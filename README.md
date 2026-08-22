@@ -7,7 +7,7 @@ mock exam that scores you per topic.
 
 No build step. No server. No dependencies. It works offline.
 
-**[→ Open the notes](https://yourname.github.io/studykit/)**
+**[→ Open the notes](https://gorrv.github.io/studykit/)**
 
 ---
 
