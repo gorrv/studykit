@@ -1,0 +1,13 @@
+{
+  "name": "studykit",
+  "version": "1.0.0",
+  "description": "Self-contained interactive revision notes: computable tools, generated self-marking questions, and a mock exam, in one HTML file per module.",
+  "scripts": {
+    "test": "node tests/run.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  },
+  "license": "MIT",
+  "private": true
+}

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StudyKit — interactive revision notes</title>
+<meta name="description" content="Self-contained, interactive revision notes with computable tools, generated self-marking questions and a mock exam. One HTML file per module, works offline.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#faf7f0; --paper-2:#f3efe4; --surface:#fffdf8; --surface-2:#f7f3ea; --surface-3:#eee9dc;
+  --ink:#22201c; --ink-soft:#413d36; --ink-muted:#7d766a; --rule:#e0d9c8;
+  --accent:#2f5d8a; --accent-2:#b04a2f; --accent-3:#3f7a52; --accent-4:#7a5ba8;
+  --shadow:0 1px 2px rgba(60,50,30,.05),0 6px 20px rgba(60,50,30,.06);
+  --tint-a:rgba(47,93,138,.09);
+}
+[data-theme="dark"]{
+  --paper:#16171a; --paper-2:#1b1d21; --surface:#1e2025; --surface-2:#24272d; --surface-3:#2b2f36;
+  --ink:#e9e6df; --ink-soft:#cbc7bd; --ink-muted:#8f8a80; --rule:#343841;
+  --accent:#7fb0dd; --accent-2:#e08e70; --accent-3:#7fc294; --accent-4:#b498dd;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+  --tint-a:rgba(127,176,221,.12);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding:0 24px}
+header{border-bottom:1px solid var(--rule);background:var(--paper-2)}
+.bar{display:flex;align-items:center;gap:14px;padding:16px 0}
+.brand{font-family:'IBM Plex Serif',serif;font-weight:700;font-size:19px;letter-spacing:-.01em}
+.brand span{color:var(--accent)}
+.spacer{flex:1}
+.tbtn{font-family:'IBM Plex Mono',monospace;font-size:12px;padding:6px 12px;border-radius:7px;
+  border:1px solid var(--rule);background:var(--surface);color:var(--ink-muted);cursor:pointer}
+.tbtn:hover{border-color:var(--accent);color:var(--accent)}
+.hero{padding:64px 0 44px}
+h1{font-family:'IBM Plex Serif',serif;font-size:42px;line-height:1.15;margin:0 0 18px;letter-spacing:-.02em}
+.lede{font-size:19px;color:var(--ink-soft);max-width:66ch;margin:0 0 26px}
+.lede strong{color:var(--ink);font-weight:600}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.pill{font-family:'IBM Plex Mono',monospace;font-size:11.5px;padding:5px 11px;border-radius:20px;
+  background:var(--surface-2);border:1px solid var(--rule);color:var(--ink-muted)}
+h2{font-family:'IBM Plex Serif',serif;font-size:25px;margin:52px 0 6px;letter-spacing:-.01em}
+h2 .s{color:var(--accent-2);font-weight:600;margin-right:6px}
+.sub{color:var(--ink-muted);margin:0 0 22px;font-size:15px}
+.cards{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:720px){.cards{grid-template-columns:1fr 1fr}}
+.card{display:block;text-decoration:none;color:inherit;background:var(--surface);
+  border:1px solid var(--rule);border-radius:14px;padding:22px;box-shadow:var(--shadow);
+  transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card .code{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px}
+.card h3{font-family:'IBM Plex Serif',serif;font-size:21px;margin:0 0 8px}
+.card p{margin:0 0 16px;color:var(--ink-soft);font-size:14.5px}
+.stats{display:flex;flex-wrap:wrap;gap:6px}
+.stat{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:4px 9px;border-radius:6px;
+  background:var(--surface-2);color:var(--ink-muted);border:1px solid var(--rule)}
+.stat b{color:var(--ink);font-weight:600}
+.card.wip{opacity:.9}
+.card.wip .code{color:var(--ink-muted)}
+.feat{display:grid;grid-template-columns:1fr;gap:14px;margin-top:6px}
+@media(min-width:720px){.feat{grid-template-columns:1fr 1fr}}
+.f{border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;
+  padding:15px 17px;background:var(--surface)}
+.f h4{margin:0 0 5px;font-size:15px;font-weight:600}
+.f p{margin:0;font-size:14px;color:var(--ink-soft)}
+pre{background:var(--surface-2);border:1px solid var(--rule);border-radius:10px;padding:15px 17px;
+  overflow-x:auto;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.7;color:var(--ink-soft)}
+code{font-family:'IBM Plex Mono',monospace;font-size:.92em}
+footer{margin-top:70px;border-top:1px solid var(--rule);padding:26px 0 50px;
+  color:var(--ink-muted);font-size:13.5px}
+footer a{color:var(--accent)}
+.note{border:1px solid var(--rule);border-radius:10px;padding:15px 17px;background:var(--surface-2);
+  font-size:14px;color:var(--ink-soft);margin-top:18px}
+</style>
+</head>
+<body>
+<header><div class="wrap bar">
+  <div class="brand">Study<span>Kit</span></div>
+  <div class="spacer"></div>
+  <button class="tbtn" id="tt" onclick="tog()">◐ theme</button>
+</div></header>
+
+<div class="wrap">
+  <section class="hero">
+    <h1>Revision notes that compute.</h1>
+    <p class="lede">Each module is <strong>one HTML file</strong> — no build step, no server, no dependencies.
+      Open it and you get the notes, <strong>interactive tools that run the actual algorithms</strong>,
+      <strong>self-marking questions generated fresh every time</strong>, full-text search, and a mock exam that
+      scores you per topic.</p>
+    <div class="pills">
+      <span class="pill">works offline</span>
+      <span class="pill">no dependencies</span>
+      <span class="pill">light + dark</span>
+      <span class="pill">keyboard search</span>
+      <span class="pill">printable</span>
+    </div>
+  </section>
+
+  <h2><span class="s">§</span>Modules</h2>
+  <p class="sub">Click any module to open it. Each is a single self-contained file.</p>
+  <div class="cards">
+
+    <a class="card" href="modules/intro-to-ai.html">
+      <div class="code">5CCS2INT · Weeks 1–9</div>
+      <h3>Introduction to AI</h3>
+      <p>Search and A*, adversarial search, CSPs, planning and PDDL, MDPs and value iteration,
+        machine learning, clustering, regression and decision trees, reinforcement learning, AI ethics.</p>
+      <div class="stats">
+        <span class="stat"><b>40</b> sections</span>
+        <span class="stat"><b>33</b> tools</span>
+        <span class="stat"><b>43</b> question generators</span>
+        <span class="stat"><b>44</b> figures</span>
+      </div>
+    </a>
+
+    <a class="card" href="modules/programming-language-design.html">
+      <div class="code">5CCS2PLD · Weeks 1–10</div>
+      <h3>Programming Language Design</h3>
+      <p>BNF and syntax, semantics and abstract machines, small-step and big-step evaluation, induction,
+        variables and scope, Haskell and laziness, type systems and inference, Prolog and SLD-resolution.</p>
+      <div class="stats">
+        <span class="stat"><b>11</b> sections</span>
+        <span class="stat"><b>24</b> tools</span>
+        <span class="stat"><b>10</b> question generators</span>
+        <span class="stat">Hindley–Milner engine</span>
+      </div>
+    </a>
+
+    <a class="card wip" href="modules/operating-systems.html">
+      <div class="code">Operating Systems · notes only</div>
+      <h3>Operating Systems</h3>
+      <p>Processes and scheduling, threads, virtual memory and address translation, demand paging,
+        copy-on-write, page replacement. Prose notes — interactive tools not yet built for this module.</p>
+      <div class="stats">
+        <span class="stat"><b>12</b> sections</span>
+        <span class="stat">no tools yet</span>
+        <span class="stat">no question bank yet</span>
+      </div>
+    </a>
+
+  </div>
+
+  <h2><span class="s">§</span>What makes it different</h2>
+  <p class="sub">Most revision notes are static text. These run.</p>
+  <div class="feat">
+    <div class="f">
+      <h4>The tools execute the algorithms</h4>
+      <p>Value iteration really sweeps the grid, UCB really picks the arm, the decision tree really
+        computes every Gini-Split. Change an input and everything downstream recomputes.</p>
+    </div>
+    <div class="f">
+      <h4>Questions are generated, not stored</h4>
+      <p>Numbers are randomised on every draw and marked by the same code the tools use, so you can't
+        memorise answers. Every question explains its own working when you get it wrong.</p>
+    </div>
+    <div class="f">
+      <h4>Every figure is computed</h4>
+      <p>No screenshots. The overfitting plots come from a real polynomial fit; the ε-greedy curves from
+        a 400-run simulation; the dendrogram from an actual complete-linkage merge.</p>
+    </div>
+    <div class="f">
+      <h4>The numbers are verified</h4>
+      <p>Each module ships with a jsdom test suite that drives the real page and cross-checks results
+        against independent implementations. Several errors in the source lecture slides were caught this way.</p>
+    </div>
+  </div>
+
+  <h2><span class="s">§</span>Using it</h2>
+  <pre>Download a module file and open it in any browser.
+That's the whole install. It works with no network connection.
+
+  Ctrl/Cmd + K     search everything
+  /                jump to search
+  ◐                light / dark
+  Ctrl/Cmd + P     print (sidebar and tools are hidden)</pre>
+
+  <div class="note">
+    <strong>A note on the content.</strong> The explanatory writing, tools, figures and question banks
+    in these files are original. The underlying course material — definitions, exercises and some
+    figures — belongs to the module leaders at King's College London and is used here for personal
+    revision. If you want to adapt this for your own course, the engine is the reusable part;
+    see <code>docs/AUTHORING.md</code>.
+  </div>
+
+  <footer class="wrap">
+    Built as a revision project. Engine and notes by Gor.
+    &nbsp;·&nbsp; <a href="https://github.com/">source</a>
+  </footer>
+</div>
+
+<script>
+function tog(){
+  var d=document.documentElement;
+  var n=d.getAttribute('data-theme')==='dark'?'light':'dark';
+  d.setAttribute('data-theme',n);
+  try{localStorage.setItem('sk-theme',n);}catch(e){}
+}
+(function(){
+  var t='light';
+  try{t=localStorage.getItem('sk-theme')||(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');}catch(e){}
+  document.documentElement.setAttribute('data-theme',t);
+})();
+</script>
+</body>
+</html>
