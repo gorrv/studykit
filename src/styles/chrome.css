@@ -291,3 +291,13 @@
     padding: 0 1px; border-radius: 2px; }
   .search-flash { animation: nsFlash 2.4s ease-out; border-radius: 4px; }
   .week-section.active { display: block; }
+
+  /* A short aside under a tool's output: what the numbers mean, or what to
+     try next. Muted so it reads as commentary, not as part of the result. */
+  .tool-note {
+    margin: 8px 0 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--ink-muted);
+  }
+  .tool-note + .tool-note { margin-top: 4px; }

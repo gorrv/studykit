@@ -1,166 +1,265 @@
   /* ============================================================
-     TOOL 2: SCHEDULING PLAYGROUND (Week 2)
+     CPU SCHEDULING (Week 2)
+
+     Five algorithms, one simulator. Rather than a branch per algorithm,
+     the loop below advances the clock one unit at a time and asks a
+     policy which ready process should hold the CPU. FCFS, SJF, SRTF,
+     Round Robin and Priority differ only in that answer, and in whether
+     they are allowed to interrupt a running process — which is exactly
+     the distinction the exam asks about.
      ============================================================ */
 
-  let procs = [
-    { name: 'P1', arrival: 0, burst: 5 },
-    { name: 'P2', arrival: 0, burst: 4 },
-    { name: 'P3', arrival: 0, burst: 3 },
-  ];
-  const ganttColors = ['gantt-p1','gantt-p2','gantt-p3','gantt-p4','gantt-p5'];
+  var SCH = {
+    procs: [
+      { name: 'P1', arrival: 0, burst: 5, priority: 2 },
+      { name: 'P2', arrival: 0, burst: 4, priority: 1 },
+      { name: 'P3', arrival: 0, burst: 3, priority: 3 },
+    ],
+    res: null,
+  };
+
+  /**
+   * `key` — lowest wins when choosing the next process to run.
+   * `preemptive` — may take the CPU from a running process the moment a
+   *   better-keyed one becomes ready. Round Robin is deliberately false here:
+   *   it preempts on quantum expiry only, never because another process looks
+   *   more attractive, and it serves its queue strictly first-in-first-out.
+   */
+  var SCH_ALGOS = {
+    fcfs: { label: 'FCFS', preemptive: false, fifo: false, key: function (p) { return p.arrival; } },
+    sjf:  { label: 'SJF',  preemptive: false, fifo: false, key: function (p) { return p.burst; } },
+    srtf: { label: 'SRTF', preemptive: true,  fifo: false, key: function (p) { return p.remaining; } },
+    prio: { label: 'Priority', preemptive: false, fifo: false, key: function (p) { return p.priority; } },
+    rr:   { label: 'Round Robin', preemptive: false, fifo: true, key: function (p) { return p.arrival; } },
+  };
+
+  /**
+   * Run one schedule.
+   *
+   * @param {Array} input  [{name, arrival, burst, priority}]
+   * @param {string} algo  a key of SCH_ALGOS
+   * @param {number} quantum  time slice, Round Robin only
+   * @param {boolean} preempt  force preemption (turns Priority into preemptive Priority)
+   * @returns {{timeline, rows, avg, cpuBusy, span}}
+   */
+  function schSimulate(input, algo, quantum, preempt) {
+    var spec = SCH_ALGOS[algo] || SCH_ALGOS.fcfs;
+    var preemptive = spec.preemptive || !!preempt;
+    var q = Math.max(1, quantum | 0);
+
+    var ps = input.map(function (p, i) {
+      return {
+        i: i, name: p.name, arrival: p.arrival, burst: p.burst,
+        priority: p.priority, remaining: p.burst,
+        admitted: -1, firstRun: -1, completion: -1,
+      };
+    });
+
+    var ready = [], cur = null, sliceLeft = 0, done = 0, t = 0;
+    var timeline = [], busy = 0;
+    var horizon = ps.reduce(function (a, p) { return a + p.burst; }, 0) +
+                  ps.reduce(function (a, p) { return Math.max(a, p.arrival); }, 0) + 2;
+
+    /* Lowest key wins; ties break on arrival, then on the order the user
+       typed the processes in, so the result is deterministic. Round Robin
+       ignores the key entirely and takes the head of the queue. */
+    function best(list) {
+      if (spec.fifo) return list.shift();
+      var pick = 0;
+      for (var k = 1; k < list.length; k++) {
+        var a = list[k], b = list[pick];
+        var ka = spec.key(a), kb = spec.key(b);
+        if (ka < kb || (ka === kb && (a.arrival < b.arrival ||
+            (a.arrival === b.arrival && a.i < b.i)))) pick = k;
+      }
+      return list.splice(pick, 1)[0];
+    }
+
+    while (done < ps.length && t <= horizon) {
+      // 1. admit everything that has arrived by now, in the order given
+      for (var i = 0; i < ps.length; i++) {
+        if (ps[i].arrival === t) { ps[i].admitted = t; ready.push(ps[i]); }
+      }
+
+      // 2. a quantum that has run out returns the process to the back of the
+      //    queue — after this instant's arrivals, which is the usual convention
+      //    and the one that changes the answer in exam questions
+      if (cur && algo === 'rr' && sliceLeft === 0) { ready.push(cur); cur = null; }
+
+      // 3. a preemptive policy may take the CPU away mid-burst
+      if (cur && preemptive && ready.length) {
+        var challenger = ready.reduce(function (a, b) { return spec.key(b) < spec.key(a) ? b : a; });
+        if (spec.key(challenger) < spec.key(cur)) { ready.push(cur); cur = null; }
+      }
+
+      // 4. hand the CPU to whoever the policy picks
+      if (!cur && ready.length) {
+        cur = best(ready);
+        sliceLeft = q;
+        if (cur.firstRun < 0) cur.firstRun = t;
+      }
+
+      // 5. run for one unit (or idle)
+      if (cur) {
+        var last = timeline[timeline.length - 1];
+        if (last && last.name === cur.name) last.end = t + 1;
+        else timeline.push({ name: cur.name, start: t, end: t + 1 });
+        cur.remaining--; sliceLeft--; busy++;
+        if (cur.remaining === 0) { cur.completion = t + 1; done++; cur = null; }
+      } else {
+        var lastI = timeline[timeline.length - 1];
+        if (lastI && lastI.name === null) lastI.end = t + 1;
+        else if (done < ps.length) timeline.push({ name: null, start: t, end: t + 1 });
+      }
+      t++;
+    }
+
+    var rows = ps.map(function (p) {
+      var turnaround = p.completion - p.arrival;
+      return {
+        name: p.name, arrival: p.arrival, burst: p.burst, priority: p.priority,
+        completion: p.completion,
+        turnaround: turnaround,
+        waiting: turnaround - p.burst,
+        response: p.firstRun - p.arrival,
+      };
+    });
+
+    var n = rows.length || 1;
+    var sum = function (f) { return rows.reduce(function (a, r) { return a + f(r); }, 0); };
+
+    return {
+      timeline: timeline,
+      rows: rows,
+      span: t,
+      cpuBusy: busy,
+      avg: {
+        turnaround: sum(function (r) { return r.turnaround; }) / n,
+        waiting: sum(function (r) { return r.waiting; }) / n,
+        response: sum(function (r) { return r.response; }) / n,
+      },
+    };
+  }
+
+  /* ---------- the editable process table ---------- */
 
   function renderProcRows() {
-    const c = document.getElementById('sch-rows');
+    var c = document.getElementById('sch-rows');
     if (!c) return;
-    c.innerHTML = procs.map((p, i) => `
-      <div class="proc-input-row">
-        <span class="pname">${p.name}</span>
-        <input type="number" min="0" value="${p.arrival}" onchange="updateProc(${i},'arrival',this.value)">
-        <input type="number" min="1" value="${p.burst}" onchange="updateProc(${i},'burst',this.value)">
-        <button class="mini-btn" onclick="removeProc(${i})" title="Remove">×</button>
-      </div>`).join('');
+    c.innerHTML = SCH.procs.map(function (p, i) {
+      return '<div class="proc-input-row">' +
+        '<span class="pname">' + p.name + '</span>' +
+        '<input type="number" min="0" value="' + p.arrival + '" aria-label="' + p.name + ' arrival"' +
+        ' onchange="updateProc(' + i + ',\'arrival\',this.value)">' +
+        '<input type="number" min="1" value="' + p.burst + '" aria-label="' + p.name + ' burst"' +
+        ' onchange="updateProc(' + i + ',\'burst\',this.value)">' +
+        '<input type="number" min="1" value="' + p.priority + '" aria-label="' + p.name + ' priority"' +
+        ' onchange="updateProc(' + i + ',\'priority\',this.value)">' +
+        '<button class="mini-btn" onclick="removeProc(' + i + ')" title="Remove ' + p.name + '">×</button>' +
+        '</div>';
+    }).join('');
   }
 
   function updateProc(i, field, val) {
-    procs[i][field] = Math.max(0, parseInt(val,10) || 0);
+    var v = parseInt(val, 10);
+    if (isNaN(v)) v = 0;
+    SCH.procs[i][field] = field === 'arrival' ? Math.max(0, v) : Math.max(1, v);
+    runSchedule();
   }
+
   function addProc() {
-    if (procs.length >= 5) return;
-    procs.push({ name: 'P'+(procs.length+1), arrival: 0, burst: 3 });
+    if (SCH.procs.length >= 6) return;
+    SCH.procs.push({ name: 'P' + (SCH.procs.length + 1), arrival: 0, burst: 3, priority: 2 });
     renderProcRows();
+    runSchedule();
   }
+
   function removeProc(i) {
-    procs.splice(i,1);
-    procs.forEach((p,idx) => p.name = 'P'+(idx+1));
+    if (SCH.procs.length <= 1) return;
+    SCH.procs.splice(i, 1);
+    SCH.procs.forEach(function (p, idx) { p.name = 'P' + (idx + 1); });
     renderProcRows();
+    runSchedule();
   }
+
   function toggleQuantum() {
-    const algo = document.getElementById('sch-algo').value;
-    document.getElementById('sch-quantum-field').style.display = (algo === 'rr') ? 'flex' : 'none';
+    var algo = document.getElementById('sch-algo').value;
+    var qf = document.getElementById('sch-quantum-field');
+    var pf = document.getElementById('sch-preempt-field');
+    if (qf) qf.style.display = (algo === 'rr') ? 'flex' : 'none';
+    if (pf) pf.style.display = (algo === 'prio') ? 'flex' : 'none';
+    runSchedule();
   }
+
+  /* ---------- render ---------- */
+
+  var SCH_COLOURS = ['gantt-p1', 'gantt-p2', 'gantt-p3', 'gantt-p4', 'gantt-p5'];
 
   function runSchedule() {
-    const algo = document.getElementById('sch-algo').value;
-    const out = document.getElementById('sch-output');
-    if (procs.length === 0) { out.innerHTML = '<div class="tool-error">Add at least one process.</div>'; return; }
+    var out = document.getElementById('sch-output');
+    if (!out) return;
 
-    const colorMap = {};
-    procs.forEach((p,i) => colorMap[p.name] = ganttColors[i % ganttColors.length]);
+    var algo = (document.getElementById('sch-algo') || {}).value || 'fcfs';
+    var quantum = parseInt((document.getElementById('sch-quantum') || {}).value, 10) || 2;
+    var preempt = !!(document.getElementById('sch-preempt') || {}).checked;
 
-    let timeline = []; // {name, start, end}
-    const ps = procs.map(p => ({...p, remaining: p.burst}));
-
-    if (algo === 'fcfs') {
-      const sorted = [...ps].sort((a,b)=> a.arrival - b.arrival);
-      let t = 0;
-      for (const p of sorted) {
-        if (t < p.arrival) { timeline.push({name:'idle', start:t, end:p.arrival}); t = p.arrival; }
-        timeline.push({name:p.name, start:t, end:t+p.burst}); t += p.burst;
-      }
-    } else if (algo === 'sjf') {
-      // non-preemptive
-      let t = 0, done = 0;
-      const n = ps.length;
-      const finished = {};
-      while (done < n) {
-        const avail = ps.filter(p => p.arrival <= t && !finished[p.name]);
-        if (avail.length === 0) {
-          const next = ps.filter(p=>!finished[p.name]).sort((a,b)=>a.arrival-b.arrival)[0];
-          timeline.push({name:'idle', start:t, end:next.arrival}); t = next.arrival; continue;
-        }
-        avail.sort((a,b)=> a.burst - b.burst || a.arrival - b.arrival);
-        const p = avail[0];
-        timeline.push({name:p.name, start:t, end:t+p.burst}); t += p.burst;
-        finished[p.name] = true; done++;
-      }
-    } else if (algo === 'rr') {
-      const q = Math.max(1, parseInt(document.getElementById('sch-quantum').value,10) || 2);
-      const arrivalSorted = [...ps].sort((a,b)=>a.arrival-b.arrival);
-      const queue = [];
-      let t = 0, idx = 0, done = 0;
-      const n = ps.length;
-      // seed
-      while (idx < arrivalSorted.length && arrivalSorted[idx].arrival <= t) queue.push(arrivalSorted[idx++]);
-      if (queue.length === 0 && arrivalSorted.length) { t = arrivalSorted[0].arrival; while (idx<arrivalSorted.length && arrivalSorted[idx].arrival<=t) queue.push(arrivalSorted[idx++]); }
-      while (done < n) {
-        if (queue.length === 0) {
-          if (idx < arrivalSorted.length) { timeline.push({name:'idle',start:t,end:arrivalSorted[idx].arrival}); t=arrivalSorted[idx].arrival; while(idx<arrivalSorted.length && arrivalSorted[idx].arrival<=t) queue.push(arrivalSorted[idx++]); continue; }
-          else break;
-        }
-        const p = queue.shift();
-        const run = Math.min(q, p.remaining);
-        timeline.push({name:p.name, start:t, end:t+run});
-        t += run; p.remaining -= run;
-        // enqueue newly arrived during this slice
-        while (idx < arrivalSorted.length && arrivalSorted[idx].arrival <= t) queue.push(arrivalSorted[idx++]);
-        if (p.remaining > 0) queue.push(p); else done++;
-      }
+    if (!SCH.procs.length) {
+      out.innerHTML = '<div class="tool-error">Add at least one process.</div>';
+      return;
     }
+    if (!document.getElementById('sch-rows').children.length) renderProcRows();
 
-    // merge consecutive same-name blocks for cleaner gantt
-    const merged = [];
-    for (const b of timeline) {
-      const last = merged[merged.length-1];
-      if (last && last.name === b.name) last.end = b.end; else merged.push({...b});
-    }
+    var res = schSimulate(SCH.procs, algo, quantum, preempt);
+    SCH.res = res;
 
-    const totalTime = merged.length ? merged[merged.length-1].end : 0;
-    const unit = Math.max(20, Math.min(46, 600 / Math.max(totalTime,1)));
+    var colour = {};
+    SCH.procs.forEach(function (p, i) { colour[p.name] = SCH_COLOURS[i % SCH_COLOURS.length]; });
 
-    // build gantt
-    let html = '<div class="live-gantt"><div class="live-gantt-row">';
-    for (const b of merged) {
-      const w = (b.end - b.start) * unit;
-      const cls = b.name === 'idle' ? 'gantt-idle' : colorMap[b.name];
-      html += `<div class="live-gantt-cell ${cls}" style="width:${w}px;">${b.name==='idle'?'idle':b.name}</div>`;
-    }
+    var unit = Math.max(18, Math.min(46, 620 / Math.max(res.span, 1)));
+
+    var html = '<div class="live-gantt"><div class="live-gantt-row">';
+    res.timeline.forEach(function (b) {
+      var w = (b.end - b.start) * unit;
+      var cls = b.name === null ? 'gantt-idle' : colour[b.name];
+      html += '<div class="live-gantt-cell ' + cls + '" style="width:' + w + 'px;">' +
+        (b.name === null ? 'idle' : b.name) + '</div>';
+    });
     html += '</div><div class="live-gantt-axis" style="position:relative; height:16px;">';
-    // axis ticks
-    const ticks = new Set([0]);
-    merged.forEach(b => ticks.add(b.end));
-    [...ticks].sort((a,b)=>a-b).forEach(tk => {
-      html += `<span style="position:absolute; left:${tk*unit}px; transform:translateX(-50%);">${tk}</span>`;
+    var ticks = { 0: true };
+    res.timeline.forEach(function (b) { ticks[b.end] = true; });
+    Object.keys(ticks).map(Number).sort(function (a, b) { return a - b; }).forEach(function (tk) {
+      html += '<span style="position:absolute; left:' + (tk * unit) + 'px; transform:translateX(-50%);">' + tk + '</span>';
     });
     html += '</div></div>';
 
-    // compute waiting times: completion - arrival - burst
-    const completion = {};
-    const firstRun = {};
-    merged.forEach(b => {
-      if (b.name !== 'idle') {
-        completion[b.name] = b.end;
-        if (firstRun[b.name] === undefined) firstRun[b.name] = b.start;
-      }
+    html += '<table class="results-table">' +
+      '<tr><th>Process</th><th>Arrival</th><th>Burst</th><th>Priority</th>' +
+      '<th>Completion</th><th>Turnaround</th><th>Waiting</th><th>Response</th></tr>';
+    res.rows.forEach(function (r) {
+      html += '<tr><td><strong>' + r.name + '</strong></td><td>' + r.arrival + '</td><td>' + r.burst +
+        '</td><td>' + r.priority + '</td><td>' + r.completion + '</td><td>' + r.turnaround +
+        '</td><td>' + r.waiting + '</td><td>' + r.response + '</td></tr>';
     });
-    let totalWait = 0, totalTAT = 0, totalResp = 0;
-    const rows = procs.map(p => {
-      const comp = completion[p.name];
-      const tat = comp - p.arrival;            // turnaround
-      const wait = tat - p.burst;              // waiting
-      const resp = firstRun[p.name] - p.arrival; // response
-      totalWait += wait; totalTAT += tat; totalResp += resp;
-      return `<tr><td><strong>${p.name}</strong></td><td>${p.arrival}</td><td>${p.burst}</td><td>${comp}</td><td>${tat}</td><td>${wait}</td><td>${resp}</td></tr>`;
-    }).join('');
+    html += '<tr class="awt-row"><td colspan="7">Average turnaround time</td><td>' +
+      res.avg.turnaround.toFixed(2) + '</td></tr>' +
+      '<tr class="awt-row"><td colspan="7">Average waiting time (AWT)</td><td>' +
+      res.avg.waiting.toFixed(2) + '</td></tr>' +
+      '<tr class="awt-row"><td colspan="7">Average response time</td><td>' +
+      res.avg.response.toFixed(2) + '</td></tr></table>';
 
-    const awt = (totalWait / procs.length).toFixed(2);
-    const atat = (totalTAT / procs.length).toFixed(2);
-    const aresp = (totalResp / procs.length).toFixed(2);
+    var idle = res.span - res.cpuBusy;
+    html += '<p class="tool-note">Turnaround = completion − arrival. Waiting = turnaround − burst. ' +
+      'Response = first time on the CPU − arrival. ' +
+      'The CPU was busy for ' + res.cpuBusy + ' of ' + res.span + ' units' +
+      (idle ? ' (' + idle + ' idle)' : '') + '.</p>';
 
-    html += `<table class="results-table">
-      <tr><th>Process</th><th>Arrival</th><th>Burst</th><th>Completion</th><th>Turnaround</th><th>Waiting</th><th>Response</th></tr>
-      ${rows}
-      <tr class="awt-row"><td colspan="6">Average Waiting Time (AWT)</td><td>${awt}</td></tr>
-      <tr class="awt-row"><td colspan="6">Average Turnaround Time</td><td>${atat}</td></tr>
-      <tr class="awt-row"><td colspan="6">Average Response Time</td><td>${aresp}</td></tr>
-    </table>
-    <p style="font-size:12px; color:var(--ink-muted); margin-top:6px;">📘 Notice the trade-off: turnaround-optimisers (SJF) and response-optimisers (Round-Robin) pull these averages in opposite directions.</p>`;
+    html += '<p class="tool-note">Try the same processes under every algorithm. ' +
+      'SJF and SRTF give the lowest average waiting time and can starve a long job; ' +
+      'Round Robin gives the lowest average response time and the worst turnaround. ' +
+      'That trade-off is the whole point — no algorithm wins both.</p>';
 
     out.innerHTML = html;
   }
 
-  // initialise tools on load
-  document.addEventListener('DOMContentLoaded', function() {
-    renderProcRows();
-    stkRender();
-  });
-
+  window.SCH = SCH;
+  window.schSimulate = schSimulate;

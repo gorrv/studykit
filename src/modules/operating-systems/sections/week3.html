@@ -404,7 +404,9 @@ PT size = m × 2ⁿ
           <span class="tool-badge">Practice tool</span>
           <h3>Virtual → Physical Translator</h3>
         </div>
-        <div class="tool-desc">Single-level paging. Addresses in hex. Try the exam-style example: address <code>0x5123</code>, page size <code>4</code> kB.</div>
+        <div class="tool-desc">Watch a virtual address split into its fields and get walked through the table.
+          Try the exam-style example first — address <code>0x5123</code>, page size <code>4</code> kB, one level —
+          then switch to two levels to see where the directory index comes from.</div>
 
         <div class="tool-controls">
           <div class="tool-field">
@@ -421,10 +423,17 @@ PT size = m × 2ⁿ
             </select>
           </div>
           <div class="tool-field">
-            <label>Addr width</label>
+            <label for="xl-width">Addr width</label>
             <select id="xl-width">
               <option value="16">16-bit</option>
               <option value="32" selected>32-bit</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="xl-levels">Page table</label>
+            <select id="xl-levels">
+              <option value="1" selected>Single level</option>
+              <option value="2">Two level</option>
             </select>
           </div>
           <button class="tool-btn" onclick="runTranslate()">Translate ▶</button>

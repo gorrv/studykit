@@ -182,6 +182,80 @@ synchronized (first) { synchronized (second) { ... } }</div>
         A more flexible fix: with <code>tryLock()</code>, a philosopher attempts the right fork but <strong>doesn't block</strong> if it's unavailable — they just put the left fork back down and try again later. No thread ever holds-and-waits indefinitely, so deadlock is avoided (this breaks the <em>hold and wait</em> condition). Verified in Ian's program: all philosophers get to both think <em>and</em> eat.
       </div>
 
+      <h3 id="w11-bankertool">🛠️ Interactive: Banker's algorithm</h3>
+
+      <p>Lock ordering prevents deadlock by construction. The <strong>Banker's algorithm</strong> takes the other
+      route: allow any allocation pattern, but check every request before granting it, and refuse anything that
+      would leave the system in a state with no guaranteed way out. Each process declares up front the maximum
+      it will ever need; the banker only ever moves between <strong>safe</strong> states — ones where some order
+      exists in which every process can still finish.</p>
+
+      <div class="tool" data-run="runBankers">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Banker's Algorithm</h3>
+        </div>
+        <div class="tool-desc">The state below is the standard worked example: five processes, three resource
+          types (A B C). Change any number and the safe sequence recomputes. Then try a request — the interesting
+          case is one the banker refuses even though the resources are free.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="bk-avail">Available (A B C)</label>
+            <input type="text" id="bk-avail" value="3 3 2" style="width:110px;">
+          </div>
+        </div>
+
+        <div class="bk-grids">
+          <div class="tool-field">
+            <label for="bk-alloc">Allocation — one row per process</label>
+            <textarea id="bk-alloc" rows="5" spellcheck="false">0 1 0
+2 0 0
+3 0 2
+2 1 1
+0 0 2</textarea>
+          </div>
+          <div class="tool-field">
+            <label for="bk-max">Max — one row per process</label>
+            <textarea id="bk-max" rows="5" spellcheck="false">7 5 3
+3 2 2
+9 0 2
+2 2 2
+4 3 3</textarea>
+          </div>
+        </div>
+
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="bk-pid">Request from process</label>
+            <input type="number" id="bk-pid" value="1" min="0" style="width:70px;">
+          </div>
+          <div class="tool-field">
+            <label for="bk-req">asking for</label>
+            <input type="text" id="bk-req" value="1 0 2" style="width:110px;">
+          </div>
+          <button class="tool-btn" onclick="runBankers()">Check ▶</button>
+        </div>
+
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+
+        <div id="bk-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The three verdicts, in order</div>
+        <p style="margin-top:0;"><strong>1 · Granted.</strong> Leave the boxes as they are and ask for
+        <code>1 0 2</code> on behalf of <strong>P1</strong>. It is within P1's declared need, it is available,
+        and the state afterwards is still safe.</p>
+        <p><strong>2 · Must wait.</strong> Now apply that grant by hand — set Available to <code>2 3 0</code> and
+        P1's allocation row to <code>3 0 2</code> — and ask for <code>3 3 0</code> on behalf of <strong>P4</strong>.
+        Only 2 of A are free, so P4 blocks. Nothing subtle here: it simply cannot be served yet.</p>
+        <p style="margin-bottom:0;"><strong>3 · Refused.</strong> From that same state, ask for <code>0 2 0</code>
+        on behalf of <strong>P0</strong>. Three of B are free, so the banker <em>could</em> hand them over — and
+        refuses anyway, because the state that results has no safe sequence. That gap between "available" and
+        "grantable" is the entire point of the algorithm, and it is what exam questions test.</p>
+      </div>
+
       <!-- ===== Semaphores ===== -->
       <h2 id="w11-semaphores">Semaphores</h2>
 

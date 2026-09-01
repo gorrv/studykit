@@ -1,97 +1,191 @@
   /* ============================================================
-     TOOL 1: ADDRESS TRANSLATOR (Week 3)
+     ADDRESS TRANSLATION (Week 3)
+
+     One virtual address, split into fields and walked through the page
+     table. Single-level is the exam's worked example; two-level shows
+     where the extra index comes from and why anyone would accept a
+     second memory access to get it.
      ============================================================ */
 
-  // Default page table: page -> frame (matches the worked example: page 5 -> 0x1ffa)
-  const defaultPT = { 0: null, 1: null, 2: null, 3: 0x2, 4: 0x4, 5: 0x1ffa, 6: null, 7: null };
+  /* The worked example from the notes: page 5 lives in frame 0x1ffa.
+     null means "not present" — a page fault. */
+  var XL_PT = { 0: null, 1: null, 2: null, 3: 0x2, 4: 0x4, 5: 0x1ffa, 6: null, 7: null };
+
+  /**
+   * Split a virtual address into its fields.
+   *
+   * @param {number} vaddr
+   * @param {number} width       address width in bits
+   * @param {number} offsetBits  log2 of the page size
+   * @param {number} levels      1 or 2
+   * @returns {{offset, page, fields}} fields are high-order first
+   */
+  function xlSplit(vaddr, width, offsetBits, levels) {
+    var offset = vaddr % Math.pow(2, offsetBits);
+    var page = Math.floor(vaddr / Math.pow(2, offsetBits));
+    var pageBits = width - offsetBits;
+
+    if (levels === 1) {
+      return {
+        offset: offset, page: page,
+        fields: [{ name: 'page number p', short: 'p', bits: pageBits, value: page }],
+      };
+    }
+
+    // Split the page number as evenly as possible, the outer index taking
+    // the extra bit when it does not divide.
+    var innerBits = Math.floor(pageBits / 2);
+    var outerBits = pageBits - innerBits;
+    return {
+      offset: offset, page: page,
+      innerBits: innerBits, outerBits: outerBits,
+      fields: [
+        { name: 'directory index p₁', short: 'p₁', bits: outerBits, value: Math.floor(page / Math.pow(2, innerBits)) },
+        { name: 'table index p₂', short: 'p₂', bits: innerBits, value: page % Math.pow(2, innerBits) },
+      ],
+    };
+  }
+
+  /** Walk the table(s) and report each lookup. */
+  function xlWalk(split, levels) {
+    var steps = [];
+    if (levels === 1) {
+      var f = XL_PT[split.page];
+      steps.push({
+        what: 'page table', index: split.page,
+        found: (f === null || f === undefined) ? null : f,
+        note: (f === null || f === undefined)
+          ? 'entry not present — the MMU raises a page fault and the OS takes over'
+          : 'frame number',
+      });
+    } else {
+      var dir = split.fields[0].value, idx = split.fields[1].value;
+      // Only directories containing a mapped page have an inner table at all.
+      var present = Object.keys(XL_PT).some(function (p) {
+        return XL_PT[p] !== null && Math.floor(p / Math.pow(2, split.innerBits)) === dir;
+      });
+      steps.push({
+        what: 'page directory', index: dir,
+        found: present ? 'inner table' : null,
+        note: present
+          ? 'points at a second-level table'
+          : 'no second-level table allocated for this region — that is the space saving, and it faults',
+      });
+      if (present) {
+        var page = dir * Math.pow(2, split.innerBits) + idx;
+        var fr = XL_PT[page];
+        steps.push({
+          what: 'second-level table', index: idx,
+          found: (fr === null || fr === undefined) ? null : fr,
+          note: (fr === null || fr === undefined) ? 'entry not present — page fault' : 'frame number',
+        });
+      }
+    }
+    return steps;
+  }
 
   function runTranslate() {
-    const out = document.getElementById('xl-output');
-    const raw = document.getElementById('xl-vaddr').value.trim();
-    const pageKB = parseInt(document.getElementById('xl-pagesize').value, 10);
-    const width = parseInt(document.getElementById('xl-width').value, 10);
+    var out = document.getElementById('xl-output');
+    if (!out) return;
 
-    // parse hex
-    let vaddr;
-    try {
-      vaddr = raw.toLowerCase().startsWith('0x') ? parseInt(raw, 16) : parseInt(raw, 16);
-      if (isNaN(vaddr)) throw new Error();
-    } catch (e) {
-      out.innerHTML = '<div class="tool-error">Could not parse the address. Use hex, e.g. 0x5123.</div>';
+    var raw = (document.getElementById('xl-vaddr') || {}).value || '';
+    var pageKB = parseInt((document.getElementById('xl-pagesize') || {}).value, 10) || 4;
+    var width = parseInt((document.getElementById('xl-width') || {}).value, 10) || 32;
+    var levels = parseInt((document.getElementById('xl-levels') || {}).value, 10) || 1;
+
+    var vaddr = parseInt(raw.trim().replace(/^0x/i, ''), 16);
+    if (isNaN(vaddr) || vaddr < 0) {
+      out.innerHTML = '<div class="tool-error">Could not read that address. Use hex, e.g. 0x5123.</div>';
       return;
     }
 
-    const pageBytes = pageKB * 1024;
-    const offsetBits = Math.log2(pageBytes);
-    const pBits = width - offsetBits;
-    const maxAddr = Math.pow(2, width);
+    var pageBytes = pageKB * 1024;
+    var offsetBits = Math.round(Math.log2(pageBytes));
+    var maxAddr = Math.pow(2, width);
 
     if (vaddr >= maxAddr) {
-      out.innerHTML = `<div class="tool-error">Address 0x${vaddr.toString(16)} exceeds the ${width}-bit address space (max 0x${(maxAddr-1).toString(16)}).</div>`;
+      out.innerHTML = '<div class="tool-error">0x' + vaddr.toString(16) +
+        ' does not fit in a ' + width + '-bit address space (max 0x' + (maxAddr - 1).toString(16) + ').</div>';
       return;
     }
 
-    const offset = vaddr & (pageBytes - 1);
-    const pageNum = Math.floor(vaddr / pageBytes);
+    var split = xlSplit(vaddr, width, offsetBits, levels);
+    var steps = xlWalk(split, levels);
+    var offHex = Math.ceil(offsetBits / 4);
 
-    // get frame from page table (use a small editable table; default mapping for low pages)
-    let frame = defaultPT.hasOwnProperty(pageNum) ? defaultPT[pageNum] : null;
+    var html = '<div class="bits-display">';
+    split.fields.forEach(function (f, i) {
+      html += '<div class="bit-cell ' + (i === 0 && levels === 2 ? 'dirbits' : 'pbits') + '">0x' +
+        f.value.toString(16) + '<small>' + f.name + ' · ' + f.bits + ' bits</small></div>';
+    });
+    html += '<div class="bit-cell obits">0x' + split.offset.toString(16).padStart(offHex, '0') +
+      '<small>offset d · ' + offsetBits + ' bits</small></div></div>';
 
-    const offsetHexDigits = Math.ceil(offsetBits / 4);
+    html += '<p class="tool-note" style="text-align:center;">A ' + pageKB + ' kB page needs ' + offsetBits +
+      ' bits of offset, so the low ' + offHex + ' hex digit' + (offHex > 1 ? 's are' : ' is') +
+      ' carried through untouched. The remaining ' + (width - offsetBits) + ' bits ' +
+      (levels === 1 ? 'index the page table.'
+        : 'are split ' + split.outerBits + ' / ' + split.innerBits + ' across the two levels.') + '</p>';
 
-    let html = '';
-
-    // bit breakdown
-    html += '<div class="bits-display">';
-    html += `<div class="bit-cell pbits">0x${pageNum.toString(16)}<small>page # p · ${pBits} bits</small></div>`;
-    html += `<div class="bit-cell obits">0x${offset.toString(16).padStart(offsetHexDigits,'0')}<small>offset o · ${offsetBits} bits</small></div>`;
+    // the walk
+    html += '<div class="xl-walk">';
+    steps.forEach(function (s, i) {
+      var ok = s.found !== null;
+      html += '<div class="xl-step' + (ok ? '' : ' miss') + '">' +
+        '<span class="xl-step-n">' + (i + 1) + '</span>' +
+        '<span class="xl-step-body"><strong>' + s.what + '</strong>[0x' + s.index.toString(16) + '] → ' +
+        (ok ? (typeof s.found === 'number' ? 'frame 0x' + s.found.toString(16) : s.found) : '<em>invalid</em>') +
+        '<br><span class="tool-note">' + s.note + '</span></span></div>';
+    });
     html += '</div>';
 
-    html += `<p style="text-align:center; font-size:13px; color:var(--ink-muted);">Page size ${pageKB}kB → offset is ${offsetBits} bits (low ${offsetHexDigits} hex digit${offsetHexDigits>1?'s':''}). Page number = upper ${pBits} bits.</p>`;
-
-    // page table display (editable)
-    html += '<div style="display:flex; gap:24px; align-items:flex-start; justify-content:center; flex-wrap:wrap; margin:16px 0;">';
-    html += '<div><div style="font-family:\'IBM Plex Mono\',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-muted); text-align:center; margin-bottom:6px;">Page table (editable)</div><div class="pt-grid">';
-    for (let i = 7; i >= 0; i--) {
-      const f = defaultPT[i];
-      const isHit = (i === pageNum);
-      const valStr = (f === null || f === undefined) ? 'X' : f.toString(16);
-      html += `<div class="pt-entry ${isHit ? 'highlight' : ''}">`;
-      html += `<div class="idx">${i}</div>`;
-      html += `<div class="frame ${(f===null||f===undefined)?'invalid':''}" contenteditable="true" data-page="${i}" oninput="editPT(this)" style="min-width:70px;">${valStr}</div>`;
+    // the single-level table stays visible: it is the exam's worked example
+    if (levels === 1) {
+      html += '<div class="pt-grid">';
+      for (var i = 7; i >= 0; i--) {
+        var f = XL_PT[i];
+        var val = (f === null || f === undefined) ? 'X' : f.toString(16);
+        html += '<div class="pt-entry' + (i === split.page ? ' highlight' : '') + '">' +
+          '<div class="idx">' + i + '</div>' +
+          '<div class="frame' + (val === 'X' ? ' invalid' : '') + '">' + val + '</div></div>';
+      }
       html += '</div>';
     }
-    html += '</div></div>';
 
-    // steps
-    html += '<div style="font-family:\'IBM Plex Mono\',monospace; font-size:13px; max-width:320px;">';
-    html += `<div class="translate-step"><span class="step-num">1</span><div>Split: page <strong>0x${pageNum.toString(16)}</strong>, offset <strong>0x${offset.toString(16)}</strong></div></div>`;
-    if (frame === null || frame === undefined) {
-      html += `<div class="translate-step"><span class="step-num" style="background:var(--accent-2);">!</span><div>Page <strong>0x${pageNum.toString(16)}</strong> is <strong style="color:var(--accent-2);">invalid (X)</strong> → page fault! The OS would trap this.</div></div>`;
-      html += '</div></div>';
-      html += '<div class="tool-error" style="text-align:center;">⚠ Page fault: this page isn\'t mapped. Edit the table to map it, or try a mapped page (3, 4, or 5).</div>';
-      out.innerHTML = html;
-      return;
+    var last = steps[steps.length - 1];
+    if (typeof last.found === 'number') {
+      var phys = last.found * pageBytes + split.offset;
+      html += '<p class="xl-result">Physical address = frame 0x' + last.found.toString(16) +
+        ' × ' + pageKB + 'kB + offset 0x' + split.offset.toString(16) +
+        ' = <strong>0x' + phys.toString(16) + '</strong></p>';
+    } else {
+      html += '<p class="xl-result miss">Page fault. The MMU cannot complete this translation; ' +
+        'it traps to the OS, which loads the page and restarts the instruction.</p>';
     }
-    html += `<div class="translate-step"><span class="step-num">2</span><div>Look up page ${pageNum} → frame <strong>0x${frame.toString(16)}</strong></div></div>`;
-    html += `<div class="translate-step"><span class="step-num">3</span><div>Keep offset <strong>0x${offset.toString(16)}</strong> unchanged</div></div>`;
-    html += `<div class="translate-step"><span class="step-num">4</span><div>Combine (f, o)</div></div>`;
-    html += '</div></div>';
 
-    const paddr = (frame * pageBytes) + offset;
-    html += `<div class="paddr-result">physical address = 0x${paddr.toString(16)}</div>`;
+    // why anyone bothers with two levels
+    var entries = Math.pow(2, width - offsetBits);
+    var flatMB = (entries * 4) / 1024 / 1024;
+    if (levels === 1) {
+      html += '<p class="tool-note">A flat table needs one entry per page: 2<sup>' + (width - offsetBits) +
+        '</sup> = ' + entries.toLocaleString() + ' entries. At 4 bytes each that is ' +
+        (flatMB >= 1 ? flatMB.toFixed(0) + ' MB' : (flatMB * 1024).toFixed(0) + ' kB') +
+        ' <em>per process</em>, whether or not the address space is actually used. Switch to two levels ' +
+        'to see where that goes.</p>';
+    } else {
+      var outerSz = Math.pow(2, split.outerBits) * 4;
+      var innerSz = Math.pow(2, split.innerBits) * 4;
+      html += '<p class="tool-note">Two levels: a directory of 2<sup>' + split.outerBits + '</sup> entries (' +
+        (outerSz / 1024).toFixed(outerSz >= 1024 ? 0 : 1) + ' kB) plus one ' +
+        (innerSz / 1024).toFixed(innerSz >= 1024 ? 0 : 1) + ' kB table <em>for each region actually used</em>. ' +
+        'A process touching only code, heap and stack allocates a handful instead of the full ' +
+        (flatMB >= 1 ? flatMB.toFixed(0) + ' MB' : (flatMB * 1024).toFixed(0) + ' kB') + '. ' +
+        'The cost is a second memory access per translation, which is why the TLB matters.</p>';
+    }
 
     out.innerHTML = html;
   }
 
-  function editPT(el) {
-    const page = parseInt(el.getAttribute('data-page'), 10);
-    const v = el.textContent.trim().toLowerCase();
-    if (v === 'x' || v === '') {
-      defaultPT[page] = null;
-    } else {
-      const f = parseInt(v, 16);
-      defaultPT[page] = isNaN(f) ? null : f;
-    }
-  }
-
+  window.XL_PT = XL_PT;
+  window.xlSplit = xlSplit;
+  window.xlWalk = xlWalk;
