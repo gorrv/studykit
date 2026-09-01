@@ -1,5 +1,8 @@
   /* ============================================================
      SHARED HELPERS
+     esc() is used everywhere a tool interpolates user input into HTML.
+     The inference-tree renderer draws the derivation trees that both
+     the semantics and the type-system tools build.
      ============================================================ */
   function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

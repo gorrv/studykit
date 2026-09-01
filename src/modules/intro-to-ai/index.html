@@ -6,7 +6,7 @@
 <script>
 (function(){
   var t = null;
-  try { t = localStorage.getItem('ai-theme'); } catch (e) {}
+  try { t = localStorage.getItem('studykit-theme'); } catch (e) {}
   if (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
   document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
 })();
@@ -124,6 +124,32 @@
   </main>
 </div>
 <script>
-<!--@include js/theme.js--><!--@include js/section-switching.js--><!--@include js/shared-helpers.js--><!--@include js/self-test-quiz-driver-question-generators-get-pushed-into.js--><!--@include js/generic-tool-reset.js--><!--@include js/week-tools-added-here-as-each-week-s-content-goes-in.js--><!--@include js/w1-·-a-lab-where-h-comes-from-and-what-changes-when-it-chang.js--><!--@include js/w2-·-game-trees-minimax-and-alpha-beta.js--><!--@include js/w2-·-csp-parsing-backtracking-forward-checking-ac-3.js--><!--@include js/w3-·-blocks-world-strips-engine-rpg-forward-chain-search.js--><!--@include js/w4-·-mdps-grid-worlds-and-value-iteration.js--><!--@include js/w4-·-how-information-spreads-the-picture-behind-value-iterat.js--><!--@include js/w5-·-machine-learning-metrics-and-curve-fitting.js--><!--@include js/interaction-layer-dragging-on-svg-step-players-live-edit.js--><!--@include js/w6-·-clustering-k-means-within-cluster-variance-hierarchical.js--><!--@include js/w7-·-supervised-learning.js--><!--@include js/w8-·-reinforcement-learning.js--><!--@include js/w9-·-ai-ethics.js--><!--@include js/mock-exam-a-scored-optionally-timed-test-over-any-set-of-wee.js--><!--@include js/const-adv.js--><!--@include js/const-cspq.js--><!--@include js/const-plan.js--><!--@include js/const-mdpq.js--><!--@include js/const-mlq.js--><!--@include js/const-clq.js--><!--@include js/site-search-full-text-across-every-section.js--></script>
+  <!--@include @/engine/helpers.js-->
+  <!--@include @/engine/theme.js-->
+  <!--@include @/engine/nav.js-->
+  <!--@include @/engine/ix.js-->
+  <!--@include @/engine/tools.js-->
+  <!--@include @/engine/search.js-->
+  <!--@include js/quiz.js-->
+  <!--@include js/w1-search.js-->
+  <!--@include js/w1-astar-lab.js-->
+  <!--@include js/w2-game-trees.js-->
+  <!--@include js/w2-csp.js-->
+  <!--@include js/w3-planning.js-->
+  <!--@include js/w4-mdp.js-->
+  <!--@include js/w4-information-spread.js-->
+  <!--@include js/w5-machine-learning.js-->
+  <!--@include js/w6-clustering.js-->
+  <!--@include js/w7-supervised.js-->
+  <!--@include js/w8-reinforcement.js-->
+  <!--@include js/w9-ethics.js-->
+  <!--@include js/exam.js-->
+  <!--@include js/questions/w2-adversarial.js-->
+  <!--@include js/questions/w2-csp.js-->
+  <!--@include js/questions/w3-planning.js-->
+  <!--@include js/questions/w4-mdp.js-->
+  <!--@include js/questions/w5-machine-learning.js-->
+  <!--@include js/questions/w6-clustering.js-->
+  <!--@include @/engine/boot.js--></script>
 </body>
 </html>

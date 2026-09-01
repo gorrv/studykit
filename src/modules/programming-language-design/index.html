@@ -6,7 +6,7 @@
 <script>
 (function(){
   var t = null;
-  try { t = localStorage.getItem('pld-theme'); } catch (e) {}
+  try { t = localStorage.getItem('studykit-theme'); } catch (e) {}
   if (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
   document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
 })();
@@ -50,6 +50,37 @@
   </main>
 </div>
 <script>
-<!--@include js/preamble.js--><!--@include js/interaction-layer.js--><!--@include js/tool-1-fetch-execute-cycle-simulator.js--><!--@include js/tool-2-ambiguity-parse-tree-derivation-explorer.js--><!--@include js/tool-3-transition-system-explorer.js--><!--@include js/tool-4-w2-static-vs-dynamic-scope-resolver.js--><!--@include js/tool-5-w2-dangling-else.js--><!--@include js/tool-6-w2-loop-tracer-pre-test-vs-post-test.js--><!--@include js/tool-7-w3-f-i-i-evaluation-order.js--><!--@include js/tool-8-w3-simp-abstract-machine.js--><!--@include js/w4-shared-store-helpers-value-tests-inference-tree-rendering.js--><!--@include js/tool-9-w4-small-step-sos-reducer.js--><!--@include js/tool-10-w4-big-step-derivation-prover.js--><!--@include js/tool-11-w4-three-semantics-compared.js--><!--@include js/tool-12-w6-reduction-strategy-explorer.js--><!--@include js/tool-13-w6-type-parser-composition-check-partial-application.js--><!--@include js/tool-16-w8-pattern-matching-evaluator.js--><!--@include js/tool-14-w8-sfun-syntax-cbv-cbn-evaluation-derivations.js--><!--@include js/tool-15-w8-sfun-typing-derivations-t.js--><!--@include js/w9-shared-first-order-term-parser-printer.js--><!--@include js/tool-17-w9-term-literal-clause-checker.js--><!--@include js/tool-18-w9-substitution-applier.js--><!--@include js/tool-19-w9-prolog-interpreter-sld-resolution-backtracking.js--><!--@include js/tool-20-w10-unification-stepper-martelli-montanari.js--><!--@include js/tool-21-w10-sld-resolution-tree-builder.js--><!--@include js/tool-22-self-test-generator.js--><!--@include js/generic-tool-reset.js--><!--@include js/tool-most-general-type-hindley-milner-inference.js--><!--@include js/site-search-full-text-across-every-section.js--></script>
+  <!--@include @/engine/helpers.js-->
+  <!--@include @/engine/theme.js-->
+  <!--@include @/engine/nav.js-->
+  <!--@include @/engine/ix.js-->
+  <!--@include @/engine/tools.js-->
+  <!--@include @/engine/search.js-->
+  <!--@include js/w1-fetch-execute.js-->
+  <!--@include js/w1-ambiguity.js-->
+  <!--@include js/w1-transition-systems.js-->
+  <!--@include js/w2-scope.js-->
+  <!--@include js/w2-dangling-else.js-->
+  <!--@include js/w2-loops.js-->
+  <!--@include js/w3-evaluation-order.js-->
+  <!--@include js/w3-simp-machine.js-->
+  <!--@include js/w4-shared.js-->
+  <!--@include js/w4-small-step.js-->
+  <!--@include js/w4-big-step.js-->
+  <!--@include js/w4-three-semantics.js-->
+  <!--@include js/w6-reduction.js-->
+  <!--@include js/w6-types.js-->
+  <!--@include js/w8-pattern-matching.js-->
+  <!--@include js/w8-sfun.js-->
+  <!--@include js/w8-sfun-typing.js-->
+  <!--@include js/w9-shared.js-->
+  <!--@include js/w9-terms.js-->
+  <!--@include js/w9-substitution.js-->
+  <!--@include js/w9-prolog.js-->
+  <!--@include js/w10-unification.js-->
+  <!--@include js/w10-sld-tree.js-->
+  <!--@include js/quiz.js-->
+  <!--@include js/w7-hindley-milner.js-->
+  <!--@include @/engine/boot.js--></script>
 </body>
 </html>

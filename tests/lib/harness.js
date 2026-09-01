@@ -148,6 +148,12 @@ async function checkStructure(s, m) {
       leaked ? leaked[0] : '');
   });
 
+  // The engine renders every tool on load and collects failures rather than
+  // throwing, so a broken tool can't blank the page. Nothing collects them at
+  // runtime, so this is where they have to be caught.
+  const bootErrors = m.window.TOOL_BOOT_ERRORS || [];
+  s.ok('every tool booted', bootErrors.length === 0, bootErrors.slice(0, 4).join(' | '));
+
   // Every section must be reachable through the nav without throwing.
   if (typeof m.window.showWeek === 'function') {
     m.$$('.week-section').forEach(sec => {

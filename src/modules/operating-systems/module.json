@@ -1,32 +1,24 @@
 {
   "id": "operating-systems",
-  "title": "OSC Study Notes — Operating Systems",
-  "sections": [
-    "week1",
-    "week2",
-    "week3",
-    "week4",
-    "week5",
-    "week7",
-    "week8",
-    "week9",
-    "week10",
-    "week11",
-    "cram",
-    "mock"
+  "engine": [
+    "helpers.js",
+    "theme.js",
+    "nav.js",
+    "ix.js",
+    "tools.js",
+    "search.js"
   ],
   "scripts": [
-    "js/preamble.js",
-    "js/tool-1-address-translator-week-3.js",
-    "js/tool-2-scheduling-playground-week-2.js",
-    "js/tool-3-stack-visualiser-week-1.js",
-    "js/tool-4-base-limit-checker-week-3.js",
-    "js/tool-5-page-replacement-simulator-week-4.js",
-    "js/tool-6-stack-smashing-demo-week-5.js",
-    "js/tool-7-caesar-rot13-cipher-week-7.js",
-    "js/tool-8-fork-simulator-week-8.js",
-    "js/tool-9-race-condition-simulator-week-9.js",
-    "js/tool-10-dining-philosophers-week-11.js",
-    "js/mock-exam-data-driven-auto-marking.js"
+    "exam.js",
+    "w1-stack.js",
+    "w11-philosophers.js",
+    "w2-scheduling.js",
+    "w3-address-translation.js",
+    "w3-base-limit.js",
+    "w4-page-replacement.js",
+    "w5-stack-smashing.js",
+    "w7-cipher.js",
+    "w8-fork.js",
+    "w9-race.js"
   ]
 }

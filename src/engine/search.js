@@ -224,37 +224,3 @@
     if (aside) aside.addEventListener('scroll', nsPlace);
     window.addEventListener('scroll', nsPlace, true);
   }
-  document.addEventListener('DOMContentLoaded', nsInit);
-  /* exposed so you can poke at them from the browser console */
-  window.IX = IX; window.MG = MG; window.hmTypeOf = hmTypeOf; window.hmSameType = hmSameType;
-
-  document.addEventListener('DOMContentLoaded', function () {
-    snapshotTools();
-    ixLive();
-    try { runMGT(); } catch (e) {}
-    IX.initReveal();
-    applyThemeLabel();
-    runReduce();
-    runCompose();
-    runCurry();
-    runPatMatch();
-    runSfun();
-    runTyping();
-    runLpCheck();
-    runSubst();
-    runProlog();
-    runUnify();
-    runSLD();
-    qzNext();
-    runEvalOrder();
-    smRunAll();
-    ssRunAll();
-    runBigStep();
-    runCompare();
-    feReset();
-    runParse();
-    runTS();
-    scRender();
-    runDangling();
-    runLoops();
-  });
