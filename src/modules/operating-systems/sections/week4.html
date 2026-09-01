@@ -255,7 +255,7 @@
       <h3 id="w4-prsim">🛠️ Interactive: Page Replacement Simulator</h3>
       <p>The classic exam question: given a reference string and N frames, trace the evictions and count page faults. Step through it one access at a time, or run it all at once. Try comparing FIFO vs LRU on the same string.</p>
 
-      <div class="tool">
+      <div class="tool" data-run="prRunAll">
         <div class="tool-header">
           <span class="tool-badge">Practice tool</span>
           <h3>Page Replacement Tracer</h3>
@@ -286,6 +286,9 @@
           <button class="tool-btn" onclick="prRunAll()">Run all ⏭</button>
           <button class="tool-btn danger" onclick="prReset()">Reset ↺</button>
         </div>
+
+
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
 
         <div id="pr-output" class="tool-output"></div>
       </div>

@@ -78,7 +78,7 @@ if (rc &lt; 0) {
       <h3 id="w8-forktool">🛠️ Interactive: fork() Return-Value Simulator</h3>
       <p>The "called once, returns twice" behaviour confuses everyone at first. Step through a small program with fork() calls and watch the process tree branch — each fork doubles the processes, and you can see exactly what each one prints.</p>
 
-      <div class="tool">
+      <div class="tool" data-run="runFork">
         <div class="tool-header">
           <span class="tool-badge">Practice tool</span>
           <h3>fork() Tree Explorer</h3>
@@ -97,6 +97,9 @@ if (rc &lt; 0) {
           </div>
           <button class="tool-btn" onclick="runFork()">Run ▶</button>
         </div>
+
+
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
 
         <div id="fork-output" class="tool-output"></div>
       </div>

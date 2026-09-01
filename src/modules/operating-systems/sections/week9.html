@@ -219,7 +219,7 @@ counter++   <span style="color:#7eb892;">// actually:</span>
       <h3 id="w9-racetool">🛠️ Interactive: Race Condition Demo</h3>
       <p>Watch two threads increment a shared counter. Run them <em>interleaved</em> (realistic, lossy) versus <em>sequentially</em> (the naive expectation) and see the lost updates accumulate. This is the single most important concept of the week.</p>
 
-      <div class="tool">
+      <div class="tool" data-run="runRace">
         <div class="tool-header">
           <span class="tool-badge">Concurrency demo</span>
           <h3>Lost Update Simulator</h3>
@@ -242,6 +242,9 @@ counter++   <span style="color:#7eb892;">// actually:</span>
           </div>
           <button class="tool-btn" onclick="runRace()">Run ▶</button>
         </div>
+
+
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
 
         <div id="race-output" class="tool-output"></div>
       </div>

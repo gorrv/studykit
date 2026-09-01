@@ -1,0 +1,43 @@
+  /* ==========================================================================
+     THEME — two palettes, light and dark.
+     Use the toggle in the sidebar, or set the default here:
+         <html lang="en" data-theme="light">   or   data-theme="dark"
+     ========================================================================== */
+  :root, html[data-theme="light"] {
+    --paper:#f4efe6; --paper-2:#ede6d7; --surface:#fefcf6; --surface-2:#ffffff; --surface-3:#fdfaf2;
+    --ink:#1a1f2e; --ink-soft:#3d4555; --ink-muted:#6b7080; --rule:#d8cfb8;
+    --accent:#1e4d8b; --accent-2:#c2410c; --accent-3:#5b7f3a; --accent-4:#6b4d8b;
+    --highlight:#f5d76e; --accent-hover:#163a6b;
+    --tint-a:#eaf1fa; --tint-a2:#cfe3f7; --tint-b:#f5ede0; --tint-b2:#fbeee4;
+    --tint-c:#ecf4e6; --tint-c2:#e3f0db; --tint-c3:#e3eccb; --tint-d:#f0ecf5;
+    --tint-hl:#fff8dc; --tint-warn:#f7f0d8; --tint-bad:#f7e3e3; --tint-n:#e8e2d2; --tint-n2:#f3f0e6;
+    --warn-border:#c8a82c; --warn-text:#8a6d10; --badge-text:#6b5410;
+    --chip-bg:#1a1f2e; --chip-fg:#f4efe6;
+    --code-bg:#2a2f3e; --code-fg:#e8e4d8; --code-kw:#e89b6d; --code-cm:#7eb892;
+    --code-ty:#9dc4ec; --code-st:#d9a5c7; --code-dim:#999999; --code-dim2:#8a8f7d;
+    --accent-rgb:30,77,139; --accent2-rgb:194,65,12; --accent3-rgb:91,127,58;
+    --highlight-rgb:245,215,110; --shadow-rgb:26,31,46;
+    --shadow: 0 2px 0 rgba(var(--shadow-rgb), 0.04), 0 8px 24px rgba(var(--shadow-rgb), 0.06);
+    --val-r: #d1443f; --val-g: #3f9c50; --val-b: #3a6fd8;
+    --clu1: #1f77b4; --clu2: #d62728; --clu3: #2ca02c; --clu4: #9467bd;
+    --clu5: #ff7f0e; --clu6: #17becf; --clu7: #8c564b; --clu8: #e377c2;
+  }
+  html[data-theme="dark"] {
+    --paper:#12161f; --paper-2:#181d28; --surface:#1b2130; --surface-2:#232a3b; --surface-3:#171c26;
+    --ink:#eeeae0; --ink-soft:#c2c8d4; --ink-muted:#8d95a5; --rule:#333c4d;
+    --accent:#5aa9ff; --accent-2:#ff9d5c; --accent-3:#7ede7b; --accent-4:#c48cff;
+    --highlight:#ffd75e; --accent-hover:#8ac4ff;
+    --tint-a:#14273f; --tint-a2:#1b3557; --tint-b:#3a2a19; --tint-b2:#41291d;
+    --tint-c:#16301c; --tint-c2:#1c3c22; --tint-c3:#243523; --tint-d:#2b1f43;
+    --tint-hl:#453a17; --tint-warn:#3d3418; --tint-bad:#42221f; --tint-n:#252c3a; --tint-n2:#1e2431;
+    --warn-border:#d0a83c; --warn-text:#ffd97a; --badge-text:#ffe6a3;
+    --chip-bg:#2d3548; --chip-fg:#eeeae0;
+    --code-bg:#0d111a; --code-fg:#e4e0d4; --code-kw:#ff9d5c; --code-cm:#7fd694;
+    --code-ty:#86c5ff; --code-st:#f0a3d0; --code-dim:#7d8698; --code-dim2:#75806a;
+    --accent-rgb:90,169,255; --accent2-rgb:255,157,92; --accent3-rgb:126,222,123;
+    --highlight-rgb:255,215,94; --shadow-rgb:0,0,0;
+    --shadow: 0 1px 0 rgba(var(--shadow-rgb), 0.35), 0 6px 20px rgba(var(--shadow-rgb), 0.32);
+    --val-r: #f2635d; --val-g: #5fd077; --val-b: #6d9cff;
+    --clu1: #4ea3e0; --clu2: #ff6b6b; --clu3: #5fd077; --clu4: #b98cf0;
+    --clu5: #ffa14a; --clu6: #4fd8e8; --clu7: #c08a72; --clu8: #f58fd0;
+  }

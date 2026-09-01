@@ -190,7 +190,7 @@ mov   <span style="color:#7eb892;">$0x403f0d</span>,%esi
       <h4 id="w3-bltool" style="font-family:'Fraunces',serif; font-size:18px; margin-top:28px;">🛠️ Try it: Base &amp; Limit Checker</h4>
       <p style="font-size:14px;">Set a base and limit, then feed in virtual addresses and watch the hardware either translate (base + address) or trap. The bar shows where the address lands relative to the allowed window.</p>
 
-      <div class="tool">
+      <div class="tool" data-run="blCheck">
         <div class="tool-header">
           <span class="tool-badge">Practice tool</span>
           <h3>Base &amp; Limit MMU</h3>
@@ -212,6 +212,9 @@ mov   <span style="color:#7eb892;">$0x403f0d</span>,%esi
           </div>
           <button class="tool-btn" onclick="blCheck()">Check ▶</button>
         </div>
+
+
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
 
         <div id="bl-output" class="tool-output"></div>
       </div>
@@ -396,7 +399,7 @@ PT size = m × 2ⁿ
       <h3 id="w3-translator">🛠️ Interactive: Address Translator</h3>
       <p>Practice the mechanic that's almost guaranteed to appear in the exam. Enter a virtual address and page size, and watch it split into page number + offset, look up the frame, and combine into the physical address. The page table is editable — change any frame number.</p>
 
-      <div class="tool">
+      <div class="tool" data-run="runTranslate">
         <div class="tool-header">
           <span class="tool-badge">Practice tool</span>
           <h3>Virtual → Physical Translator</h3>
@@ -426,6 +429,9 @@ PT size = m × 2ⁿ
           </div>
           <button class="tool-btn" onclick="runTranslate()">Translate ▶</button>
         </div>
+
+
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
 
         <div id="xl-output" class="tool-output"></div>
       </div>

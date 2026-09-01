@@ -346,7 +346,7 @@
       <h3 id="w2-playground">🛠️ Interactive: Scheduling Playground</h3>
       <p>Enter processes with their burst times (and arrival times), pick an algorithm, and watch the Gantt chart and average waiting time generate live. Great for checking your hand-worked answers.</p>
 
-      <div class="tool">
+      <div class="tool" data-run="runSchedule">
         <div class="tool-header">
           <span class="tool-badge">Practice tool</span>
           <h3>CPU Scheduler Simulator</h3>
@@ -379,6 +379,9 @@
           <button class="tool-btn secondary" onclick="addProc()">+ Add process</button>
           <button class="tool-btn" onclick="runSchedule()">Run ▶</button>
         </div>
+
+
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
 
         <div id="sch-output" class="tool-output"></div>
       </div>

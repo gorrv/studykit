@@ -138,7 +138,7 @@ return 0;
       <h3 id="w5-smashtool">🛠️ Interactive: Stack-Smashing Demo</h3>
       <p>Type input of different lengths into a 10-byte buffer and watch it spill over the saved frame pointer and into the return address. See exactly how many characters it takes to hijack control flow — safely, in your browser.</p>
 
-      <div class="tool">
+      <div class="tool" data-run="runSmash">
         <div class="tool-header">
           <span class="tool-badge">Security demo</span>
           <h3>Buffer Overflow Visualiser</h3>
@@ -153,6 +153,9 @@ return 0;
           <button class="tool-btn" onclick="runSmash()">Write to stack ▶</button>
           <button class="tool-btn danger" onclick="document.getElementById('smash-input').value='AAAAAAAAAAAAAAAAAAAAAAAAEVILshellcode!'; runSmash();">Try an exploit 💀</button>
         </div>
+
+
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
 
         <div id="smash-output" class="tool-output"></div>
       </div>

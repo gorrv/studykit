@@ -136,7 +136,7 @@ public void run() {
       <h3 id="w11-philtool">🛠️ Interactive: Dining Philosophers</h3>
       <p>Watch all five philosophers reach for their left fork. In <strong>naive</strong> mode they deadlock (circular wait). Flip to the <strong>fixed</strong> mode — where the last philosopher reaches right-first — and the cycle breaks, so someone can always eat.</p>
 
-      <div class="tool">
+      <div class="tool" data-run="runPhil">
         <div class="tool-header">
           <span class="tool-badge">Concurrency demo</span>
           <h3>Dining Philosophers Simulator</h3>
@@ -153,6 +153,9 @@ public void run() {
           </div>
           <button class="tool-btn" onclick="runPhil()">Everyone grabs left fork ▶</button>
         </div>
+
+
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
 
         <div id="phil-output" class="tool-output"></div>
       </div>

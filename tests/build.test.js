@@ -53,6 +53,37 @@ module.exports = async function run() {
     s.ok(`${id}: no unresolved include`, built.html.indexOf('@include') < 0);
     s.ok(`${id}: has a title`, /<title>[^<]+<\/title>/.test(built.html));
     s.ok(`${id}: closes its html`, built.html.trim().endsWith('</html>'));
+
+    // Both palettes must define every token the stylesheet reads. A token
+    // defined only in the light palette is invisible in dark mode, which is
+    // the one CSS bug the DOM tests can never see.
+    const css = (built.html.match(/<style>([\s\S]*?)<\/style>/) || [, ''])[1];
+    const used = new Set((css.match(/var\(\s*(--[\w-]+)/g) || [])
+      .map(v => v.replace(/var\(\s*/, '')));
+
+    const palette = re => {
+      const block = css.match(re);
+      return new Set(block ? (block[1].match(/(--[\w-]+)\s*:/g) || [])
+        .map(d => d.replace(/\s*:$/, '')) : []);
+    };
+    const light = palette(/:root[^{]*\{([\s\S]*?)\}/);
+    const dark = palette(/html\[data-theme="dark"\][^{]*\{([\s\S]*?)\}/);
+
+    // Some modules declare extra tokens in a second :root block; collect those too.
+    let m2, extra = /:root[^{]*\{([\s\S]*?)\}/g;
+    while ((m2 = extra.exec(css))) {
+      (m2[1].match(/(--[\w-]+)\s*:/g) || []).forEach(d => light.add(d.replace(/\s*:$/, '')));
+    }
+    let m3, extraDark = /html\[data-theme="dark"\][^{]*\{([\s\S]*?)\}/g;
+    while ((m3 = extraDark.exec(css))) {
+      (m3[1].match(/(--[\w-]+)\s*:/g) || []).forEach(d => dark.add(d.replace(/\s*:$/, '')));
+    }
+
+    const undef = [...used].filter(t => !light.has(t));
+    s.ok(`${id}: every CSS token is defined`, undef.length === 0, undef.join(', '));
+
+    const lightOnly = [...used].filter(t => light.has(t) && !dark.has(t));
+    s.ok(`${id}: every token used has a dark value`, lightOnly.length === 0, lightOnly.join(', '));
   }
 
   // Orphan check: every source file should reach a module, except the

@@ -307,7 +307,7 @@ read(fd, buffer, 100);   <span style="color:#7eb892;">// looks like a function c
       <h3 id="w1-stacktool">🛠️ Interactive: Stack Push/Pop</h3>
       <p>Get a feel for last-in-first-out. Push and pop values manually, or watch the recursive triangular-number example (from the slides) push a frame per call and unwind back.</p>
 
-      <div class="tool">
+      <div class="tool" data-run="stkRender">
         <div class="tool-header">
           <span class="tool-badge">Practice tool</span>
           <h3>Stack Visualiser</h3>
@@ -325,7 +325,8 @@ read(fd, buffer, 100);   <span style="color:#7eb892;">// looks like a function c
           <button class="tool-btn" style="background:var(--accent-3);" onclick="stkDemo()">▶ Run tri(3) demo</button>
         </div>
 
-        <div id="stk-viz" class="stack-tool-viz"></div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="stk-viz" class="stack-tool-viz tool-output"></div>
         <div id="stk-log" class="stack-log"></div>
       </div>
 

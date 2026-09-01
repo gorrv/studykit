@@ -255,3 +255,12 @@
     sampleMockQuestions();   // pick a fresh random 10 each reset
     renderMock();
   }
+
+  /* The mock exam builds its paper the first time the section is opened, so
+     the questions are not drawn until someone actually wants them. The engine's
+     showWeek is generic, so the module registers the hook rather than editing it. */
+  NAV.onShow.push(function (id) {
+    if (id !== 'mock') return;
+    if (mockQuestions.length === 0) sampleMockQuestions();
+    renderMock();
+  });

@@ -262,7 +262,7 @@ plaintext P  →  ciphertext C       C = E(P)      P = D(C)
       <h3 id="w7-ciphertool">🛠️ Interactive: Caesar / ROT13 Cipher</h3>
       <p>Encrypt and decrypt with a shift cipher. Set the key to 13 for ROT13 and notice that encrypting twice gets you back to the start. Try frequency analysis on a longer message to see why it's trivially breakable.</p>
 
-      <div class="tool">
+      <div class="tool" data-run="runCipher">
         <div class="tool-header">
           <span class="tool-badge">Crypto demo</span>
           <h3>Shift Cipher Playground</h3>
@@ -280,6 +280,9 @@ plaintext P  →  ciphertext C       C = E(P)      P = D(C)
           </div>
           <button class="tool-btn" onclick="runCipher()">Encrypt ▶</button>
         </div>
+
+
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
 
         <div id="cip-output" class="tool-output"></div>
       </div>
