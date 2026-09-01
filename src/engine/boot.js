@@ -26,6 +26,7 @@
   window.IX = IX;
   window.NAV = NAV;
   window.TOOL_RUNNERS = TOOL_RUNNERS;
+  window.QZ_GEN = QZ_GEN;
   window.TOOL_BOOT_ERRORS = TOOL_BOOT_ERRORS;
   window.BOOT = BOOT;
   window.showWeek = showWeek;

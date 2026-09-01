@@ -3,9 +3,6 @@
      Questions are generated, and marked by the same engines the
      week-by-week tools use.
      ============================================================ */
-  const qzPick = a => a[Math.floor(Math.random() * a.length)];
-  const qzInt = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
-  function qzNorm(s) { return String(s).toLowerCase().replace(/\s+/g, '').replace(/[.;]$/, ''); }
   /* parse a user-written substitution into a canonical string */
   function qzCanonSubst(txt) {
     let t = txt.trim();
@@ -32,7 +29,6 @@
   }
   function qzCanonTerm(txt) { return plShow(plParse(txt), 0); }
   /* ---------- generators ---------- */
-  const QZ_GEN = [];
   /* --- unification --- */
   QZ_GEN.push({ topic: 'log', make: function () {
     const cs = ['a', 'b', 'c'], vs = ['X', 'Y', 'Z'];
@@ -279,80 +275,3 @@
     };
   }});
   /* ---------- quiz driver ---------- */
-  let qzCur = null, qzScore = { right: 0, total: 0 }, qzAnswered = false, qzPicked = null;
-  function qzNext() {
-    const topic = document.getElementById('qz-topic').value;
-    const pool = QZ_GEN.filter(g => topic === 'all' ? true : g.topic === topic);
-    if (!pool.length) { document.getElementById('qz-output').innerHTML = '<div class="tool-error">No questions for that topic.</div>'; return; }
-    let tries = 0;
-    while (tries++ < 12) {
-      try { qzCur = qzPick(pool).make(); break; } catch (e) { qzCur = null; }
-    }
-    if (!qzCur) { document.getElementById('qz-output').innerHTML = '<div class="tool-error">Could not generate a question — try again.</div>'; return; }
-    qzAnswered = false; qzPicked = null;
-    qzRender();
-  }
-  function qzChoose(i) {
-    if (qzAnswered || !qzCur) return;
-    qzPicked = qzCur.choices[i];
-    qzSubmit(qzPicked);
-  }
-  function qzSubmitText() {
-    if (!qzCur || qzAnswered) return;
-    qzSubmit(document.getElementById('qz-answer').value);
-  }
-  function qzSubmit(val) {
-    if (!qzCur || qzAnswered) return;
-    if (!String(val).trim()) return;
-    let res;
-    try { res = qzCur.check(val); } catch (e) { res = { ok: false, msg: 'Could not read that answer.' }; }
-    qzAnswered = true; qzCur.given = val; qzCur.result = res;
-    qzScore.total++; if (res.ok) qzScore.right++;
-    qzRender();
-  }
-  function qzReveal() {
-    if (!qzCur) { qzNext(); return; }
-    if (!qzAnswered) { qzAnswered = true; qzScore.total++; qzCur.result = { ok: false, revealed: true }; }
-    qzRender();
-  }
-  function qzResetScore() { qzScore = { right: 0, total: 0 }; qzRender(); }
-  function qzRender() {
-    const out = document.getElementById('qz-output');
-    let html = '';
-    const pct = qzScore.total ? Math.round(100 * qzScore.right / qzScore.total) : 0;
-    html += `<div class="quiz-score" style="margin-bottom:10px;"><span class="stat-pill dark">score ${qzScore.right} / ${qzScore.total}</span>`;
-    if (qzScore.total) html += `<span class="stat-pill ${pct >= 70 ? 'b' : pct >= 40 ? 'a' : 'c'}">${pct}%</span>`;
-    html += '</div>';
-    if (!qzCur) { out.innerHTML = html + '<div class="quiz-prompt">Press <strong>New question</strong> to start.</div>'; return; }
-    html += `<div class="quiz-prompt"><div class="qp-topic">${qzCur.topic}</div>${qzCur.prompt}</div>`;
-    if (qzCur.kind === 'choice') {
-      html += '<div class="quiz-choices">';
-      qzCur.choices.forEach((c, i) => {
-        let cls = 'quiz-choice';
-        if (qzAnswered) {
-          if (qzNorm(c) === qzNorm(qzCur.answer)) cls += ' right';
-          else if (qzCur.given !== undefined && qzNorm(c) === qzNorm(qzCur.given)) cls += ' wrong';
-        }
-        html += `<button class="${cls}" onclick="qzChoose(${i})">${c}</button>`;
-      });
-      html += '</div>';
-    } else {
-      html += `<div class="tool-controls" style="margin:8px 0;">
-        <div class="tool-field" style="flex:1; min-width:220px;">
-          <label>your answer</label>
-          <input type="text" id="qz-answer" placeholder="${esc(qzCur.placeholder || '')}" style="width:100%;"
-                 onkeydown="if(event.key==='Enter'){qzSubmitText();}" ${qzAnswered ? 'disabled' : ''}
-                 value="${qzAnswered && qzCur.given !== undefined ? esc(String(qzCur.given)) : ''}">
-        </div>
-        <button class="tool-btn" onclick="qzSubmitText()" ${qzAnswered ? 'disabled' : ''}>Check</button>
-      </div>`;
-    }
-    if (qzAnswered) {
-      const r = qzCur.result || {};
-      if (r.ok) html += `<div class="verdict safe quiz-fb">✓ <strong>Correct.</strong> ${qzCur.explain}</div>`;
-      else if (r.revealed) html += `<div class="verdict warn quiz-fb"><strong>Answer:</strong> <code>${esc(String(qzCur.answer))}</code><br><br>${qzCur.explain}</div>`;
-      else html += `<div class="verdict bad quiz-fb">✗ Not quite. ${r.msg ? r.msg + '<br><br>' : ''}<strong>The answer is</strong> <code>${esc(String(qzCur.answer))}</code>.<br><br>${qzCur.explain}</div>`;
-      html += `<div class="tool-controls" style="margin-top:10px;"><button class="tool-btn green" onclick="qzNext()">Next question ▶</button></div>`;
-    }
-    out.innerHTML = html;
-  }

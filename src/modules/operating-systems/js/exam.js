@@ -264,3 +264,5 @@
     if (mockQuestions.length === 0) sampleMockQuestions();
     renderMock();
   });
+
+  window.mockQuestionBank = mockQuestionBank;

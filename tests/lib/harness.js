@@ -176,7 +176,21 @@ async function checkStructure(s, m) {
  */
 function checkQuestionBank(s, m, n = 2000) {
   const GEN = m.window.QZ_GEN;
-  if (!Array.isArray(GEN) || !GEN.length) return;
+
+  // This used to return quietly when QZ_GEN was not on window, which meant a
+  // module whose bank was not exposed appeared to pass thousands of checks it
+  // had never run. If a module ships a question tool, its bank must be
+  // reachable.
+  const hasQuizTool = m.$$('.tool[data-run="qzNext"]').length > 0;
+  if (!Array.isArray(GEN)) {
+    s.ok('question bank is reachable from the page', !hasQuizTool,
+      'the page has a question tool but window.QZ_GEN is not exposed');
+    return;
+  }
+  if (!GEN.length) {
+    s.ok('question bank is not empty', !hasQuizTool, 'QZ_GEN is empty');
+    return;
+  }
 
   let made = 0, bad = 0, firstBad = null;
   for (let i = 0; i < n; i++) {
@@ -198,10 +212,19 @@ function checkQuestionBank(s, m, n = 2000) {
       if (!q.check(q.answer).ok) { fail('marker rejects its own answer'); continue; }
       if (q.choices.filter(c => c !== q.answer).some(w => q.check(w).ok)) { fail('marker accepts a wrong choice'); }
     } else {
-      const numeric = String(q.answer).match(/-?[0-9]+\.?[0-9]*$/);
-      if (!numeric) { fail('non-numeric answer for a free-text question'); continue; }
-      if (!q.check(numeric[0]).ok) { fail('marker rejects its own answer'); continue; }
-      if (q.check('banana').ok) { fail('marker accepts nonsense'); }
+      // Free text. Not every module answers with a number — the type-inference
+      // and term-unification questions answer with syntax — so the invariant
+      // is that the marker accepts what the question says the answer is, in
+      // whatever form it states it, and rejects something that plainly isn't.
+      const stated = String(q.answer);
+      const numericTail = (stated.match(/-?[0-9]+\.?[0-9]*$/) || [])[0];
+      const accepts = v => { try { return q.check(v).ok; } catch (e) { return false; } };
+
+      if (!accepts(stated) && !(numericTail && accepts(numericTail))) {
+        fail('marker rejects its own answer: ' + stated);
+        continue;
+      }
+      if (accepts('banana')) { fail('marker accepts nonsense'); }
     }
   }
   s.ok(`${n} generated questions are self-consistent`, bad === 0,

@@ -10,7 +10,7 @@
  * handful of worked examples never would.
  */
 
-const { loadModule, Suite, checkStructure } = require('./lib/harness');
+const { loadModule, Suite, checkStructure, checkQuestionBank } = require('./lib/harness');
 
 /** Every ordering of 0..n-1. Small n only — used for exhaustive checks. */
 function permutations(items) {
@@ -34,7 +34,21 @@ module.exports = async function run() {
   const w = m.window;
 
   await checkStructure(s, m);
+  checkQuestionBank(s, m, 3000);
   s.ok('has content sections', m.$$('section').length >= 5, `${m.$$('section').length} sections`);
+
+  // The hand-written bank behind the mock exam is separate from the generators.
+  s.ok('the mock exam bank is substantial', w.mockQuestionBank.length >= 100,
+    `${w.mockQuestionBank.length} questions`);
+  {
+    const bad = w.mockQuestionBank.filter(q =>
+      !q.q || !q.explain || !Array.isArray(q.opts) || !Array.isArray(q.correct) ||
+      !q.correct.length || q.correct.some(i => i < 0 || i >= q.opts.length) ||
+      new Set(q.opts).size !== q.opts.length ||
+      (q.type === 'single' && q.correct.length !== 1));
+    s.ok('every mock question is well formed', bad.length === 0,
+      bad.slice(0, 2).map(q => q.topic).join(', '));
+  }
 
   // ------------------------------------------------------------ Week 2
   // Silberschatz's worked examples, which is what the exam questions look like.

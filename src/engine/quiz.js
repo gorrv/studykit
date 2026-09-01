@@ -9,6 +9,8 @@
   const qzPick = a => a[Math.floor(Math.random() * a.length)];
   const qzInt = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
   function qzNorm(s) { return String(s).toLowerCase().replace(/\s+/g, '').replace(/[.;]$/, ''); }
+  /* The commonest marker: accept the stated answer, ignoring case and spacing. */
+  const textCheck = ans => v => ({ ok: qzNorm(v) === qzNorm(ans) });
   let qzCur = null, qzScore = { right: 0, total: 0 }, qzAnswered = false;
   function qzNext() {
     const sel = document.getElementById('qz-topic');

@@ -1,0 +1,50 @@
+    <section id="practice" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Revision</div>
+        <h1>Self-test</h1>
+        <div class="week-subtitle">generated questions, marked by the tools themselves</div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why these are worth more than the mock exam</div>
+        The mock exam draws from a fixed bank, so once you have seen a question you half-remember the
+        answer. These are <strong>generated</strong>: the processes, addresses, reference strings and
+        allocation matrices are different every time, and your answer is checked by running the same
+        simulator the tools use. You cannot pass by recognising the question — only by doing the working.
+      </div>
+
+      <h2 id="pr-selftest">Question generator</h2>
+
+      <div class="tool" data-run="qzNext">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Generate a question and mark my answer</h3>
+        </div>
+        <div class="tool-desc">Numeric answers are marked to two decimal places; give a plain number.
+          For the Need matrix, type the row separated by spaces, e.g. <code>1 2 2</code>.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="qz-topic">topic</label>
+            <select id="qz-topic">
+              <option value="all">everything</option>
+              <option value="scheduling">W2 · CPU scheduling</option>
+              <option value="translation">W3 · address translation</option>
+              <option value="replacement">W4 · page replacement</option>
+              <option value="deadlock">W11 · deadlock &amp; Banker's</option>
+            </select>
+          </div>
+          <button class="tool-btn green" onclick="qzNext()">New question ▶</button>
+          <button class="tool-btn secondary" onclick="qzReveal()">Show answer</button>
+          <button class="tool-btn danger" onclick="qzResetScore()">Reset score</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="qz-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">If you get one wrong</div>
+        Every explanation shows the working, not just the answer — the Gantt trace for a scheduling
+        question, the hit/miss sequence for a replacement one, the safety walk for Banker's. Read it,
+        then draw the next one on the same topic and do it by hand before pressing Check.
+      </div>
+    </section>

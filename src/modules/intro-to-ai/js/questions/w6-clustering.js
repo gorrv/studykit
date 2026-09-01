@@ -814,6 +814,4 @@
 
   /* Interactive state, exposed so you can poke at it from the browser console:
      KM.pts, KM.mu, KM.frames … then call kmRender() to redraw. */
-  window.IX = IX; window.KM = KM; window.HC = HC; window.VI = VI; window.GT = GT; window.QZ_GEN = QZ_GEN; window.SX = SX; window.CA = CA; window.AD = AD; window.CS = CS; window.AC = AC; window.RP = RP; window.PL = PL; window.EU = EU; window.SW = SW; window.CM = CM; window.RG = RG; window.WV = WV; window.NM = NM; window.LS = LS; window.GI = GI; window.DT = DT; window.BD = BD; window.QT = QT; window.EG = EG; window.UC = UC; window.HM = HM; window.BI = BI; window.FR = FR; window.PN = PN; window.EX = EX; window.EX_WEEKS = EX_WEEKS; window.SP = SP; window.AL = AL; window.HARMS = HARMS; window.HARM_CASES = HARM_CASES; window.BIAS = BIAS; window.BIAS_CASES = BIAS_CASES; window.PRINCIPLES = PRINCIPLES; window.MITIG = MITIG;
-
   /* initialise on load */
