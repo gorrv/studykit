@@ -1,0 +1,177 @@
+    <div class="brand">OSC <span class="accent">Notes</span></div>
+    <div class="brand-sub">Operating Systems · 6CCS3OSC</div>
+
+    <nav>
+      <ul>
+        <li class="week">
+          <div class="week-label">Week 01</div>
+          <a class="week-title" href="#" onclick="showWeek('week1'); return false;">Introduction &amp; Core Concepts</a>
+          <ul class="subsection">
+            <li><a href="#w1-what-is-os">What is an OS?</a></li>
+            <li><a href="#w1-jobs">What an OS handles</a></li>
+            <li><a href="#w1-good-os">What makes an OS good</a></li>
+            <li><a href="#w1-concurrency">Concurrency vs parallelism</a></li>
+            <li><a href="#w1-five">The 5 core concepts</a></li>
+            <li><a href="#w1-stack">Stack recap</a></li>
+            <li><a href="#w1-stacktool">🛠️ Stack tool</a></li>
+            <li><a href="#w1-exam">Exam takeaways</a></li>
+          </ul>
+        </li>
+
+        <li class="week">
+          <div class="week-label">Week 02</div>
+          <a class="week-title" href="#" onclick="showWeek('week2'); return false;">Processes, Scheduling &amp; Threads</a>
+          <ul class="subsection">
+            <li><a href="#w2-multitask" onclick="showWeek('week2')">Multitasking &amp; task types</a></li>
+            <li><a href="#w2-program-process" onclick="showWeek('week2')">Program vs Process</a></li>
+            <li><a href="#w2-pcb" onclick="showWeek('week2')">PCB &amp; process states</a></li>
+            <li><a href="#w2-context" onclick="showWeek('week2')">Context switching</a></li>
+            <li><a href="#w2-scheduling" onclick="showWeek('week2')">Scheduling algorithms</a></li>
+            <li><a href="#w2-playground" onclick="showWeek('week2')">🛠️ Scheduler tool</a></li>
+            <li><a href="#w2-threads" onclick="showWeek('week2')">Threads</a></li>
+            <li><a href="#w2-exam" onclick="showWeek('week2')">Exam takeaways</a></li>
+          </ul>
+        </li>
+
+        <li class="week">
+          <div class="week-label">Week 03</div>
+          <a class="week-title" href="#" onclick="showWeek('week3'); return false;">Virtual Memory &amp; Address Translation</a>
+          <ul class="subsection">
+            <li><a href="#w3-problem" onclick="showWeek('week3')">The address-binding problem</a></li>
+            <li><a href="#w3-relocation" onclick="showWeek('week3')">Load-time relocation</a></li>
+            <li><a href="#w3-baselimit" onclick="showWeek('week3')">Base &amp; limit (MMU)</a></li>
+            <li><a href="#w3-bltool" onclick="showWeek('week3')">🛠️ Base/limit tool</a></li>
+            <li><a href="#w3-segmentation" onclick="showWeek('week3')">Segmentation</a></li>
+            <li><a href="#w3-paging" onclick="showWeek('week3')">Paged virtual addressing</a></li>
+            <li><a href="#w3-translation" onclick="showWeek('week3')">Translation &amp; the TLB</a></li>
+            <li><a href="#w3-translator" onclick="showWeek('week3')">🛠️ Translator tool</a></li>
+            <li><a href="#w3-multilevel" onclick="showWeek('week3')">Multi-level page tables</a></li>
+            <li><a href="#w3-exam" onclick="showWeek('week3')">Exam takeaways</a></li>
+          </ul>
+        </li>
+
+        <li class="week">
+          <div class="week-label">Week 04</div>
+          <a class="week-title" href="#" onclick="showWeek('week4'); return false;">Demand Paging &amp; Virtual Memory</a>
+          <ul class="subsection">
+            <li><a href="#w4-faults" onclick="showWeek('week4')">Page faults as interposition</a></li>
+            <li><a href="#w4-lazy" onclick="showWeek('week4')">Lazy allocation &amp; zeroing</a></li>
+            <li><a href="#w4-cow" onclick="showWeek('week4')">Copy-on-write</a></li>
+            <li><a href="#w4-vm" onclick="showWeek('week4')">Virtual memory &amp; swapping</a></li>
+            <li><a href="#w4-hierarchy" onclick="showWeek('week4')">Storage hierarchy</a></li>
+            <li><a href="#w4-tracking" onclick="showWeek('week4')">Tracking swapped pages</a></li>
+            <li><a href="#w4-replacement" onclick="showWeek('week4')">Page replacement</a></li>
+            <li><a href="#w4-prsim" onclick="showWeek('week4')">🛠️ Replacement tool</a></li>
+            <li><a href="#w4-allocation" onclick="showWeek('week4')">Frame allocation &amp; thrashing</a></li>
+            <li><a href="#w4-exam" onclick="showWeek('week4')">Exam takeaways</a></li>
+          </ul>
+        </li>
+
+        <li class="week">
+          <div class="week-label">Week 05</div>
+          <a class="week-title" href="#" onclick="showWeek('week5'); return false;">User-Space: malloc, Stack, Files &amp; I/O</a>
+          <ul class="subsection">
+            <li><a href="#w5-malloc" onclick="showWeek('week5')">malloc &amp; the heap</a></li>
+            <li><a href="#w5-freelist" onclick="showWeek('week5')">Free lists &amp; fit policies</a></li>
+            <li><a href="#w5-brk" onclick="showWeek('week5')">brk &amp; mmap</a></li>
+            <li><a href="#w5-stack" onclick="showWeek('week5')">The stack in depth</a></li>
+            <li><a href="#w5-overflow" onclick="showWeek('week5')">Buffer overflows</a></li>
+            <li><a href="#w5-smashtool" onclick="showWeek('week5')">🛠️ Stack-smash demo</a></li>
+            <li><a href="#w5-handles" onclick="showWeek('week5')">Files, handles &amp; IPC</a></li>
+            <li><a href="#w5-io" onclick="showWeek('week5')">How I/O works</a></li>
+            <li><a href="#w5-exam" onclick="showWeek('week5')">Exam takeaways</a></li>
+          </ul>
+        </li>
+
+        <li class="week">
+          <div class="week-label">Week 07</div>
+          <a class="week-title" href="#" onclick="showWeek('week7'); return false;">Access Control, Auth &amp; Cryptography</a>
+          <ul class="subsection">
+            <li><a href="#w7-accesscontrol" onclick="showWeek('week7')">Access control basics</a></li>
+            <li><a href="#w7-matrix" onclick="showWeek('week7')">ACLs vs capabilities</a></li>
+            <li><a href="#w7-cia" onclick="showWeek('week7')">Security properties (CIA)</a></li>
+            <li><a href="#w7-leastpriv" onclick="showWeek('week7')">Least privilege</a></li>
+            <li><a href="#w7-confused" onclick="showWeek('week7')">Confused deputy &amp; PwnKit</a></li>
+            <li><a href="#w7-auth" onclick="showWeek('week7')">Authentication</a></li>
+            <li><a href="#w7-passwords" onclick="showWeek('week7')">Passwords &amp; hashing</a></li>
+            <li><a href="#w7-crypto" onclick="showWeek('week7')">Cryptography</a></li>
+            <li><a href="#w7-ciphertool" onclick="showWeek('week7')">🛠️ Cipher tool</a></li>
+            <li><a href="#w7-exam" onclick="showWeek('week7')">Exam takeaways</a></li>
+          </ul>
+        </li>
+
+        <li class="week">
+          <div class="week-label">Week 08</div>
+          <a class="week-title" href="#" onclick="showWeek('week8'); return false;">Unix History &amp; Microkernels</a>
+          <ul class="subsection">
+            <li><a href="#w8-unix" onclick="showWeek('week8')">Why Unix matters</a></li>
+            <li><a href="#w8-fork" onclick="showWeek('week8')">fork() &amp; exec() ★</a></li>
+            <li><a href="#w8-forktool" onclick="showWeek('week8')">🛠️ fork() simulator</a></li>
+            <li><a href="#w8-everything" onclick="showWeek('week8')">"Everything is a file"</a></li>
+            <li><a href="#w8-microkernel" onclick="showWeek('week8')">Microkernels ★</a></li>
+            <li><a href="#w8-advanced" onclick="showWeek('week8')">Advanced topics (context)</a></li>
+            <li><a href="#w8-exam" onclick="showWeek('week8')">Exam takeaways</a></li>
+          </ul>
+        </li>
+
+        <li class="week">
+          <div class="week-label">Week 09 · Concurrency</div>
+          <a class="week-title" href="#" onclick="showWeek('week9'); return false;">Java Threads &amp; the Memory Model</a>
+          <ul class="subsection">
+            <li><a href="#w9-multithreading" onclick="showWeek('week9')">Multithreading basics</a></li>
+            <li><a href="#w9-creating" onclick="showWeek('week9')">Creating threads (3 ways)</a></li>
+            <li><a href="#w9-lifecycle" onclick="showWeek('week9')">Lifecycle: sleep, stop, join</a></li>
+            <li><a href="#w9-states" onclick="showWeek('week9')">JVM thread states</a></li>
+            <li><a href="#w9-memory" onclick="showWeek('week9')">Java Memory Model</a></li>
+            <li><a href="#w9-race" onclick="showWeek('week9')">Race conditions</a></li>
+            <li><a href="#w9-racetool" onclick="showWeek('week9')">🛠️ Race condition demo</a></li>
+            <li><a href="#w9-exam" onclick="showWeek('week9')">Exam takeaways</a></li>
+          </ul>
+        </li>
+
+        <li class="week">
+          <div class="week-label">Week 10 · Concurrency</div>
+          <a class="week-title" href="#" onclick="showWeek('week10'); return false;">Java Synchronization</a>
+          <ul class="subsection">
+            <li><a href="#w10-critical" onclick="showWeek('week10')">Critical sections &amp; mutex</a></li>
+            <li><a href="#w10-synchronized" onclick="showWeek('week10')">synchronized methods</a></li>
+            <li><a href="#w10-locks" onclick="showWeek('week10')">Locks &amp; intrinsic locks</a></li>
+            <li><a href="#w10-blocks" onclick="showWeek('week10')">synchronized blocks</a></li>
+            <li><a href="#w10-threadsafe" onclick="showWeek('week10')">Thread safety &amp; immutability</a></li>
+            <li><a href="#w10-visibility" onclick="showWeek('week10')">Visibility &amp; memory levels</a></li>
+            <li><a href="#w10-volatile" onclick="showWeek('week10')">volatile</a></li>
+            <li><a href="#w10-reorder" onclick="showWeek('week10')">Reordering &amp; happens-before</a></li>
+            <li><a href="#w10-exam" onclick="showWeek('week10')">Exam takeaways</a></li>
+          </ul>
+        </li>
+
+        <li class="week">
+          <div class="week-label">Week 11 · Concurrency</div>
+          <a class="week-title" href="#" onclick="showWeek('week11'); return false;">Deadlock &amp; Semaphores</a>
+          <ul class="subsection">
+            <li><a href="#w11-lock" onclick="showWeek('week11')">Lock interface &amp; ReentrantLock</a></li>
+            <li><a href="#w11-reentrancy" onclick="showWeek('week11')">Reentrancy</a></li>
+            <li><a href="#w11-vs" onclick="showWeek('week11')">synchronized vs ReentrantLock</a></li>
+            <li><a href="#w11-deadlock" onclick="showWeek('week11')">Deadlock &amp; the 4 conditions</a></li>
+            <li><a href="#w11-philosophers" onclick="showWeek('week11')">Dining Philosophers</a></li>
+            <li><a href="#w11-philtool" onclick="showWeek('week11')">🛠️ Philosophers demo</a></li>
+            <li><a href="#w11-avoidance" onclick="showWeek('week11')">Deadlock avoidance</a></li>
+            <li><a href="#w11-semaphores" onclick="showWeek('week11')">Semaphores</a></li>
+            <li><a href="#w11-exam" onclick="showWeek('week11')">Exam takeaways</a></li>
+          </ul>
+        </li>
+
+        <li class="week">
+          <div class="week-label">★ Revision</div>
+          <a class="week-title" href="#" onclick="showWeek('cram'); return false;" style="color:var(--accent-2);">Exam Cram Sheet</a>
+          <div class="placeholder">All key insights, one page</div>
+        </li>
+
+        <li class="week">
+          <div class="week-label">★ Practice</div>
+          <a class="week-title" href="#" onclick="showWeek('mock'); return false;" style="color:var(--accent-2);">Mock Exam</a>
+          <div class="placeholder">Random 10 from 120+ bank</div>
+        </li>
+      </ul>
+    </nav>
+  

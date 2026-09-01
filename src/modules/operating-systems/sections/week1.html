@@ -1,0 +1,353 @@
+<section id="week1" class="week-section active">
+
+      <div class="week-header">
+        <div class="week-eyebrow">Week 01 · Introductory Topics</div>
+        <h1>The Operating System</h1>
+        <div class="week-subtitle">a program for running programs</div>
+      </div>
+
+      <p>This week sets the scene: <em>what</em> an operating system is, <em>why</em> it exists, how to study it, and a preview of the five core concepts you'll use throughout the course. It's mostly conceptual — be patient with it, the practical stuff comes later.</p>
+
+      <!-- ===== What is an OS ===== -->
+      <h2 id="w1-what-is-os">What is an Operating System?</h2>
+
+      <p>You have a computer: a CPU, memory, a disk, a keyboard, a screen. You want to run multiple programs (Chrome, Spotify, VS Code) for one or more users, all sharing this hardware without stepping on each other's toes.</p>
+
+      <p>The OS is the <strong>middleman software</strong> that sits between your programs and the hardware. It shares the hardware fairly and safely, and hides the messy hardware details behind a clean, abstract interface.</p>
+
+      <div class="diagram">
+        ┌────────────────────────────────────────────┐<br>
+        │ &nbsp;<strong>Application software</strong> &nbsp;(Chrome, your code) &nbsp;&nbsp;│<br>
+        ├────────────────────────────────────────────┤<br>
+        │ &nbsp;<strong>Operating system</strong> &nbsp;(the middle of the stack)│<br>
+        ├────────────────────────────────────────────┤<br>
+        │ &nbsp;<strong>Hardware</strong> &nbsp;(CPU, memory, I/O devices) &nbsp;&nbsp;&nbsp;│<br>
+        └────────────────────────────────────────────┘
+        <div class="caption">The OS as the middle of the stack — apps above, hardware below.</div>
+      </div>
+
+      <h3>Two ways to describe it</h3>
+      <ul>
+        <li><strong>Intensionally</strong> (by what it does): a program for running programs.</li>
+        <li><strong>Extensionally</strong> (by where it sits): the software in the middle of the stack.</li>
+      </ul>
+
+      <div class="callout">
+        <div class="callout-label">Key phrase</div>
+        <strong>"Secure multiplexing of the computer's resources"</strong> — fancy way of saying <em>sharing one machine among many programs/users, safely</em>. <em>Multiplexing</em> = sharing ("making many out of one"). <em>Secure</em> = nobody can grab more than their share, or interfere with someone else's share.
+      </div>
+
+      <!-- ===== Jobs ===== -->
+      <h2 id="w1-jobs">What an OS actually handles</h2>
+
+      <p>Before OSes existed, a human operator did this job — loading programs by hand, scheduling jobs, etc. The 1951 EDSAC film shows this. The OS is essentially software that takes over the human operator's role. Specifically, it must handle:</p>
+
+      <table>
+        <tr><th>Job</th><th>What it means</th></tr>
+        <tr><td><strong>Loading</strong></td><td>Get programs from disk into memory so they can run. A program in execution is a <em>process</em>.</td></tr>
+        <tr><td><strong>Scheduling</strong></td><td>Decide which process/thread runs on which CPU, and when.</td></tr>
+        <tr><td><strong>Memory</strong></td><td>Manage where each program lives in RAM, how much it gets, and let programs request more.</td></tr>
+        <tr><td><strong>I/O</strong></td><td>Let programs talk to disk, network, keyboard, screen, etc., in a portable way.</td></tr>
+        <tr><td><strong>Security</strong></td><td>Stop programs and users from interfering with each other — but let them communicate when they want to.</td></tr>
+        <tr><td><strong>Control</strong></td><td>Let admins start/stop/debug things <em>while</em> the system is running.</td></tr>
+      </table>
+
+      <p>Modern OSes also add <strong>virtualisation</strong> (giving each process an illusory "virtual computer"), <strong>communication</strong> (programs talking to each other), and <strong>abstraction</strong> (e.g. giving you "files" instead of raw disk blocks).</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Virtualisation in one breath</div>
+        Each process thinks it has its own CPU(s), its own private memory, its own storage, its own network. The OS maintains this illusion. A program that <em>only</em> virtualises hardware (and does nothing else) is called a <strong>hypervisor</strong> or <strong>virtual machine monitor</strong>.
+      </div>
+
+      <!-- ===== Good OS ===== -->
+      <h2 id="w1-good-os">What makes an OS "good"?</h2>
+
+      <p>Seven qualities — and almost every pair of them <em>trades off against each other</em>:</p>
+
+      <table>
+        <tr><th>Quality</th><th>Meaning</th></tr>
+        <tr><td><strong>Efficiency</strong></td><td>Minimal overhead, maximum use of hardware</td></tr>
+        <tr><td><strong>Fairness</strong></td><td>Shares resources according to policy</td></tr>
+        <tr><td><strong>Reliability</strong></td><td>Keeps working when programs are buggy or hardware faulty</td></tr>
+        <tr><td><strong>Security</strong></td><td>Keeps working when users/programs are <em>adversarial</em></td></tr>
+        <tr><td><strong>Usability</strong></td><td>Helps humans get things done</td></tr>
+        <tr><td><strong>Abstraction</strong></td><td>Offers high-level, general services</td></tr>
+        <tr><td><strong>Simplicity</strong></td><td>Small, maintainable, auditable codebase</td></tr>
+      </table>
+
+      <div class="callout exam">
+        <div class="callout-label">Exam-style angle</div>
+        Be ready to <em>pick two</em> of these and explain the tension between them. E.g. <strong>Security vs Simplicity</strong>: more security checks = more code = harder to audit. <strong>Efficiency vs Fairness</strong>: greedy scheduling is fast but unfair. <strong>Abstraction vs Efficiency</strong>: nicer interfaces add layers.
+      </div>
+
+      <!-- ===== Concurrency ===== -->
+      <h2 id="w1-concurrency">Concurrency vs Parallelism</h2>
+
+      <p>This trips people up. They're not the same thing.</p>
+
+      <div class="mode-grid">
+        <div class="mode-box user" style="background:#e3eaf5; border-color:var(--accent);">
+          <h4>Concurrency</h4>
+          <p style="font-size:14px; margin:0 0 8px 0;">Multiple things <em>in progress</em>, not necessarily at the same instant.</p>
+          <p style="font-size:13px; margin:0; color:var(--ink-soft);">The OS rapidly switches between them (~10ms slices). They're "concurrent" because <strong>nobody controls the order of their interactions</strong>.</p>
+        </div>
+        <div class="mode-box kernel" style="background:#f5ede0; border-color:var(--accent-2);">
+          <h4>Parallelism</h4>
+          <p style="font-size:14px; margin:0 0 8px 0;">Multiple things <em>physically happening at the same instant</em>.</p>
+          <p style="font-size:13px; margin:0; color:var(--ink-soft);">Requires multiple cores / CPUs / devices. Real simultaneity.</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Rob Pike</div>
+        <em>"Concurrency is not parallelism, but it enables parallelism."</em>
+        <p style="margin: 10px 0 0 0; font-size: 14px;">The key insight: what makes things <strong>complicated</strong> is <em>interaction</em>, not physical timing. Two parallel processes that never interact are easy. Two threads on a single CPU that share memory are hard.</p>
+      </div>
+
+      <h3>Why OSes are inherently concurrent</h3>
+      <p>Even if no programs were running, the OS itself is concurrent because the <em>hardware</em> is parallel — CPU, disk, network card, keyboard, etc. are all active at once. The OS coordinates them using <strong>hardware interrupts</strong>: a device sends a signal to the CPU, causing it to jump into a special OS routine.</p>
+
+      <div class="diagram">
+                        ┌──────────┐<br>
+        &nbsp;&nbsp;┌────────│ &nbsp;<strong>CPU</strong> &nbsp;&nbsp;│────────┐<br>
+        &nbsp;&nbsp;│ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└────┬─────┘ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+        &nbsp;&nbsp;│ memory bus │ interrupt &nbsp;│ I/O bus<br>
+        &nbsp;&nbsp;▼ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▼<br>
+        [Memory] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│ &nbsp;&nbsp;[I/O Controller]<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│ &nbsp;│ &nbsp;│ &nbsp;│<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│ &nbsp;&nbsp;disk net kbd printer<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[device says "I'm done!" → interrupt fires → CPU jumps into OS]
+        <div class="caption">A modern computer is a parallel system. The OS coordinates concurrent hardware via interrupts.</div>
+      </div>
+
+      <!-- ===== Five Core Concepts ===== -->
+      <h2 id="w1-five">The Five Core Concepts</h2>
+
+      <p>These are the foundation everything else builds on. Memorise them.</p>
+
+      <div class="concept-grid">
+        <div class="concept-card" data-num="1">
+          <h3>Address Space</h3>
+          <p>Memory is a giant list of numbered boxes. Each number is an <strong>address</strong>. The whole set of addresses for one process is its <strong>address space</strong>. Pointers (and Java references!) are just addresses.</p>
+        </div>
+
+        <div class="concept-card" data-num="2">
+          <h3>Loading a Program</h3>
+          <p>A program sits on disk as a file. To run it, the OS copies its parts into memory and sets up an address space. A running program is called a <strong>process</strong>.</p>
+        </div>
+
+        <div class="concept-card" data-num="3">
+          <h3>User vs System (Kernel) Mode</h3>
+          <p>The CPU has two modes. In <strong>user mode</strong>, dangerous instructions are blocked. In <strong>kernel mode</strong>, the OS runs and everything is permitted. To switch, you use a software interrupt — a.k.a. a system call.</p>
+        </div>
+
+        <div class="concept-card" data-num="4">
+          <h3>Limited Direct Execution</h3>
+          <p>Your program runs <strong>directly on the real CPU at full speed</strong>, but with two limits: (a) it runs in user mode, so it can't do dangerous things; (b) periodic timer interrupts force a jump back into the OS so it can regain control.</p>
+        </div>
+
+        <div class="concept-card" data-num="5">
+          <h3>System Calls</h3>
+          <p>How a program <strong>asks the OS</strong> to do something privileged (read a file, send data, fork a process). Looks like a normal function call, but uses a special CPU instruction that switches mode and jumps to OS code identified by a number, not an address.</p>
+        </div>
+      </div>
+
+      <h3>Address space: visualised</h3>
+
+      <div class="addr-space">
+        <div class="addr-row"><div class="addr-label">high</div><div class="addr-content stack">Stack<span class="desc">grows down ↓</span></div></div>
+        <div class="addr-row"><div class="addr-label">↕</div><div class="addr-content free">free space</div></div>
+        <div class="addr-row"><div class="addr-label">↑</div><div class="addr-content heap">Heap<span class="desc">grows up ↑</span></div></div>
+        <div class="addr-row"><div class="addr-label">·</div><div class="addr-content data">Data segment<span class="desc">globals, statics</span></div></div>
+        <div class="addr-row"><div class="addr-label">low</div><div class="addr-content text">Text segment<span class="desc">the code itself</span></div></div>
+      </div>
+      <p style="text-align:center; font-style:italic; color:var(--ink-muted); font-size:13px;">Standard layout of a process's address space in memory.</p>
+
+      <h3>User mode vs Kernel mode</h3>
+
+      <div class="mode-grid">
+        <div class="mode-box user">
+          <h4>🟢 User Mode</h4>
+          <ul>
+            <li>Your apps run here</li>
+            <li>CPU blocks dangerous instructions</li>
+            <li>Can't directly touch hardware</li>
+            <li>Can't access other processes' memory</li>
+            <li>Limited to your own address space</li>
+          </ul>
+        </div>
+        <div class="mode-box kernel">
+          <h4>🔴 Kernel Mode</h4>
+          <ul>
+            <li>The OS itself runs here</li>
+            <li>CPU allows everything</li>
+            <li>Can talk to any hardware</li>
+            <li>Can access any memory</li>
+            <li>Full privileges</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Limited direct execution: the two tricks</h3>
+
+      <div class="flow">
+        <div class="flow-step">
+          <h5>Trick 1 · User Mode</h5>
+          <p>CPU blocks dangerous instructions, forcing your program to ask the OS politely via system calls.</p>
+        </div>
+        <div class="flow-plus">+</div>
+        <div class="flow-step">
+          <h5>Trick 2 · Interrupts</h5>
+          <p>A hardware timer fires every ~10ms, forcing a jump back into OS code regardless of what your program is doing.</p>
+        </div>
+      </div>
+      <p style="text-align:center; font-style:italic; color:var(--ink-muted);">Result: programs run at native hardware speed, but the OS always gets the keys back.</p>
+
+      <h3>System calls: the journey</h3>
+
+      <div class="code-block">
+<span style="color:#7eb892;">// Your program (user mode)</span>
+read(fd, buffer, 100);   <span style="color:#7eb892;">// looks like a function call...</span>
+                         <span style="color:#7eb892;">// ...but actually executes a special instruction:</span>
+                         <span style="color:#e89b6d;">syscall #3</span>  <span style="color:#7eb892;">// "do syscall number 3 (read)"</span>
+
+<span style="color:#7eb892;">// Then, magically:</span>
+<span style="color:#999;">  1.</span> CPU switches: <span style="color:#7eb892;">user mode</span> → <span style="color:#e89b6d;">kernel mode</span>
+<span style="color:#999;">  2.</span> Maybe switch address space
+<span style="color:#999;">  3.</span> Jump to OS routine (looked up by NUMBER, not address)
+<span style="color:#999;">  4.</span> OS does the privileged work (reads from disk, etc.)
+<span style="color:#999;">  5.</span> CPU switches back: <span style="color:#e89b6d;">kernel mode</span> → <span style="color:#7eb892;">user mode</span>
+<span style="color:#999;">  6.</span> Returns to your code with the result
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why a number, not an address?</div>
+        Because the OS code is in a separate, protected place — your program isn't allowed to know where exactly it lives. The number is a stable ID into a table the OS controls. This also means the OS can change its internal layout without breaking your programs.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">📘 The trap table (OSTEP Ch.6)</div>
+        How does the hardware know <em>which</em> OS code to jump to on a trap? At <strong>boot time</strong> (in kernel mode), the OS sets up a <strong>trap table</strong> — telling the hardware the address of each handler (syscall handler, timer-interrupt handler, keyboard-interrupt handler, etc.). The hardware remembers these until reboot. <br><br>
+        The instruction that installs the trap table is itself <strong>privileged</strong> — if a user program could set its own trap table, it could point the "syscall handler" at its own code and take over the machine. (Worth pondering: this is exactly the kind of Very Bad Idea the user/kernel split exists to prevent.)
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">📘 Why does a system call look like a normal function call?</div>
+        In your C/C++ code, <code>open()</code> or <code>read()</code> looks exactly like an ordinary function call — so how does the system know it's special? Because it <em>is</em> a real procedure call... into the <strong>C library</strong>. Hidden inside that library function is the actual <strong>trap instruction</strong>. The library follows an agreed <em>calling convention</em> with the kernel: it places the arguments and the <strong>system-call number</strong> in known registers/stack locations, then executes the trap. That's why <em>you</em> never have to write assembly to make a syscall — somebody already wrote that stub for you.
+      </div>
+
+      <h3>📘 Regaining control: cooperative vs non-cooperative (OSTEP)</h3>
+      <p>Here's a subtle problem the slides gloss over: if a process is running on the CPU, then by definition <strong>the OS is not running</strong>. So how can the OS ever take back control to switch processes? Two approaches:</p>
+
+      <div class="compare-2">
+        <div class="mode-box user" style="background:#ecf4e6; border-color:var(--accent-3);">
+          <h4>Cooperative</h4>
+          <p style="font-size:13px; margin:0;">The OS <em>trusts</em> processes to give up the CPU voluntarily — they do so naturally whenever they make a system call (or hit an illegal operation that traps). Some systems add an explicit <code>yield()</code> call. <strong>Flaw:</strong> a process stuck in an infinite loop that makes no syscalls never gives control back — your only recourse is to <em>reboot</em>. (Old Mac &amp; Xerox Alto worked this way.)</p>
+        </div>
+        <div class="mode-box kernel" style="background:#fbeee4; border-color:var(--accent-2);">
+          <h4>Non-cooperative</h4>
+          <p style="font-size:13px; margin:0;">The hardware helps: a <strong>timer interrupt</strong> is programmed at boot to fire every few milliseconds. When it fires, the running process is halted and a pre-set OS handler runs — so the OS <em>always</em> regains control, no matter how badly a process behaves. This is what makes <strong>preemptive</strong> scheduling possible.</p>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">📘 Reboot is a legitimate tool</div>
+        OSTEP makes a surprising point: rebooting isn't just an ugly hack. It moves software back to a known, well-tested state, reclaims leaked resources (like memory), and is easy to automate. Large-scale internet services <em>deliberately</em> reboot machines periodically for exactly these reasons.
+      </div>
+
+      <h3>How they all fit together</h3>
+
+      <div class="diagram">
+        <strong>1.</strong> You type <code>./hello</code> in a terminal.<br>
+        <strong>2.</strong> Shell makes a <strong>system call</strong> [5] asking the OS to start a new process.<br>
+        <strong>3.</strong> OS <strong>loads the program</strong> [2] from disk into a fresh <strong>address space</strong> [1].<br>
+        <strong>4.</strong> OS sets the CPU to <strong>user mode</strong> [3] and jumps to your code — this is <strong>limited direct execution</strong> [4].<br>
+        <strong>5.</strong> Your program runs at full hardware speed... until it needs to print.<br>
+        <strong>6.</strong> <code>printf()</code> triggers a <strong>system call</strong> [5] → CPU flips to <strong>kernel mode</strong> [3] → OS writes to screen → flips back.<br>
+        <strong>7.</strong> Eventually a timer interrupt fires → CPU jumps into OS → OS may switch to another process.
+        <div class="caption">A complete trip through all five concepts in a single program execution.</div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">📘 The two-phase LDE protocol (OSTEP) — exam-ready summary</div>
+        <strong>Phase 1 — at boot (kernel mode):</strong> OS initialises the trap table; hardware remembers handler locations. OS starts the timer.<br>
+        <strong>Phase 2 — running a process:</strong> OS sets up the process (process-list entry, memory, kernel stack), then uses <code>return-from-trap</code> to drop to user mode and jump into the code. The process runs directly on hardware until it either (a) makes a syscall → <code>trap</code> into OS → handle → <code>return-from-trap</code> back, or (b) gets hit by a timer interrupt → OS regains control → maybe context-switch to another process.
+      </div>
+
+      <!-- ===== Stack Recap ===== -->
+      <h2 id="w1-stack">Stack Recap (bonus)</h2>
+
+      <p>The slides include a stack refresher because system calls and procedure calls rely on it.</p>
+
+      <ul>
+        <li>A <strong>stack</strong> is a memory region used like a stack of plates: <strong>last in, first out</strong>.</li>
+        <li>The <strong>stack pointer (SP)</strong> is a special CPU register holding the address of the top.</li>
+        <li><strong>Push</strong> = add a value on top, SP moves.</li>
+        <li><strong>Pop</strong> = remove the top value, SP moves back.</li>
+        <li>Programs use it to save things temporarily during function calls: return addresses, local variables, saved registers.</li>
+      </ul>
+
+      <div class="stack-viz">
+        <div class="stack-cell"><div class="addr">0x0105</div><div class="val">—</div><div class="ptr"></div></div>
+        <div class="stack-cell"><div class="addr">0x0104</div><div class="val">—</div><div class="ptr"></div></div>
+        <div class="stack-cell"><div class="addr">0x0103</div><div class="val">—</div><div class="ptr"></div></div>
+        <div class="stack-cell sp"><div class="addr">0x0102</div><div class="val">—</div><div class="ptr">← SP</div></div>
+        <div class="stack-cell filled"><div class="addr">0x0101</div><div class="val">0x2A</div><div class="ptr">pushed 42</div></div>
+        <div class="stack-cell filled"><div class="addr">0x0100</div><div class="val">0x33</div><div class="ptr">pushed earlier</div></div>
+        <p style="margin-top:16px; font-family:'Fraunces',serif; font-style:italic; color:var(--ink-muted); font-size:13px;">After two pushes. SP points to the next free slot.</p>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Why store return addresses on the stack?</div>
+        Old machines like MARIE stored the return address <em>inside</em> the function's code. This breaks recursion — if a function calls itself, the second call overwrites the first's return address. The stack handles nested/recursive calls naturally: each call gets its own frame on top, and they unwind in reverse order. Early machines didn't bother because they lacked hardware stack support and recursion was uncommon.
+      </div>
+
+      <!-- ===== STACK VISUALISER ===== -->
+      <h3 id="w1-stacktool">🛠️ Interactive: Stack Push/Pop</h3>
+      <p>Get a feel for last-in-first-out. Push and pop values manually, or watch the recursive triangular-number example (from the slides) push a frame per call and unwind back.</p>
+
+      <div class="tool">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Stack Visualiser</h3>
+        </div>
+        <div class="tool-desc">The stack pointer (SP) always marks the top. Push adds on top; pop removes the most recent.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>Value to push</label>
+            <input type="text" id="stk-val" value="42" style="width:90px;">
+          </div>
+          <button class="tool-btn" onclick="stkPush()">Push ↓</button>
+          <button class="tool-btn secondary" onclick="stkPop()">Pop ↑</button>
+          <button class="tool-btn danger" onclick="stkClear()">Clear</button>
+          <button class="tool-btn" style="background:var(--accent-3);" onclick="stkDemo()">▶ Run tri(3) demo</button>
+        </div>
+
+        <div id="stk-viz" class="stack-tool-viz"></div>
+        <div id="stk-log" class="stack-log"></div>
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="w1-exam">Exam-style takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 1</div>
+        <ol>
+          <li>Define <strong>"secure multiplexing"</strong> and explain why both words matter.</li>
+          <li><strong>Concurrency vs parallelism</strong> — define each, give Rob Pike's framing.</li>
+          <li>The <strong>five core concepts</strong> — one-sentence definitions, plus how they connect.</li>
+          <li>Pick two <strong>OS quality tradeoffs</strong> (e.g. security vs simplicity) and discuss tension.</li>
+          <li><strong>Limited direct execution</strong> — THE key insight. Explain how OSes differ from JVMs. Know the two "limits" (user mode + interrupts).</li>
+          <li>Why <strong>system calls use numbers, not addresses</strong> — security and abstraction.</li>
+          <li>📘 The <strong>trap table</strong> — set at boot, why installing it is privileged.</li>
+          <li>📘 <strong>Cooperative vs non-cooperative</strong> control — and why the timer interrupt is essential for preemption.</li>
+          <li>📘 The <strong>two-phase LDE protocol</strong> (boot phase + run phase) — be able to sketch it.</li>
+          <li>Why <strong>return addresses go on the stack</strong> — recursion / nested calls.</li>
+        </ol>
+      </div>
+
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 1 notes. Send Week 2 slides whenever you're ready.</p>
+
+    </section>

@@ -1,0 +1,129 @@
+<section id="w9-bias" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 09 · Part 3 · AI Ethics</div>
+        <h1>Discrimination &amp; Bias</h1>
+        <div class="week-subtitle">three definitions, four examples, five causes</div>
+      </div>
+      <!-- ===== DEFINITIONS ===== -->
+      <h2 id="bi-def">The three definitions</h2>
+      <div class="callout exam">
+        <div class="callout-label">Direct and indirect discrimination — learn both names for each</div>
+        <table class="cmp-table">
+          <tr><th></th><th>Direct discrimination<br><span style="font-weight:400; opacity:.75;">“disparate treatment”</span></th><th>Indirect discrimination<br><span style="font-weight:400; opacity:.75;">“disparate impact”</span></th></tr>
+          <tr><td><strong>Definition</strong></td>
+            <td>when somebody is <strong>disadvantaged because of a personal attribute</strong> (e.g. age, gender, race)</td>
+            <td>when people with a certain personal attribute <strong>are disadvantaged even though the attribute is not explicitly considered</strong> in decisions</td></tr>
+          <tr><td><strong>Is the attribute an input?</strong></td><td>Yes</td><td><strong>No</strong> — and this is the point</td></tr>
+          <tr><td><strong>Example</strong></td><td>a model that takes race as a feature and scores accordingly</td><td>a model that takes postcode, which correlates with race</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>The exam-relevant consequence:</strong> deleting the protected attribute from your feature set does <em>not</em> make a system fair. It rules out direct discrimination and leaves indirect discrimination completely untouched — and indirect is the kind almost every real AI case turns out to be.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Bias, in the context of AI ethics</div>
+        The lecture gives it two senses, and you should be able to say which you mean:
+        <ul style="margin:10px 0 0 0;">
+          <li><strong>Imbalance or tendency in data</strong> — the <strong>input</strong> sense.</li>
+          <li><strong>Direct or indirect discrimination</strong> — the <strong>output</strong> sense.</li>
+        </ul>
+        <p style="margin:12px 0 0 0;">These are connected but not the same, and conflating them is a common source of muddle: <strong>imbalanced data does not automatically produce discrimination, and discrimination can arise from perfectly balanced data</strong> (via the label, the objective, or the metric). The five causes on the next slide are precisely the routes from one to the other.</p>
+      </div>
+      <!-- ===== EXAMPLES ===== -->
+      <h2 id="bi-ex">Four documented examples</h2>
+      <div class="callout">
+        <div class="callout-label">1 · Recidivism prediction — ProPublica, “Machine Bias”</div>
+        <strong>The algorithm was more likely to mistakenly predict high-risk on Black than on White defendants.</strong>
+        <p style="margin:10px 0 0 0;">Read the sentence carefully, because the precision matters: the claim is about <strong>mistaken</strong> high-risk predictions — a difference in the <em>false positive rate</em> between groups, not simply a difference in scores. Two groups can receive different score distributions for entirely legitimate reasons; being <em>wrongly</em> flagged at different rates is harder to defend.</p>
+        <p style="margin:10px 0 0 0;">In the taxonomy: an <strong>allocative</strong> harm (distribution of opportunities — liberty, bail), arising from <strong>measurement bias</strong> if the label is re-arrest, and it is <strong>indirect</strong> discrimination since race is not an input.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">2 · Generative models — GPT-3 and DALL·E</div>
+        The slide shows outputs from both, with the caption <strong>“All white male.”</strong>
+        <p style="margin:10px 0 0 0;">This is a <strong>representational</strong> harm rather than an allocative one — nobody is denied a resource. <strong>Stereotyping</strong> and <strong>erasing</strong> are the relevant sub-types. It is worth noticing that this failure has no victim who can point to a decision made about them, which is exactly why the reparation list in Part 2 works so poorly for it.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">3 · Pedestrian detection — Brandao (2019)</div>
+        <strong>“Age and gender bias in pedestrian detection algorithms.”</strong> The slide shows <strong>miss rates</strong> differing by age and gender group.
+        <p style="margin:10px 0 0 0;">A <strong>quality-of-service</strong> allocative harm with an obvious <strong>physical safety</strong> consequence — a detector that misses children more often is a safety harm, not merely an accuracy footnote. This is the clearest case in the lecture of one harm category producing another.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">4 · Gender classification — Buolamwini &amp; Gebru, “Gender Shades” (2018)</div>
+        <p style="margin:0 0 10px 0;">The slide reproduces the error-rate table across <strong>Fitzpatrick skin types I–VI</strong> for three commercial systems:</p>
+        <table class="cmp-table">
+          <tr><th>system</th><th>Type I</th><th>Type II</th><th>Type III</th><th>Type IV</th><th>Type V</th><th>Type VI</th></tr>
+          <tr><td><strong>Microsoft</strong></td><td>1.7%</td><td>1.1%</td><td>3.3%</td><td><strong>0%</strong></td><td>23.2%</td><td>25.0%</td></tr>
+          <tr><td><strong>Face++</strong></td><td>11.9%</td><td>9.7%</td><td>8.2%</td><td>13.9%</td><td>32.4%</td><td><strong style="color:var(--accent-2);">46.5%</strong></td></tr>
+          <tr><td><strong>IBM</strong></td><td>5.1%</td><td>7.4%</td><td>8.2%</td><td>8.3%</td><td>33.3%</td><td><strong style="color:var(--accent-2);">46.8%</strong></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>What to take from the numbers.</strong> Two of the three systems are close to a <strong>coin flip</strong> on the darkest skin type — 46.5% and 46.8% error on a <em>binary</em> classification. And the best system goes from <strong>0% error on Type IV to 25% on Type VI</strong>. No single overall accuracy figure would have shown any of this, which is the whole argument for <strong>disaggregated evaluation</strong>.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why "intersectional" is in the paper's title</div>
+        The disparity is far larger for <strong>combinations</strong> of attributes than for either attribute alone. A system can look nearly even across gender overall and nearly even across skin type overall, and still fail catastrophically for the group at the intersection of both. <strong>Checking one attribute at a time is not enough</strong> — and this is a good, specific point to make in an answer about evaluation.
+        <p style="margin:10px 0 0 0;">Feed these numbers into the <a href="#mt-ftool" onclick="showWeek('w9-mitig')">fairness-function tool</a> to see what different objectives do with them.</p>
+      </div>
+      <!-- ===== CAUSES ===== -->
+      <h2 id="bi-cause">The five causes of discrimination by AI</h2>
+      <div class="callout exam">
+        <div class="callout-label">Branch 1 — the risk was not anticipated, tested, or alleviated</div>
+        <table class="cmp-table">
+          <tr><th>cause</th><th>the lecture's description</th><th>developer's fault?</th></tr>
+          <tr><td><strong>World bias</strong></td><td>world distribution problem</td><td><span style="color:var(--accent-3);">no</span></td></tr>
+          <tr><td><strong>Representation bias</strong></td><td>data collection problem</td><td><strong style="color:var(--accent-2);">★ yes</strong></td></tr>
+          <tr><td><strong>Measurement bias</strong></td><td>wrong categorization of people, or wrong measurements</td><td><strong style="color:var(--accent-2);">★ yes</strong></td></tr>
+          <tr><td><strong>Algorithm bias</strong></td><td>wrong choice of algorithm</td><td><strong style="color:var(--accent-2);">★ yes</strong></td></tr>
+          <tr><td><strong>Evaluation bias</strong></td><td>wrong choice of evaluation metric or test set</td><td><strong style="color:var(--accent-2);">★ yes</strong></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Four of the five carry the developer's-fault marker.</strong> Only <strong>world bias</strong> does not — because the data is an accurate record of an unequal world, so no amount of better collection fixes it. That single exception is an easy thing to be asked about, and the answer is not “so it's nobody's fault”: deploying a system that reproduces world bias is still a decision somebody made.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Branch 2 — the risk is obvious, the task is problematic</div>
+        <table class="cmp-table">
+          <tr><th>failure</th><th>developer's fault?</th></tr>
+          <tr><td>Ethics board does not flag a problem</td><td><span style="color:var(--ink-muted);">—</span></td></tr>
+          <tr><td>Developer doesn't oppose building it, doesn't report, doesn't blow the whistle</td><td><strong style="color:var(--accent-2);">★ yes</strong></td></tr>
+          <tr><td>Management makes the decision to deploy</td><td><span style="color:var(--ink-muted);">—</span></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">This is the branch for the right-hand column of Part 1 — cases where the question was <em>“should we even build this?”</em> and the answer was no. <strong>The developer's fault here is not a technical failure but a failure to object</strong>, which is why <strong>whistleblowing</strong> appears in the mitigation list in Part 4.</p>
+      </div>
+      <!-- ===== TOOL ===== -->
+      <h2 id="bi-tool">Tool · Where bias enters</h2>
+      <div class="tool" data-run="runBias">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>The pipeline, and a diagnosis drill</h3></div>
+        <p class="tool-desc">The <strong>pipeline</strong> tab lays the five causes out along the stages they arise in — the world, data collection, measurement, the algorithm, evaluation — with each one's fault marker, an example and its usual mitigation. <strong>★ diagnose a case</strong> gives you something that went wrong and asks which cause the lecture would name. The pairs that are easy to confuse — representation vs evaluation, algorithm vs evaluation — are deliberately both in the bank.</p>
+        <div class="tool-controls" style="margin-top:4px;"><button class="tool-btn" onclick="runBias()">Open</button></div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="bi-output" class="tool-output"></div>
+      </div>
+      <!-- ===== WHO DISCOVERS ===== -->
+      <h2 id="bi-who">Who is discovering these issues</h2>
+      <div class="callout exam">
+        <div class="callout-label">The slide, in full</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Women</strong></li>
+          <li><strong>Black scholars</strong></li>
+          <li><strong>LGBTQ</strong></li>
+          <li>…</li>
+        </ul>
+        <p style="margin:12px 0 0 0;">→ <strong>Importance of lived experience &amp; diversity.</strong></p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why this slide sits here rather than in the mitigation section</div>
+        Because it is an <em>empirical claim about how these findings actually got made</em>, not a recommendation. Gender Shades was authored by Buolamwini and Gebru; the disparities had been sitting in deployed commercial products, measurable by anyone, for years before someone thought to break the numbers down that way.
+        <p style="margin:10px 0 0 0;">The argument it supports is a practical one: <strong>you cannot test for a harm you have not imagined</strong>, and what you imagine is bounded by who is in the room. That is why <strong>team diversity</strong> and <strong>participatory design</strong> appear as mitigations in Part 4 — they are not gestures at fairness, they are proposed as <em>error-detection mechanisms</em>. Making that argument explicitly is worth more than asserting that diversity is good.</p>
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="bi-key">Exam takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">What to have ready</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Direct discrimination = disparate treatment</strong> — disadvantaged <em>because of</em> a personal attribute. <strong>Indirect = disparate impact</strong> — disadvantaged even though the attribute is <em>not explicitly considered</em>.</li>
+          <li><strong>Removing the protected attribute does not prevent indirect discrimination</strong>, and most real cases are indirect.</li>
+          <li><strong>Bias has an input sense</strong> (imbalance or tendency in data) <strong>and an output sense</strong> (direct or indirect discrimination).</li>
+          <li><strong>The five causes:</strong> world · representation · measurement · algorithm · evaluation. <strong>All but world bias are marked the developer's fault.</strong></li>
+          <li><strong>Second branch:</strong> obvious risk, problematic task — ethics board, developer not objecting/whistleblowing (★), management deploying.</li>
+          <li><strong>The examples:</strong> ProPublica recidivism (mistaken high-risk more often for Black defendants) · GPT-3 / DALL·E (“all white male”) · Brandao 2019 pedestrian miss rates · Buolamwini &amp; Gebru 2018 Gender Shades (up to <strong>46.8%</strong> error on the darkest skin type against near-zero on the lightest).</li>
+          <li><strong>Lived experience and diversity</strong> — the people finding these problems are disproportionately from the groups affected, which is an argument for diversity as error detection.</li>
+        </ul>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Part 4 is what to do about all of it.</p>
+    </section>

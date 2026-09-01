@@ -1,0 +1,238 @@
+<section id="week11" class="week-section">
+
+      <div class="week-header">
+        <div class="week-eyebrow">Week 11 · Concurrency (Ian's material) · Final week</div>
+        <h1>Deadlock &amp; Semaphores</h1>
+        <div class="week-subtitle">when locks turn against you — and finer-grained control</div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">The final piece</div>
+        Week 10 used <code>synchronized</code> to fix races. But locking itself can cause new problems — most notably <strong>deadlock</strong>. This week covers explicit locks (the <code>Lock</code> interface / <code>ReentrantLock</code>), the four conditions for deadlock, the famous Dining Philosophers problem, how to avoid deadlock, and <strong>semaphores</strong> for when you want to allow <em>several</em> threads through, not just one.
+      </div>
+
+      <!-- ===== Lock interface ===== -->
+      <h2 id="w11-lock">The Lock interface &amp; ReentrantLock</h2>
+
+      <p><code>synchronized</code> is convenient but a <strong>blunt tool</strong> — it can only lock entire methods or blocks <em>within</em> a method, and the lock is released automatically. Java also offers explicit locks implementing the <strong>Lock interface</strong>, which you must create, lock, and unlock yourself. That's the price for more flexibility. The basic implementation is <code>ReentrantLock</code>:</p>
+
+      <div class="code-block">
+private Lock lock = new ReentrantLock();
+
+private void addToCounter(int amount) {
+    if (amount &gt;= 0) {
+        try {
+            <span style="color:#e89b6d;">lock.lock();</span>      <span style="color:#7eb892;">// acquire — open the critical section</span>
+            counter += amount;
+        } finally {
+            <span style="color:#e89b6d;">lock.unlock();</span>    <span style="color:#7eb892;">// ALWAYS release, even on exception</span>
+        }
+    }
+}
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why try-finally?</div>
+        Unlike <code>synchronized</code> (which releases automatically when the block exits, even via exception), an explicit lock will <strong>stay locked forever</strong> if you forget to unlock — e.g. if the critical section throws. Putting <code>unlock()</code> in a <code>finally</code> block guarantees release no matter what. The lock is now just an <em>object</em>, decoupled from any particular method or block.
+      </div>
+
+      <!-- ===== Reentrancy ===== -->
+      <h2 id="w11-reentrancy">Reentrancy</h2>
+
+      <p>A lock is <strong>reentrant</strong> if a thread that already holds it can acquire it <em>again</em> without blocking. Java's <code>synchronized</code> blocks/methods are reentrant, and so is <code>ReentrantLock</code> (hence the name).</p>
+
+      <div class="code-block">
+public synchronized void f() {
+    g();   <span style="color:#7eb892;">// calls another synchronized method on the SAME object</span>
+}
+public synchronized void g() { }
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Why reentrancy is essential</div>
+        Consider a thread calling synchronized <code>f()</code> on object A, which calls synchronized <code>g()</code> also on A. The thread already holds A's lock from entering <code>f()</code>. <strong>Without reentrancy, it would block waiting for a lock it already holds</strong> — an instant self-deadlock. Reentrancy makes nested synchronized calls on the same object possible.
+      </div>
+
+      <!-- ===== synchronized vs ReentrantLock ===== -->
+      <h2 id="w11-vs">synchronized vs ReentrantLock</h2>
+
+      <p>They behave similarly, so when would you choose the explicit lock? <code>ReentrantLock</code> offers several things <code>synchronized</code> can't:</p>
+
+      <table>
+        <tr><th>Feature</th><th>synchronized</th><th>ReentrantLock</th></tr>
+        <tr><td>Scope</td><td>One method/block only</td><td>Can lock &amp; unlock across <em>different</em> methods</td></tr>
+        <tr><td>Fairness</td><td>No fairness guarantee</td><td>Can grant access in arrival order</td></tr>
+        <tr><td>Acquisition policy</td><td>Block until acquired</td><td><code>tryLock()</code> (give up immediately), timed, or interruptible</td></tr>
+        <tr><td>Introspection</td><td>None</td><td>Can query the waiting list, etc.</td></tr>
+        <tr><td>Release</td><td>Automatic</td><td>Manual (you must <code>unlock()</code>)</td></tr>
+      </table>
+
+      <!-- ===== Deadlock ===== -->
+      <h2 id="w11-deadlock">Deadlock &amp; the four conditions</h2>
+
+      <p>If you only lock within one object you're usually fine. But realistic programs have <strong>multiple threads acquiring multiple locks</strong>, and if there are dependencies, you can get <strong>deadlock</strong>: thread A holds lock X and needs Y; thread B holds Y and needs X. Both are stuck forever, each waiting on a lock the other holds.</p>
+
+      <div class="dl-cycle">
+        <div class="dl-thread">Thread A<br><span class="dl-holds">holds X ✓</span><br><span class="dl-needs">needs Y ✗</span></div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <div class="dl-lockbox">Lock X</div>
+          <div class="dl-lockbox">Lock Y</div>
+        </div>
+        <div class="dl-thread">Thread B<br><span class="dl-holds">holds Y ✓</span><br><span class="dl-needs">needs X ✗</span></div>
+      </div>
+      <p style="text-align:center; font-style:italic; color:var(--ink-muted); font-size:13px;">A holds X &amp; wants Y; B holds Y &amp; wants X. Neither will release first → circular wait → deadlock.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">The four conditions for deadlock — ALL must hold</div>
+        <div class="dl-conditions">
+          <div class="dl-cond"><h4><span class="dl-num">1</span>Mutual Exclusion</h4><p>Resources are held in a non-shareable way — i.e. critical sections exist.</p></div>
+          <div class="dl-cond"><h4><span class="dl-num">2</span>Hold and Wait</h4><p>A thread holds one resource while waiting to acquire others.</p></div>
+          <div class="dl-cond"><h4><span class="dl-num">3</span>No Preemption</h4><p>A resource is only released voluntarily by the thread holding it — it can't be forcibly taken.</p></div>
+          <div class="dl-cond"><h4><span class="dl-num">4</span>Circular Wait</h4><p>A cycle of threads exists, each waiting on a resource the next one holds.</p></div>
+        </div>
+        <p style="margin:10px 0 0 0;"><strong>Break any ONE of these four and deadlock cannot occur.</strong> That's the key to every avoidance strategy.</p>
+      </div>
+
+      <h3>A realistic example: bank transfers</h3>
+      <p>Two threads transfer money between accounts, locking <code>from</code> then <code>to</code>:</p>
+      <div class="code-block">
+<span style="color:#7eb892;">// Thread 1: transfer(sid, doris, 200)   → locks Sid,  then Doris</span>
+<span style="color:#7eb892;">// Thread 2: transfer(doris, sid, 300)   → locks Doris, then Sid</span>
+public static void transfer(BankAccount from, BankAccount to, double amount) {
+    synchronized (from) {
+        synchronized (to) {
+            from.withdraw(amount);
+            to.deposit(amount);
+        }
+    }
+}
+      </div>
+      <p>The threads call <code>transfer</code> with accounts in <strong>different orders</strong>. Thread 1 grabs Sid's lock; Thread 2 grabs Doris's lock — then each needs the lock the <em>other</em> holds. Deadlock. (All four conditions are present, including the fatal circular wait.)</p>
+
+      <!-- ===== Dining Philosophers ===== -->
+      <h2 id="w11-philosophers">The Dining Philosophers problem</h2>
+
+      <p>The classic illustration. <strong>Five philosophers</strong> sit around a table, alternating between thinking and eating. There are <strong>five forks</strong>, one between each pair. To eat, a philosopher needs <em>both</em> adjacent forks. They're selfish and uncoordinated: each picks up its <strong>left fork, then its right fork</strong>, eats, then puts both down.</p>
+
+      <div class="code-block">
+public void run() {
+    while (true) {
+        act("is thinking");
+        synchronized (fork1) {            <span style="color:#7eb892;">// pick up LEFT fork</span>
+            synchronized (fork2) {        <span style="color:#7eb892;">// pick up RIGHT fork</span>
+                act("is eating");
+            }
+        }
+    }
+}
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Why it deadlocks</div>
+        If all five philosophers get hungry at once and each grabs its <strong>left fork simultaneously</strong>, every philosopher now holds one fork and waits forever for the right one (held by their neighbour). That's a perfect <strong>circular wait</strong> — all five waiting on the philosopher to their right. Everyone starves. The program <em>might</em> run a while without deadlock, but it's never guaranteed.
+      </div>
+
+      <!-- ===== PHILOSOPHERS TOOL ===== -->
+      <h3 id="w11-philtool">🛠️ Interactive: Dining Philosophers</h3>
+      <p>Watch all five philosophers reach for their left fork. In <strong>naive</strong> mode they deadlock (circular wait). Flip to the <strong>fixed</strong> mode — where the last philosopher reaches right-first — and the cycle breaks, so someone can always eat.</p>
+
+      <div class="tool">
+        <div class="tool-header">
+          <span class="tool-badge">Concurrency demo</span>
+          <h3>Dining Philosophers Simulator</h3>
+        </div>
+        <div class="tool-desc">5 philosophers, 5 forks. Each needs both neighbouring forks to eat. The grab order determines whether they deadlock.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>Fork-grab strategy</label>
+            <select id="phil-mode">
+              <option value="naive">Naive (all grab left first)</option>
+              <option value="fixed">Fixed (last grabs right first)</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runPhil()">Everyone grabs left fork ▶</button>
+        </div>
+
+        <div id="phil-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== Avoidance ===== -->
+      <h2 id="w11-avoidance">Deadlock avoidance</h2>
+
+      <p>The best approach is to <strong>design so deadlock can't occur</strong> — by breaking one of the four conditions. (You can also do <em>deadlock detection</em>: spot it after it happens and break it, but prevention is cleaner.) Since you usually can't eliminate mutual exclusion, the most practical target is the <strong>circular wait</strong>.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">Lock ordering — the key technique</div>
+        Impose a <strong>fixed global order</strong> in which locks are always acquired, based on some property of the objects. If everyone acquires in the same order, no cycle can form. For the bank example: sort by account <code>id</code> before locking.
+        <div class="code-block" style="margin:10px 0 0 0;">BankAccount first = from, second = to;
+if (first.getId() &gt; second.getId()) {   <span style="color:#7eb892;">// always lock lower id first</span>
+    first = to; second = from;
+}
+synchronized (first) { synchronized (second) { ... } }</div>
+      </div>
+
+      <p>For the philosophers, the equivalent fix is to make the <strong>last philosopher reach for the right fork first</strong>. This breaks the symmetry of the circular wait — the cycle can no longer close, so at least one philosopher can always get both forks and eat.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Or use ReentrantLock's tryLock()</div>
+        A more flexible fix: with <code>tryLock()</code>, a philosopher attempts the right fork but <strong>doesn't block</strong> if it's unavailable — they just put the left fork back down and try again later. No thread ever holds-and-waits indefinitely, so deadlock is avoided (this breaks the <em>hold and wait</em> condition). Verified in Ian's program: all philosophers get to both think <em>and</em> eat.
+      </div>
+
+      <!-- ===== Semaphores ===== -->
+      <h2 id="w11-semaphores">Semaphores</h2>
+
+      <p>So far, locks allow <strong>one</strong> thread at a time. But sometimes you want to allow <strong>N</strong> threads — e.g. a database that supports only 5 concurrent connections. A <strong>semaphore</strong> handles this.</p>
+
+      <div class="callout">
+        <div class="callout-label">What a semaphore is</div>
+        Basically an integer with a fixed maximum, plus methods to increase/decrease it. It's initialised to its max — say 5 <strong>permits</strong>. <code>acquire()</code> takes a permit (5→4→3...); when permits hit <strong>0</strong>, further acquirers <strong>block</strong>. <code>release()</code> returns a permit. The count never exceeds the maximum. This is a <strong>counting semaphore</strong>.
+      </div>
+
+      <div class="sem-permits">
+        <div class="sem-permit">🔵</div>
+        <div class="sem-permit">🔵</div>
+        <div class="sem-permit">🔵</div>
+        <div class="sem-permit taken">⚪</div>
+        <div class="sem-permit taken">⚪</div>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-muted); margin-left:8px;">3 of 5 permits available (2 in use)</span>
+      </div>
+
+      <div class="code-block">
+private Semaphore semaphore = new Semaphore(5);   <span style="color:#7eb892;">// 5 permits</span>
+
+public boolean connect() {
+    <span style="color:#7eb892;">// try to get a permit, waiting up to 100ms</span>
+    return semaphore.tryAcquire(100, TimeUnit.MILLISECONDS);
+}
+public void disconnect() {
+    semaphore.release();   <span style="color:#7eb892;">// return the permit</span>
+}
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Binary semaphore = a lock</div>
+        A <strong>binary semaphore</strong> holds only 0 or 1 — so it behaves exactly like a lock (one permit = one thread at a time). The general counting semaphore is the more powerful generalisation: it allows <em>literal concurrent access</em> by up to N threads to a resource that can safely handle N users at once.
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="w11-exam">Exam-style takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 11</div>
+        <ol>
+          <li><strong>Lock interface / ReentrantLock</strong> — explicit lock/unlock; always unlock in a <code>finally</code> block.</li>
+          <li><strong>Reentrancy</strong> — a thread holding a lock can re-acquire it; essential for nested synchronized calls on the same object (else self-deadlock).</li>
+          <li><strong>synchronized vs ReentrantLock</strong> — ReentrantLock adds: cross-method locking, fairness, <code>tryLock()</code>/timed/interruptible acquisition, introspection. Cost: manual release.</li>
+          <li><strong>Deadlock</strong> — A holds X needs Y, B holds Y needs X; both stuck forever.</li>
+          <li><strong>The four conditions</strong> — mutual exclusion, hold-and-wait, no preemption, circular wait. ALL must hold; break any ONE to prevent deadlock. <em>(Memorise these.)</em></li>
+          <li><strong>Dining Philosophers</strong> — 5 philosophers, 5 forks, all grab left → circular wait → starvation. Be able to explain why.</li>
+          <li><strong>Lock ordering fix</strong> — impose a global acquisition order (bank: by id; philosophers: last one grabs right first) to break circular wait.</li>
+          <li><strong>tryLock fix</strong> — don't block on the second lock; breaks hold-and-wait.</li>
+          <li><strong>Semaphores</strong> — N permits; <code>acquire()</code>/<code>release()</code>; blocks at 0. <strong>Counting</strong> (N threads, e.g. 5 DB connections) vs <strong>binary</strong> (0/1 = a lock).</li>
+        </ol>
+      </div>
+
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">🎓 End of Week 11 — and the end of the entire module. Both the OS and concurrency courses are now complete. Best of luck in the exam!</p>
+
+    </section>

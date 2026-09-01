@@ -1,0 +1,243 @@
+<section id="w8-ex" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 08 · Part 4 · Worked Solutions</div>
+      <div class="callout">
+        <div class="callout-label">Figures 8.4 and 8.5</div>
+        <div class="ix-canvas"><svg width="100%" viewBox="0 0 680 290" role="img" xmlns="http://www.w3.org/2000/svg"><title>Figure 8.4</title><desc>Average reward against step for four values of epsilon.</desc><rect x="60" y="40" width="560" height="200" rx="4" fill="var(--surface-2)" stroke="var(--rule)" stroke-width="0.7"/><line x1="60" y1="233.8" x2="620" y2="233.8" stroke="var(--rule)" stroke-width="0.6"/><text x="52.0" y="237.2" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">0.0</text><line x1="60" y1="171.2" x2="620" y2="171.2" stroke="var(--rule)" stroke-width="0.6"/><text x="52.0" y="174.8" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">0.5</text><line x1="60" y1="108.8" x2="620" y2="108.8" stroke="var(--rule)" stroke-width="0.6"/><text x="52.0" y="112.2" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">1.0</text><line x1="60" y1="46.2" x2="620" y2="46.2" stroke="var(--rule)" stroke-width="0.6"/><text x="52.0" y="49.8" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">1.5</text><path d="M 60.0 238.1 L 63.4 232.6 L 66.7 231.5 L 70.1 231.9 L 73.5 232.9 L 76.8 234.5 L 80.2 234.4 L 83.6 233.5 L 86.9 233.6 L 90.3 234.0 L 93.7 234.8 L 97.0 234.1 L 100.4 232.6 L 103.8 231.2 L 107.1 232.1 L 110.5 232.0 L 113.9 233.0 L 117.2 233.4 L 120.6 233.2 L 124.0 233.8 L 127.3 234.0 L 130.7 235.0 L 134.1 233.9 L 137.4 235.0 L 140.8 234.2 L 144.2 232.5 L 147.5 232.4 L 150.9 233.2 L 154.3 234.2 L 157.6 233.9 L 161.0 235.0 L 164.4 234.1 L 167.7 233.1 L 171.1 234.4 L 174.5 234.4 L 177.8 232.8 L 181.2 232.1 L 184.6 232.5 L 187.9 232.9 L 191.3 232.4 L 194.7 233.0 L 198.0 233.0 L 201.4 231.5 L 204.8 231.9 L 208.1 232.1 L 211.5 231.4 L 214.9 231.8 L 218.2 231.6 L 221.6 233.1 L 225.0 233.9 L 228.3 234.0 L 231.7 235.6 L 235.1 235.2 L 238.4 236.8 L 241.8 237.1 L 245.2 237.1 L 248.5 236.2 L 251.9 234.1 L 255.3 233.5 L 258.6 234.4 L 262.0 234.4 L 265.4 234.1 L 268.7 235.0 L 272.1 235.1 L 275.5 235.2 L 278.8 236.1 L 282.2 236.6 L 285.6 236.2 L 288.9 236.9 L 292.3 237.1 L 295.7 236.1 L 299.0 235.8 L 302.4 236.6 L 305.8 236.0 L 309.1 236.8 L 312.5 237.0 L 315.9 237.2 L 319.2 236.6 L 322.6 236.0 L 326.0 235.4 L 329.3 234.6 L 332.7 233.5 L 336.1 234.5 L 339.4 234.1 L 342.8 233.5 L 346.2 234.4 L 349.5 233.8 L 352.9 235.0 L 356.3 234.1 L 359.6 235.0 L 363.0 234.2 L 366.4 233.5 L 369.7 233.4 L 373.1 234.1 L 376.5 232.9 L 379.8 233.4 L 383.2 234.4 L 386.6 234.5 L 389.9 234.1 L 393.3 234.2 L 396.7 235.5 L 400.0 233.4 L 403.4 233.0 L 406.8 233.2 L 410.1 233.2 L 413.5 233.2 L 416.9 234.1 L 420.2 235.5 L 423.6 235.9 L 427.0 236.8 L 430.3 237.1 L 433.7 235.5 L 437.1 235.9 L 440.4 234.2 L 443.8 234.4 L 447.2 233.6 L 450.5 232.2 L 453.9 231.0 L 457.3 230.5 L 460.6 230.8 L 464.0 229.6 L 467.4 231.4 L 470.7 231.4 L 474.1 230.0 L 477.5 231.1 L 480.8 230.8 L 484.2 231.8 L 487.6 233.1 L 490.9 232.9 L 494.3 233.5 L 497.7 231.1 L 501.0 232.5 L 504.4 232.9 L 507.8 232.9 L 511.1 231.6 L 514.5 233.0 L 517.9 233.4 L 521.2 232.8 L 524.6 234.6 L 528.0 234.4 L 531.3 234.4 L 534.7 234.5 L 538.1 235.2 L 541.4 234.1 L 544.8 234.8 L 548.2 234.4 L 551.5 233.2 L 554.9 231.6 L 558.3 231.6 L 561.6 231.8 L 565.0 231.5 L 568.4 233.0 L 571.7 234.1 L 575.1 232.2 L 578.5 232.2 L 581.8 232.9 L 585.2 233.9 L 588.6 233.4 L 591.9 233.0 L 595.3 233.2 L 598.7 231.6 L 602.0 232.9 L 605.4 233.2 L 608.8 233.6 L 612.1 232.6 L 615.5 233.6 L 618.9 233.5" fill="none" stroke="var(--ink-muted)" stroke-width="2"/><text x="616.0" y="228.0" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">&#949; = 1 (random)</text><path d="M 60.0 228.5 L 63.4 190.6 L 66.7 170.4 L 70.1 157.9 L 73.5 148.5 L 76.8 142.8 L 80.2 138.5 L 83.6 134.0 L 86.9 131.5 L 90.3 121.5 L 93.7 115.9 L 97.0 113.3 L 100.4 111.0 L 103.8 109.9 L 107.1 107.9 L 110.5 107.0 L 113.9 106.8 L 117.2 105.2 L 120.6 105.0 L 124.0 104.6 L 127.3 104.5 L 130.7 104.4 L 134.1 104.5 L 137.4 105.5 L 140.8 105.2 L 144.2 105.5 L 147.5 105.2 L 150.9 105.4 L 154.3 106.0 L 157.6 105.8 L 161.0 105.6 L 164.4 106.2 L 167.7 105.8 L 171.1 106.1 L 174.5 105.8 L 177.8 105.5 L 181.2 103.8 L 184.6 104.4 L 187.9 104.6 L 191.3 104.4 L 194.7 105.4 L 198.0 104.8 L 201.4 105.5 L 204.8 105.9 L 208.1 106.4 L 211.5 107.0 L 214.9 107.5 L 218.2 107.8 L 221.6 106.0 L 225.0 106.4 L 228.3 105.9 L 231.7 105.6 L 235.1 105.9 L 238.4 105.1 L 241.8 104.8 L 245.2 104.6 L 248.5 104.4 L 251.9 104.2 L 255.3 103.2 L 258.6 103.5 L 262.0 103.2 L 265.4 104.5 L 268.7 104.5 L 272.1 104.2 L 275.5 104.9 L 278.8 105.2 L 282.2 105.9 L 285.6 104.9 L 288.9 105.1 L 292.3 104.6 L 295.7 105.2 L 299.0 104.5 L 302.4 104.1 L 305.8 103.8 L 309.1 103.6 L 312.5 104.0 L 315.9 104.4 L 319.2 104.0 L 322.6 103.5 L 326.0 103.2 L 329.3 103.0 L 332.7 103.0 L 336.1 103.1 L 339.4 103.2 L 342.8 102.0 L 346.2 103.1 L 349.5 103.4 L 352.9 103.5 L 356.3 103.2 L 359.6 103.1 L 363.0 103.0 L 366.4 102.5 L 369.7 103.2 L 373.1 102.0 L 376.5 102.0 L 379.8 102.8 L 383.2 103.2 L 386.6 103.6 L 389.9 103.1 L 393.3 104.0 L 396.7 103.8 L 400.0 103.8 L 403.4 104.1 L 406.8 103.0 L 410.1 103.1 L 413.5 103.2 L 416.9 103.5 L 420.2 103.5 L 423.6 103.1 L 427.0 104.2 L 430.3 104.6 L 433.7 104.9 L 437.1 104.9 L 440.4 104.6 L 443.8 104.8 L 447.2 103.6 L 450.5 104.9 L 453.9 104.6 L 457.3 104.9 L 460.6 104.4 L 464.0 104.4 L 467.4 104.5 L 470.7 104.0 L 474.1 103.5 L 477.5 102.6 L 480.8 102.4 L 484.2 102.1 L 487.6 102.4 L 490.9 102.4 L 494.3 101.6 L 497.7 101.9 L 501.0 103.1 L 504.4 103.8 L 507.8 104.0 L 511.1 104.8 L 514.5 105.1 L 517.9 106.0 L 521.2 106.4 L 524.6 106.2 L 528.0 105.9 L 531.3 105.1 L 534.7 105.1 L 538.1 104.2 L 541.4 104.5 L 544.8 103.4 L 548.2 103.0 L 551.5 103.8 L 554.9 103.0 L 558.3 103.6 L 561.6 103.9 L 565.0 104.9 L 568.4 105.0 L 571.7 105.0 L 575.1 106.0 L 578.5 105.2 L 581.8 104.9 L 585.2 104.5 L 588.6 103.9 L 591.9 104.1 L 595.3 104.6 L 598.7 105.1 L 602.0 105.4 L 605.4 106.9 L 608.8 106.2 L 612.1 107.5 L 615.5 107.5 L 618.9 107.5" fill="none" stroke="var(--accent-2)" stroke-width="2"/><text x="616.0" y="102.6" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="var(--accent-2)">&#949; = 0 (greedy)</text><path d="M 60.0 227.4 L 63.4 187.9 L 66.7 167.9 L 70.1 155.1 L 73.5 147.6 L 76.8 140.9 L 80.2 136.1 L 83.6 132.8 L 86.9 130.2 L 90.3 119.4 L 93.7 113.6 L 97.0 110.9 L 100.4 109.0 L 103.8 107.2 L 107.1 106.5 L 110.5 105.9 L 113.9 104.8 L 117.2 105.0 L 120.6 104.9 L 124.0 103.5 L 127.3 102.4 L 130.7 103.4 L 134.1 103.2 L 137.4 102.0 L 140.8 103.0 L 144.2 102.8 L 147.5 101.5 L 150.9 102.1 L 154.3 101.9 L 157.6 100.9 L 161.0 100.6 L 164.4 100.6 L 167.7 100.0 L 171.1 100.0 L 174.5 99.6 L 177.8 98.0 L 181.2 98.6 L 184.6 98.2 L 187.9 98.9 L 191.3 98.2 L 194.7 99.1 L 198.0 98.0 L 201.4 97.9 L 204.8 98.1 L 208.1 98.4 L 211.5 99.5 L 214.9 99.6 L 218.2 99.2 L 221.6 98.1 L 225.0 97.8 L 228.3 98.4 L 231.7 96.6 L 235.1 96.0 L 238.4 94.4 L 241.8 94.2 L 245.2 94.1 L 248.5 93.8 L 251.9 93.1 L 255.3 91.9 L 258.6 91.9 L 262.0 91.8 L 265.4 92.4 L 268.7 91.9 L 272.1 89.8 L 275.5 90.0 L 278.8 88.8 L 282.2 89.1 L 285.6 89.9 L 288.9 89.6 L 292.3 89.5 L 295.7 89.1 L 299.0 90.5 L 302.4 90.5 L 305.8 90.4 L 309.1 89.5 L 312.5 88.3 L 315.9 87.4 L 319.2 86.6 L 322.6 85.9 L 326.0 85.1 L 329.3 84.8 L 332.7 85.9 L 336.1 86.6 L 339.4 86.8 L 342.8 87.2 L 346.2 86.6 L 349.5 87.1 L 352.9 87.4 L 356.3 87.2 L 359.6 86.9 L 363.0 86.1 L 366.4 86.4 L 369.7 85.9 L 373.1 87.0 L 376.5 87.2 L 379.8 86.6 L 383.2 85.5 L 386.6 85.8 L 389.9 84.0 L 393.3 83.2 L 396.7 83.1 L 400.0 82.8 L 403.4 81.6 L 406.8 82.6 L 410.1 83.1 L 413.5 82.1 L 416.9 82.2 L 420.2 82.2 L 423.6 82.8 L 427.0 82.6 L 430.3 82.0 L 433.7 82.1 L 437.1 82.6 L 440.4 83.2 L 443.8 83.5 L 447.2 84.4 L 450.5 83.9 L 453.9 83.8 L 457.3 83.4 L 460.6 82.8 L 464.0 82.5 L 467.4 82.4 L 470.7 82.2 L 474.1 81.1 L 477.5 81.1 L 480.8 80.5 L 484.2 80.1 L 487.6 80.8 L 490.9 80.1 L 494.3 80.2 L 497.7 79.5 L 501.0 80.1 L 504.4 79.8 L 507.8 79.8 L 511.1 80.6 L 514.5 80.2 L 517.9 80.0 L 521.2 80.4 L 524.6 80.2 L 528.0 80.4 L 531.3 81.1 L 534.7 80.5 L 538.1 79.4 L 541.4 80.1 L 544.8 79.4 L 548.2 78.1 L 551.5 77.1 L 554.9 76.6 L 558.3 76.1 L 561.6 76.5 L 565.0 77.6 L 568.4 77.1 L 571.7 77.2 L 575.1 78.0 L 578.5 78.0 L 581.8 77.9 L 585.2 78.0 L 588.6 78.0 L 591.9 77.4 L 595.3 76.9 L 598.7 76.9 L 602.0 77.1 L 605.4 76.5 L 608.8 76.5 L 612.1 76.9 L 615.5 76.0 L 618.9 75.2" fill="none" stroke="var(--accent-3)" stroke-width="2"/><text x="616.0" y="70.0" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="var(--accent-3)">&#949; = 0.01</text><path d="M 60.0 217.1 L 63.4 200.6 L 66.7 182.8 L 70.1 170.0 L 73.5 160.0 L 76.8 151.0 L 80.2 147.0 L 83.6 143.8 L 86.9 140.8 L 90.3 129.2 L 93.7 121.9 L 97.0 116.6 L 100.4 114.1 L 103.8 112.8 L 107.1 110.5 L 110.5 107.9 L 113.9 104.9 L 117.2 103.2 L 120.6 101.2 L 124.0 100.4 L 127.3 99.9 L 130.7 98.9 L 134.1 98.0 L 137.4 97.2 L 140.8 96.1 L 144.2 96.2 L 147.5 96.2 L 150.9 96.0 L 154.3 96.4 L 157.6 94.9 L 161.0 94.2 L 164.4 93.9 L 167.7 94.2 L 171.1 94.8 L 174.5 94.4 L 177.8 93.0 L 181.2 93.4 L 184.6 92.8 L 187.9 92.5 L 191.3 91.0 L 194.7 90.5 L 198.0 88.6 L 201.4 87.8 L 204.8 88.3 L 208.1 86.6 L 211.5 85.5 L 214.9 83.9 L 218.2 83.9 L 221.6 84.0 L 225.0 82.9 L 228.3 82.2 L 231.7 81.5 L 235.1 80.2 L 238.4 80.0 L 241.8 79.4 L 245.2 79.2 L 248.5 78.2 L 251.9 78.5 L 255.3 79.4 L 258.6 79.0 L 262.0 78.4 L 265.4 78.1 L 268.7 79.0 L 272.1 78.0 L 275.5 78.9 L 278.8 78.8 L 282.2 78.1 L 285.6 77.1 L 288.9 76.1 L 292.3 77.2 L 295.7 76.1 L 299.0 77.1 L 302.4 77.5 L 305.8 77.8 L 309.1 78.1 L 312.5 78.4 L 315.9 79.0 L 319.2 78.4 L 322.6 77.8 L 326.0 77.0 L 329.3 76.6 L 332.7 75.5 L 336.1 74.9 L 339.4 73.9 L 342.8 74.4 L 346.2 73.6 L 349.5 74.4 L 352.9 73.9 L 356.3 73.2 L 359.6 73.4 L 363.0 73.2 L 366.4 73.6 L 369.7 72.8 L 373.1 72.8 L 376.5 73.0 L 379.8 73.1 L 383.2 73.6 L 386.6 73.6 L 389.9 72.9 L 393.3 71.5 L 396.7 72.1 L 400.0 72.0 L 403.4 70.9 L 406.8 70.5 L 410.1 69.4 L 413.5 69.1 L 416.9 69.4 L 420.2 70.4 L 423.6 70.9 L 427.0 71.2 L 430.3 72.5 L 433.7 72.6 L 437.1 73.2 L 440.4 73.0 L 443.8 73.6 L 447.2 74.2 L 450.5 74.0 L 453.9 73.9 L 457.3 72.1 L 460.6 71.8 L 464.0 72.0 L 467.4 72.0 L 470.7 70.1 L 474.1 70.0 L 477.5 69.5 L 480.8 68.4 L 484.2 68.5 L 487.6 67.5 L 490.9 66.9 L 494.3 67.5 L 497.7 67.9 L 501.0 68.9 L 504.4 67.8 L 507.8 67.8 L 511.1 68.1 L 514.5 67.8 L 517.9 68.9 L 521.2 69.0 L 524.6 67.6 L 528.0 65.9 L 531.3 66.1 L 534.7 66.2 L 538.1 66.6 L 541.4 67.5 L 544.8 66.9 L 548.2 67.4 L 551.5 68.5 L 554.9 70.0 L 558.3 70.4 L 561.6 70.5 L 565.0 71.8 L 568.4 72.1 L 571.7 73.5 L 575.1 72.6 L 578.5 72.5 L 581.8 72.8 L 585.2 71.5 L 588.6 71.1 L 591.9 69.9 L 595.3 68.8 L 598.7 67.9 L 602.0 68.0 L 605.4 68.1 L 608.8 68.2 L 612.1 68.4 L 615.5 68.6 L 618.9 70.0" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="616.0" y="65.6" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="var(--accent)">&#949; = 0.1</text><text x="60.0" y="256.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">0</text><text x="172.2" y="256.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">100</text><text x="284.4" y="256.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">200</text><text x="396.7" y="256.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">300</text><text x="508.9" y="256.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">400</text><text x="620.0" y="256.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">500</text><text x="340.0" y="274.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--ink-muted)">steps</text></svg></div><div class="ix-canvas"><svg width="100%" viewBox="0 0 680 210" role="img" xmlns="http://www.w3.org/2000/svg"><title>Figure 8.5</title><desc>Two actions with confidence intervals; a2 has the lower estimate but the higher upper bound.</desc><text x="76.0" y="65.0" text-anchor="end" font-family="IBM Plex Mono" font-size="13" fill="var(--ink-muted)" font-weight="600">a&#8321;</text><line x1="381.7" y1="60" x2="465.0" y2="60" stroke="var(--ink-muted)" stroke-width="2.5"/><line x1="381.7" y1="52" x2="381.7" y2="68" stroke="var(--ink-muted)" stroke-width="2.4"/><line x1="465.0" y1="52" x2="465.0" y2="68" stroke="var(--ink-muted)" stroke-width="2.4"/><circle cx="423.3" cy="60" r="4.5" fill="var(--accent-4)"/><text x="423.3" y="46.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-4)">Q = 6</text><text x="475.0" y="64.0" text-anchor="start" font-family="IBM Plex Mono" font-size="10.5" fill="var(--ink-muted)">upper bound 7</text><text x="76.0" y="123.0" text-anchor="end" font-family="IBM Plex Mono" font-size="13" fill="var(--accent)" font-weight="600">a&#8322;</text><line x1="131.7" y1="118" x2="548.3" y2="118" stroke="var(--accent)" stroke-width="3.5"/><line x1="131.7" y1="110" x2="131.7" y2="126" stroke="var(--accent)" stroke-width="2.4"/><line x1="548.3" y1="110" x2="548.3" y2="126" stroke="var(--accent)" stroke-width="2.4"/><circle cx="340.0" cy="118" r="4.5" fill="var(--accent-4)"/><text x="340.0" y="104.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-4)">Q = 4</text><text x="558.3" y="122.0" text-anchor="start" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent)">upper bound 9</text><line x1="548.3" y1="40" x2="548.3" y2="140" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="4 3"/><text x="548.3" y="32.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent)">highest upper bound wins</text><line x1="84" y1="168" x2="590" y2="168" stroke="var(--ink-muted)"/><text x="131.7" y="184.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">-1</text><text x="215.0" y="184.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">1</text><text x="298.3" y="184.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">3</text><text x="381.7" y="184.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">5</text><text x="465.0" y="184.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">7</text><text x="548.3" y="184.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">9</text></svg></div>
+        <p style="margin:12px 0 0 0;"><strong>Top:</strong> Exercise 7 asks where &#949; = 0.75 would sit on this chart. <strong>Bottom:</strong> the picture behind Exercise 8 &mdash; a&#8322; has the worse estimate but the wider interval, so its upper bound is higher and UCB takes it.</p>
+      </div>
+        <h1>The Eight Exercises, Worked</h1>
+        <div class="week-subtitle">every solution box in the PDF is blank — these are filled in and checked</div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Why this section exists</div>
+        Chapter 8 poses eight exercises and prints an empty <em>Solution to Exercise n</em> box after each. Every answer below is worked from the definitions and <strong>independently re-computed</strong> — Exercise 8's trace was reproduced twice, once by hand and once in code, and the <a href="#uc-tool" onclick="showWeek('w8-ucb')">UCB tool</a> reproduces it a third time so you can step through it yourself.
+      </div>
+
+      <!-- ===== EX 1 ===== -->
+      <div class="exbox" id="z-1">
+        <div class="extag">Exercise 1</div>
+        <p class="q">Using the example given before with A and B, what is q⋆(A) and q⋆(B)?</p>
+        <p style="margin:0 0 10px 0;">The suggested set-up was <strong>A ∼ N(10, 1)</strong> and <strong>B ∼ N(11, 4)</strong>. By Definition 8.2, q⋆(a) = E[R<sub>t</sub> | A<sub>t</sub> = a] — <strong>the expected value of the reward distribution</strong>, and the expected value of N(µ, σ²) is µ.</p>
+        <div class="ans"><span class="lbl">answer</span>
+          <strong>q⋆(A) = 10 and q⋆(B) = 11.</strong> The optimal action is <strong>B</strong>.
+        </div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">The three things this one-line question is checking</div>
+          <ul style="margin:6px 0 0 0;">
+            <li><strong>q⋆ is the mean, not the maximum</strong> and not any observed reward. B can and will pay less than A on plenty of individual pulls.</li>
+            <li><strong>The variance is irrelevant to q⋆.</strong> B's σ² = 4 makes it noisier, not better or worse. It affects how <em>hard</em> B is to identify, not what it is worth.</li>
+            <li><strong>This is exactly the number the agent never sees.</strong> You can answer it only because you were handed the distributions; an agent playing Example 8.1 has to approach 10 and 11 through Q<sub>t</sub>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ===== EX 2 ===== -->
+      <div class="exbox" id="z-2">
+        <div class="extag">Exercise 2</div>
+        <p class="q">Consider the sequence of actions and rewards in Table 8.1. Assuming Q<sub>t</sub>(a) = 0 if a has not been taken before t, evaluate Q<sub>t</sub>(A) and Q<sub>t</sub>(B) for each t, 1 ≤ t ≤ 5.</p>
+        <table class="cmp-table" style="max-width:400px;">
+          <tr><th>t</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+          <tr><th>A<sub>t</sub></th><td>A</td><td>A</td><td>B</td><td>A</td><td>B</td></tr>
+          <tr><th>R<sub>t</sub></th><td>0.5</td><td>−0.3</td><td>0.4</td><td>1.0</td><td>1.5</td></tr>
+        </table>
+        <p style="margin:14px 0 8px 0;">The whole exercise turns on <strong>“before t”</strong>: Q<sub>t</sub> averages steps 1 … t − 1 only.</p>
+        <table class="cmp-table">
+          <tr><th>t</th><th>rewards from A so far</th><th>Q<sub>t</sub>(A)</th><th>rewards from B so far</th><th>Q<sub>t</sub>(B)</th></tr>
+          <tr><td>1</td><td><em>none</em></td><td><strong>0</strong></td><td><em>none</em></td><td><strong>0</strong></td></tr>
+          <tr><td>2</td><td>0.5</td><td><code>0.5/1</code> = <strong>0.5</strong></td><td><em>none</em></td><td><strong>0</strong></td></tr>
+          <tr><td>3</td><td>0.5, −0.3</td><td><code>0.2/2</code> = <strong>0.1</strong></td><td><em>none</em></td><td><strong>0</strong></td></tr>
+          <tr><td>4</td><td>0.5, −0.3</td><td><code>0.2/2</code> = <strong>0.1</strong></td><td>0.4</td><td><code>0.4/1</code> = <strong>0.4</strong></td></tr>
+          <tr><td>5</td><td>0.5, −0.3, 1.0</td><td><code>1.2/3</code> = <strong>0.4</strong></td><td>0.4</td><td><code>0.4/1</code> = <strong>0.4</strong></td></tr>
+        </table>
+        <div class="ans"><span class="lbl">answer</span>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1.9;">
+            Q<sub>t</sub>(A): &nbsp;0, &nbsp;0.5, &nbsp;0.1, &nbsp;0.1, &nbsp;0.4<br>
+            Q<sub>t</sub>(B): &nbsp;0, &nbsp;0&nbsp;&nbsp;, &nbsp;0&nbsp;&nbsp;, &nbsp;0.4, &nbsp;0.4
+          </div>
+        </div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">Four traps in five columns</div>
+          <ul style="margin:6px 0 0 0;">
+            <li><strong>Q₁ is 0 for both</strong>, not undefined. Nothing has happened yet.</li>
+            <li><strong>R₅ = 1.5 never appears anywhere</strong>, because the table stops at t = 5 and Q₅ only sees steps 1–4. If the question had asked for Q₆ you would get Q₆(B) = (0.4 + 1.5)/2 = <strong>0.95</strong>.</li>
+            <li><strong>Q₃(A) = 0.1, not 0.5.</strong> The −0.3 at t = 2 has already landed.</li>
+            <li><strong>At t = 5 the two estimates tie at 0.4.</strong> Definition 8.5 then says a greedy player <strong>randomises between them</strong> — a 50/50 choice, not "keep doing what you were doing". The tool's verdict line makes this call at every step.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ===== EX 3 ===== -->
+      <div class="exbox" id="z-3">
+        <div class="extag">Exercise 3</div>
+        <p class="q">For each of the two strategies, discuss whether they could be considered doing too much exploration or exploitation, and why. (a) A greedy algorithm — the next action is determined by the highest average reward given so far. (b) A random algorithm — it just picks the next action at random.</p>
+        <div class="ans"><span class="lbl">answer</span>
+          <strong>Greedy does far too much exploitation; random does far too much exploration.</strong> Neither uses the other mode at all.
+        </div>
+        <p style="margin:16px 0 8px 0;"><strong>(a) The greedy algorithm — pure exploitation.</strong></p>
+        <ul style="margin:0 0 0 0;">
+          <li>It acts on its current estimates <strong>and nothing else</strong>. Every step is spent on the arm that <em>currently</em> looks best.</li>
+          <li>The failure mode is the one the notes name in §8.5: it <strong>gets ‘stuck’ in any action with a positive value and misses ones possibly much better</strong>. With Q₁(a) = 0 and positive rewards, an arm that pays well once may be the only arm ever tried.</li>
+          <li><strong>A single lucky sample is never corrected</strong>, because correcting it would require sampling a rival — which greedy will not do. Equally, <strong>a single unlucky sample of the truly best arm is fatal</strong>: it will never get a second chance.</li>
+          <li>Its one saving grace: <strong>ties are randomised</strong>, so at t = 1 it does pick uniformly. After that it can narrow to one arm forever.</li>
+        </ul>
+        <p style="margin:16px 0 8px 0;"><strong>(b) The random algorithm — pure exploration.</strong></p>
+        <ul style="margin:0 0 0 0;">
+          <li>It <strong>gathers information beautifully</strong> — every arm is sampled 1/k of the time, so all its estimates converge to the true q⋆.</li>
+          <li>And then it <strong>throws that information away</strong>. Nothing it learns ever changes what it does. It is not really a learning algorithm at all.</li>
+          <li>Its expected reward per step is the <strong>average over all arms</strong>, forever — 0 on the N(0, 1) testbed of Figure 8.4, which is why the random curve is flat at zero.</li>
+        </ul>
+        <div class="callout tip" style="margin:16px 0 0 0;">
+          <div class="callout-label">The point the exercise is setting up</div>
+          Both are <em>extreme</em>, and in opposite directions — which is what makes them the two endpoints of a single dial. <strong>“A balance between greedy and random could be a possible way forward”</strong>, and ε-greedy is exactly that dial: a weighted coin between (a) and (b), with ε as the weight.
+          <p style="margin:10px 0 0 0;">If a question asks you to <em>argue</em> rather than classify, the strongest line is about <strong>information</strong>: greedy never buys any, random never spends any, and the useful algorithms do both.</p>
+        </div>
+      </div>
+
+      <!-- ===== EX 4 ===== -->
+      <div class="exbox" id="z-4">
+        <div class="extag">Exercise 4</div>
+        <p class="q">Consider a 50-armed bandit problem. What is the probability, at each time t, that a random method selects the optimal action?</p>
+        <p style="margin:0 0 8px 0;">By Definition 8.4 the random method takes each action with probability 1/k, independently of everything that has happened. There is <strong>exactly one</strong> optimal action — the notes justify uniqueness in §8.4: <strong>the probability of drawing two exactly equal values from a normal distribution is null.</strong> With k = 50:</p>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:10px 0;">Pr(A<sub>t</sub> = optimal) = 1/50 = 0.02</div>
+        <div class="ans"><span class="lbl">answer</span>
+          <strong>1/50 = 0.02 = 2%</strong>, at every t, forever — it never improves.
+        </div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">The follow-up worth pre-empting</div>
+          “At each time t” is doing real work in the question. The answer is <strong>constant in t</strong>, which is the whole indictment of the random method: after a million steps it is still 2%. Contrast ε-greedy, whose probability of the optimal action <em>rises</em> towards its ceiling of <strong>1 − ε + ε/k</strong> as the estimates converge.
+          <p style="margin:10px 0 0 0;">For k = 50 and ε = 0.1 that ceiling is 0.9 + 0.002 = <strong>90.2%</strong>. Same problem, forty-five times better, from one weighted coin.</p>
+        </div>
+      </div>
+
+      <!-- ===== EX 5 ===== -->
+      <div class="exbox" id="z-5">
+        <div class="extag">Exercise 5</div>
+        <p class="q">A 2-armed bandit at t = 10, with q⋆(a₁) = 2 and q⋆(a₂) = 2.3. Using ε-greedy with ε = 0.5, what is the probability that the optimal action is selected at step t = 10, when (i) Q₁₀(a₁) = 2.4, Q₁₀(a₂) = 2.1; (ii) Q₁₀(a₁) = 2.1, Q₁₀(a₂) = 2.4; (iii) Q₁₀(a₁) = 2.4, Q₁₀(a₂) = 2.4?</p>
+        <p style="margin:0 0 10px 0;">First: <strong>the optimal action is a₂</strong>, because q⋆(a₂) = 2.3 &gt; 2 = q⋆(a₁). The q⋆ values are used <em>only</em> for that — the agent's choice depends on the Q's alone. With k = 2 and ε = 0.5, the random branch gives each arm <strong>ε/k = 0.25</strong>.</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; margin:0 0 12px 12px;">
+          Pr(a₂) = ε·(1/k) &nbsp;+&nbsp; (1 − ε)·Pr(greedy picks a₂) = 0.25 + 0.5·Pr(greedy picks a₂)
+        </div>
+        <table class="cmp-table">
+          <tr><th>case</th><th>Q₁₀(a₁), Q₁₀(a₂)</th><th>greedy takes</th><th>Pr(greedy → a₂)</th><th>Pr(optimal a₂)</th></tr>
+          <tr><td>(i)</td><td>2.4, 2.1</td><td>a₁</td><td>0</td><td>0.25 + 0.5·0 = <strong>0.25</strong></td></tr>
+          <tr><td>(ii)</td><td>2.1, 2.4</td><td>a₂</td><td>1</td><td>0.25 + 0.5·1 = <strong>0.75</strong></td></tr>
+          <tr><td>(iii)</td><td>2.4, 2.4</td><td>tie → randomise</td><td>½</td><td>0.25 + 0.5·0.5 = <strong>0.5</strong></td></tr>
+        </table>
+        <div class="ans"><span class="lbl">answer</span>
+          <strong>(i) 0.25 &nbsp;·&nbsp; (ii) 0.75 &nbsp;·&nbsp; (iii) 0.5</strong>
+        </div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">Three ways to lose the marks here</div>
+          <ul style="margin:6px 0 0 0;">
+            <li><strong>Answering 0 for case (i).</strong> Even when greedy points the wrong way, the random branch still reaches a₂ with probability ε/k = 0.25. The greedy branch is not the only route.</li>
+            <li><strong>Answering 1 − ε = 0.5 for case (ii).</strong> The greedy action also collects its share of the random branch: 0.5 + 0.25 = 0.75.</li>
+            <li><strong>Forgetting the tie rule in case (iii).</strong> Definition 8.5 randomises among the maxima, so the greedy branch itself is a coin flip. Answering 0.75 (treating a₂ as “the” greedy choice) or 0.25 (treating a₁ as it) both miss it.</li>
+          </ul>
+          <p style="margin:10px 0 0 0;">Sanity check on the whole answer set: the three cases are <strong>0.25 &lt; 0.5 &lt; 0.75</strong>, in the order <em>estimates point away</em> → <em>estimates tie</em> → <em>estimates point at it</em>. The middle case must sit exactly halfway, and it does.</p>
+        </div>
+      </div>
+
+      <!-- ===== EX 6 ===== -->
+      <div class="exbox" id="z-6">
+        <div class="extag">Exercise 6</div>
+        <p class="q">Both random and greedy methods are particular cases of the ε-greedy method. What should you set ε to in order to obtain, respectively, the greedy and random methods?</p>
+        <div class="ans"><span class="lbl">answer</span>
+          <strong>ε = 0 gives the greedy method. ε = 1 gives the random method.</strong>
+        </div>
+        <p style="margin:16px 0 8px 0;">Straight from Definition 8.6, which says: with probability ε act randomly, with probability 1 − ε act greedily.</p>
+        <ul style="margin:0;">
+          <li><strong>ε = 0</strong> — the random branch fires with probability 0, so every step is <code>arg max<sub>a</sub> Q<sub>t</sub>(a)</code>. That is Definition 8.5 exactly, ties and all.</li>
+          <li><strong>ε = 1</strong> — the greedy branch fires with probability 0, so every step is uniform over the k arms. That is Definition 8.4 exactly.</li>
+        </ul>
+        <div class="callout tip" style="margin:16px 0 0 0;">
+          <div class="callout-label">Why the question is asked at all</div>
+          It fixes the shape of ε as a <strong>dial between two named extremes</strong>, not a free parameter with arbitrary meaning. Every claim in §8.5 then reads as a statement about position on that dial — and it is worth noticing that Figure 8.4 plots <strong>both endpoints and two interior points</strong> of the same one-parameter family.
+          <p style="margin:10px 0 0 0;">A likely follow-up: <em>does some ε strictly dominate?</em> No. Larger ε learns faster but pays more forever; smaller ε learns slower but pays less. The best ε depends on <strong>how long you intend to play</strong> — which is precisely why §8.5 is careful to say ε = 0.1 wins at 500 steps while ε = 0.01 wins in the long run.</p>
+        </div>
+      </div>
+
+      <!-- ===== EX 7 ===== -->
+      <div class="exbox" id="z-7">
+        <div class="extag">Exercise 7</div>
+        <p class="q">Assume the ε = 0.1 line in Figure 8.4 is close to stabilising, and will stabilise before an average reward of 2. If we add the line for ε = 0.75, at 500 steps do you expect its average reward to be: (1) lower than random, (2) between random and greedy, (3) between greedy and ε = 0.01, (4) between ε = 0.01 and ε = 0.1, or (5) higher than ε = 0.1?</p>
+        <div class="ans"><span class="lbl">answer</span>
+          <strong>(2) — between random and greedy.</strong>
+        </div>
+        <p style="margin:16px 0 8px 0;"><strong>The argument.</strong> Once the estimates have roughly converged, an ε-greedy agent spends a fraction (1 − ε) of its steps on the best arm and a fraction ε on a uniformly random arm, so its average reward is about</p>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">(1 − ε)·q⋆(best) &nbsp;+&nbsp; ε·(mean arm value)</div>
+        <p style="margin:0 0 8px 0;">On this testbed the arm values come from N(0, 1), so <strong>the mean arm is worth 0</strong> and the second term vanishes. The reward is therefore roughly <strong>proportional to (1 − ε)</strong>:</p>
+        <table class="cmp-table">
+          <tr><th>ε</th><th>≈ (1 − ε) × q⋆(best)</th><th>simulated at 500 steps</th></tr>
+          <tr><td>1 (random)</td><td>0</td><td><code>≈ 0.00</code></td></tr>
+          <tr><td><strong>0.75</strong></td><td><strong>0.25 × 1.54 ≈ 0.39</strong></td><td><code>≈ 0.38</code></td></tr>
+          <tr><td>0 (greedy)</td><td>— stalls early, does not reach q⋆(best)</td><td><code>≈ 1.04</code></td></tr>
+          <tr><td>0.01</td><td>0.99 × 1.54 ≈ 1.52 <em>eventually</em></td><td><code>≈ 1.22</code></td></tr>
+          <tr><td>0.1</td><td>0.90 × 1.54 ≈ 1.39</td><td><code>≈ 1.36</code></td></tr>
+        </table>
+        <p style="margin:14px 0 0 0;">So ε = 0.75 lands near <strong>0.39</strong> — clearly above random's 0, and clearly below greedy's ≈ 1.0. <strong>Option 2.</strong> Turn ε = 0.75 on in the <a href="#eg-tool" onclick="showWeek('w8-eps')">testbed tool</a> and the curve appears exactly there.</p>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">Where the 1.54 comes from, if you want the number rather than the shape</div>
+          It is the <strong>expected maximum of 10 independent standard normals</strong> ≈ 1.54 — the value of the best arm on an average testbed. You are not expected to know it; the hint in the question (“ε = 0.1 stabilises before 2”) exists so you can work backwards: if ε = 0.1 stabilises at 0.9·q⋆(best) and that is under 2, then q⋆(best) is a bit over 1.5, and 0.25 of it is around 0.4.
+          <p style="margin:10px 0 0 0;"><strong>The qualitative argument alone earns the answer:</strong> ε = 0.75 spends three quarters of its steps choosing uniformly at random — which is worth 0 — so it cannot do much better than a quarter of the best arm's value, and that is well below what even greedy manages. The only genuinely tempting wrong answer is (1), on the thought that "more randomness is worse than random"; but ε = 0.75 still exploits a quarter of the time, so it must strictly beat pure random.</p>
+        </div>
+      </div>
+
+      <!-- ===== EX 8 ===== -->
+      <div class="exbox" id="z-8">
+        <div class="extag">Exercise 8</div>
+        <p class="q">Determine A₁, …, A₈ in the 3-armed bandit whose arms pay, in order, a₁: 5, 4, 7, 3, 7 · a₂: 3.5, 7, 1, 1, 1 · a₃: 6, 0, 4, 4, 3. Also give UCB₈(a) for the three actions — the values used to determine A₈. Use c = 2.</p>
+        <p style="margin:0 0 10px 0;">Apply (8.5) with c = 2, using Remark 8.8: <strong>N = 0 counts as +∞</strong>, and <strong>ties go to the lowest index</strong>. N<sub>t</sub>(a) counts pulls strictly before t.</p>
+        <table class="cmp-table">
+          <tr><th>t</th><th>ln t</th><th>UCB<sub>t</sub>(a₁)</th><th>UCB<sub>t</sub>(a₂)</th><th>UCB<sub>t</sub>(a₃)</th><th>A<sub>t</sub></th><th>R<sub>t</sub></th></tr>
+          <tr><td>1</td><td>0</td><td><code>+∞</code></td><td><code>+∞</code></td><td><code>+∞</code></td><td><strong>a₁</strong> <span style="opacity:.6;">tie → lowest</span></td><td>5</td></tr>
+          <tr><td>2</td><td>0.6931</td><td><code>6.6651</code></td><td><code>+∞</code></td><td><code>+∞</code></td><td><strong>a₂</strong> <span style="opacity:.6;">tie → lowest</span></td><td>3.5</td></tr>
+          <tr><td>3</td><td>1.0986</td><td><code>7.0963</code></td><td><code>5.5963</code></td><td><code>+∞</code></td><td><strong>a₃</strong></td><td>6</td></tr>
+          <tr><td>4</td><td>1.3863</td><td><code>7.3548</code></td><td><code>5.8548</code></td><td><code>8.3548</code></td><td><strong>a₃</strong></td><td>0</td></tr>
+          <tr><td>5</td><td>1.6094</td><td><code>7.5373</code></td><td><code>6.0373</code></td><td><code>4.7941</code></td><td><strong>a₁</strong></td><td>4</td></tr>
+          <tr><td>6</td><td>1.7918</td><td><code>6.3930</code></td><td><code>6.1771</code></td><td><code>4.8930</code></td><td><strong>a₁</strong></td><td>7</td></tr>
+          <tr><td>7</td><td>1.9459</td><td><code>6.9441</code></td><td><code>6.2899</code></td><td><code>4.9728</code></td><td><strong>a₁</strong></td><td>3</td></tr>
+          <tr style="background:var(--tint-c);"><td><strong>8</strong></td><td>2.0794</td><td><code><strong>6.1920</strong></code></td><td><code><strong>6.3841</strong></code></td><td><code><strong>5.0393</strong></code></td><td><strong>a₂</strong></td><td>7</td></tr>
+        </table>
+        <div class="ans"><span class="lbl">answer</span>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; line-height:2;">
+            A₁ … A₈ &nbsp;=&nbsp; <strong>a₁, a₂, a₃, a₃, a₁, a₁, a₁, a₂</strong><br><br>
+            UCB₈(a₁) = 4.75 + 2√(2.0794/4) = <strong>6.1920</strong><br>
+            UCB₈(a₂) = 3.5&nbsp;&nbsp; + 2√(2.0794/1) = <strong>6.3841</strong><br>
+            UCB₈(a₃) = 3&nbsp;&nbsp;&nbsp;&nbsp; + 2√(2.0794/2) = <strong>5.0393</strong>
+          </div>
+        </div>
+        <p style="margin:16px 0 8px 0;"><strong>Two steps written out in full</strong>, since that is what earns the marks:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:2; margin:0 0 0 12px;">
+          t = 5: &nbsp;N₅ = (1, 1, 2), &nbsp;Q₅ = (5, 3.5, 3), &nbsp;ln 5 = 1.6094<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;a₁: 5 + 2√(1.6094/1) = 5 + 2(1.2686) = 7.5373 &nbsp;←&nbsp; max<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;a₂: 3.5 + 2(1.2686) = 6.0373<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;a₃: 3 + 2√(1.6094/2) = 3 + 2(0.8971) = 4.7941<br><br>
+          t = 8: &nbsp;N₈ = (4, 1, 2), &nbsp;Q₈ = (4.75, 3.5, 3), &nbsp;ln 8 = 2.0794<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;a₁: 4.75 + 2√(2.0794/4) = 4.75 + 2(0.7210) = 6.1920<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;a₂: 3.5 + 2√(2.0794/1) = 3.5 + 2(1.4420) = 6.3841 &nbsp;←&nbsp; max<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;a₃: 3 + 2√(2.0794/2) = 3 + 2(1.0198) = 5.0393
+        </div>
+        <div class="callout tip" style="margin:16px 0 0 0;">
+          <div class="callout-label">What the trace is actually demonstrating</div>
+          <ul style="margin:6px 0 0 0;">
+            <li><strong>The first three steps are forced.</strong> Every arm has N = 0 and therefore +∞, so a₁, a₂, a₃ come out in index order. This is always how a UCB trace starts, for any rewards.</li>
+            <li><strong>a₃ is picked twice in a row and then dropped.</strong> Its 6 at t = 3 made it the leader; the 0 at t = 4 halved its average to 3 and it is never seen again in these eight steps. <strong>UCB reacts fast to a bad sample</strong> because the estimate moves and the interval shrinks at the same time.</li>
+            <li><strong>a₁ is exploited three times running</strong> (t = 5, 6, 7) — UCB is not obliged to alternate. It only moves on when the exploitation term stops covering the shrinking exploration term.</li>
+            <li><strong>A₈ = a₂ is the whole point of the chapter.</strong> At t = 8, a₂ has the <em>worst</em> estimate of the three (Q = 3.5 against a₁'s 4.75) but it has been pulled <strong>once</strong>, so its interval is by far the widest — 2√(2.0794/1) = 2.884 against a₁'s 1.442. <strong>It wins on uncertainty, not on merit.</strong> That is Figure 8.5, arrived at by arithmetic.</li>
+            <li><strong>And it was right.</strong> a₂'s second reward is 7, lifting Q(a₂) to 5.25 — the best of the three. An ε-greedy agent would have reached that only by luck; a purely greedy one, never.</li>
+          </ul>
+        </div>
+        <div class="callout warn" style="margin:14px 0 0 0;">
+          <div class="callout-label">Three arithmetic slips that derail the whole table</div>
+          <ul style="margin:6px 0 0 0;">
+            <li><strong>Using log₁₀ instead of ln.</strong> ln 8 = 2.0794, log₁₀ 8 = 0.9031. Everything downstream changes.</li>
+            <li><strong>Counting the current pull in N<sub>t</sub>.</strong> N is pulls <em>prior to</em> t. At t = 8, a₁ has been pulled 4 times (t = 1, 5, 6, 7), not 5.</li>
+            <li><strong>Putting c inside the square root.</strong> It is c·√(ln t / N), not √(c·ln t / N). With c = 2 that is a factor of √2 wrong on every exploration term.</li>
+          </ul>
+          <p style="margin:10px 0 0 0;">Keep a running <strong>(N, Q)</strong> pair per arm in the margin and update it after each pick — that alone prevents all three.</p>
+        </div>
+      </div>
+
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 8.</p>
+    </section>

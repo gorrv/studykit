@@ -1,0 +1,636 @@
+<section id="week1" class="week-section active">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 01 · Introduction</div>
+        <h1>Paradigms, Syntax &amp; Semantics</h1>
+        <div class="week-subtitle">what a programming language actually <em>is</em></div>
+      </div>
+      <p>This lecture is the map for the whole module. It answers one question — <strong>what are the parts of a programming language?</strong> — and the answer (<em>syntax, semantics, implementation</em>) becomes the structure of everything that follows. Almost every later week is a deep dive into one of these three boxes.</p>
+      <div class="callout">
+        <div class="callout-label">The shape of the lecture</div>
+        Role of languages → <strong>paradigms</strong> → the <strong>three components</strong> → then one pass through each component: <em>implementation</em> (compile / interpret / hybrid), <em>syntax</em> (concrete vs abstract, grammars, ambiguity), <em>semantics</em> (static vs dynamic; denotational / axiomatic / <strong>operational</strong>).
+      </div>
+      <!-- ===== Why ===== -->
+      <h2 id="w1-why">Why study programming languages?</h2>
+      <p>Programming languages are <strong>tools for writing software</strong>. The ones we have today are the product of an evolution that is still going. We study the underlying concepts — rather than any one language — for three reasons:</p>
+      <ul>
+        <li>To <strong>choose the most suitable language</strong> for each application.</li>
+        <li>To <strong>increase our ability to learn new languages</strong> (concepts transfer; syntax is superficial).</li>
+        <li>To be able to <strong>design new languages</strong> — not just general-purpose ones, but also user interfaces, configuration languages, DSLs for software systems.</li>
+      </ul>
+      <h3>Languages and software engineering</h3>
+      <p>Languages aren't only used in the implementation phase. They matter in the <strong>design phase</strong> too, because they shape how you decompose a system into modules.</p>
+      <p>A <strong>design method</strong> is a guideline for producing a design — e.g. functional design or object-oriented design. Languages differ in how much they support one:</p>
+      <table>
+        <tr><th>Language</th><th>Design method support</th></tr>
+        <tr><td><strong>Fortran</strong> (older)</td><td>Supports no specific design method</td></tr>
+        <tr><td><strong>Haskell, CaML</strong></td><td>Designed to support <em>functional</em> design</td></tr>
+        <tr><td><strong>Java, C++</strong></td><td>Designed to support <em>object-oriented</em> design and programming</td></tr>
+      </table>
+      <div class="callout exam">
+        <div class="callout-label">The key claim — quotable in an exam</div>
+        <strong>If the design method is not compatible with the language, the programming effort increases.</strong> This is the practical justification for the whole module: paradigm mismatch has a real cost, so knowing the paradigms lets you avoid paying it.
+      </div>
+      <!-- ===== Paradigms ===== -->
+      <h2 id="w1-paradigms">Programming paradigms</h2>
+      <p>A programming language may <strong>enforce a particular style of programming</strong> — a <strong>paradigm</strong>. Four are named in the lecture:</p>
+      <div class="paradigm-grid">
+        <div class="paradigm imp">
+          <h4>Imperative</h4>
+          <span class="p-tag">how to compute it</span>
+          <p>Programs are decomposed into <strong>computation steps</strong>, reflecting the computer architecture (memory cells you assign to, sequenced commands).</p>
+          <span class="langs">Fortran · C · Python · Java</span>
+        </div>
+        <div class="paradigm fun">
+          <h4>Functional</h4>
+          <span class="p-tag">what to compute</span>
+          <p>Based on the mathematical notion of <strong>function</strong>. The focus is on <em>what</em> should be computed, not <em>how</em> it should be computed.</p>
+          <span class="langs">Lisp · Haskell · CaML · Scheme</span>
+        </div>
+        <div class="paradigm log">
+          <h4>Logic</h4>
+          <span class="p-tag">describe the problem</span>
+          <p>Programs <strong>describe a problem</strong> rather than defining an algorithmic implementation. You state facts and rules; the engine searches for solutions.</p>
+          <span class="langs">Prolog</span>
+        </div>
+        <div class="paradigm oo">
+          <h4>Object-oriented</h4>
+          <span class="p-tag">orthogonal — adds to any of the above</span>
+          <p>This feature can be <strong>added to any of the above</strong> paradigms: there are OO imperative languages, OO functional languages, etc.</p>
+          <span class="langs">Java · OCaML · Scala · Python · Ruby · F#</span>
+        </div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Easy marks — don't lose them</div>
+        OO is <strong>not a fourth sibling</strong> of imperative/functional/logic; it's an <em>orthogonal feature</em> that can be layered onto any of them. That's why <strong>Java</strong> is listed as both imperative <em>and</em> object-oriented, and <strong>OCaML/F#</strong> as both functional <em>and</em> object-oriented. Getting this distinction right is a classic exam discriminator.
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The one-line contrast worth memorising</div>
+        <strong>Imperative</strong> = a sequence of state changes (<em>how</em>). <strong>Functional</strong> = evaluation of expressions/functions (<em>what</em>). <strong>Logic</strong> = a description of the problem, with the search strategy supplied by the language. The course covers all three in that order: imperative first (SIMP), then functional + type systems, then logic (Prolog) at the end.
+      </div>
+      <!-- ===== Three components ===== -->
+      <h2 id="w1-components">Definition of a programming language: the three components</h2>
+      <p>This is the single most important slide of the lecture. <strong>A language has three main components.</strong></p>
+      <div class="concept-grid">
+        <div class="concept-card" data-num="1">
+          <h3>Syntax</h3>
+          <p>Defines the <strong>form</strong> of programs: how expressions, commands and declarations are built and put together to form a program.</p>
+        </div>
+        <div class="concept-card" data-num="2">
+          <h3>Semantics</h3>
+          <p>Gives the <strong>meaning</strong> of programs: how they behave when they are executed.</p>
+        </div>
+        <div class="concept-card" data-num="3">
+          <h3>Implementation</h3>
+          <p>A <strong>software system</strong> that can read a program and execute it on a machine, plus a set of tools (editors, debuggers, etc).</p>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why the order matters</div>
+        Syntax tells you which <em>strings</em> (or trees) are programs. Semantics attaches <em>meaning</em> to those trees. Implementation is the <em>machinery</em> that makes the meaning actually happen on hardware. Later in this lecture, abstract syntax is defined precisely as <em>"the syntax trees, to which a semantics is associated"</em> — that phrase is the hinge between components 1 and 2.
+      </div>
+      <!-- ===== Architecture ===== -->
+      <h2 id="w1-arch">Revision: computer architecture &amp; where language implementation sits</h2>
+      <p>The main components of a computer are <strong>memory</strong>, <strong>registers</strong>, and a <strong>processor</strong> with a set of machine instructions for arithmetic and logic operations (the <strong>machine language</strong>).</p>
+      <p>The operating system supplies <em>higher-level primitives</em> than machine language (input/output, file management, editors). Language implementations are built on top of these. User programs form the top layer:</p>
+      <div class="arch-stack">
+        <div class="arch-layer arch-user">user programs</div>
+        <div class="arch-layer arch-impl">language implementation</div>
+        <div class="arch-layer arch-os">operating system</div>
+        <div class="arch-layer arch-machine">machine</div>
+      </div>
+      <p style="text-align:center; font-style:italic; color:var(--ink-muted); font-size:13px;">Each layer offers a higher-level abstraction than the one below it.</p>
+      <div class="callout">
+        <div class="callout-label">The framing for the module</div>
+        We are concerned with <strong>high-level programming languages</strong>, which are (more or less) <strong>machine independent</strong>. Machine independence is exactly what creates the implementation problem: the gap between the language and the hardware has to be bridged by <em>something</em> — a compiler, an interpreter, or both.
+      </div>
+      <!-- ===== Implementation ===== -->
+      <h2 id="w1-impl">Implementation: compilation, interpretation, hybrid</h2>
+      <p>A high-level language can be implemented in three ways:</p>
+      <h3>1 · Compilation</h3>
+      <p>The <strong>compiler translates the source language into machine language</strong> that can be executed directly on the computer. This method provides <strong>fast program execution</strong>.</p>
+      <div class="callout exam">
+        <div class="callout-label">Memorise: the four phases of compilation</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Lexical Analysis</strong></li>
+          <li><strong>Syntax Analysis (Parsing)</strong></li>
+          <li><strong>Type and Semantics Analysis</strong></li>
+          <li><strong>Machine Code Generation</strong></li>
+        </ol>
+      </div>
+      <div class="pipeline">
+        <div class="pipe-stage"><h5>1 · Lexical Analysis</h5><p>Characters → tokens</p></div>
+        <div class="pipe-arrow"><span class="pa-label">tokens</span>→</div>
+        <div class="pipe-stage"><h5>2 · Syntax Analysis</h5><p>Tokens → syntax tree (parsing)</p></div>
+        <div class="pipe-arrow"><span class="pa-label">tree</span>→</div>
+        <div class="pipe-stage"><h5>3 · Type &amp; Semantics</h5><p>Static checks on the tree</p></div>
+        <div class="pipe-arrow"><span class="pa-label">checked</span>→</div>
+        <div class="pipe-stage"><h5>4 · Code Generation</h5><p>Emit machine code</p></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">📘 Notice the three components hiding in the pipeline</div>
+        Phase 1–2 implement the <strong>syntax</strong> (concrete syntax in, abstract syntax tree out). Phase 3 implements the <strong>static semantics</strong> (typing — see below). Phase 4 realises the <strong>dynamic semantics</strong> in machine code. The compiler is literally the three components of a language, executed in order. <em>(Detail on this is the Compilers course; here we only need the phase names and the idea.)</em>
+      </div>
+      <h3>Execution: the fetch–execute cycle</h3>
+      <p>Machine code is executed in a process called the <strong>fetch–execute cycle</strong>. Each machine instruction is moved from the memory (where programs reside) to the processor:</p>
+      <div class="code-block">
+Initialise the <span style="color:var(--code-kw);">program counter</span>   <span style="color:var(--code-cm);">// held in a register of the machine</span>
+Repeat forever:
+    <span style="color:var(--code-dim);">1.</span> <span style="color:var(--code-kw);">fetch</span>     the instruction pointed at by the program counter
+    <span style="color:var(--code-dim);">2.</span> <span style="color:var(--code-kw);">increment</span> the program counter
+    <span style="color:var(--code-dim);">3.</span> <span style="color:var(--code-kw);">decode and execute</span> the instruction
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The ordering detail people get wrong</div>
+        The program counter is incremented <strong>before</strong> the instruction is decoded and executed — <em>not after</em>. That ordering is what makes jump instructions work: a jump executes <em>after</em> the increment, so it simply overwrites the already-advanced PC.
+      </div>
+      <p>When all the instructions in the program have been executed, control returns to the operating system. <em>(In a system running more than one program the process is more complex — that's the OS course's territory.)</em></p>
+      <h3>2 · Interpretation</h3>
+      <p>The program is executed by an <strong>interpreter</strong> which <em>simulates a machine whose fetch–execute cycle deals with high-level program instructions</em>. <strong>There is no translation</strong> — the interpreter produces a <strong>virtual machine</strong> for the language.</p>
+      <div class="mode-grid">
+        <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
+          <h4 style="color:var(--accent-3);">✓ Advantages</h4>
+          <ul>
+            <li>Easy to implement</li>
+            <li>Easy debugging of programs</li>
+            <li>Better error messages</li>
+          </ul>
+        </div>
+        <div class="mode-box" style="background:var(--tint-b2); border-color:var(--accent-2);">
+          <h4 style="color:var(--accent-2);">✗ Disadvantage</h4>
+          <ul>
+            <li><strong>Slow execution</strong></li>
+          </ul>
+        </div>
+      </div>
+      <p>Simpler languages and prototyping languages are usually interpreted — e.g. <strong>LISP</strong>, <strong>Unix shell scripts</strong>.</p>
+      <h3>3 · Hybrid implementation</h3>
+      <p>Some languages are compiled to an <strong>intermediate language</strong> instead of machine language; that intermediate language is then <strong>interpreted</strong>.</p>
+      <div class="callout tip">
+        <div class="callout-label">The advantage: portability</div>
+        Programs can be executed on <em>any machine that has an interpreter for the intermediate language</em>.
+        <ul style="margin:8px 0 0 0;">
+          <li>Many <strong>functional languages</strong> are translated to <em>abstract machine code</em>, which is then interpreted.</li>
+          <li>In <strong>Java</strong>, the intermediate form (<strong>bytecode</strong>) gives portability to any machine with a bytecode interpreter.</li>
+        </ul>
+      </div>
+      <p>Some languages have <em>both</em> an interpreted and a compiled version: the interpreter is used to develop and debug programs, which are later compiled to increase execution speed. <strong>This course uses <code>ghci</code></strong>, the interpreted version of Haskell — a compiler (<code>ghc</code>) is also available.</p>
+      <table class="scorecard">
+        <tr><th>Method</th><th>Speed</th><th>Portability</th><th>Debugging</th><th>Typical use</th></tr>
+        <tr><td><strong>Compilation</strong></td><td class="good">✓ Fast</td><td class="bad">✗ Per-machine</td><td class="mid">~ Harder</td><td>Production C, Fortran</td></tr>
+        <tr><td><strong>Interpretation</strong></td><td class="bad">✗ Slow</td><td class="mid">~ Needs interpreter</td><td class="good">✓ Easy, good errors</td><td>LISP, shell scripts</td></tr>
+        <tr><td><strong>Hybrid</strong></td><td class="mid">~ Middle</td><td class="good">✓ Excellent</td><td class="good">✓ Good</td><td>Java bytecode, functional abstract machines</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">📘 Worth knowing (background, not in the slides)</div>
+        Real systems blur these categories. <strong>JIT compilation</strong> (as in modern JVMs) starts by interpreting bytecode and then compiles hot paths to machine code at run time — a hybrid of the hybrid. Note also the recurring idea: an <strong>interpreter <em>is</em> a machine</strong>, just one built in software. That idea comes back later as the <em>abstract machine</em> — a transition system that specifies an interpreter.
+      </div>
+      <!-- ===== FETCH-EXECUTE TOOL ===== -->
+      <h3 id="w1-fetool">🛠️ Interactive: Fetch–Execute Cycle</h3>
+      <p>Step through a tiny machine and watch the three phases in order. The point to internalise: the program counter is incremented <em>before</em> the instruction executes — which is exactly why <code>JMP</code> works by overwriting it.</p>
+      <div class="tool" data-run="feReset">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Fetch–Execute Simulator</h3>
+        </div>
+        <div class="tool-desc">A machine with one accumulator, memory cells, and a program counter. Instructions: <code>LOAD n</code>, <code>ADD n</code>, <code>SUB n</code>, <code>STORE addr</code>, <code>LOADM addr</code>, <code>PRINT</code>, <code>JMPZ addr</code>, <code>JMP addr</code>, <code>HALT</code>.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1; min-width:260px;">
+            <label>Program (one instruction per line)</label>
+            <textarea id="fe-prog" rows="7" style="width:100%;">LOAD 5
+STORE 0
+LOAD 3
+ADD 4
+PRINT
+SUB 7
+JMPZ 8
+PRINT
+HALT</textarea>
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="feStep()">Step ▶</button>
+          <button class="tool-btn green" onclick="feRunAll()">Run all ⏭</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="fe-output" class="tool-output"></div>
+      </div>
+      <!-- ===== SYNTAX ===== -->
+      <h2 id="w1-syntax">Syntax</h2>
+      <p>The syntax is concerned with the <strong>form</strong> of programs. It is given by:</p>
+      <ul>
+        <li>an <strong>alphabet</strong>: the set of characters that can be used;</li>
+        <li>a <strong>set of rules</strong>: indicating how to form expressions, commands, etc.</li>
+      </ul>
+      <div class="callout exam">
+        <div class="callout-label">Concrete vs abstract syntax — a guaranteed exam distinction</div>
+        <div class="compare-2" style="margin:10px 0 0 0;">
+          <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+            <h4 style="color:var(--accent);">Concrete syntax</h4>
+            <p style="font-size:13.5px; margin:0;">Describes which <strong>chains of characters</strong> are well-formed programs. It defines <em>strings</em>.</p>
+          </div>
+          <div class="mode-box" style="background:var(--tint-d); border-color:var(--accent-4);">
+            <h4 style="color:var(--accent-4);">Abstract syntax</h4>
+            <p style="font-size:13.5px; margin:0;">Describes the <strong>syntax trees</strong>, <em>to which a semantics is associated</em>. It defines <em>trees</em>.</p>
+          </div>
+        </div>
+      </div>
+      <h3>Grammars</h3>
+      <p>To specify the syntax of a language we use <strong>grammars</strong>. A grammar is given by three things:</p>
+      <ol>
+        <li>An <strong>alphabet</strong> V = V<sub>T</sub> ∪ V<sub>NT</sub> — the <strong>terminals</strong> and <strong>non-terminals</strong>.</li>
+        <li>A set of <strong>rules</strong>.</li>
+        <li>An <strong>initial symbol</strong>.</li>
+      </ol>
+      <p>Rules are written in <strong>Backus–Naur form (BNF)</strong>:</p>
+      <div class="grammar">
+        <span class="nt">Exp</span>&nbsp;&nbsp;&nbsp; <span class="def">::=</span> <span class="nt">Num</span> <span class="bar">|</span> <span class="nt">Exp</span> <span class="nt">Op</span> <span class="nt">Exp</span><br>
+        <span class="nt">Op</span>&nbsp;&nbsp;&nbsp;&nbsp; <span class="def">::=</span> <span class="term">+</span> <span class="bar">|</span> <span class="term">−</span> <span class="bar">|</span> <span class="term">∗</span> <span class="bar">|</span> <span class="term">div</span><br>
+        <span class="nt">Num</span>&nbsp;&nbsp;&nbsp; <span class="def">::=</span> <span class="nt">Digit</span> <span class="bar">|</span> <span class="nt">Digit</span> <span class="nt">Num</span><br>
+        <span class="nt">Digit</span>&nbsp; <span class="def">::=</span> <span class="term">0</span> <span class="bar">|</span> <span class="term">1</span> <span class="bar">|</span> <span class="term">2</span> <span class="bar">|</span> <span class="term">3</span> <span class="bar">|</span> <span class="term">4</span> <span class="bar">|</span> <span class="term">5</span> <span class="bar">|</span> <span class="term">6</span> <span class="bar">|</span> <span class="term">7</span> <span class="bar">|</span> <span class="term">8</span> <span class="bar">|</span> <span class="term">9</span>
+        <div class="g-note">
+          <strong>Initial symbol:</strong> Exp &nbsp;·&nbsp;
+          <strong>Terminals:</strong> + &nbsp;−&nbsp; ∗ &nbsp;div&nbsp; 0 … 9 &nbsp;·&nbsp;
+          <strong>Non-terminals:</strong> Exp, Op, Num, Digit
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">How to read it</div>
+        <code>::=</code> means "is defined as"; <code>|</code> means "or". <strong>Non-terminals</strong> (Exp, Op, Num, Digit) are placeholders that get expanded further. <strong>Terminals</strong> (+, −, ∗, div, 0–9) are the actual characters that appear in a program — they can't be expanded. You generate a program by starting at the initial symbol and repeatedly replacing non-terminals using the rules, until only terminals remain. That sequence of replacements is a <strong>derivation</strong>.
+      </div>
+      <div class="callout">
+        <div class="callout-label">📘 Reading the recursion (background)</div>
+        Two rules here are <em>recursive</em>, and each does a different job. <code>Num ::= Digit | Digit Num</code> recurses on the <em>right only</em>, so it just builds a left-to-right sequence of digits — this is how multi-digit numbers like <code>42</code> exist at all. <code>Exp ::= Num | Exp Op Exp</code> recurses on <em>both sides</em>, and that double recursion is precisely what makes the grammar ambiguous, as we'll see next.
+      </div>
+      <!-- ===== AMBIGUITY ===== -->
+      <h2 id="w1-ambiguity">The problem: ambiguity</h2>
+      <p>Take the concrete syntax above and ask a simple question:</p>
+      <p style="text-align:center; font-family:'Fraunces',serif; font-size:22px; font-style:italic; margin:22px 0;">How is <code style="font-size:0.85em;">1 - 2 - 3</code> read?</p>
+      <p>The grammar gives us <strong>two different derivations</strong>, and they mean different things:</p>
+      <div class="deriv">
+        <div style="font-family:'IBM Plex Sans',sans-serif; font-size:12px; color:var(--accent); font-weight:600; margin-bottom:6px;">Derivation A — expand the <em>right</em> Exp</div>
+        Exp → Exp Op Exp → Num Op Exp → Digit Op Exp → 1 Op Exp → 1 − Exp → 1 − Exp Op Exp …
+        <div style="margin-top:8px; color:var(--accent-2);">This corresponds to &nbsp;<strong>1 − (2 − 3)</strong></div>
+      </div>
+      <div class="deriv">
+        <div style="font-family:'IBM Plex Sans',sans-serif; font-size:12px; color:var(--accent); font-weight:600; margin-bottom:6px;">Derivation B — expand the <em>left</em> Exp</div>
+        Exp → Exp Op Exp → Exp Op Exp Op Exp → Num Op Exp Op Exp → Digit Op Exp Op Exp → …
+        <div style="margin-top:8px; color:var(--accent-2);">This corresponds to &nbsp;<strong>(1 − 2) − 3</strong></div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Why this is fatal</div>
+        <strong>1 − (2 − 3) = 2</strong> but <strong>(1 − 2) − 3 = −4</strong>. The same string of characters has two structures and therefore <em>two different meanings</em>. A grammar that allows this is <strong>ambiguous</strong> — and an ambiguous concrete syntax means you cannot attach a well-defined semantics to a program, because you don't know which program you have.
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">📘 The standard definition &amp; the standard fix (background)</div>
+        A grammar is <strong>ambiguous</strong> if some string in its language has <em>more than one distinct parse tree</em>. Real language designers fix this <em>inside the concrete grammar</em> by <strong>stratifying</strong> it into levels — one non-terminal per precedence level, with the recursion placed on one side only to force an associativity:
+        <div class="grammar" style="margin:10px 0 0 0; box-shadow:none;">
+          <span class="nt">Exp</span>&nbsp;&nbsp;&nbsp; <span class="def">::=</span> <span class="nt">Exp</span> <span class="term">+</span> <span class="nt">Term</span> <span class="bar">|</span> <span class="nt">Exp</span> <span class="term">−</span> <span class="nt">Term</span> <span class="bar">|</span> <span class="nt">Term</span><br>
+          <span class="nt">Term</span>&nbsp;&nbsp; <span class="def">::=</span> <span class="nt">Term</span> <span class="term">∗</span> <span class="nt">Factor</span> <span class="bar">|</span> <span class="nt">Term</span> <span class="term">div</span> <span class="nt">Factor</span> <span class="bar">|</span> <span class="nt">Factor</span><br>
+          <span class="nt">Factor</span> <span class="def">::=</span> <span class="nt">Num</span> <span class="bar">|</span> <span class="term">(</span> <span class="nt">Exp</span> <span class="term">)</span>
+          <div class="g-note">Left-recursion on Exp/Term forces <em>left</em> associativity, so 1−2−3 can only be (1−2)−3. Putting ∗ and div at a deeper level gives them higher precedence. This is why real languages have brackets and precedence tables — but note that in <em>this</em> module we sidestep the whole issue by working with abstract syntax instead.</div>
+        </div>
+      </div>
+      <!-- ===== PARSE TREE TOOL ===== -->
+      <h3 id="w1-parsetool">🛠️ Interactive: Ambiguity &amp; Parse Trees</h3>
+      <p>Type an expression and see both readings side by side — the trees, their values, and a full step-by-step <strong>leftmost derivation</strong> for each. Derivations are a standard exam question, so use this to check your hand-written ones.</p>
+      <div class="tool" data-run="runParse">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Parse Tree &amp; Derivation Explorer</h3>
+        </div>
+        <div class="tool-desc">Uses the ambiguous grammar above (<code>Exp ::= Num | Exp Op Exp</code>). Operators: <code>+ - * div</code>. Try <code>1 - 2 - 3</code>, then <code>2 + 3 * 4</code>.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1; min-width:220px;">
+            <label>Expression</label>
+            <input type="text" id="pt-expr" value="1 - 2 - 3" style="width:100%;">
+          </div>
+          <button class="tool-btn" onclick="runParse()">Parse ▶</button>
+          <button class="tool-btn secondary" onclick="document.getElementById('pt-expr').value='2 + 3 * 4'; runParse();">Try 2 + 3 * 4</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="pt-output" class="tool-output"></div>
+      </div>
+      <!-- ===== ABSTRACT SYNTAX ===== -->
+      <h2 id="w1-abstract">Abstract syntax — the fix used in this course</h2>
+      <p>Rather than patching the concrete grammar, we move up a level. The <strong>abstract syntax</strong> of the same arithmetic language is:</p>
+      <div class="grammar">
+        <span class="nt">e</span>&nbsp;&nbsp; <span class="def">::=</span> <span class="nt">n</span> <span class="bar">|</span> <span class="term">op</span><span class="def">(</span><span class="nt">e</span><span class="def">,</span> <span class="nt">e</span><span class="def">)</span><br>
+        <span class="nt">op</span> <span class="def">::=</span> <span class="term">+</span> <span class="bar">|</span> <span class="term">−</span> <span class="bar">|</span> <span class="term">∗</span> <span class="bar">|</span> <span class="term">div</span>
+        <div class="g-note">This grammar defines <strong>trees</strong>, not strings.</div>
+      </div>
+      <p>And now there is <strong>no ambiguity</strong>, because the two readings are simply two <em>different terms</em>:</p>
+      <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:18px 0; color:var(--accent-2);">
+        −(1, −(2, 3)) &nbsp;≠&nbsp; −(−(1, 2), 3)
+      </div>
+      <div class="tree-pair">
+        <div class="tree-card">
+          <div class="tree-title">−(1, −(2, 3))</div>
+          <svg viewBox="0 0 200 155" style="max-width:200px; width:100%;" xmlns="http://www.w3.org/2000/svg">
+            <line x1="100" y1="30" x2="60" y2="72" stroke="var(--ink-soft)" stroke-width="1.5"/>
+            <line x1="100" y1="30" x2="140" y2="72" stroke="var(--ink-soft)" stroke-width="1.5"/>
+            <line x1="140" y1="88" x2="117" y2="122" stroke="var(--ink-soft)" stroke-width="1.5"/>
+            <line x1="146" y1="88" x2="167" y2="122" stroke="var(--ink-soft)" stroke-width="1.5"/>
+            <circle cx="100" cy="25" r="15" fill="var(--tint-b)" stroke="var(--accent-2)" stroke-width="2"/>
+            <text x="100" y="31" text-anchor="middle" font-family="IBM Plex Mono" font-size="15" fill="var(--accent-2)">−</text>
+            <circle cx="57" cy="78" r="14" fill="var(--tint-a)" stroke="var(--accent)" stroke-width="1.5"/>
+            <text x="57" y="83" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--accent)">1</text>
+            <circle cx="143" cy="78" r="15" fill="var(--tint-b)" stroke="var(--accent-2)" stroke-width="2"/>
+            <text x="143" y="84" text-anchor="middle" font-family="IBM Plex Mono" font-size="15" fill="var(--accent-2)">−</text>
+            <circle cx="112" cy="130" r="14" fill="var(--tint-a)" stroke="var(--accent)" stroke-width="1.5"/>
+            <text x="112" y="135" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--accent)">2</text>
+            <circle cx="172" cy="130" r="14" fill="var(--tint-a)" stroke="var(--accent)" stroke-width="1.5"/>
+            <text x="172" y="135" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--accent)">3</text>
+          </svg>
+          <div class="tree-val a">1 − (2 − 3) &nbsp;=&nbsp; 2</div>
+        </div>
+        <div class="tree-card">
+          <div class="tree-title">−(−(1, 2), 3)</div>
+          <svg viewBox="0 0 200 155" style="max-width:200px; width:100%;" xmlns="http://www.w3.org/2000/svg">
+            <line x1="100" y1="30" x2="60" y2="72" stroke="var(--ink-soft)" stroke-width="1.5"/>
+            <line x1="100" y1="30" x2="140" y2="72" stroke="var(--ink-soft)" stroke-width="1.5"/>
+            <line x1="54" y1="88" x2="32" y2="122" stroke="var(--ink-soft)" stroke-width="1.5"/>
+            <line x1="60" y1="88" x2="84" y2="122" stroke="var(--ink-soft)" stroke-width="1.5"/>
+            <circle cx="100" cy="25" r="15" fill="var(--tint-b)" stroke="var(--accent-2)" stroke-width="2"/>
+            <text x="100" y="31" text-anchor="middle" font-family="IBM Plex Mono" font-size="15" fill="var(--accent-2)">−</text>
+            <circle cx="57" cy="78" r="15" fill="var(--tint-b)" stroke="var(--accent-2)" stroke-width="2"/>
+            <text x="57" y="84" text-anchor="middle" font-family="IBM Plex Mono" font-size="15" fill="var(--accent-2)">−</text>
+            <circle cx="143" cy="78" r="14" fill="var(--tint-a)" stroke="var(--accent)" stroke-width="1.5"/>
+            <text x="143" y="83" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--accent)">3</text>
+            <circle cx="28" cy="130" r="14" fill="var(--tint-a)" stroke="var(--accent)" stroke-width="1.5"/>
+            <text x="28" y="135" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--accent)">1</text>
+            <circle cx="88" cy="130" r="14" fill="var(--tint-a)" stroke="var(--accent)" stroke-width="1.5"/>
+            <text x="88" y="135" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--accent)">2</text>
+          </svg>
+          <div class="tree-val b">(1 − 2) − 3 &nbsp;=&nbsp; −4</div>
+        </div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The three remarks — learn these verbatim</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Abstract syntax describes program representation.</strong></li>
+          <li><strong>Abstract syntax is not ambiguous.</strong></li>
+          <li><strong>We will always work with the abstract syntax</strong> of the language, and study the semantics of the main constructs of programming languages.</li>
+        </ol>
+        <p style="margin:10px 0 0 0;">Point 3 is a promise about the rest of the module: from here on, every semantic rule you meet is defined over <em>trees</em>, never over strings. Parsing (string → tree) is somebody else's problem.</p>
+      </div>
+      <!-- ===== SEMANTICS ===== -->
+      <h2 id="w1-semantics">Semantics</h2>
+      <p>The semantics of a language defines the <strong>meaning</strong> of programs — that is, <em>how they behave when they are executed on a computer</em>.</p>
+      <div class="callout">
+        <div class="callout-label">The motivating warning</div>
+        Different languages have different syntax <em>and</em> different semantics for similar constructs — but <strong>variations in syntax are often superficial</strong>. It is important to appreciate the differences in <em>meaning</em> of apparently similar constructs. (Two languages can both have a <code>for</code> loop or a <code>=</code> and mean quite different things by them.)
+      </div>
+      <p>There are <strong>two kinds</strong> of semantics:</p>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-d); border-color:var(--accent-4);">
+          <h4 style="color:var(--accent-4);">Static semantics — <em>typing</em></h4>
+          <p style="font-size:13.5px; margin:0 0 8px 0;">The goal is to detect, <strong>before the actual execution</strong> of the program, programs that are <em>syntactically correct but will give errors during execution</em>.</p>
+          <p style="font-size:13.5px; margin:0;">Example: <code>1 + 'a'</code> — perfectly well-formed, entirely meaningless.</p>
+          <p style="font-size:12px; color:var(--ink-muted); margin:8px 0 0 0; font-style:italic;">Type systems are studied later in the course.</p>
+        </div>
+        <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
+          <h4 style="color:var(--accent-3);">Dynamic semantics — <em>just "semantics"</em></h4>
+          <p style="font-size:13.5px; margin:0;">Specifies the <strong>meaning</strong> of programs: what actually happens when they run.</p>
+          <p style="font-size:12px; color:var(--ink-muted); margin:8px 0 0 0; font-style:italic;">When someone says "the semantics" with no qualifier, they mean this one.</p>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The dividing line, stated cleanly</div>
+        <strong>Syntax</strong> rejects <code>1 + + )</code> — it isn't even a program. <strong>Static semantics</strong> rejects <code>1 + 'a'</code> — it's a program, but a nonsensical one, and we can prove that <em>without running it</em>. <strong>Dynamic semantics</strong> tells you what <code>1 + 2</code> actually does. Each layer catches errors the previous one can't see.
+      </div>
+      <h3>Informal vs formal semantics</h3>
+      <p><strong>Informal</strong> definitions — the English explanations in language manuals — are often <em>imprecise and incomplete</em>. <strong>Formal</strong> semantics matter to three different audiences, and the exam likes this list:</p>
+      <div class="concept-grid">
+        <div class="concept-card" data-num="1">
+          <h3>For the implementation of the language</h3>
+          <p>The behaviour of <em>each construct</em> is specified, providing an <strong>abstraction of the execution process which is independent of the machine</strong>.</p>
+        </div>
+        <div class="concept-card" data-num="2">
+          <h3>For programmers</h3>
+          <p>A formal semantics provides <strong>tools and techniques to reason about programs</strong> and to <em>prove properties</em> of programs.</p>
+        </div>
+        <div class="concept-card" data-num="3">
+          <h3>For language designers</h3>
+          <p>It allows them to <strong>detect ambiguities</strong> in the constructs, and it <em>suggests improvements and new constructs</em> — e.g. the influence of the study of the <strong>λ-calculus</strong> on the design of functional languages.</p>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The honest caveat</div>
+        Formal semantic descriptions <strong>can be complex</strong>, so in practice <em>usually only a part of the language is formally defined</em>. Full formal specifications of production languages are rare and hard-won.
+      </div>
+      <!-- ===== STYLES ===== -->
+      <h2 id="w1-styles">Styles of semantics</h2>
+      <p>Three styles. They are <strong>complementary</strong>, and each has its advantages.</p>
+      <div class="sem-grid">
+        <div class="sem-card sem-den">
+          <h4>Denotational</h4>
+          <p>The meaning of expressions (and of the constructs in general) is given in an <strong>abstract, mathematical way</strong>, using a mathematical model for the language. The semantics describes the <em>effect</em> of each construct.</p>
+          <span class="sem-use">good for: reasoning &amp; proving properties of programs</span>
+        </div>
+        <div class="sem-card sem-ax">
+          <h4>Axiomatic</h4>
+          <p>Uses <strong>axioms and deduction rules</strong> in a specific logic. <em>Predicates</em> or <em>assertions</em> are given before and after each construct, describing the constraints on program variables — a <strong>precondition</strong> and a <strong>postcondition</strong>.</p>
+          <span class="sem-use">good for: reasoning &amp; proving properties of programs</span>
+        </div>
+        <div class="sem-card sem-op">
+          <h4>Operational ★</h4>
+          <p>The meaning of each construct is given in terms of <strong>computation steps</strong>. The behaviour of the program during execution can be described using a <strong>transition system</strong> (abstract machine, structural operational semantics).</p>
+          <span class="sem-use">good for: implementing the language &amp; proving compiler optimisations correct</span>
+        </div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Which is used for what — and which we study</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Operational</strong> semantics is very useful for the <em>implementation</em> of the language and for <em>proving the correctness of compiler optimisations</em>.</li>
+          <li><strong>Denotational</strong> and <strong>axiomatic</strong> semantics are useful to <em>reason about and prove properties of programs</em>.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;"><strong>In this course we study operational semantics.</strong> Expect a question asking you to name all three styles, characterise each in one line, and say which is best suited to which task.</p>
+      </div>
+      <!-- ===== TRANSITION SYSTEMS ===== -->
+      <h2 id="w1-transitions">Operational semantics: transition systems</h2>
+      <p>This is the formal machinery the rest of the module runs on. Learn the definition precisely.</p>
+      <div class="callout">
+        <div class="callout-label">Definition — a transition system</div>
+        A transition system is specified by:
+        <ul style="margin:8px 0 0 0;">
+          <li>A set <strong>Config</strong> of <strong>configurations</strong> (or <em>states</em>),</li>
+          <li>A binary relation <strong>→ ⊆ Config × Config</strong>, called the <strong>transition relation</strong>. We write <code>c → c′</code> (infix) to indicate that <em>c</em> and <em>c′</em> are related by →.</li>
+        </ul>
+      </div>
+      <h3>Notation</h3>
+      <table>
+        <tr><th>Notation</th><th>Meaning</th></tr>
+        <tr><td><code>c → c′</code></td><td>A <strong>transition</strong> from <em>c</em> to <em>c′</em> — a change of state. One computation step.</td></tr>
+        <tr><td><code>c →* c′</code></td><td>The <strong>reflexive transitive closure</strong> of →. It holds iff there is a sequence of transitions <code>c → c₁ → … → cₙ = c′</code> where <strong>n ≥ 0</strong>.</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">Don't lose the "n ≥ 0"</div>
+        Because <strong>n may be 0</strong>, <code>c →* c</code> always holds — that's the <em>reflexive</em> part. So →* means "reaches in <em>zero or more</em> steps", not "one or more". A configuration always reaches itself. This trips people up in proofs.
+      </div>
+      <h3>Initial and terminal configurations</h3>
+      <p>We distinguish an <strong>initial</strong> and a <strong>final</strong> (also called <strong>terminal</strong>) subset of configurations, written <strong>I</strong> and <strong>T</strong>. The defining property:</p>
+      <div class="callout warn">
+        <div class="callout-label">Terminal means stuck</div>
+        For all <code>c ∈ T</code> there is <strong>no</strong> <code>c′</code> such that <code>c → c′</code>. A terminal configuration has <em>no outgoing transitions</em> — the machine cannot move, so it has stopped.
+        <p style="margin:10px 0 0 0;">The idea: <strong>a sequence of transitions from <em>i</em> ∈ I to <em>t</em> ∈ T represents a run of the program.</strong></p>
+      </div>
+      <div class="ts-box">
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--ink-muted); margin-bottom:6px;">a run of a program</div>
+        <div class="ts-chain">
+          <div class="ts-node init">i ∈ I</div>
+          <span class="ts-arrow">→</span>
+          <div class="ts-node mid">c₁</div>
+          <span class="ts-arrow">→</span>
+          <div class="ts-node mid">c₂</div>
+          <span class="ts-arrow">→</span>
+          <div class="ts-node mid">…</div>
+          <span class="ts-arrow">→</span>
+          <div class="ts-node term">t ∈ T</div>
+        </div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--accent-2); margin-top:4px;">the whole chain is summarised as &nbsp;i →* t</div>
+        <div class="ts-legend">
+          <span>■ initial configuration</span>
+          <span>■ intermediate</span>
+          <span>■ terminal (no outgoing →)</span>
+        </div>
+      </div>
+      <h3>Determinism</h3>
+      <div class="callout exam">
+        <div class="callout-label">Definition to memorise exactly</div>
+        A transition system is <strong>deterministic</strong> if
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:12px 0; color:var(--accent-2);">
+          for all c, c₁, c₂: &nbsp; c → c₁ &nbsp;and&nbsp; c → c₂ &nbsp;implies&nbsp; c₁ = c₂
+        </div>
+        <p style="margin:0;">In words: <strong>every configuration has at most one successor</strong>. If any configuration can step to two <em>different</em> configurations, the system is non-deterministic.</p>
+      </div>
+      <div class="ts-box">
+        <div class="compare-2" style="margin:0;">
+          <div>
+            <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--accent-3); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px;">✓ deterministic</div>
+            <div class="ts-chain">
+              <div class="ts-node init">c</div><span class="ts-arrow">→</span><div class="ts-node mid">c₁</div>
+            </div>
+            <p style="text-align:center; font-size:12px; color:var(--ink-muted); margin:0;">exactly one way forward from every state</p>
+          </div>
+          <div>
+            <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--accent-2); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px;">✗ non-deterministic</div>
+            <div class="ts-chain">
+              <div class="ts-node init">c</div>
+              <span class="ts-arrow">→</span>
+              <div style="display:flex; flex-direction:column; gap:5px;">
+                <div class="ts-node branch">c₁</div>
+                <div class="ts-node branch">c₂</div>
+              </div>
+            </div>
+            <p style="text-align:center; font-size:12px; color:var(--ink-muted); margin:0;">c → c₁ and c → c₂ with c₁ ≠ c₂</p>
+          </div>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">📘 Why determinism is the property you check (background)</div>
+        A deterministic transition system means a program has <strong>exactly one possible run</strong> — so "the result" is well defined and an implementation has no choices to make. Non-determinism appears deliberately in some settings (concurrency, and the search in <strong>logic programming</strong> — which is why Prolog needs a specified <em>strategy</em> to pick among applicable rules). Keep the distinction in mind: it comes back in the Prolog part of the course.
+      </div>
+      <!-- ===== TRANSITION SYSTEM TOOL ===== -->
+      <h3 id="w1-tstool">🛠️ Interactive: Transition System Explorer</h3>
+      <p>Define a transition relation and have the definitions checked for you: which configurations are <strong>terminal</strong>, whether the system is <strong>deterministic</strong>, and what is reachable via <strong>→*</strong> from a chosen start. Edit the relation to break determinism and watch the verdict flip.</p>
+      <div class="tool" data-run="runTS">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Transition Relation Checker</h3>
+        </div>
+        <div class="tool-desc">One transition per line, written <code>c -&gt; c'</code>. Configuration names can be anything (<code>c0</code>, <code>&lt;x:=1, s&gt;</code>, …).</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1; min-width:240px;">
+            <label>Transition relation →</label>
+            <textarea id="ts-rel" rows="6" style="width:100%;">c0 -> c1
+c1 -> c2
+c2 -> c3
+c3 -> c4</textarea>
+          </div>
+          <div class="tool-field">
+            <label>Start configuration</label>
+            <input type="text" id="ts-start" value="c0" style="width:130px;">
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="runTS()">Analyse ▶</button>
+          <button class="tool-btn danger" onclick="tsPreset('nondet')">Load a non-deterministic one</button>
+          <button class="tool-btn secondary" onclick="tsPreset('loop')">Load a non-terminating one</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="ts-output" class="tool-output"></div>
+      </div>
+      <!-- ===== ABSTRACT MACHINES ===== -->
+      <h2 id="w1-machines">Abstract machines &amp; the structural approach</h2>
+      <p>The <strong>first method ever used</strong> to give a formal description of the behaviour of a program was in terms of <strong>abstract machines</strong>.</p>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        An <strong>abstract machine</strong> is a <em>transition system that specifies an interpreter</em> for a programming language.
+        <p style="margin:10px 0 0 0;">The lecture promises an example for a simple imperative language: <strong>SIMP</strong> — which is where Week 2 onwards goes.</p>
+      </div>
+      <table class="scorecard">
+        <tr><th>Abstract machines</th><th>Verdict</th></tr>
+        <tr><td>For <strong>implementing</strong> a language</td><td class="good">✓ Very useful — they describe the execution of each command</td></tr>
+        <tr><td>For <strong>users</strong> of the language</td><td class="bad">✗ Not always easy to understand</td></tr>
+      </table>
+      <p>So there is a better option. It is possible to specify the operational semantics of a language in a <strong>more structured way</strong>:</p>
+      <div class="callout tip">
+        <div class="callout-label">Structural operational semantics (SOS)</div>
+        The <strong>structural approach to operational semantics</strong>, based on transition systems, gives an <strong>inductive definition</strong> of the execution of a program: <em>each command is described in terms of its components</em>.
+        <p style="margin:10px 0 0 0;">That last clause is the whole idea — the meaning of <code>while b do c</code> is defined using the meanings of <code>b</code> and <code>c</code>, not by describing a machine. It's compositional, and it's why we needed <em>abstract syntax trees</em>: "its components" means "its subtrees".</p>
+      </div>
+      <div class="diagram">
+        <strong>1.</strong> <strong>Syntax</strong> gives us trees &nbsp;→&nbsp; <code>op(e₁, e₂)</code>, <code>while(b, c)</code>, …<br>
+        <strong>2.</strong> A <strong>configuration</strong> pairs a piece of program with its state &nbsp;→&nbsp; <code>⟨c, σ⟩</code><br>
+        <strong>3.</strong> The <strong>transition relation →</strong> says how one configuration steps to the next<br>
+        <strong>4.</strong> <strong>SOS rules</strong> define → <em>inductively, by the shape of the tree</em><br>
+        <strong>5.</strong> A <strong>run</strong> is a chain <code>i →* t</code> from an initial to a terminal configuration
+        <div class="caption">How the pieces of this lecture assemble into the method used for the rest of the module.</div>
+      </div>
+      <!-- ===== ROADMAP ===== -->
+      <h2 id="w1-roadmap">Where the course goes from here <span class="context-badge">roadmap</span></h2>
+      <div class="concept-grid">
+        <div class="concept-card" data-num="1">
+          <h3>Imperative languages</h3>
+          <p>The main components of imperative languages: first an <strong>informal description</strong>, then a <strong>formal specification</strong> of the main aspects using <em>transition systems</em>.</p>
+        </div>
+        <div class="concept-card" data-num="2">
+          <h3>Functional languages</h3>
+          <p>The <strong>second part</strong> of the course is dedicated to functional languages and their <strong>type systems</strong>. (This is where <code>ghci</code> comes in.)</p>
+        </div>
+        <div class="concept-card" data-num="3">
+          <h3>Logic programming</h3>
+          <p>A brief study of logic programming languages, describing the <strong>operational semantics of Prolog</strong>, in the last part of the course.</p>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Reading</div>
+        Every section of this lecture points at <strong>Chapter 1 of the textbook</strong> (Fernández) plus the reference list there. For history and evolution of programming languages, <strong>Sebesta's book</strong>. Compilation and interpretation are covered in depth in the <em>Compilers</em> course.
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="w1-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 1</div>
+        <ol>
+          <li><strong>The three components of a language</strong> — syntax (form), semantics (meaning), implementation (software system + tools). One sentence each.</li>
+          <li><strong>The four paradigms</strong> — imperative (steps, mirrors architecture), functional (mathematical functions, <em>what</em> not <em>how</em>), logic (describes the problem, not the algorithm), object-oriented (<em>orthogonal</em> — can be added to any of the others). Give example languages for each.</li>
+          <li><strong>Design method vs language</strong> — if the design method isn't compatible with the language, the programming effort increases.</li>
+          <li><strong>The layer diagram</strong> — machine → OS → language implementation → user programs.</li>
+          <li><strong>Three implementation techniques</strong> — compilation (fast), interpretation (easy to implement, easy debugging, better errors, but slow), hybrid (portability, e.g. Java bytecode / abstract machine code).</li>
+          <li><strong>The four phases of compilation</strong> — lexical analysis, syntax analysis (parsing), type &amp; semantics analysis, machine code generation.</li>
+          <li><strong>The fetch–execute cycle</strong> — initialise PC; then repeat: fetch, <em>increment PC</em>, decode &amp; execute. Note the increment comes <em>before</em> execution.</li>
+          <li><strong>What a grammar is</strong> — alphabet (terminals + non-terminals), rules, initial symbol. Be able to identify each in a given BNF grammar.</li>
+          <li><strong>Concrete vs abstract syntax</strong> — chains of characters vs syntax trees to which a semantics is associated.</li>
+          <li><strong>Ambiguity</strong> — be able to give <em>both</em> derivations of <code>1 - 2 - 3</code> and say which bracketing each corresponds to. Expect to do this for a fresh expression.</li>
+          <li><strong>Why abstract syntax fixes it</strong> — it defines trees, so <code>−(1, −(2, 3)) ≠ −(−(1, 2), 3)</code>; abstract syntax is unambiguous, and we always work with it.</li>
+          <li><strong>Static vs dynamic semantics</strong> — typing (catches <code>1 + 'a'</code> <em>before</em> execution) vs meaning during execution.</li>
+          <li><strong>Why formal semantics matters</strong> — for implementation (machine-independent abstraction), for programmers (reason about &amp; prove properties), for designers (detect ambiguities, suggest constructs — cf. λ-calculus).</li>
+          <li><strong>The three styles</strong> — denotational (abstract/mathematical model, describes the effect), axiomatic (axioms + deduction rules, pre/postconditions), operational (computation steps, transition systems). Know which suits implementation vs proving program properties. <strong>We study operational.</strong></li>
+          <li><strong>Transition system</strong> — a set Config of configurations + a binary relation → ⊆ Config × Config. Define <code>→*</code> as the reflexive transitive closure (n ≥ 0).</li>
+          <li><strong>Terminal configurations</strong> — for all c ∈ T there is no c′ with c → c′. A run is a sequence from i ∈ I to t ∈ T.</li>
+          <li><strong>Determinism</strong> — for all c, c₁, c₂: c → c₁ and c → c₂ implies c₁ = c₂. Be ready to check a given relation.</li>
+          <li><strong>Abstract machine</strong> — a transition system that specifies an interpreter for a language. Useful for implementation, not always easy for users → hence the <strong>structural</strong> approach, which defines execution <em>inductively</em>, each command in terms of its components.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 1 notes. Send Week 2 slides whenever you're ready.</p>
+    </section>

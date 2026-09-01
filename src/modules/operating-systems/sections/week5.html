@@ -1,0 +1,259 @@
+<section id="week5" class="week-section">
+
+      <div class="week-header">
+        <div class="week-eyebrow">Week 05 · User-Space Topics</div>
+        <h1>malloc, the Stack, Files &amp; I/O</h1>
+        <div class="week-subtitle">the machinery that lives on top of the kernel</div>
+      </div>
+
+      <p>This week steps <em>up</em> from the kernel into <strong>user space</strong> — the things that run on top of the OS but lean heavily on it. Four threads, all connecting back to ideas you've already met (fragmentation, the stack, system calls, interrupts).</p>
+
+      <!-- ===== malloc ===== -->
+      <h2 id="w5-malloc">malloc &amp; the heap</h2>
+
+      <p>The OS only deals in <strong>big chunks of memory — at least a page</strong>. But programs want small pieces: <code>malloc(42 * sizeof(int))</code> wants 168 bytes, not a 4kB page. The job of a <strong>memory allocator</strong> (malloc/free in C, new/delete in C++) is to <em>parcel out small pieces from a bigger chunk</em> the OS gave it — the <strong>heap</strong>.</p>
+
+      <div class="callout">
+        <div class="callout-label">What malloc actually means</div>
+        <code>int *pn = malloc(42 * sizeof(int));</code> means: <em>"find a free range of ≥ 168 bytes, chop out 168 bytes, mark it as used, and return a pointer to the start."</em> <code>free(pn)</code> does the opposite: <em>"mark this chunk as free."</em> Crucially, the <strong>OS has nothing to do with these calls</strong> — both <code>malloc</code> and <code>new</code> are <em>library code running inside the user process</em>.
+      </div>
+
+      <h3>Why study malloc?</h3>
+      <ul>
+        <li>Allocators <em>do</em> use the OS to get their raw memory (in page-sized chunks and larger).</li>
+        <li>An OS kernel has its <em>own</em> internal malloc-like allocator for its own use.</li>
+        <li>They show <strong>another layer of fragmentation</strong> — this time <em>within</em> the heap, on top of the OS's page-level fragmentation.</li>
+        <li>Higher-level languages (C++, Java, Python) almost always have a malloc-like allocator underneath.</li>
+      </ul>
+
+      <div class="callout tip">
+        <div class="callout-label">Two layers of allocation</div>
+        From the <strong>OS's</strong> point of view, the whole heap arena is "allocated" to the process. From <strong>malloc's</strong> point of view, parts of that arena are still "free." So you have allocation-within-allocation, and fragmentation-within-fragmentation. <em>malloc means manual</em> — here we only consider manual memory management (you call <code>free</code>/<code>delete</code> yourself), not garbage collection.
+      </div>
+
+      <!-- ===== Free list ===== -->
+      <h2 id="w5-freelist">Free lists &amp; fit policies</h2>
+
+      <p>How does malloc "mark" a chunk as free? It records it in a data structure. The simplest is a <strong>free list</strong> — a linked list <em>threaded through the unallocated space itself</em>. Each node records the <strong>size</strong> of its free area and a <strong>pointer to the next</strong> free area.</p>
+
+      <div class="freelist">
+        <div class="fl-node">head</div>
+        <span class="fl-arrow">→</span>
+        <div class="fl-node"><span class="sz">size: 64</span><br>next →</div>
+        <span class="fl-arrow">→</span>
+        <div class="fl-node"><span class="sz">size: 200</span><br>next →</div>
+        <span class="fl-arrow">→</span>
+        <div class="fl-node"><span class="sz">size: 32</span><br>next →</div>
+        <span class="fl-arrow">→</span>
+        <div class="fl-node">NULL</div>
+      </div>
+      <p>Adjacent free areas are usually <strong>coalesced</strong> (merged) to fight fragmentation.</p>
+
+      <h3>First-fit vs best-fit</h3>
+      <p>Allocation involves a <strong>search</strong> through the free list. Two classic strategies:</p>
+      <table>
+        <tr><th>Strategy</th><th>How</th><th>Trade-off</th></tr>
+        <tr><td><strong>First-fit</strong></td><td>Use the first free block big enough</td><td>Fast (stops early), but can leave awkward leftovers near the list head</td></tr>
+        <tr><td><strong>Best-fit</strong></td><td>Search all blocks, use the smallest that fits</td><td>Less wasted space per allocation, but slower (must scan everything) and can create tiny unusable fragments</td></tr>
+      </table>
+      <p style="font-size:13px; color:var(--ink-muted);">A better real-world structure: <em>segregated free lists</em> — separate lists bucketed by size class, so the search is much faster.</p>
+
+      <!-- ===== brk/mmap ===== -->
+      <h2 id="w5-brk">Getting more memory: brk &amp; mmap</h2>
+
+      <p>When the heap is full and fragmented, a big <code>malloc</code> can't be satisfied. The allocator must <strong>ask the OS for more memory</strong> via a system call. Two ways on Unix-like systems:</p>
+
+      <div class="compare-2">
+        <div class="mode-box user" style="background:#fbeee4; border-color:var(--accent-2);">
+          <h4>brk() — the classic</h4>
+          <p style="font-size:13px; margin:0;">Moves the <strong>program break</strong> (the end of the heap; a vestige of segmentation!) to a later address, gaining memory in between. The break's location is part of the per-process state the OS maintains. <code>brk(curbrk + 100*PAGE_SIZE)</code> asks for 100 more pages.</p>
+        </div>
+        <div class="mode-box kernel" style="background:#ecf4e6; border-color:var(--accent-3);">
+          <h4>mmap() — the modern, flexible way</h4>
+          <p style="font-size:13px; margin:0;">Doesn't care about the program break. Returns a fresh, possibly non-contiguous arena anywhere. malloc can add it to the free list. <strong>No contended single resource</strong> (unlike the one program break), so it's better for multi-threaded allocators.</p>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Connecting back to demand paging</div>
+        Asking for memory via <code>brk</code>/<code>mmap</code> <em>need not allocate physical memory immediately</em> — it just reserves virtual address space. Physical frames arrive lazily on first access, via page faults (Week 4!). Note <code>mmap</code> with <code>MAP_ANONYMOUS</code> gives blank memory; mapping a <em>named file</em> instead is how you get memory-mapped files.
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">malloc is a highly-optimised concurrent codebase</div>
+        Many threads may call <code>malloc()</code> at once, so the free list must be <strong>concurrent</strong> (thread-safe). Doug Lea — who designed much of <code>java.util.concurrent</code> — also wrote <strong>dlmalloc</strong>, one of the most widely-used implementations. (InfOS's kernel malloc <em>is</em> dlmalloc, for the kernel's own chunk allocation; frames use a different algorithm.) Real allocators are measured per <strong>workload</strong> (a program+input pair) on speed of alloc/free and internal/external fragmentation.
+      </div>
+
+      <!-- ===== Stack in depth ===== -->
+      <h2 id="w5-stack">The stack in depth</h2>
+
+      <p>Back to the stack — now in detail, because (a) you need it for the mini-project, and (b) <strong>many security exploits target it</strong>. When a function is called, a <strong>stack frame</strong> (or "activation record") is pushed. In the x86-64 scheme shown in the slides, the first two things in each frame are:</p>
+      <ol>
+        <li>The caller's <strong>return address</strong> (saved program counter — where to jump back to)</li>
+        <li>The caller's <strong>frame pointer</strong> (saved <code>rbp</code>)</li>
+      </ol>
+      <p>...followed by saved registers and local variables (e.g. that <code>Hello, world!</code> buffer, or saved <code>rbx</code>/<code>r12</code>).</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Two things the stack encodes</div>
+        Using the frame pointer, you can <strong>"walk up" the stack</strong>, following the chain of frames. This tells you:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>History</strong> — what uncompleted calls got us here? (Useful for a <em>backtrace</em> when debugging — that's the Medium mini-project.)</li>
+          <li><strong>Continuation</strong> — where will we return to next? (One answer per active call.)</li>
+        </ul>
+        <p style="margin:8px 0 0 0;"><strong>Influence the stack and you influence the program's future.</strong> That sentence is the entire premise of the next section.</p>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">A lovely detail</div>
+        The instruction <code>movabs $0x77202c6f6c6c6548, %rax</code> in the hello-world disassembly looks like a magic number — but those 8 bytes, read little-endian, literally spell <code>"Hello, w"</code>. The string is being loaded as an immediate integer constant.
+      </div>
+
+      <!-- ===== Buffer overflows ===== -->
+      <h2 id="w5-overflow">Buffer overflows &amp; stack smashing</h2>
+
+      <p>Consider this innocent-looking program:</p>
+      <div class="code-block">
+char buf[10];
+scanf("%s", buf);   <span style="color:#7eb892;">// read a string into buf...</span>
+return 0;
+      </div>
+
+      <p><strong>Danger:</strong> what if you type <em>more</em> than 10 characters? <code>scanf</code> doesn't check the buffer size — it just keeps writing. The stack grows toward lower addresses but arrays fill toward <em>higher</em> addresses, so an over-long input writes <em>past</em> the buffer and over the saved registers, the saved frame pointer, and eventually the <strong>return address</strong>.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">The attack</div>
+        If an attacker knows the address of a powerful library function elsewhere in the process, they can craft input where the overflowing bytes <em>are</em> that address — overwriting the return address so that when <code>main</code> returns, it "returns" into the attacker's chosen code instead. This is a <strong>stack-smashing attack</strong>, a kind of <strong>buffer overflow</strong>.
+      </div>
+
+      <h3>Why does this happen — and why doesn't the compiler stop it?</h3>
+      <p>When array indexing / pointer arithmetic is <strong>not bounds-checked</strong>, the code is trusting that input won't exceed the buffer. C and C++ don't insert bounds checks by default (for speed, and because the language permits raw pointer arithmetic that makes checks hard). Safer interfaces exist and <em>should</em> be used: <code>strncpy()</code> over <code>strcpy()</code>, <code>vector::at()</code> over <code>operator[]</code>.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">📘 Why can Java do this but C can't?</div>
+        Java arrays carry their length and the runtime bounds-checks every access (throwing <code>ArrayIndexOutOfBoundsException</code>). C arrays are just raw memory with no length attached, and pointer arithmetic can produce any address — so the compiler often <em>can't</em> know the bound to check. That safety is exactly what C trades away for speed and low-level control.
+      </div>
+
+      <!-- ===== STACK SMASH TOOL ===== -->
+      <h3 id="w5-smashtool">🛠️ Interactive: Stack-Smashing Demo</h3>
+      <p>Type input of different lengths into a 10-byte buffer and watch it spill over the saved frame pointer and into the return address. See exactly how many characters it takes to hijack control flow — safely, in your browser.</p>
+
+      <div class="tool">
+        <div class="tool-header">
+          <span class="tool-badge">Security demo</span>
+          <h3>Buffer Overflow Visualiser</h3>
+        </div>
+        <div class="tool-desc"><code>char buf[10]</code> followed by a saved frame pointer (8 bytes) and the return address (8 bytes). Type a string and watch where it lands.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>Input to scanf("%s", buf)</label>
+            <input type="text" id="smash-input" value="hello" style="width:300px;">
+          </div>
+          <button class="tool-btn" onclick="runSmash()">Write to stack ▶</button>
+          <button class="tool-btn danger" onclick="document.getElementById('smash-input').value='AAAAAAAAAAAAAAAAAAAAAAAAEVILshellcode!'; runSmash();">Try an exploit 💀</button>
+        </div>
+
+        <div id="smash-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== Files & handles ===== -->
+      <h2 id="w5-handles">Files, handles &amp; inter-process communication</h2>
+
+      <p>Processes are inherently <strong>communicative</strong> — with the OS and with each other. They make requests in terms of identifiable <strong>objects</strong> ("write these bytes to <em>this file</em>", "listen on <em>this network interface</em>"), identified using <strong>handles</strong>.</p>
+
+      <div class="callout">
+        <div class="callout-label">Why opaque handles, not addresses?</div>
+        Processes <strong>don't share memory with the OS</strong> → they can't use memory addresses to name kernel objects. They also can't use device-level identifiers (the OS abstracts those away), and some "objects" are pure OS constructs (threads, processes) with no hardware identifier at all. So the OS hands out an <strong>opaque handle</strong> — in InfOS, an arbitrary 64-bit integer; in Unix, a small <code>int</code> called a <strong>file descriptor (fd)</strong> — that indexes a table the OS controls.
+      </div>
+
+      <h3>File descriptors</h3>
+      <p>A Unix process starts with three open file descriptors by default:</p>
+      <div class="fd-table">
+        <div class="fd-list">
+          <div class="fd-row std"><div class="fdn">0</div><div class="fdt">standard input (stdin)</div></div>
+          <div class="fd-row std"><div class="fdn">1</div><div class="fdt">standard output (stdout)</div></div>
+          <div class="fd-row std"><div class="fdn">2</div><div class="fdt">standard error (stderr)</div></div>
+          <div class="fd-row"><div class="fdn">3</div><div class="fdt">→ first file you open()</div></div>
+          <div class="fd-row"><div class="fdn">4</div><div class="fdt">→ a network socket, perhaps</div></div>
+        </div>
+        <div style="max-width:320px; font-size:14px;">
+          <p>An fd can refer to many kinds of object: terminals, files on disk, network connections, devices (sound card, camera). Most support <code>read()</code> and <code>write()</code>; some support extras like <code>seek()</code> (files, but not live audio) or the catch-all <code>ioctl()</code>.</p>
+          <p style="color:var(--ink-muted); font-style:italic; font-size:13px;">You could say fds are "dynamically typed" — the same interface, many underlying object types. (Threads/processes are the exception — they use <code>pid_t</code>/<code>tid_t</code>, not fds.)</p>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">A security problem with handles</div>
+        If a handle is just an integer indexing a table, what stops a process from <em>guessing</em> another handle's number and using it? The OS must check that the handle belongs to the process using it (the InfOS <code>ObjectDescriptor</code> records an <code>owner</code> thread for exactly this reason). Forgetting that check is a real vulnerability class.
+      </div>
+
+      <h3>Inter-process communication (IPC)</h3>
+      <p>fds aren't just for devices — they're also channels to <em>other processes</em>:</p>
+      <ul>
+        <li><strong>Shared files</strong> — two processes read/write the same file.</li>
+        <li><strong>Sockets</strong> on a loopback "network" card — local network-style comms.</li>
+        <li><strong>Pipes</strong> — one-way in-memory channels.</li>
+        <li><strong>Pseudo-terminals</strong> — two-way in-memory channels.</li>
+      </ul>
+
+      <div class="callout tip">
+        <div class="callout-label">Avoiding slow user↔kernel crossings: shared memory</div>
+        Every <code>read</code>/<code>write</code> is a system call (slow-ish mode switch). To avoid them, processes can <strong>share memory directly</strong> using the MMU: <code>mmap()</code> the <em>same named file</em> with <code>MAP_SHARED</code> (not <code>MAP_PRIVATE</code>). Now both processes see the same physical frames and can communicate by simply reading/writing memory — no syscall per exchange. This ties paging (Week 3–4) directly to IPC.
+      </div>
+
+      <!-- ===== I/O ===== -->
+      <h2 id="w5-io">How I/O works (intro)</h2>
+
+      <p>I/O devices are many and varied, so it's not workable for each program to know each device. <strong>Device drivers</strong> are the OS's code for talking to a specific device, exposing a higher-level, device-agnostic interface to the rest of the OS — which is then abstracted further to user programs via system calls. Devices must also be <strong>multiplexed</strong> securely and concurrently. There are three evolutionary approaches to actually moving the data:</p>
+
+      <div class="io-stage">
+        <div class="io-num">1</div>
+        <div>
+          <h4>Programmed I/O + polling</h4>
+          <p>The CPU writes commands to the device's I/O ports, then <strong>repeatedly asks "are you done yet?"</strong> in a loop (polling the status register). Problem: the disk is millions of CPU cycles slow — the CPU is kept 100% busy doing nothing useful. <em>Very inefficient.</em></p>
+        </div>
+      </div>
+      <div class="io-stage better">
+        <div class="io-num">2</div>
+        <div>
+          <h4>Interrupt-driven I/O</h4>
+          <p>The CPU issues the command then <strong>carries on with other work</strong>. When the device finishes, it raises a <strong>hardware interrupt</strong>: the CPU saves its registers, looks up the handler in the interrupt table, and jumps to it. The handler reads the now-ready data. Far less wasted time. (An <em>interrupt controller</em>, e.g. an APIC on x86, multiplexes the interrupt line between devices.)</p>
+        </div>
+      </div>
+      <div class="io-stage better">
+        <div class="io-num">3</div>
+        <div>
+          <h4>Direct Memory Access (DMA)</h4>
+          <p>A <strong>DMA controller</strong> transfers data between the device and memory <em>by itself</em>, without the CPU running <code>in</code>/<code>out</code> instructions for every word. The CPU is freed entirely during the transfer; it still gets <strong>one interrupt on completion</strong>, but by then the data is already in memory. Maximum efficiency.</p>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Full-circle: timer interrupts &amp; preemptive scheduling</div>
+        Interrupts aren't just for talking to the outside world. The <strong>timer</strong> is itself a device on an I/O bus, programmed to interrupt the CPU at a set frequency. When the timer interrupt fires, its handler <strong>calls the scheduler</strong> to pick another process — which is <em>exactly</em> how preemptive Round-Robin (Week 2) works, and how the OS guarantees it regains control (Week 1's "limited direct execution"). Everything connects.
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="w5-exam">Exam-style takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 5</div>
+        <ol>
+          <li><strong>malloc's job</strong> — parcel small pieces from a big OS-given chunk; it's <em>library code in the process</em>, not the OS.</li>
+          <li><strong>Two layers of allocation/fragmentation</strong> — OS pages vs malloc's sub-allocation within the heap.</li>
+          <li><strong>Free lists</strong> — threaded through free space; each node has size + next; coalescing.</li>
+          <li><strong>First-fit vs best-fit</strong> — the speed-vs-waste trade-off.</li>
+          <li><strong>brk vs mmap</strong> — moving the program break vs flexible non-contiguous arenas; why mmap is better for threads.</li>
+          <li><strong>Stack frames</strong> — return address + saved frame pointer + locals; walking the stack for a backtrace (history) and continuation.</li>
+          <li><strong>Buffer overflow / stack smashing</strong> — how unbounded input overwrites the return address to hijack control flow; why C doesn't bounds-check but Java does.</li>
+          <li><strong>Handles / file descriptors</strong> — why opaque (no shared memory, abstracts devices, names OS-only objects); fds 0/1/2; the ownership security check.</li>
+          <li><strong>IPC mechanisms</strong> — shared files, sockets, pipes, pseudo-terminals; shared memory via <code>mmap(MAP_SHARED)</code> to avoid syscall overhead.</li>
+          <li><strong>I/O evolution</strong> — polling → interrupts → DMA, and what each saves.</li>
+          <li><strong>Timer interrupts → preemption</strong> — the link between I/O machinery and the scheduler.</li>
+        </ol>
+      </div>
+
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 5 notes. Send Week 6 slides whenever you're ready.</p>
+
+    </section>

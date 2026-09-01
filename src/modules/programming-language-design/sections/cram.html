@@ -1,0 +1,348 @@
+<section id="cram" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Revision · One-Page Quick Reference</div>
+        <h1>Exam Cram Sheet</h1>
+        <div class="week-subtitle">every core concept, condensed</div>
+      </div>
+      <p class="no-print">A distilled summary of the module so far. Use <strong>Ctrl/Cmd+P</strong> to print it (the sidebar and tools are hidden in print). Each card maps to a week — it'll grow as you send more slides.</p>
+      <div class="cram-grid">
+        <div class="cram-card">
+          <h3>W1 · The three components</h3>
+          <ul>
+            <li><span class="term">Syntax</span> = form of programs (how expressions/commands/declarations are built).</li>
+            <li><span class="term">Semantics</span> = meaning of programs (how they behave when executed).</li>
+            <li><span class="term">Implementation</span> = software system that reads &amp; executes a program, + tools.</li>
+            <li><span class="term">Layers:</span> machine → OS → language implementation → user programs.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W1 · Paradigms</h3>
+          <ul>
+            <li><span class="term">Imperative</span> — computation steps, mirrors the architecture. <em>Fortran, C, Python, Java.</em></li>
+            <li><span class="term">Functional</span> — mathematical functions; <em>what</em>, not <em>how</em>. <em>Lisp, Haskell, CaML, Scheme.</em></li>
+            <li><span class="term">Logic</span> — describes the problem, not the algorithm. <em>Prolog.</em></li>
+            <li><span class="term">Object-oriented</span> — <strong>orthogonal</strong>; addable to any of the above. <em>Java, OCaML, Scala, Python, Ruby, F#.</em></li>
+            <li>Mismatched design method &amp; language ⇒ <span class="term">programming effort increases</span>.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W1 · Implementation techniques</h3>
+          <ul>
+            <li><span class="term">Compilation</span> → machine language. Fast execution.</li>
+            <li><span class="term">Phases:</span> lexical analysis → syntax analysis (parsing) → type &amp; semantics analysis → machine code generation.</li>
+            <li><span class="term">Interpretation</span> → no translation; a virtual machine for the language. Easy to implement, easy debugging, better errors; <em>slow</em>. LISP, shell scripts.</li>
+            <li><span class="term">Hybrid</span> → compile to an intermediate language, then interpret. <strong>Portability.</strong> Java bytecode; functional → abstract machine code. <code>ghci</code> vs <code>ghc</code>.</li>
+            <li><span class="term">Fetch–execute:</span> init PC; repeat { fetch at PC · <strong>increment PC</strong> · decode &amp; execute }.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W1 · Syntax</h3>
+          <ul>
+            <li><span class="term">Given by:</span> an alphabet + a set of rules.</li>
+            <li><span class="term">Grammar</span> = alphabet V = V<sub>T</sub> ∪ V<sub>NT</sub> + rules + initial symbol. Written in <strong>BNF</strong>.</li>
+            <li><span class="term">Concrete syntax</span> — which <em>chains of characters</em> are well-formed programs.</li>
+            <li><span class="term">Abstract syntax</span> — the <em>syntax trees</em>, to which a semantics is associated.</li>
+            <li><span class="term">Ambiguity:</span> <code>1-2-3</code> has two derivations → 1−(2−3)=2 vs (1−2)−3=−4.</li>
+            <li><span class="term">Fix:</span> <code>e ::= n | op(e,e)</code> defines <em>trees</em> — unambiguous. We always work with abstract syntax.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W1 · Semantics</h3>
+          <ul>
+            <li><span class="term">Static (typing)</span> — catch syntactically-correct-but-broken programs <em>before</em> execution, e.g. <code>1 + 'a'</code>.</li>
+            <li><span class="term">Dynamic</span> — the meaning of programs.</li>
+            <li><span class="term">Formal semantics matters for:</span> implementation (machine-independent abstraction), programmers (reason &amp; prove), designers (detect ambiguity, suggest constructs — cf. λ-calculus).</li>
+            <li><span class="term">Denotational</span> — abstract mathematical model; describes the <em>effect</em>.</li>
+            <li><span class="term">Axiomatic</span> — axioms + deduction rules; pre/postconditions.</li>
+            <li><span class="term">Operational ★</span> — computation steps via transition systems. <strong>Studied in this course.</strong></li>
+            <li>Operational → implementation &amp; compiler-optimisation correctness. Denotational/axiomatic → proving program properties.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-3);">
+          <h3 style="color:var(--accent-3);">W1 · Transition systems</h3>
+          <ul>
+            <li><span class="term">Specified by:</span> a set <strong>Config</strong> of configurations + a relation <strong>→ ⊆ Config × Config</strong>.</li>
+            <li><span class="term">c →* c′</span> = reflexive transitive closure: a chain <code>c → c₁ → … → cₙ = c′</code> with <strong>n ≥ 0</strong>.</li>
+            <li><span class="term">Terminal (T):</span> for all c ∈ T there is <em>no</em> c′ with c → c′.</li>
+            <li><span class="term">A run</span> = a sequence of transitions from i ∈ I to t ∈ T.</li>
+            <li><span class="term">Deterministic</span> iff ∀c,c₁,c₂: c → c₁ ∧ c → c₂ ⇒ c₁ = c₂.</li>
+            <li><span class="term">Abstract machine</span> = a transition system specifying an <em>interpreter</em>. Great for implementation, hard for users.</li>
+            <li><span class="term">Structural OS (SOS)</span> = inductive definition of execution; each command described in terms of <em>its components</em>.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-4);">
+          <h3 style="color:var(--accent-4);">W2 · Variables</h3>
+          <ul>
+            <li>Imperative languages = abstractions of the <span class="term">Von Neumann</span> architecture; <span class="term">variables represent memory cells</span>.</li>
+            <li><span class="term">4 properties:</span> name · type (<em>values allowed <strong>and</strong> operations available</em>) · address = <span class="term">l-value</span> · value = <span class="term">r-value</span>.</li>
+            <li>Name→address is <em>not simple</em>: one name ↦ many addresses; many names ↦ one address (Pascal variant records, Fortran EQUIVALENCE).</li>
+            <li><span class="term">Static/dynamic typing:</span> Java, Haskell, ML, Scala / Python, Ruby.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-4);">
+          <h3 style="color:var(--accent-4);">W2 · Lifetime &amp; scope</h3>
+          <ul>
+            <li><span class="term">Lifetime</span> = time between allocation and deallocation. <strong>4 classes:</strong></li>
+            <li><span class="term">Static</span> — bound before execution until end. ✓ efficiency (compile-time addressing) ✗ no reuse, no recursion.</li>
+            <li><span class="term">Stack dynamic</span> — allocated when the declaration is processed at run time (locals of recursive procedures).</li>
+            <li><span class="term">Explicit heap-dynamic</span> — nameless cells via pointers (C++ <code>new</code>/<code>delete</code>); Java objects, no explicit destroy → GC (first in Lisp).</li>
+            <li><span class="term">Implicit heap-dynamic</span> — bound only when assigned (Perl/JS strings, arrays). ✓ flexibility ✗ hard error detection.</li>
+            <li><span class="term">Scope</span> = range where the variable is visible. <em>Local</em> = declared in the executing block; <em>global</em> = visible but not local.</li>
+            <li><span class="term">Static scope</span> — compile time; same block → parent block → …; not found = compiler error.</li>
+            <li><span class="term">Dynamic scope</span> — depends on the <em>calling sequence</em>. ✗ no static type-checking ✗ very hard to understand. Perl lets you choose; Scheme is static.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-2);">
+          <h3 style="color:var(--accent-2);">W2 · Flow of control</h3>
+          <ul>
+            <li><span class="term">3 kinds:</span> selection · looping · branching. <strong>if-then-else + while suffice for any sequential algorithm; go-to is superfluous.</strong></li>
+            <li><span class="term">Dangling else</span> — Java matches <code>else</code> with the <em>most recent unpaired then</em>. Algol 60 disambiguates with <code>begin</code>/<code>end</code>; Java needs braces for the outer reading.</li>
+            <li><span class="term">Multiple selectors</span> — <code>switch</code>; some languages exit at the end of a branch, others need explicit <code>break</code>/<code>return</code>.</li>
+            <li><span class="term">Pre-test</span> (test before body) vs <span class="term">post-test</span> (after) — post-test runs the body <strong>at least once</strong>.</li>
+            <li><span class="term">Counter-controlled</span> vs <span class="term">logically-controlled</span>.</li>
+            <li><code>for(e1;e2;e3)</code> — e1 initialises; e2 evaluated <em>before each</em> body; e3 <em>after each</em> body.</li>
+            <li><code>while</code> pre-test, runs while <strong>True</strong> · <code>do</code> post-test, runs until <strong>False</strong> · Pascal <code>repeat</code> runs until <strong>True</strong> (the opposite of <code>do</code>).</li>
+            <li><span class="term">Assignment:</span> <code>=</code> ≠ mathematical equivalence (<code>:=</code> sometimes); <code>i++</code> returns <em>i</em>, <code>++i</code> returns <em>i+1</em>.</li>
+            <li><span class="term">Blocks</span> (keywords/separators, may hold declarations → local under static scope) · <span class="term">subprograms</span> = named blocks invoked explicitly · <span class="term">formal</span> (declaration) vs <span class="term">actual</span> (invocation) parameters.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-3);">
+          <h3 style="color:var(--accent-3);">W3 · SIMP syntax</h3>
+          <ul>
+            <li><span class="term">Why formal:</span> <code>f(i++,--i)</code> — both operators precise, but C never specified the <em>order of evaluation of parameters</em> → different compilers, different code.</li>
+            <li><span class="term">Abstract machine</span> = transition system specifying an <em>interpreter</em>. The <em>first</em> approach to formal description.</li>
+            <li><code>P ::= C | E | B</code></li>
+            <li><code>C ::= skip | l := E | C ; C | if B then C else C | while B do C</code></li>
+            <li><code>E ::= !l | n | E op E</code> · <code>op ::= + − ∗ /</code></li>
+            <li><code>B ::= True | False | E bop E | ¬B | B ∧ B</code> · <code>bop ::= &gt; &lt; =</code></li>
+            <li><span class="term">!l</span> = the value stored in l (r-value); bare <span class="term">l</span> = the address (l-value).</li>
+            <li>Grammars define <span class="term">trees</span>: leaves ∈ ℤ ∪ {True,False} ∪ L ∪ {skip}; non-leaves = operators &amp; commands.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-3);">
+          <h3 style="color:var(--accent-3);">W3 · The machine</h3>
+          <ul>
+            <li><span class="term">3 parts:</span> control stack <em>c</em> · results (auxiliary) stack <em>r</em> · memory/store <em>m</em>, a <strong>partial</strong> function address → integer; dom(m) = where defined.</li>
+            <li><span class="term">m[l ↦ n](l) = n</span> and <span class="term">m[l ↦ n](l′) = m(l′)</span> if l ≠ l′.</li>
+            <li><span class="term">Configuration</span> = ⟨Control, Results, Memory⟩. <span class="term">Initial</span> ⟨C · nil, nil, m⟩ · <span class="term">Final</span> ⟨nil, nil, m⟩.</li>
+            <li><span class="term">Command semantics:</span> ⟨C·nil, nil, m⟩ →* ⟨nil, nil, m′⟩ ⇒ C terminates successfully producing m′.</li>
+            <li><span class="term">Expression semantics:</span> ⟨E·c, r, m⟩ →* ⟨c, v·r, m′⟩ ⇒ the value of E in m is v.</li>
+            <li><span class="term">Every operator has 2 rules:</span> decomposition (push sub-phrases + token) then application (consume operands, push one value).</li>
+            <li><span class="term">⚠ Argument order:</span> results stack is n₂·n₁·r — compute <strong>n₁ op n₂</strong>.</li>
+            <li><span class="term">Assignment:</span> l pushed <em>unevaluated</em> onto r; <code>:=</code> then sees n·l·r and yields m[l↦n].</li>
+            <li><span class="term">If:</span> both branches parked on r; <code>if</code> discards all three and moves the chosen branch to c.</li>
+            <li><span class="term">While:</span> <code>⟨while·c, True·B·C·r, m⟩ → ⟨C · (while B do C) · c, r, m⟩</code> — the loop <strong>rebuilds itself</strong> behind the body.</li>
+            <li><span class="term">✓ Advantage:</span> step-by-step, useful for implementing the language. <span class="term">✗ Disadvantage:</span> not intuitive — many transitions are just <em>phrase analysis</em>, few really compute.</li>
+            <li><span class="term">Fix → structural approach (Plotkin):</span> transitions for a compound statement defined via those of its sub-statements — i.e. <strong>inductive</strong>.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-4);">
+          <h3 style="color:var(--accent-4);">W4 · Induction</h3>
+          <ul>
+            <li><span class="term">Mathematical:</span> base P(0); step ∀n. P(n) ⇒ P(n+1).</li>
+            <li><span class="term">Structural (lists):</span> P(nil); P(l) ⇒ P(cons(h,l)).</li>
+            <li><span class="term">Structural (trees):</span> P(leaf) for all leaves; for each constructor c, P(t₁)∧…∧P(tₙ) ⇒ P(c(t₁,…,tₙ)).</li>
+            <li><span class="term">For SIMP E:</span> base P(n), P(!l); step P(E)∧P(E′) ⇒ P(E op E′).</li>
+            <li>Justified by maths induction on <span class="term">tree size</span> (trees are finite).</li>
+            <li><span class="term">Inductive definition:</span> <em>axiom</em> = element of T; <em>rule</em> = (H, c), H non-empty hypotheses, c conclusion. Membership shown by a <span class="term">proof tree</span> whose leaves are axioms.</li>
+            <li><span class="term">Rule induction:</span> base ∀a∈A. P(a); step ∀({h₁…hₙ},c)∈R. P(h₁)∧…∧P(hₙ) ⇒ P(c).</li>
+            <li><span class="term">Special rule induction</span> (subset J): basis over A∩J; for rules with c∈J assume only for h∈H∩J.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent);">
+          <h3 style="color:var(--accent);">W4 · Small-step</h3>
+          <ul>
+            <li><span class="term">Configuration</span> = ⟨P, s⟩ — a <em>pair</em>, no stacks. Remaining work = the leftover program text.</li>
+            <li>E has value n if ⟨E,s⟩ →* ⟨n,s′⟩ · C succeeds if ⟨C,s⟩ →* ⟨skip,s′⟩.</li>
+            <li><span class="term">Axioms:</span> var, op, bop, and, not. <span class="term">Congruence:</span> opL/opR, bopL/bopR, notArg, andL/andR.</li>
+            <li><span class="term">R rules require n₁</span> — a value on the left ⇒ forces <strong>left-to-right</strong> evaluation.</li>
+            <li><span class="term">Commands:</span> :=R, := , seq, skip, if, ifT, ifF, while.</li>
+            <li><span class="term">while</span> is an axiom: <code>⟨while B do C,s⟩ → ⟨if B then (C; while B do C) else skip, s⟩</code>.</li>
+            <li><span class="term">Terminal:</span> ⟨n,s⟩ ⟨b,s⟩ ⟨skip,s⟩ and ⟨!l,s⟩ with l ∉ dom(s) — the last is <strong>blocked</strong>.</li>
+            <li><span class="term">vs abstract machine:</span> ✓ every transition does real computation; ✗ each arrow needs a <em>proof</em>.</li>
+            <li><span class="term">Deterministic</span> ⇒ a unique maximal <em>evaluation sequence</em>, finite or infinite.</li>
+            <li><span class="term">3 categories:</span> terminating · blocked/stuck · divergent.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-3);">
+          <h3 style="color:var(--accent-3);">W4 · Big-step</h3>
+          <ul>
+            <li><span class="term">⟨P,s⟩ ⇓ ⟨P′,s′⟩</span> if ⟨P,s⟩ →* ⟨P′,s′⟩ and ⟨P′,s′⟩ is <em>terminal</em>.</li>
+            <li><span class="term">Expressions:</span> const, var, and, not, op, bop. Stores thread <strong>s → s′ → s″</strong>.</li>
+            <li><span class="term">Commands:</span> skip, := , seq, ifT, ifF, whileF, whileT.</li>
+            <li><span class="term">whileT</span> has <em>three</em> premises, the third being the same loop again ⇒ tree nests once per iteration, bottoming out at whileF.</li>
+            <li><span class="term">⚠ Divergent programs have NO derivation</span> — big-step can't distinguish divergent from blocked; small-step can.</li>
+            <li><span class="term">Blocks:</span> <code>C ::= begin loc x := E; C end</code>. Rule needs <em>l fresh</em> (∉ dom(s′) ∪ dom(s″) ∪ locations(C)) and the renaming <code>C{x ↦ l}</code>.</li>
+            <li>The conclusion drops l from the store — <strong>that discard is what makes scoping static</strong>.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-3);">
+          <h3 style="color:var(--accent-3);">W6 · Functional basics</h3>
+          <ul>
+            <li>Programs consist <span class="term">entirely of functions</span>; functions defined in terms of other functions; focus on <em>what</em>, not <em>how</em>.</li>
+            <li>Strongly typed (no core dumps) + built-in memory management. <span class="term">✓</span> shorter, easier to understand/design/verify/maintain. <span class="term">✗</span> usually slower, arguably less flexible.</li>
+            <li><span class="term">Evaluation = reduction</span>: a simplification process yielding the <em>value</em> / <em>normal form</em>. Notation e → e′. The meaning of an expression is its value.</li>
+            <li><span class="term">Unicity of normal forms</span> — value determined by the components, <em>independent of the order of reduction</em>.</li>
+            <li><span class="term">Non-termination</span> — not all reduction sequences lead to a value. <code>fortytwo infinity</code>: some sequences diverge, those that terminate give 42.</li>
+            <li><span class="term">Call-by-name</span> (normal order): application first, then argument. <strong>Always finds the value if one exists.</strong></li>
+            <li><span class="term">Call-by-value</span> (applicative order): argument first. <strong>More efficient in general, but may fail.</strong></li>
+            <li><span class="term">lazy = call-by-name + sharing</span> — Haskell's strategy; defers evaluation until results are needed.</li>
+            <li><span class="term">f : A → B</span>, domain A, codomain B; (f x) :: B.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-3);">
+          <h3 style="color:var(--accent-3);">W6 · Definitions &amp; currying</h3>
+          <ul>
+            <li><span class="term">3 styles:</span> plain equation · guarded (conditional) equations · pattern matching.</li>
+            <li><span class="term">Pattern order matters</span> — arguments compared against definitions <em>in the order provided</em>, until a match or the patterns are exhausted.</li>
+            <li><span class="term">Conditional semantics:</span> evaluate the condition, then <em>only</em> the chosen branch. This is why recursion terminates.</li>
+            <li><span class="term">error</span> — predefined, takes a string, terminates the evaluator immediately and displays it.</li>
+            <li><span class="term">Application:</span> precedence over other operations · associates <strong>left</strong> (<code>square square 3</code> = <code>(square square) 3</code>) · outer brackets omitted.</li>
+            <li><span class="term">where / let … in</span> — local definitions, available only on the RHS. Evaluate e′ → replace a by r → evaluate e{a↦r}.</li>
+            <li><span class="term">Operators are functions:</span> infix by default, prefix in brackets <code>(+) 3 4</code>; <code>(+)</code> is the curryfied <code>+</code>; quote to make prefix functions infix: <code>10 `div` 2</code>. <code>+ - * /</code> left associative.</li>
+            <li><span class="term">Composition:</span> <code>(·) :: (b→c) → (a→b) → (a→c)</code>, <code>(f·g) x = f (g x)</code>. Itself a function. Only matching types compose — <em>g runs first</em>.</li>
+            <li><span class="term">Currying:</span> functions take no more than one argument; applying to n&gt;1 yields a function of n−1 ⇒ <strong>partial application</strong>. <code>plus 3 :: Int → Int</code>.</li>
+            <li><span class="term">Tuples don't curry</span> — one argument, no intermediate stage. Convert with <code>curry :: ((a,b)→c)→(a→b→c)</code> and <code>uncurry</code>.</li>
+            <li><span class="term">Lists:</span> <code>!!</code> indexes from 0 · <code>:</code> is cons · <code>zipWith f l1 l2</code> pointwise.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-4);">
+          <h3 style="color:var(--accent-4);">W8 · Types &amp; polymorphism</h3>
+          <ul>
+            <li>Values divided into <span class="term">types</span>, each associated with <em>a set of operations</em>; given explicitly or inferred.</li>
+            <li><span class="term">Static</span> (C, C++, Java, Haskell) vs <span class="term">dynamic</span> (Python, JavaScript, PHP).</li>
+            <li>Untypeable expressions are <span class="term">rejected without evaluation</span>. ✓ early errors ✓ types as specification. <strong>Passing type checks ≠ correct, but ⇒ no type errors at runtime.</strong></li>
+            <li>Haskell types: basic · constructed (tuples, lists, strings) · function. <span class="term">The arrow associates right.</span></li>
+            <li><span class="term">Monomorphic</span> = at most one type per expression; <span class="term">polymorphic</span> = some have more than one.</li>
+            <li><code>T ::= V | C(T₁,…,Tₙ)</code>; a polymorphic type <em>represents the set of its instances</em>.</li>
+            <li><code>error :: String → a</code> — must be polymorphic, since all branches of a definition share a type.</li>
+            <li><span class="term">Overloading = ad-hoc polymorphism</span>: same name, different types. <code>(+) :: a→a→a</code> is too general (<code>'a'+'b'</code>). Fixes: different names · enrich types with ∧ · <span class="term">type classes</span> <code>Num a ⇒ a→a→a</code>.</li>
+            <li><span class="term">Inference:</span> most general type; combination gives constraints; unsolvable ⇒ untypeable. <code>square :: Num c ⇒ c → c</code>. <code>square square 3</code> fails because <strong>Int = (Int→Int)</strong> has no solution.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-4);">
+          <h3 style="color:var(--accent-4);">W8 · Lists &amp; user-defined types</h3>
+          <ul>
+            <li><code>[] :: [a]</code> · <code>(:) :: a→[a]→[a]</code> · <code>head :: [a]→a</code> · <code>tail :: [a]→[a]</code>. Strings <em>are</em> lists of characters.</li>
+            <li><code>data Nat = Zero | Succ Nat</code> · <code>data Seq a = Empty | Cons a (Seq a)</code>.</li>
+            <li><span class="term">Data constructors</span> build terms; <span class="term">type constructors</span> define new polymorphic types (<code>Seq</code>).</li>
+            <li><code>data Tree a = Leaf a | Branch (Tree a) (Tree a)</code>; <code>height</code> via pattern matching + local <code>max</code>.</li>
+            <li><span class="term">Structural induction</span>: one case per constructor. For <code>Nat</code> it <em>is</em> mathematical induction: (P(0) ∧ ∀n.(P(n)⇒P(n+1))) ⇔ ∀n.P(n).</li>
+            <li>Prove <code>add n Zero = n</code> and <code>sumNat n = n(n+1)/2</code>.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-3);">
+          <h3 style="color:var(--accent-3);">W8 · SFUN semantics &amp; typing</h3>
+          <ul>
+            <li>SFUN = small, <span class="term">first-order</span> functional language over ints and Booleans. <strong>Configurations are just terms</strong> — no store.</li>
+            <li>Program = set of recursive equations; vars(dᵢ) ⊆ parameters; <span class="term">one equation per function name</span>. <em>Closed</em> term = no variables.</li>
+            <li><span class="term">Big-step ⇓<sub>P</sub></span> rules: (n) (b) (op) (bop) (and) (not) (if<sub>t</sub>) (if<sub>f</sub>) and the application rule.</li>
+            <li><span class="term">fn<sub>val</sub></span> — n+1 premises, substitutes <em>values</em>: arguments evaluated first.</li>
+            <li><span class="term">fn<sub>name</sub></span> — <strong>one</strong> premise, substitutes <em>unevaluated terms</em>. Only this rule changes.</li>
+            <li><code>fortytwo(infinity)</code>: <strong>no derivation</strong> under CBV, <strong>⇓ 42</strong> under CBN. <code>square(2+1)</code>: <code>2+1</code> evaluated once under CBV, twice under CBN.</li>
+            <li><span class="term">Determinism</span> (both strategies): t ⇓ v₁ ∧ t ⇓ v₂ ⇒ v₁ = v₂, by <em>rule induction</em>; only one rule applies to any term.</li>
+            <li><span class="term">Types:</span> β ::= int | bool; τ ::= (β₁,…,βₙ)→β; n = 0 written β. No arrows inside — first-order, so no currying.</li>
+            <li><span class="term">Γ ⊢<sub>ε</sub> t : τ</span> — Γ: variables → base types; ε: function names → types respecting arity. ⟨f⟩ = 0 makes the application rule an <em>axiom</em>; both <code>if</code> branches need the same τ.</li>
+            <li><span class="term">P typeable</span> iff for each equation there are Γᵢ, τᵢ typing <em>both</em> sides. <code>infinity</code> is typeable but never terminates.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent);">
+          <h3 style="color:var(--accent);">W9 · Logic programming basics</h3>
+          <ul>
+            <li><span class="term">Logic</span> expresses knowledge / describes the problem; <span class="term">inference</span> computes the solution.</li>
+            <li>✓ knowledge-based · declarative · precise simple semantics · one formalism for spec/program/proof · <strong>the same program used many ways</strong> ← <em>only this last one is specific to LP</em>.</li>
+            <li><span class="term">No input/output variables</span> — <code>reverse</code> answers X in either position, or with none at all.</li>
+            <li>✗ efficient arithmetic and I/O cost the declarative semantics; ✗ restricted to a fragment of classical FOL.</li>
+            <li><span class="term">Prolog:</span> Colmerauer &amp; Roussel, early 1970s · NLP and AI · syntax = clausal fragment of FOL · semantics = <strong>SLD-resolution with automatic backtracking</strong> · impure.</li>
+            <li><span class="term">Term</span> = a variable, or f(t₁,…,tₙ) with f of arity n (constants have arity 0).</li>
+            <li><span class="term">Atomic formula</span> p(t₁,…,tₙ); <span class="term">literal</span> = A or ¬A. <strong>Only terms can be arguments of predicates.</strong></li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent);">
+          <h3 style="color:var(--accent);">W9 · Clauses &amp; substitutions</h3>
+          <ul>
+            <li><span class="term">Horn clause</span> = disjunction of literals, <em>at most one positive</em>. <span class="term">Definite clause</span> = exactly one positive.</li>
+            <li><span class="term">Fact</span> single positive · <span class="term">Rule</span> positive + negatives · <span class="term">Goal</span> only negatives, <code>:- B₁,…,Bₙ.</code></li>
+            <li>A ∨ ¬B₁ ∨ … ≡ (B₁∧…∧Bₙ)→A, read backwards as <code>A :- B₁,…,Bₙ</code>.</li>
+            <li>Programs = sets of definite clauses. <span class="term">Facts before rules.</span> <code>X-1</code> can't be passed directly — bind it with <code>is</code>.</li>
+            <li>All clauses are <span class="term">universally quantified</span> on all their variables.</li>
+            <li><span class="term">Substitution</span> = partial map variables → terms, finite domain; σ = {X₁↦t₁,…}; dom(σ). Only variables get replaced.</li>
+            <li><span class="term">Applied simultaneously</span> — {X↦Y, Y↦a} must not become X↦a. Variables not in t are unaffected.</li>
+            <li><span class="term">Order matters twice:</span> clauses in program order; the <em>selection function picks the leftmost literal</em>. Answers are a <strong>by-product</strong> of resolution.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-2);">
+          <h3 style="color:var(--accent-2);">W9 · Built-ins, lists, limitations</h3>
+          <ul>
+            <li>Built-ins: operators · <code>is</code> · <code>call/1 fail/0 !/0</code> · <code>','</code> · <code>=..</code> · <code>write, nl</code>. Notation <span class="term">p/n</span>.</li>
+            <li>Lists: <code>[]</code> · <code>[X|L]</code> cons · <code>[X,Y,Z]</code>. <code>[]</code> matches only the empty list, <code>[H|T]</code> only non-empty. <code>member/2 length/2 sort/2</code>.</li>
+            <li><code>append([],L,L). append([X|L],Y,[X|Z]) :- append(L,Y,Z).</code> — forwards, failing, and infinitely many solutions.</li>
+            <li><span class="term">No negative facts, no negative heads</span> — definite clauses have exactly one positive literal.</li>
+            <li><span class="term">Resolution rule:</span> from A∨B and ¬A∨C infer B∨C. Unrestricted, clauses resolve in multiple ways and the next pair must be chosen arbitrarily.</li>
+            <li>Restricting to definite clauses makes resolution <strong>S</strong>elective (unique &amp; deterministic) and <strong>L</strong>inear (resolvent is empty or a new goal) — with <strong>D</strong>efinite, that's <span class="term">SLD</span>.</li>
+            <li><span class="term">Negation as failure</span> <code>\\+</code> — failure to prove A is taken as proof of ¬A (closed-world assumption).</li>
+            <li><span class="term">Disjunction</span> A∨B can't be represented: adding both facts gives the stronger A∧B; rewriting with <code>\\+</code> doesn't behave like true disjunction.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-4);">
+          <h3 style="color:var(--accent-4);">W10 · Unification</h3>
+          <ul>
+            <li><span class="term">Problem U</span> = set of equations between terms. <span class="term">Unifier</span> σ makes sᵢσ and tᵢσ <em>syntactically identical</em>. <span class="term">mgu</span> = a unifier of which every other unifier is an instance.</li>
+            <li>{X↦Y} is more general than {X↦a, Y↦a}: compose with {Y↦a} to get ρ, but not conversely.</li>
+            <li><span class="term">Why generality matters:</span> committing a variable to a constant early blocks later resolutions — leave variables free unless binding is needed.</li>
+            <li><span class="term">(1)</span> f(s̄)=f(t̄) → s₁=t₁,…,sₙ=tₙ &nbsp;<span class="term">(2)</span> f≠g → <strong>failure</strong> &nbsp;<span class="term">(3)</span> X=X → delete</li>
+            <li><span class="term">(4)</span> t=X (t not a var) → X=t &nbsp;<span class="term">(5)</span> X=t, X∉t, X in E → substitute X↦t in E &nbsp;<span class="term">(6)</span> X occurs in t, X≠t → <strong>failure</strong> (<em>occur-check</em>)</li>
+            <li>(1) and (2) apply to <span class="term">constants</span> too (arity 0). Occur-check is costly, so some systems omit it.</li>
+            <li>Success: change each <code>=</code> to <code>↦</code>. U is a <em>set</em> — order is unimportant.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-4);">
+          <h3 style="color:var(--accent-4);">W10 · SLD-resolution</h3>
+          <ul>
+            <li><span class="term">Principle:</span> prove <code>:- G₁,…,Gₙ</code> by showing P ∪ {¬G₁∨…∨¬Gₙ} leads to a <em>contradiction</em>. Derived goals = <span class="term">resolvents</span>.</li>
+            <li><span class="term">S</span>elective (a fixed computation rule picks the atom) · <span class="term">L</span>inear (the most recent resolvent is the next goal) · <span class="term">D</span>efinite (all program clauses definite).</li>
+            <li>✓ <span class="term">refutation-complete</span> · ✓ <span class="term">independence of the selection rule</span>.</li>
+            <li><span class="term">Resolvent:</span> select Gᵢ, unify with a clause head via mgu σ, replace Gᵢ by the body, apply σ throughout. Answer = <em>composition of the σ's, restricted to the query's variables</em>.</li>
+            <li><span class="term">Prolog:</span> left-most literal, clauses top-to-bottom, <strong>depth-first</strong>. <em>SLD-resolution is complete but Prolog's implementation is not</em> — it can get stuck in an infinite branch.</li>
+            <li><span class="term">Tree:</span> nodes = goals, edges labelled with mgus, children left-to-right in program order, failed unifications not drawn, <strong>□</strong> = success, dead end = <em>failure</em>. Branches may be success, failure <strong>or infinite</strong>.</li>
+            <li><span class="term">Back-tracking:</span> failure branches automatically, success branches on request; <span class="term">cut <code>!</code></span> = do not back-track beyond this point.</li>
+            <li><span class="term">Clause order:</span> base clauses before recursive ones — the reversed <code>append</code> gives an infinite left-most branch and <em>no</em> solutions.</li>
+            <li><span class="term">Variable renaming</span> is required: <code>{[X|Y]=Y,…}</code> fails the occur-check. Legitimate because clause variables are universally quantified; rename <strong>uniformly</strong>, avoid symbols already in the clause, carry bindings back to the goal.</li>
+          </ul>
+        </div>
+        <div class="cram-card" style="border-top-color: var(--accent-2);">
+          <h3 style="color:var(--accent-2);">Cross-cutting threads</h3>
+          <ul>
+            <li>The <span class="term">three components</span> reappear as the compiler's phases: parsing = syntax, type analysis = static semantics, code gen = dynamic semantics.</li>
+            <li><span class="term">Trees, not strings</span> — abstract syntax exists so that SOS rules can be defined "in terms of its components".</li>
+            <li>An <span class="term">interpreter is a machine in software</span> — the same idea returns as the abstract machine.</li>
+            <li><span class="term">Non-determinism</span> is a bug for imperative execution but a feature for logic programming search (Prolog, later).</li>
+            <li>The <span class="term">dangling else</span> is W1's ambiguity problem inside a real language — same string, two parse trees. Abstract syntax dissolves it.</li>
+            <li><span class="term">Blocks</span> do double duty: they scope declarations <em>and</em> disambiguate nested selectors.</li>
+            <li>W2 describes constructs <em>informally</em>; <span class="term">SIMP</span> gives them a formal operational semantics using W1's transition systems.</li>
+            <li><span class="term">l-value / r-value</span> (W2) becomes <em>syntax</em> in W3: <code>l := !l − 1</code>. The assignment rule is the distinction made mechanical.</li>
+            <li>W1's <span class="term">terminal configuration</span> (no outgoing →) is W3's ⟨nil, nil, m⟩; a <em>stuck</em> configuration (undefined location, division by zero) is non-final with no successor.</li>
+            <li><span class="term">Determinism</span> (W1) is what makes the machine an interpreter: exactly one rule matches each configuration.</li>
+            <li><span class="term">Abstract syntax = the induction principle.</span> W1 made programs trees; W4 uses exactly those leaves and constructors as the base cases and induction steps.</li>
+            <li><span class="term">Three semantics for one language:</span> abstract machine (W3) · small-step · big-step (W4). All agree on the final store; they differ in granularity and in what they can express about failure.</li>
+            <li>W2's <span class="term">static scope</span> becomes W4's block rule: a fresh location, a renaming, and a discard on exit.</li>
+            <li><span class="term">Evaluation order</span>, unspecified in C, is pinned down three times over: op-decomp order (W3), the <em>n₁</em> in the R rules (W4 small-step), and store threading s→s′→s″ (W4 big-step).</li>
+            <li><span class="term">e → e′ is the same arrow throughout.</span> Functional evaluation (W6) is a small-step semantics with <em>no store</em> — a configuration is just an expression, because nothing can be assigned to.</li>
+            <li><span class="term">Evaluation order, one more time:</span> C left it open (W3), SIMP's rules pinned it down (W3–W4), and W6 makes it a <em>choice</em> — the strategy — with real consequences for termination.</li>
+            <li><span class="term">Scope recurs:</span> Pascal blocks (W2) → SIMP's <code>begin loc</code> rule (W4) → <code>where</code> / <code>let … in</code> (W6). Always: a local name, a delimited region, gone afterwards.</li>
+            <li><span class="term">SIMP vs SFUN</span> — both get a big-step semantics in the same style, but SIMP's configurations are ⟨P, s⟩ and SFUN's are <em>just terms</em>. Removing the store is exactly what "no side effects" means formally.</li>
+            <li><span class="term">"No derivation exists"</span> means the same thing in W4 and W8: divergence and stuckness are both just the absence of a finite proof tree.</li>
+            <li><span class="term">Induction, three times:</span> mathematical (W4) → structural over abstract syntax (W4) → structural over a <code>data</code> declaration (W8). Always one case per constructor.</li>
+            <li><span class="term">Goals are configurations.</span> Prolog's "informal procedural mechanism" is a transition system in W1's sense — one step replaces the selected literal by a clause body under a substitution.</li>
+            <li><span class="term">Substitution</span> runs through the whole course: SIMP's <code>m[l ↦ n]</code>, SFUN's <code>dᵢ{x ↦ v}</code>, SOS's <code>C{x ↦ l}</code>, and Prolog's σ. Always variables replaced by terms, always simultaneous.</li>
+            <li><span class="term">Three paradigms, three notions of "answer":</span> imperative = the final store · functional = the normal form · logic = the <em>bindings</em> that made the proof work.</li>
+            <li><span class="term">Complete ≠ complete implementation.</span> SLD-resolution finds every solution; Prolog's depth-first search need not. Compare W6: call-by-name always finds the value, call-by-value need not. <em>Same shape of result, twice.</em></li>
+            <li><span class="term">Order sensitivity</span> is the recurring practical trap: pattern order in Haskell (W6), equation order in SFUN, clause order in Prolog (W10). In each case the <em>declarative</em> reading is order-free and the <em>implementation</em> is not.</li>
+            <li><span class="term">Renaming apart</span> — SIMP's fresh <code>l</code> in the block rule (W4) and Prolog's clause renaming (W10) solve the same problem: accidental capture of names.</li>
+            <li><span class="term">Trees everywhere:</span> parse trees (W1) · derivation trees for ⇓ (W4, W8) · SLD-resolution trees (W10). All are proofs; a missing tree always means "no derivation exists".</li>
+            <li><span class="term">Course order:</span> imperative (SIMP + transition systems) → functional + type systems → logic (Prolog).</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin-top:32px; padding-top:20px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Tip: for each card, try to explain every term out loud without looking — fastest way to find the gaps. 🎓</p>
+    </section>

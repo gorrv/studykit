@@ -1,0 +1,209 @@
+<section id="week10" class="week-section">
+
+      <div class="week-header">
+        <div class="week-eyebrow">Week 10 · Concurrency (Ian's material)</div>
+        <h1>Java Synchronization</h1>
+        <div class="week-subtitle">fixing races — and the deeper memory problems beneath them</div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">The mission</div>
+        Week 9 showed that sharing data between threads causes <strong>race conditions</strong> (because operations like <code>counter++</code> aren't atomic). This week is the fix. But there are actually <strong>two distinct problems</strong> to solve — and most people only notice the first:
+      </div>
+
+      <div class="twoprob">
+        <div class="prob-card prob-mutex">
+          <h4>① Mutual exclusion (atomicity)</h4>
+          <p style="font-size:13px; margin:0;">Stop two threads interleaving <em>mid-operation</em>. Fixed by <strong>synchronized</strong> / locks.</p>
+        </div>
+        <div class="prob-card prob-vis">
+          <h4>② Visibility</h4>
+          <p style="font-size:13px; margin:0;">Make sure one thread's update is actually <em>seen</em> by others (CPU caches hide it!). Fixed by <strong>volatile</strong> (or synchronized's flush).</p>
+        </div>
+      </div>
+
+      <!-- ===== Critical sections ===== -->
+      <h2 id="w10-critical">Critical sections &amp; mutual exclusion</h2>
+
+      <p>The shared-counter program from Week 9 contains a <strong>critical section</strong>: a sequence of instructions that <em>only one thread at a time</em> should execute, or you get incorrect/unpredictable behaviour. We protect critical sections with <strong>mutual exclusion</strong> — one thread at a time gets exclusive access — generally enforced with <strong>locks</strong>.</p>
+
+      <!-- ===== synchronized methods ===== -->
+      <h2 id="w10-synchronized">synchronized methods</h2>
+
+      <p>The deceptively simple fix: declare the method that touches shared state as <code>synchronized</code>. The JVM then guarantees only one thread at a time can be inside it — making the whole method a critical section.</p>
+
+      <div class="code-block">
+private <span style="color:#e89b6d;">synchronized</span> void incCounter() {
+    counter++;   <span style="color:#7eb892;">// now effectively atomic (within this method)</span>
+}
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">A subtle but important detail</div>
+        With synchronization, <strong>at least one</strong> thread is <em>guaranteed</em> to reach the correct total (200,000); the other might not. Why? The threads no longer interrupt each other <em>mid-instruction</em>, but they still interrupt each other in terms of <em>progress</em> — one thread may hit its loop limit before the shared counter reaches the final total. Think of it as the threads <strong>cooperating</strong> to reach the total, rather than each independently reaching it.
+      </div>
+
+      <!-- ===== Locks ===== -->
+      <h2 id="w10-locks">Locks &amp; intrinsic locks</h2>
+
+      <p>A <strong>lock</strong> lets you declare a critical section accessible by one thread at a time. Just before entering, a thread tries to <strong>acquire</strong> the lock; on exit it <strong>releases</strong> it. If thread A holds the lock and thread B tries to acquire it, <strong>B blocks until A releases</strong> — and if A never releases, B blocks forever.</p>
+
+      <div class="lock-flow">
+        <div class="lock-step lock-acquire"><span class="lk-ic">🔓→🔒</span><div><strong>Thread A acquires</strong> the lock, enters the critical section.</div></div>
+        <div class="lock-step lock-blocked"><span class="lk-ic">⛔</span><div><strong>Thread B tries to acquire</strong> — lock is held → B is <strong>BLOCKED</strong> (waits).</div></div>
+        <div class="lock-step lock-release"><span class="lk-ic">🔒→🔓</span><div><strong>Thread A releases</strong> on exit → B can now acquire and proceed.</div></div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Intrinsic locks (monitors)</div>
+        <strong>Every Java object has a built-in lock</strong> called its <em>intrinsic lock</em> (or monitor). When you mark a method <code>synchronized</code>, you're locking on a specific object — implicitly <code>this</code> (the current object). You don't have to write it; it's implied.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Locking is per-object, not per-method</div>
+        Because the lock is on the <em>object</em> (not the method), while one thread holds it, other threads can't enter <strong>any</strong> synchronized method on that same object. This is correct behaviour — if it only locked the single method, another synchronized method could run concurrently and still cause interference on the same shared state.
+      </div>
+
+      <!-- ===== synchronized blocks ===== -->
+      <h2 id="w10-blocks">synchronized blocks — lock only what you need</h2>
+
+      <p>A <code>synchronized</code> <em>method</em> locks the whole method — even parts that don't need it. If only part touches shared state, use a <strong>synchronized block</strong> to make just that part the critical section (and acquire the lock later / hold it for less time):</p>
+
+      <div class="code-block">
+private void addToCounter(int amount) {
+    if (amount &gt;= 0) {              <span style="color:#7eb892;">// 'amount' is a local — not shared, no lock needed</span>
+        <span style="color:#e89b6d;">synchronized (this)</span> {        <span style="color:#7eb892;">// lock acquired only here, only if needed</span>
+            counter += amount;       <span style="color:#7eb892;">// the actual critical section</span>
+        }
+    }
+}
+      </div>
+      <p>With a block you <strong>must specify which object to lock on</strong> (here <code>this</code>). The local parameter <code>amount</code> is per-thread, so it never needed protection — only the shared <code>counter</code> does.</p>
+
+      <h3>Locking on another object</h3>
+      <p>Sometimes you want to lock a <em>different</em> shared object — often one that isn't itself thread-safe. You can synchronize on any object:</p>
+      <div class="code-block">
+public void run() {
+    for (int i = 0; i &lt; 100_000; i++) {
+        <span style="color:#e89b6d;">synchronized (counter)</span> {   <span style="color:#7eb892;">// lock on the shared Counter object</span>
+            counter.incCounter();    <span style="color:#7eb892;">// Counter itself is NOT thread-safe</span>
+        }
+    }
+}
+      </div>
+
+      <!-- ===== Thread safety ===== -->
+      <h2 id="w10-threadsafe">Thread safety &amp; immutability</h2>
+
+      <div class="callout warn">
+        <div class="callout-label">The fragility of external locking</div>
+        Locking on a shared object from <em>outside</em> relies on <strong>every</strong> class remembering to do the same. If one thread misuses the object (accesses it without the lock), <em>all</em> threads can suffer. You can't enforce it. Why might you be forced into this? Because you might not control the shared class's source code (you can't add <code>synchronized</code> to a class you didn't write).
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The right way</div>
+        Ideally, any class used to create <strong>shared mutable objects should be designed thread-safe from the start</strong> (synchronizing internally). And the strongest guarantee of all: an <strong>immutable</strong> object is <em>inherently</em> thread-safe — if its state can never change, no thread can ever observe an inconsistent value, so no locking is needed at all.
+      </div>
+
+      <!-- ===== Visibility ===== -->
+      <h2 id="w10-visibility">Visibility &amp; memory levels</h2>
+
+      <p>Now the second, subtler problem. We've assumed that when one thread updates a variable, others immediately see the new value. <strong>That's not guaranteed.</strong> To understand why, you need the real memory hierarchy the CPU uses:</p>
+
+      <div class="memlvl">
+        <div class="memlvl-row">
+          <div class="memlvl-core">
+            <div class="memlvl-label">Core 1</div>
+            <div class="cl reg">registers</div>
+            <div class="cl">L1 / L2 cache</div>
+          </div>
+          <div class="memlvl-core">
+            <div class="memlvl-label">Core 2</div>
+            <div class="cl reg">registers</div>
+            <div class="cl">L1 / L2 cache</div>
+          </div>
+        </div>
+        <div style="font-size:18px; color:var(--ink-muted);">↕ <span class="memlvl-speed">(maybe shared L3 cache)</span></div>
+        <div class="memlvl-ram">Main RAM — heaps &amp; stacks live here<br><span class="memlvl-speed">slow to access vs cache/registers</span></div>
+      </div>
+      <p style="font-size:13px; color:var(--ink-muted);">Registers are fastest, then 1–4 levels of cache, then slow main RAM. <strong>Each core has its own registers and cache.</strong></p>
+
+      <div class="callout warn">
+        <div class="callout-label">The visibility problem</div>
+        This architecture <em>deliberately</em> creates data redundancy → potential inconsistency:
+        <ul style="margin:8px 0 0 0;">
+          <li>Thread A (Core 1) copies a shared variable into its cache.</li>
+          <li>Thread B (Core 2) copies the <em>same</em> variable into <em>its</em> cache.</li>
+          <li>Thread A updates the variable and writes it back to <strong>Core 1's cache</strong>.</li>
+          <li>Thread B still sees the <strong>old value</strong> in Core 2's cache — A's update is invisible to it!</li>
+        </ul>
+      </div>
+
+      <div class="vis-demo">
+        <div class="vis-core"><div class="memlvl-label">Core 1 cache (Thread A)</div><div class="vis-val" style="color:var(--accent-3);">x = 6</div>just updated</div>
+        <div style="font-size:13px; color:var(--ink-muted); text-align:center;">RAM not yet<br>updated →<br>B can't see it</div>
+        <div class="vis-core stale"><div class="memlvl-label">Core 2 cache (Thread B)</div><div class="vis-val" style="color:var(--accent-2);">x = 5</div>STALE ⚠</div>
+      </div>
+
+      <p>CPUs have mechanisms to <strong>flush</strong> caches/registers back to main RAM, but only after a flush can all threads be guaranteed to see the same value. Crucially: <strong>mutual exclusion alone doesn't fix this</strong> — it's not about interleaving, it's about stale cached copies.</p>
+
+      <!-- ===== volatile ===== -->
+      <h2 id="w10-volatile">volatile</h2>
+
+      <p>Java's keyword for variables that might be cached locally and go stale. Marking a variable <code>volatile</code> signals that it must be <strong>flushed to main memory when changed, and read back from main memory when accessed</strong> — bypassing stale cached copies.</p>
+
+      <div class="code-block">
+private <span style="color:#e89b6d;">volatile</span> boolean newDataAvailable;
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Java's visibility guarantee — you only need ONE volatile</div>
+        Remarkably, if you just need the latest values flushed/read, <strong>you only need to mark one variable volatile</strong>. By Java's visibility guarantee: when a volatile variable is flushed to RAM, <em>all</em> variables visible to that thread are flushed too. (This is also why the boolean stop-flag from Week 9 should be volatile.)
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">synchronized gives visibility too</div>
+        <code>synchronized</code> blocks have their own visibility guarantee: <strong>on entry</strong>, all variables visible to the thread are refreshed from main memory; <strong>on exit</strong>, all are flushed back. So <code>synchronized</code> fixes <em>both</em> problems — mutual exclusion <em>and</em> visibility. <code>volatile</code> fixes only visibility (no mutual exclusion / atomicity).
+      </div>
+
+      <!-- ===== Reordering ===== -->
+      <h2 id="w10-reorder">Instruction reordering &amp; happens-before</h2>
+
+      <p>One more twist. The JVM, the Java compiler, the HotSpot JIT compiler, <em>and</em> the CPU can all <strong>reorder instructions</strong> in your program — e.g. to exploit CPU pipelining by parallelising independent instructions for throughput. Statements that <em>appear</em> independent are candidates for reordering.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">Why reordering breaks concurrency</div>
+        Consider <code>addToBuffer</code> where these two lines get swapped:
+        <div class="code-block" style="margin:10px 0;">newDataAvailable = true;       <span style="color:#7eb892;">// volatile flush — "data is ready!"</span>
+buffer.addToBuffer(data, ...); <span style="color:#7eb892;">// ...but data isn't actually added until HERE</span></div>
+        Because <code>newDataAvailable</code> is volatile, setting it true flushes to RAM — so another thread thinks new data is available <em>before it actually is</em>. A consumer could read garbage.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The "happens-before" guarantee</div>
+        Java's <strong>volatile happens-before guarantee</strong> fixes this: <em>if a statement appears before a write to a volatile variable (in the program as written), it will stay before — it won't be reordered after it.</em> This prevents the dangerous swap above. <br><br>
+        The same applies to <code>synchronized</code> blocks: instructions <strong>won't be moved out of</strong> a synchronized block (a statement inside won't move to after it, and a statement before won't move to inside/after). The lock boundaries act as <em>reordering barriers</em>.
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="w10-exam">Exam-style takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 10</div>
+        <ol>
+          <li><strong>Two distinct problems:</strong> mutual exclusion (atomicity) AND visibility. Know which tool fixes which.</li>
+          <li><strong>Critical section</strong> = code only one thread should run at a time; protected by <strong>mutual exclusion</strong> via <strong>locks</strong>.</li>
+          <li><strong>synchronized method</strong> — whole method is the critical section; locks on <code>this</code> implicitly.</li>
+          <li><strong>Intrinsic lock</strong> — every object has one; holding it blocks <em>all</em> synchronized methods on that object. Acquire on enter, release on exit; others BLOCK.</li>
+          <li><strong>synchronized block</strong> — lock only the necessary part; you must name the lock object; can lock on <code>this</code> or another shared object.</li>
+          <li><strong>Thread safety</strong> — external locking is fragile (everyone must cooperate); design shared mutable classes thread-safe; <strong>immutable objects are inherently thread-safe</strong>.</li>
+          <li><strong>Memory levels</strong> — registers → cache (per-core!) → RAM. Per-core caches cause the <strong>visibility problem</strong> (stale copies).</li>
+          <li><strong>volatile</strong> — forces flush-on-write / read-from-RAM; one volatile flushes all visible vars; gives visibility but NOT atomicity.</li>
+          <li><strong>synchronized gives visibility too</strong> — refresh on entry, flush on exit (fixes both problems).</li>
+          <li><strong>Instruction reordering</strong> — JVM/compiler/HotSpot/CPU may reorder "independent" statements; the <strong>happens-before guarantee</strong> (volatile &amp; synchronized) prevents dangerous reordering across the barrier.</li>
+        </ol>
+      </div>
+
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 10 notes.</p>
+
+    </section>

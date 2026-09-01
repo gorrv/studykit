@@ -1,0 +1,139 @@
+<section id="w2-csp1" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 02 · Part 3 · CSPs</div>
+        <h1>CSPs: Introduction</h1>
+        <div class="week-subtitle">when only the answer matters, not how you got there</div>
+      </div>
+      <!-- ===== GOAL ===== -->
+      <h2 id="cs-goal">It's not the journey, it's the goal</h2>
+      <div class="callout exam">
+        <div class="callout-label">The shift</div>
+        Typically when you think of search you think of <strong>path planning</strong> — you know the goal and want to find out how to get there.
+        <p style="margin:10px 0 0 0;">But in some problems we only care about <strong>finding a goal state</strong>: fill in all the values in a way that is valid.</p>
+        <ul style="margin:10px 0 0 0;">
+          <li>Respect rules of where items/values can be placed.</li>
+          <li>Respect validity relationships.</li>
+          <li><strong>All that matters is that we satisfy those rules and constraints</strong> — not in which order you filled in the puzzle.</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why this changes the algorithm</div>
+        In Week 1 the <em>path</em> was the answer, so cost and ordering mattered. In a Sudoku or a colouring, the sequence you wrote the values in is <strong>irrelevant</strong> — nobody grades your filling-in order. That single observation is worth an exponential factor, and it's cashed in later under the word <em>commutativity</em>.
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Why plain search wastes effort here</div>
+        You <em>can</em> use an informed search on the map-colouring problem. But it is <strong>largely wasteful</strong>: there are <strong>lots of invalid states</strong>, and ordinary state-space search happily generates and stores them because it only checks whether a state is the <em>goal</em>, never whether it is <em>valid</em>.
+      </div>
+      <!-- ===== DEF ===== -->
+      <h2 id="cs-def">What a CSP is</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition — three components</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>A finite set of variables X</strong> {x₁ … xₙ} — defines all elements that need to be given a value in the problem.</li>
+          <li><strong>A set of domains D</strong> {D₁ … Dᵢ} — defines what possible values can be assigned to each variable, {v₁ … vⱼ}.</li>
+          <li><strong>A set of constraints C</strong> {C₁ … C_k} — the rules that dictate a relation between variables in X. <strong>Each constraint Cᵢ is a pairing of scope and relation.</strong></li>
+        </ul>
+        <p style="margin:12px 0 0 0;">A <strong>CSP solution</strong> is an instantiation of all variables in <em>X</em> using values in <em>D</em> that satisfies all constraints in <em>C</em>.</p>
+        <p style="margin:10px 0 0 0;">CSP solvers search through <strong>incomplete but consistent</strong> solutions (partial assignments).</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">"Scope and relation", and "incomplete but consistent"</div>
+        A constraint has a <strong>scope</strong> (which variables it talks about — e.g. ⟨SA, WA⟩) and a <strong>relation</strong> (which combinations are allowed — e.g. all pairs where the two differ). Separating them is what lets a solver reason about a constraint without knowing what problem it came from.
+        <p style="margin:10px 0 0 0;">"<strong>Incomplete but consistent</strong>" is the search space: partial assignments that break no constraint <em>so far</em>. Not every one leads to a solution, but every one is worth extending — and anything inconsistent is thrown away immediately rather than expanded.</p>
+      </div>
+      <!-- ===== MAP ===== -->
+      <h2 id="cs-map">Map colouring</h2>
+      <div class="callout">
+        <div class="callout-label">The problem</div>
+        Map of Australia. Colour each region <strong>{red, green, blue}</strong> so that <strong>no neighbouring regions are the same colour</strong>.
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">As a CSP — memorise this instantiation</div>
+        <p style="margin:0 0 8px 0;"><strong>X</strong> = {WA, NT, Q, NSW, V, SA, T}</p>
+        <p style="margin:0 0 8px 0;"><strong>D</strong> = {{red, green, blue}, {red, green, blue}, …} — one copy per variable</p>
+        <p style="margin:0;"><strong>C</strong> = {SA≠WA, SA≠NT, SA≠Q, SA≠NSW, SA≠V, WA≠NT, NT≠Q, Q≠NSW, NSW≠V}</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Two details people lose marks on</div>
+        <strong>T (Tasmania) appears in X but in no constraint</strong> — it's an island, so it neighbours nothing. It still needs a value; it just can never fail. And <strong>SA appears in five of the nine constraints</strong>, because South Australia touches everything. That asymmetry is exactly what the variable-ordering heuristics in Part 4 detect.
+      </div>
+      <!-- ===== GRAPH ===== -->
+      <h2 id="cs-graph">The constraint graph</h2>
+      <p>A CSP with binary constraints draws as a graph: <strong>nodes are variables, edges are constraints</strong>.</p>
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 460 250" role="img" xmlns="http://www.w3.org/2000/svg">
+          <title>Constraint graph for the Australia map-colouring CSP</title>
+          <desc>Seven nodes: WA, NT, Q, SA, NSW, V and T. Edges join SA to WA, NT, Q, NSW and V; WA to NT; NT to Q; Q to NSW; NSW to V. T has no edges.</desc>
+          <g stroke="var(--ink-muted)" stroke-width="1.2">
+            <line x1="80" y1="120" x2="180" y2="70"/><line x1="180" y1="70" x2="300" y2="80"/>
+            <line x1="80" y1="120" x2="200" y2="150"/><line x1="180" y1="70" x2="200" y2="150"/>
+            <line x1="300" y1="80" x2="200" y2="150"/><line x1="300" y1="80" x2="330" y2="150"/>
+            <line x1="200" y1="150" x2="330" y2="150"/><line x1="200" y1="150" x2="250" y2="205"/>
+            <line x1="330" y1="150" x2="250" y2="205"/>
+          </g>
+          <g font-family="IBM Plex Sans" font-size="12" font-style="italic" text-anchor="middle">
+            <circle cx="80" cy="120" r="21" fill="var(--surface-2)" stroke="var(--rule)"/><text x="80" y="125" fill="var(--ink)">WA</text>
+            <circle cx="180" cy="70" r="21" fill="var(--surface-2)" stroke="var(--rule)"/><text x="180" y="75" fill="var(--ink)">NT</text>
+            <circle cx="300" cy="80" r="21" fill="var(--surface-2)" stroke="var(--rule)"/><text x="300" y="85" fill="var(--ink)">Q</text>
+            <circle cx="200" cy="150" r="23" fill="var(--tint-a2)" stroke="var(--accent)" stroke-width="1.6"/><text x="200" y="155" fill="var(--accent)">SA</text>
+            <circle cx="330" cy="150" r="24" fill="var(--surface-2)" stroke="var(--rule)"/><text x="330" y="155" fill="var(--ink)">NSW</text>
+            <circle cx="250" cy="205" r="20" fill="var(--surface-2)" stroke="var(--rule)"/><text x="250" y="210" fill="var(--ink)">V</text>
+            <circle cx="410" cy="215" r="20" fill="var(--surface-2)" stroke="var(--rule)" stroke-dasharray="3 2"/><text x="410" y="220" fill="var(--ink-muted)">T</text>
+          </g>
+        </svg>
+        <div class="caption">SA (degree 5) is the hub; T is isolated. Nine edges, matching the nine constraints.</div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Read the heuristics straight off the picture</div>
+        <strong>Degree = how many constraints a variable is in.</strong> SA has degree 5, T has degree 0. "Most constraining variable" in Part 4 literally means "pick the highest-degree node" — so the graph is not decoration, it's the data structure the heuristics run on.
+      </div>
+      <!-- ===== QUEENS ===== -->
+      <h2 id="cs-queens"><em>n</em>-Queens as a CSP</h2>
+      <div class="callout exam">
+        <div class="callout-label">The formulation from the slides</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>X</strong> = {x<sub>ij</sub>} — one variable per <em>square</em> of the board.</li>
+          <li><strong>D</strong> = {0, 1} — <em>empty</em> or <em>queen</em>.</li>
+          <li><strong>C</strong> =
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; margin:8px 0 0 12px; line-height:1.9;">
+              Σ<sub>i,j</sub> X<sub>ij</sub> = N<br>
+              (X<sub>ij</sub>, X<sub>ik</sub>) ∈ {(0,0), (0,1), (1,0)}<br>
+              (X<sub>ij</sub>, X<sub>kj</sub>) ∈ {(0,0), (0,1), (1,0)}<br>
+              (X<sub>ij</sub>, X<sub>i+k, j+k</sub>) ∈ {(0,0), (0,1), (1,0)}<br>
+              (X<sub>ij</sub>, X<sub>i+k, j−k</sub>) ∈ {(0,0), (0,1), (1,0)}
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Decoding those constraints</div>
+        The set <code>{(0,0), (0,1), (1,0)}</code> is just "<strong>not both 1</strong>" written out as an explicit relation — the missing pair is (1,1). Applied to:
+        <ul style="margin:8px 0 0 0;">
+          <li><code>X<sub>ij</sub>, X<sub>ik</sub></code> — same row <em>i</em>, two columns → no two queens share a row;</li>
+          <li><code>X<sub>ij</sub>, X<sub>kj</sub></code> — same column <em>j</em> → no two share a column;</li>
+          <li><code>X<sub>i+k, j+k</sub></code> and <code>X<sub>i+k, j−k</sub></code> — the two diagonals.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">And <code>Σ X<sub>ij</sub> = N</code> forces exactly N queens on the board — without it, all-zeros would satisfy everything.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">This is a deliberately clumsy modelling</div>
+        One variable per square means <strong>n² variables</strong> and a global sum constraint. A tighter model uses <strong>one variable per column</strong> with domain {1…n} = the row its queen sits in, which makes "no two in a column" free and reduces the problem to row and diagonal constraints. The slides use the square version because it shows off <em>scope and relation</em> explicitly — but if a question asks you to "model n-Queens efficiently", the column version is the better answer.
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="cs-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 3</div>
+        <ol>
+          <li><strong>The shift</strong> — some problems care only about reaching a valid goal state, not about the path or the order of assignment.</li>
+          <li><strong>Ordinary search is wasteful here</strong> — it generates lots of invalid states because it tests for <em>goal</em>, not <em>validity</em>.</li>
+          <li><strong>The three components</strong> — variables X, domains D, constraints C. Each constraint is <strong>a pairing of scope and relation</strong>.</li>
+          <li><strong>A solution</strong> is an instantiation of all variables in X using values in D satisfying all constraints in C.</li>
+          <li><strong>Solvers search incomplete but consistent partial assignments.</strong></li>
+          <li><strong>The Australia CSP verbatim</strong> — X = {WA, NT, Q, NSW, V, SA, T}; D = {red, green, blue} each; C = {SA≠WA, SA≠NT, SA≠Q, SA≠NSW, SA≠V, WA≠NT, NT≠Q, Q≠NSW, NSW≠V} — nine constraints.</li>
+          <li><strong>The constraint graph</strong> — nodes are variables, edges are constraints; SA has degree 5, T degree 0.</li>
+          <li><strong><em>n</em>-Queens</strong> — X = {x<sub>ij</sub>}, D = {0, 1}, and the constraints: Σ X<sub>ij</sub> = N plus "not both 1" on rows, columns and both diagonals.</li>
+          <li><strong>Be able to formulate an unseen problem as a CSP</strong> — this is the standard exam question. Name the variables, give each a domain, then list the constraints.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Part 3. Next: actually solving one.</p>
+    </section>

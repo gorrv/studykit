@@ -1,0 +1,462 @@
+<section id="week2" class="week-section">
+
+      <div class="week-header">
+        <div class="week-eyebrow">Week 02 · Processes &amp; Scheduling</div>
+        <h1>Processes, Scheduling &amp; Threads</h1>
+        <div class="week-subtitle">how the OS juggles many programs on few CPUs</div>
+      </div>
+
+      <p>This week answers a fundamental question: a computer has only a handful of CPUs, yet runs dozens of programs "at once." How? The answer is <strong>processes</strong> (tracked instances of running programs), <strong>scheduling</strong> (deciding who runs next), and <strong>threads</strong> (multiple strands of work within one program).</p>
+
+      <!-- ===== Multitasking ===== -->
+      <h2 id="w2-multitask">Multitasking &amp; types of task</h2>
+
+      <p>For most of computing history, a computer had <strong>one CPU</strong> and could run <strong>one program at a time</strong>, doing <strong>one thing at a time</strong>. To switch programs you'd shut one down and start another. Painful.</p>
+
+      <p>The fix was <strong>multitasking</strong>: the CPU switches between tasks rapidly, letting each run for a slice of time. Only one runs at any instant, but switching fast creates the <em>illusion</em> of simultaneity. This is <strong>concurrency</strong> — multiple tasks making progress.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Connects to Week 1</div>
+        This is exactly the concurrency-vs-parallelism distinction. One CPU multitasking = concurrency (illusion). Multiple cores = parallelism (real simultaneity).
+      </div>
+
+      <h3>CPU-bound vs I/O-bound tasks</h3>
+
+      <p>Not all tasks are alike, and that affects how we should schedule them:</p>
+
+      <div class="compare-2">
+        <div class="mode-box user" style="background:#eaf1fa; border-color:var(--accent);">
+          <h4>CPU-bound</h4>
+          <p style="font-size:14px; margin:0;">Spends most of its time <strong>executing code</strong> on the CPU. E.g. video encoding, simulations, number crunching.</p>
+        </div>
+        <div class="mode-box kernel" style="background:#fbeee4; border-color:var(--accent-2);">
+          <h4>I/O-bound</h4>
+          <p style="font-size:14px; margin:0;">Spends most of its time <strong>waiting on I/O devices</strong> (disk, network, printer). E.g. file copying, web requests.</p>
+        </div>
+      </div>
+
+      <p>I/O devices are <em>extremely</em> slow relative to the CPU. Without multitasking, a task reading from disk would force the CPU to <strong>sit idle</strong> until the read finishes. Early multitasking systems learned to detect I/O starting, then switch to another task until the I/O completed (helped by a disk controller + buffer holding the data until the CPU is ready).</p>
+
+      <!-- ===== Program vs Process ===== -->
+      <h2 id="w2-program-process">Program vs Process</h2>
+
+      <p>A subtle but crucial distinction:</p>
+
+      <table>
+        <tr><th>Program</th><th>Process</th></tr>
+        <tr>
+          <td>A <strong>file on disk</strong> — passive. The contents of an executable (instructions + constants + global data).</td>
+          <td>A <strong>program in execution</strong> — active. An instance loaded into memory and running.</td>
+        </tr>
+      </table>
+
+      <div class="callout">
+        <div class="callout-label">The classic question</div>
+        "If I start Google Chrome twice, how many programs am I running?" → <strong>One program, two processes.</strong> Same file on disk, two independent running instances.
+      </div>
+
+      <h3>What's in an executable file (ELF)</h3>
+      <p>Unix-based systems use the <strong>ELF</strong> format. Simplified, it contains:</p>
+      <ul>
+        <li><strong>Code (text) segment</strong> — the program instructions, plus read-only constants (<code>rodata</code>)</li>
+        <li><strong>Data segment</strong> — the global data defined in the program</li>
+      </ul>
+
+      <h3>What the OS builds in RAM for a process</h3>
+      <p>When loading a program, the OS copies the static parts from the file and <em>creates two new dynamic regions</em>:</p>
+
+      <div class="addr-space">
+        <div class="addr-row"><div class="addr-label">max</div><div class="addr-content stack">Stack<span class="desc">grows down ↓</span></div></div>
+        <div class="addr-row"><div class="addr-label">↕</div><div class="addr-content free">free space (they grow toward each other)</div></div>
+        <div class="addr-row"><div class="addr-label">↑</div><div class="addr-content heap">Heap<span class="desc">grows up ↑</span></div></div>
+        <div class="addr-row"><div class="addr-label">·</div><div class="addr-content data">Data<span class="desc">globals (from file)</span></div></div>
+        <div class="addr-row"><div class="addr-label">0</div><div class="addr-content text">Text<span class="desc">code (from file)</span></div></div>
+      </div>
+
+      <table>
+        <tr><th>Region</th><th>Source</th><th>Holds</th></tr>
+        <tr><td><strong>Text</strong></td><td>copied from file</td><td>code instructions (static)</td></tr>
+        <tr><td><strong>Data</strong></td><td>copied from file</td><td>global variables (static)</td></tr>
+        <tr><td><strong>Stack</strong></td><td>created by OS</td><td>local variables, method parameters</td></tr>
+        <tr><td><strong>Heap</strong></td><td>created by OS</td><td>objects created by <code>new</code> / <code>malloc</code></td></tr>
+      </table>
+
+      <div class="callout tip">
+        <div class="callout-label">Why stack + heap are dynamic</div>
+        Code and data sizes are fixed and known from the file. But local variables, parameters, and objects <strong>don't exist until the program runs</strong> — and each run may use them differently (some methods may never be called). So the OS creates the stack and heap to let the process build these on the fly. The OS ensures stack and heap <strong>never overlap</strong> as they grow toward each other.
+      </div>
+
+      <p>If two processes run the <em>same</em> program, the OS might <strong>share the code and data segments</strong> between them (they're identical and read-only). But the <strong>stack and heap are never shared</strong> — each process gets its own.</p>
+
+      <!-- ===== PCB ===== -->
+      <h2 id="w2-pcb">Process Control Block &amp; process states</h2>
+
+      <p>The OS must track every process it starts. It does this with a <strong>Process Control Block (PCB)</strong> — one per process. Notable contents:</p>
+
+      <table>
+        <tr><th>PCB field</th><th>What it stores</th></tr>
+        <tr><td><strong>Process ID</strong></td><td>Unique number identifying the process</td></tr>
+        <tr><td><strong>Program counter</strong></td><td>Address of the next instruction to execute</td></tr>
+        <tr><td><strong>Process state</strong></td><td>READY, RUNNING, WAITING, etc.</td></tr>
+        <tr><td><strong>General-purpose registers</strong></td><td>Saved CPU register contents for this process</td></tr>
+      </table>
+
+      <p>PCBs are usually stored by the OS in a <strong>linked list</strong>.</p>
+
+      <h3>The process state diagram</h3>
+      <p>A process moves through these states over its lifetime:</p>
+
+      <div class="state-diagram">
+        <div class="state-flow">
+          <div>
+            <div class="state-node state-new">NEW</div>
+            <div class="state-label">created</div>
+          </div>
+          <span class="state-arrow">──admit──▶</span>
+          <div>
+            <div class="state-node state-ready">READY</div>
+            <div class="state-label">waiting for CPU</div>
+          </div>
+          <span class="state-arrow">──dispatch──▶</span>
+          <div>
+            <div class="state-node state-running">RUNNING</div>
+            <div class="state-label">on the CPU</div>
+          </div>
+          <span class="state-arrow">──exit──▶</span>
+          <div>
+            <div class="state-node state-term">TERMINATED</div>
+            <div class="state-label">done</div>
+          </div>
+        </div>
+        <div style="text-align:center; margin-top:24px; padding-top:20px; border-top:1px dashed var(--rule);">
+          <div class="state-flow">
+            <div>
+              <div class="state-node state-running">RUNNING</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <span class="state-arrow">──interrupt──▶ back to READY</span>
+              <span class="state-arrow">──I/O request──▶ to WAITING</span>
+            </div>
+            <div>
+              <div class="state-node state-waiting">WAITING</div>
+              <div class="state-label">I/O done → back to READY</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <table>
+        <tr><th>Transition</th><th>When it happens</th></tr>
+        <tr><td>NEW → READY</td><td>OS <em>admits</em> the process (may delay if system is full)</td></tr>
+        <tr><td>READY → RUNNING</td><td>Scheduler <em>dispatches</em> it onto the CPU</td></tr>
+        <tr><td>RUNNING → READY</td><td>OS <em>interrupts</em> it to run another process (goes back in ready queue)</td></tr>
+        <tr><td>RUNNING → WAITING</td><td>Process issues an <em>I/O request</em></td></tr>
+        <tr><td>WAITING → READY</td><td>I/O <em>completes</em> (back in ready queue)</td></tr>
+        <tr><td>RUNNING → TERMINATED</td><td>Process <em>exits</em></td></tr>
+      </table>
+
+      <!-- ===== Context switching ===== -->
+      <h2 id="w2-context">Context switching</h2>
+
+      <p>When the CPU switches from running process A to process B, the register values currently in the CPU belong to A. To switch cleanly:</p>
+
+      <div class="code-block">
+<span style="color:#7eb892;">// Switching from Process A → Process B</span>
+<span style="color:#999;">1.</span> SAVE A's context (program counter + registers) into A's PCB
+<span style="color:#999;">2.</span> LOAD B's context (program counter + registers) from B's PCB
+<span style="color:#999;">3.</span> Resume execution — CPU now runs B as if never interrupted
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Why context switching matters</div>
+        It's <strong>pure overhead</strong> — no useful work happens during a switch. If it were slow, it would dominate everything. Modern CPUs/OSes do a context switch in about <strong>1–2 microseconds</strong>. The faster it is, the more aggressively the OS can multitask.
+      </div>
+
+      <!-- ===== Scheduling ===== -->
+      <h2 id="w2-scheduling">Scheduling algorithms</h2>
+
+      <p>A modern system has many processes ready to run. The <strong>CPU scheduler</strong> decides which one runs next. (There's also a <em>long-term scheduler</em> that decides which processes get loaded from storage into RAM — but we focus on CPU scheduling.)</p>
+
+      <h3>Preemptive vs non-preemptive</h3>
+      <div class="compare-2">
+        <div class="mode-box user" style="background:#ecf4e6; border-color:var(--accent-3);">
+          <h4>Non-preemptive</h4>
+          <p style="font-size:14px; margin:0;">A process keeps the CPU until it <strong>terminates or waits</strong> (for I/O). The OS can't forcibly take it back.</p>
+        </div>
+        <div class="mode-box kernel" style="background:#fbeee4; border-color:var(--accent-2);">
+          <h4>Preemptive</h4>
+          <p style="font-size:14px; margin:0;">The OS <strong>can interrupt</strong> a running process to let another run. Modern schedulers are usually preemptive.</p>
+        </div>
+      </div>
+
+      <p>The oldest approach was <strong>cooperative multitasking</strong>: processes voluntarily <em>yield</em> to each other. Problem: a process that never yields hogs the CPU forever. (Old Windows and Mac OSes worked this way.)</p>
+
+      <div class="callout">
+        <div class="callout-label">Key metric: Average Waiting Time (AWT)</div>
+        <strong>Waiting time</strong> = time a process spends in the ready queue (not running). <strong>AWT</strong> = average across all processes. We usually want to <em>minimise</em> AWT. <strong>Burst time</strong> = total CPU time a process needs (excluding I/O).
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">📘 From the textbook (OSTEP Ch.7): two different metrics</div>
+        The slides focus on waiting time, but OSTEP frames scheduling around <em>two</em> metrics that pull in opposite directions:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Turnaround time</strong> = T<sub>completion</sub> − T<sub>arrival</sub>. How long from arriving to finishing. A <em>performance</em> metric.</li>
+          <li><strong>Response time</strong> = T<sub>first run</sub> − T<sub>arrival</sub>. How long until you <em>first</em> get the CPU. An <em>interactivity</em> metric — this is what matters when you're typing at a terminal and want to see something happen.</li>
+        </ul>
+        <p style="margin:8px 0 0 0;">This distinction is the key to understanding <em>why</em> different algorithms exist. SJF/STCF win on turnaround; Round-Robin wins on response. You can't have both — it's a fundamental trade-off (see below).</p>
+      </div>
+
+      <h3>1 · First Come First Served (FCFS)</h3>
+      <p>Simplest possible: a <strong>FIFO queue</strong>. Whoever's been waiting longest runs next. <strong>Non-preemptive.</strong> Problem: order of arrival massively affects AWT.</p>
+
+      <div class="callout">
+        <div class="callout-label">📘 The convoy effect (OSTEP)</div>
+        OSTEP gives FCFS's flaw a memorable name: the <strong>convoy effect</strong>. When several short jobs queue up behind one long job, they all wait ages — like being stuck behind someone with three full carts at the supermarket while you hold a single item. The fix (a "10-items-or-less" lane) is exactly the intuition behind Shortest Job First.
+      </div>
+
+
+      <p><strong>Example:</strong> three processes with burst times P1=24, P2=3, P3=3.</p>
+
+      <p style="margin-bottom:4px;"><strong>Order A — P1, P2, P3 arrive:</strong></p>
+      <div class="gantt">
+        <div class="gantt-row">
+          <div class="gantt-block gantt-p1" style="width:280px;">P1 (24)</div>
+          <div class="gantt-block gantt-p2" style="width:48px;">P2</div>
+          <div class="gantt-block gantt-p3" style="width:48px;">P3</div>
+        </div>
+        <div class="gantt-axis" style="position:relative; height:16px;">
+          <span style="position:absolute; left:0;">0</span>
+          <span style="position:absolute; left:280px; transform:translateX(-50%);">24</span>
+          <span style="position:absolute; left:328px; transform:translateX(-50%);">27</span>
+          <span style="position:absolute; left:376px; transform:translateX(-50%);">30</span>
+        </div>
+      </div>
+      <p>Waits: P1=0, P2=24, P3=27. <strong>AWT = (0+24+27)/3 = 17.0</strong> 😬</p>
+
+      <p style="margin-bottom:4px;"><strong>Order B — P2, P3, P1 arrive (short jobs first):</strong></p>
+      <div class="gantt">
+        <div class="gantt-row">
+          <div class="gantt-block gantt-p2" style="width:48px;">P2</div>
+          <div class="gantt-block gantt-p3" style="width:48px;">P3</div>
+          <div class="gantt-block gantt-p1" style="width:280px;">P1 (24)</div>
+        </div>
+        <div class="gantt-axis" style="position:relative; height:16px;">
+          <span style="position:absolute; left:0;">0</span>
+          <span style="position:absolute; left:48px; transform:translateX(-50%);">3</span>
+          <span style="position:absolute; left:96px; transform:translateX(-50%);">6</span>
+          <span style="position:absolute; left:376px; transform:translateX(-50%);">30</span>
+        </div>
+      </div>
+      <p>Waits: P2=0, P3=3, P1=6. <strong>AWT = (0+3+6)/3 = 3.0</strong> ✨ — same jobs, <em>nearly 6× better</em> just from order!</p>
+
+      <h3>2 · Shortest Job First (SJF)</h3>
+      <p>Instead of arrival order, pick the process with the <strong>shortest burst time</strong> next. This is <em>provably optimal</em> for minimising AWT.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">The catch</div>
+        You need to <strong>know the burst time in advance</strong> — but you usually don't! Solution: estimate it from the process's <em>previous</em> burst times (a running average). FCFS didn't have this problem because it ignores burst times entirely.
+      </div>
+
+      <p>SJF can be <strong>preemptive</strong> or <strong>non-preemptive</strong>. Preemptive version: when a new process arrives, compare its burst time to the <em>remaining</em> time of the running process — if shorter, preempt.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">Starvation</div>
+        If short jobs keep arriving, a long job might <strong>never run</strong>. This is <strong>starvation</strong>. Fix: add an <strong>ageing factor</strong> — the longer a process waits, the higher its priority climbs, guaranteeing it eventually runs. (Priority = combination of burst time + age.) This idea generalises into <em>priority scheduling</em>.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">📘 STCF — preemptive SJF (OSTEP)</div>
+        Plain SJF is non-preemptive, so a long job already running can't be interrupted when a short job arrives (the convoy effect returns). The preemptive version is <strong>Shortest Time-to-Completion First (STCF)</strong>, also called Preemptive SJF: whenever a new job arrives, compare its burst to the <em>remaining</em> time of the running job and switch if shorter. Like SJF, STCF is <strong>provably optimal for turnaround time</strong> — but, as we'll see, terrible for response time.
+      </div>
+
+      <h3>3 · Priority Scheduling</h3>
+      <p>Generalise SJF: burst time becomes just <em>one</em> factor in a process's <strong>priority</strong>. Build a function combining many factors:</p>
+      <ul>
+        <li><strong>Internal factors:</strong> burst time, I/O usage, memory requirements</li>
+        <li><strong>External factors:</strong> who owns the machine, who submitted the job</li>
+      </ul>
+      <p>Also comes in preemptive and non-preemptive flavours. Same starvation risk → same ageing fix.</p>
+
+      <h3>4 · Round-Robin (RR)</h3>
+      <p>Like FCFS but <strong>preemptive</strong>, using a <strong>circular FIFO queue</strong>. Each process gets a fixed <strong>time quantum</strong> (max time per turn). If it doesn't finish, it goes to the back of the queue.</p>
+
+      <ul>
+        <li>Finishes / waits before quantum expires → preempted early, next process runs</li>
+        <li>Reaches the quantum → preempted, sent to back of queue (unless it's the only one)</li>
+      </ul>
+
+      <p><strong>Example:</strong> quantum = 2ms, processes P1=5, P2=4, P3=3 (arriving in that order).</p>
+      <div class="gantt">
+        <div class="gantt-row">
+          <div class="gantt-block gantt-p1" style="width:60px;">P1</div>
+          <div class="gantt-block gantt-p2" style="width:60px;">P2</div>
+          <div class="gantt-block gantt-p3" style="width:60px;">P3</div>
+          <div class="gantt-block gantt-p1" style="width:60px;">P1</div>
+          <div class="gantt-block gantt-p2" style="width:60px;">P2</div>
+          <div class="gantt-block gantt-p3" style="width:30px;">P3</div>
+          <div class="gantt-block gantt-p1" style="width:30px;">P1</div>
+        </div>
+        <div class="gantt-axis" style="position:relative; height:16px;">
+          <span style="position:absolute; left:0;">0</span>
+          <span style="position:absolute; left:60px; transform:translateX(-50%);">2</span>
+          <span style="position:absolute; left:120px; transform:translateX(-50%);">4</span>
+          <span style="position:absolute; left:180px; transform:translateX(-50%);">6</span>
+          <span style="position:absolute; left:240px; transform:translateX(-50%);">8</span>
+          <span style="position:absolute; left:300px; transform:translateX(-50%);">10</span>
+          <span style="position:absolute; left:330px; transform:translateX(-50%);">11</span>
+          <span style="position:absolute; left:360px; transform:translateX(-50%);">12</span>
+        </div>
+      </div>
+      <p>Each process runs in 2ms slices, cycling through the queue until done. RR is fair and responsive — great for interactive systems — but adds context-switching overhead.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">📘 The fundamental trade-off (OSTEP) — great exam discussion point</div>
+        OSTEP crystallises the whole chapter into one insight:
+        <ul style="margin:8px 0;">
+          <li><strong>SJF / STCF</strong> optimise <em>turnaround</em> time, but are <em>bad</em> for response time (a job arriving third waits for two full jobs before running once).</li>
+          <li><strong>Round-Robin</strong> optimises <em>response</em> time, but is <em>bad</em> for turnaround (it stretches every job out by only running it a slice at a time — often worse than FCFS!).</li>
+        </ul>
+        <p style="margin:8px 0 0 0;">Any policy that is <strong>fair</strong> (evenly sharing the CPU on a short timescale) will do poorly on turnaround. <em>If you're willing to be unfair, you can run short jobs to completion (good turnaround) but hurt response; if you value fairness, you improve response but hurt turnaround.</em> You can't have both.</p>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">📘 Two more OSTEP gems</div>
+        <strong>Amortization:</strong> the time quantum is a balancing act. If a context switch costs 1ms and the quantum is 10ms, you waste ~10% on switching. Make the quantum 100ms and you waste &lt;1% — but responsiveness drops. Bigger quantum <em>amortises</em> the switch cost. <br><br>
+        <strong>Overlap / incorporating I/O:</strong> when a job blocks on I/O, the scheduler runs <em>another</em> job on the CPU meanwhile. A good scheduler treats each <em>CPU burst</em> between I/O operations as its own mini-job, so interactive (I/O-heavy) jobs stay responsive while CPU-heavy jobs soak up the spare cycles. This <em>overlap</em> is what keeps the whole system busy.
+      </div>
+
+      <h3>5 · Multilevel Queue &amp; Multilevel Feedback Queue</h3>
+      <div class="compare-2">
+        <div class="proc-box" style="border-style:solid; border-color:var(--accent);">
+          <div class="proc-title">Multilevel Queue</div>
+          <p style="font-size:13px; margin:0;">Multiple queues for different <strong>classes</strong> of process (time-critical, UI, background), arranged by priority. Each queue can use a <em>different</em> algorithm. Processes <strong>do NOT move</strong> between queues.</p>
+        </div>
+        <div class="proc-box" style="border-style:solid; border-color:var(--accent-2);">
+          <div class="proc-title">Multilevel Feedback Queue</div>
+          <p style="font-size:13px; margin:0;">More flexible: processes <strong>CAN move</strong> between queues based on behaviour. E.g. a process hogging CPU gets demoted to a lower-priority queue.</p>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Real-world</div>
+        Linux and Windows use <strong>preemptive priority scheduling</strong>. macOS appears to use a <strong>multilevel feedback queue</strong>.
+      </div>
+
+      <!-- ===== INTERACTIVE SCHEDULER ===== -->
+      <h3 id="w2-playground">🛠️ Interactive: Scheduling Playground</h3>
+      <p>Enter processes with their burst times (and arrival times), pick an algorithm, and watch the Gantt chart and average waiting time generate live. Great for checking your hand-worked answers.</p>
+
+      <div class="tool">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>CPU Scheduler Simulator</h3>
+        </div>
+        <div class="tool-desc">FCFS, SJF (non-preemptive), and Round-Robin. Edit burst/arrival times, add or remove processes.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>Algorithm</label>
+            <select id="sch-algo" onchange="toggleQuantum()">
+              <option value="fcfs">FCFS (First Come First Served)</option>
+              <option value="sjf">SJF (Shortest Job First)</option>
+              <option value="rr">Round-Robin</option>
+            </select>
+          </div>
+          <div class="tool-field" id="sch-quantum-field" style="display:none;">
+            <label>Time quantum</label>
+            <input type="number" id="sch-quantum" value="2" min="1" style="width:80px;">
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <div class="proc-input-row" style="font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-muted); font-family:'IBM Plex Mono',monospace;">
+            <span>Process</span><span>Arrival</span><span>Burst</span><span></span>
+          </div>
+          <div id="sch-rows"></div>
+        </div>
+
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="addProc()">+ Add process</button>
+          <button class="tool-btn" onclick="runSchedule()">Run ▶</button>
+        </div>
+
+        <div id="sch-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== Threads ===== -->
+      <h2 id="w2-threads">Threads</h2>
+
+      <p>Processes let you run multiple <em>programs</em> at once. But a single program often needs to do several things at once too. A word processor wants to let you keep typing while it spell-checks, repaginates, and auto-saves in the background. Enter the <strong>thread</strong>.</p>
+
+      <p>A <strong>thread</strong> is a <em>strand of execution within a process</em>. One process can have many threads running "at the same time." Threads can even create more threads. (In Java: the <code>Thread</code> class and <code>Runnable</code> interface.)</p>
+
+      <p>Classic uses: a web server spawning a thread per incoming connection; a UI keeping one thread responsive while another does heavy work.</p>
+
+      <h3>What threads share (and don't)</h3>
+
+      <p>This is the <strong>most important part for the concurrency weeks ahead</strong>:</p>
+
+      <div class="proc-mem">
+        <div class="proc-box">
+          <div class="proc-title">Process (with 3 threads)</div>
+          <div class="shared-seg">SHARED: Code (text)</div>
+          <div class="shared-seg">SHARED: Global data</div>
+          <div class="shared-seg">SHARED: Heap (objects)</div>
+          <div class="thread-row">
+            <div class="thread-col"><span class="tlabel">Thread 1</span>own stack</div>
+            <div class="thread-col"><span class="tlabel">Thread 2</span>own stack</div>
+            <div class="thread-col"><span class="tlabel">Thread 3</span>own stack</div>
+          </div>
+        </div>
+        <div class="proc-box" style="border-color:var(--ink-muted);">
+          <div class="proc-title" style="color:var(--ink-muted);">Two separate processes</div>
+          <p style="font-size:13px; text-align:center; color:var(--ink-soft);">Processes are <strong>independent</strong>. They do <strong>NOT</strong> share memory by default. To communicate they must use shared memory or message passing (inter-process communication).</p>
+        </div>
+      </div>
+
+      <table>
+        <tr><th>Resource</th><th>Shared between threads?</th></tr>
+        <tr><td>Code (text)</td><td>✅ Yes</td></tr>
+        <tr><td>Global data</td><td>✅ Yes</td></tr>
+        <tr><td>Heap (objects)</td><td>✅ Yes — all threads access the same heap</td></tr>
+        <tr><td>Stack</td><td>❌ No — <strong>each thread gets its own</strong></td></tr>
+      </table>
+
+      <div class="callout exam">
+        <div class="callout-label">This is THE source of concurrency bugs</div>
+        Because threads <strong>share the heap and globals</strong>, two threads can touch the same data at the same time → race conditions, corruption, synchronisation problems. Each thread has its <em>own stack</em> because each calls different methods with different local variables. The shared data is what makes concurrency hard — and is the entire subject of the upcoming weeks.
+      </div>
+
+      <h3>One CPU vs multicore</h3>
+      <p>On a <strong>single CPU</strong>, threads still only take turns — one thing happens at any instant. On a <strong>multicore processor</strong>, each core is a full CPU that can execute in parallel — literally at the same time. The OS can place different threads/processes on different cores, genuinely running them simultaneously and boosting throughput.</p>
+
+      <h3>User threads vs kernel threads</h3>
+      <ul>
+        <li><strong>User threads</strong> — created by the programmer (Java threads, pthreads).</li>
+        <li><strong>Kernel threads</strong> — owned by the kernel; the basic unit the OS actually schedules.</li>
+      </ul>
+      <p>The OS usually maps user threads to kernel threads <strong>one-to-one</strong> (many-to-one and many-to-many exist but are less common). Crucially: <strong>the kernel schedules threads, not processes</strong> — because kernel threads are the basic unit of execution. Java threads are managed as kernel threads by the OS.</p>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="w2-exam">Exam-style takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 2</div>
+        <ol>
+          <li><strong>Program vs process</strong> — file vs running instance. (Chrome twice = 1 program, 2 processes.)</li>
+          <li><strong>Memory layout</strong> — text + data from file; stack + heap created by OS; which grows which way; why stack/heap are dynamic.</li>
+          <li><strong>PCB contents</strong> — PID, program counter, state, registers. Stored in a linked list.</li>
+          <li><strong>Process state diagram</strong> — be able to draw it and name every transition trigger.</li>
+          <li><strong>Context switch</strong> — what's saved/restored and why it's pure overhead (1–2 µs).</li>
+          <li><strong>Compute AWT</strong> for FCFS, SJF, Round-Robin given burst times. Practice drawing Gantt charts!</li>
+          <li><strong>SJF is optimal for AWT</strong> but needs burst-time estimation and risks starvation → ageing fix.</li>
+          <li><strong>Preemptive vs non-preemptive</strong> — define both, know which algorithms can be each.</li>
+          <li><strong>Multilevel queue vs feedback queue</strong> — the difference is whether processes can move between queues.</li>
+          <li><strong>Thread sharing</strong> — threads share code/data/heap, but each has its own stack. This is the root of synchronisation problems.</li>
+          <li><strong>Kernel schedules threads, not processes.</strong></li>
+        </ol>
+      </div>
+
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 2 notes. Send Week 3 slides whenever you're ready.</p>
+
+    </section>

@@ -1,0 +1,211 @@
+<section id="notation" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">★ Start here if a formula blocks you</div>
+        <h1>Reading the Notation</h1>
+        <div class="week-subtitle">every symbol in the module, said out loud</div>
+      </div>
+      <div class="callout">
+        <div class="callout-label">What this page is for</div>
+        Most formulas in this module are short sentences written in shorthand. <strong>If you cannot read the shorthand, the sentence looks like noise</strong> — and no amount of staring fixes that, because the problem is vocabulary, not intelligence.
+        <p style="margin:10px 0 0 0;">This page lists every symbol used anywhere in the module, what to <em>say</em> when you see it, and what it <em>does</em>. Then it takes the five worst formulas and decodes them word by word.</p>
+      </div>
+
+      <!-- ===== THE THREE RULES ===== -->
+      <h2 id="nt-rules">Three rules that make any formula readable</h2>
+      <div class="callout exam">
+        <div class="callout-label">Do these in order and most formulas fall apart</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Read the left-hand side first.</strong> It tells you what is being defined and what it depends on. <code>dist(C₁,C₂)</code> is "a distance between two clusters" — so the answer will be one number, and it depends on two clusters.</li>
+          <li><strong>Find the little writing under Σ, min or max.</strong> That tells you <em>what you are looping over</em>. Under Σ it means "add one of these for every …". Under min it means "try all of these and keep the smallest".</li>
+          <li><strong>Work from the inside out.</strong> Do the innermost bracket first, exactly like arithmetic. The outer symbols just say what to do with the pile of numbers you produced.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;">A formula is never asking you to do something clever in one step. It is a recipe with the steps stacked up.</p>
+      </div>
+
+      <!-- ===== SUMS ===== -->
+      <h2 id="nt-sums">Adding things up</h2>
+      <div class="callout">
+        <table class="cmp-table">
+          <tr><th>symbol</th><th>say</th><th>means</th><th>example</th></tr>
+          <tr><td><strong>Σ</strong></td><td>"sum of" / "add up"</td><td>Add one term for each thing listed underneath.</td><td><code>Σᵢ xᵢ</code> = x₁ + x₂ + x₃ + …</td></tr>
+          <tr><td><strong>Σ<sub>i=1</sub><sup>n</sup></strong></td><td>"sum from i equals 1 to n"</td><td>i counts 1, 2, 3 … up to n. Do the thing n times and add.</td><td><code>Σ<sub>i=1</sub><sup>3</sup> i²</code> = 1 + 4 + 9 = 14</td></tr>
+          <tr><td><strong>Σ<sub>s′</sub></strong></td><td>"sum over s-prime"</td><td>One term for every square you could land on.</td><td>the Bellman equation</td></tr>
+          <tr><td><strong>Π</strong></td><td>"product of"</td><td>Same but multiply instead of add. Rare here.</td><td>—</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>The whole trick with Σ:</strong> whatever is written under it is the thing that changes from term to term. Everything else stays put.</p>
+      </div>
+
+      <!-- ===== SETS ===== -->
+      <h2 id="nt-sets">Sets, membership and size</h2>
+      <div class="callout">
+        <table class="cmp-table">
+          <tr><th>symbol</th><th>say</th><th>means</th><th>example</th></tr>
+          <tr><td><strong>∈</strong></td><td>"in" / "belongs to"</td><td>This thing is a member of that collection.</td><td><code>p ∈ C₁</code> — the point p is in cluster 1</td></tr>
+          <tr><td><strong>{ … }</strong></td><td>"the set of"</td><td>A collection, order irrelevant.</td><td><code>C = {High, Low, Medium}</code></td></tr>
+          <tr><td><strong>|C|</strong></td><td>"the size of C"</td><td><strong>How many things are in it.</strong></td><td><code>|C| = 4</code> — four points in the cluster</td></tr>
+          <tr><td><strong>|x|</strong></td><td>"the absolute value of x"</td><td>Drop the minus sign. <strong>Same bars, different job</strong> — tell them apart by what is inside: a set or a number.</td><td><code>|−3| = 3</code></td></tr>
+          <tr><td><strong>‖p − q‖</strong></td><td>"the norm of p minus q"</td><td><strong>The distance between p and q.</strong> Double bars = distance between two <em>points</em>.</td><td><code>‖(0,0) − (3,4)‖ = 5</code></td></tr>
+          <tr><td><strong>ℝ<sup>D</sup></strong></td><td>"R to the D"</td><td>Points with D coordinates. ℝ² is ordinary (x, y).</td><td><code>p ∈ ℝ²</code> — p is a 2D point</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>The one that catches people:</strong> <code>|C|</code> and <code>|x|</code> look identical. If the thing inside is a cluster or a set, it means <em>count</em>. If it is a number, it means <em>make it positive</em>.</p>
+      </div>
+
+      <!-- ===== CHOOSING ===== -->
+      <h2 id="nt-choose">Choosing: min, max, arg</h2>
+      <div class="callout exam">
+        <table class="cmp-table">
+          <tr><th>symbol</th><th>say</th><th>gives you</th><th>example</th></tr>
+          <tr><td><strong>min</strong></td><td>"the minimum of"</td><td>the smallest <em>value</em></td><td>min of {3, 7, 5} = <strong>3</strong></td></tr>
+          <tr><td><strong>max</strong></td><td>"the maximum of"</td><td>the largest <em>value</em></td><td>max of {3, 7, 5} = <strong>7</strong></td></tr>
+          <tr><td><strong>arg min</strong></td><td>"arg min"</td><td>the <em>thing</em> that gave the smallest value</td><td>arg min = <strong>the first item</strong></td></tr>
+          <tr><td><strong>arg max</strong></td><td>"arg max"</td><td>the <em>thing</em> that gave the largest value</td><td>arg max = <strong>the second item</strong></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>min/max give a number. arg min/arg max give a name.</strong> That is the entire difference, and it is worth marks in Weeks 4, 7 and 8.</p>
+        <p style="margin:10px 0 0 0;">If a question says "which action?" or "which feature?", it wants an <strong>arg</strong>. If it says "what is the value?", it wants the plain min or max.</p>
+      </div>
+
+      <!-- ===== PROBABILITY ===== -->
+      <h2 id="nt-prob">Probability and averages</h2>
+      <div class="callout">
+        <table class="cmp-table">
+          <tr><th>symbol</th><th>say</th><th>means</th><th>example</th></tr>
+          <tr><td><strong>P(A)</strong></td><td>"the probability of A"</td><td>a number from 0 to 1</td><td><code>P(heads) = 0.5</code></td></tr>
+          <tr><td><strong>P(A | B)</strong></td><td>"the probability of A <strong>given</strong> B"</td><td>A happens, <em>assuming</em> B already did. <strong>The bar is not division.</strong></td><td><code>P(s′ | s, a)</code> — where you end up, given where you were and what you did</td></tr>
+          <tr><td><strong>E[X]</strong></td><td>"the expected value of X" / "the average X"</td><td>Σ (probability × value), over everything that could happen.</td><td><code>E[coin] = 0.5×5 + 0.5×0 = 2.50</code></td></tr>
+          <tr><td><strong>N(µ, σ²)</strong></td><td>"normal with mean mu and variance sigma-squared"</td><td>a bell curve. <strong>The second slot is the variance</strong>, not the standard deviation.</td><td><code>N(11, 4)</code> ⟹ σ = 2</td></tr>
+          <tr><td><strong>1<sub>predicate</sub></strong></td><td>"the indicator of …"</td><td>1 if it is true, 0 if not. Used to count only the cases you want.</td><td><code>1<sub>Aᵢ=a</sub></code> — 1 on the steps where a was chosen</td></tr>
+        </table>
+      </div>
+
+      <!-- ===== DECORATIONS ===== -->
+      <h2 id="nt-marks">Hats, stars, primes and subscripts</h2>
+      <div class="callout exam">
+        <div class="callout-label">These are adjectives, not new quantities</div>
+        <table class="cmp-table">
+          <tr><th>mark</th><th>say</th><th>means</th><th>example</th></tr>
+          <tr><td><strong>ŷ</strong> (hat)</td><td>"y hat"</td><td><strong>an estimate</strong> — what we predicted, not what happened</td><td>y = truth, ŷ = prediction</td></tr>
+          <tr><td><strong>q⋆</strong> (star)</td><td>"q star"</td><td><strong>the true or optimal one</strong> — usually unknown to the agent</td><td>q⋆(a) = the real value, Q(a) = our guess</td></tr>
+          <tr><td><strong>s′</strong> (prime)</td><td>"s prime"</td><td><strong>the next one</strong>, or another one of the same kind</td><td>s = now, s′ = where you land</td></tr>
+          <tr><td><strong>U<sub>i</sub></strong> (subscript)</td><td>"U sub i" / "U at step i"</td><td><strong>which round</strong> we are on</td><td>U₀, U₁, U₂ — the value map after each sweep</td></tr>
+          <tr><td><strong>x<sub>ij</sub></strong> (two subs)</td><td>"x i j"</td><td>the j-th coordinate of the i-th thing</td><td>p<sub>ij</sub> — coordinate j of point i</td></tr>
+          <tr><td><strong>γ<sup>t</sup></strong> (superscript)</td><td>"gamma to the t"</td><td>usually a power. <strong>Not</strong> an index.</td><td>γ² = γ × γ</td></tr>
+          <tr><td><strong>U<sup>π</sup></strong></td><td>"U under policy pi"</td><td>the exception: a superscript naming <em>which</em> policy</td><td>U<sup>π</sup>(s)</td></tr>
+        </table>
+      </div>
+
+      <!-- ===== GREEK ===== -->
+      <h2 id="nt-greek">The Greek letters, and what each one is used for here</h2>
+      <div class="callout">
+        <table class="cmp-table">
+          <tr><th>letter</th><th>say</th><th>in this module it means</th><th>where</th></tr>
+          <tr><td><strong>γ</strong></td><td>gamma</td><td>discount factor — how much less a future reward is worth</td><td>W4, W8</td></tr>
+          <tr><td><strong>ε</strong></td><td>epsilon</td><td>a small amount: an error tolerance, or the exploration rate</td><td>W4, W8</td></tr>
+          <tr><td><strong>δ</strong></td><td>delta</td><td>the biggest change this round</td><td>W4</td></tr>
+          <tr><td><strong>π</strong></td><td>pi</td><td>a policy — an action for every state. <strong>Not 3.14 here.</strong></td><td>W4</td></tr>
+          <tr><td><strong>µ</strong></td><td>mu</td><td>a mean — a cluster centre, or a distribution's average</td><td>W6, W7</td></tr>
+          <tr><td><strong>σ, σ²</strong></td><td>sigma</td><td>standard deviation, and variance</td><td>W7, W8</td></tr>
+          <tr><td><strong>β₀, β₁</strong></td><td>beta</td><td>the intercept and slope of a fitted line</td><td>W7</td></tr>
+          <tr><td><strong>α</strong></td><td>alpha</td><td>the best value MAX can guarantee so far</td><td>W2</td></tr>
+          <tr><td><strong>β</strong></td><td>beta</td><td>the best value MIN can guarantee so far</td><td>W2</td></tr>
+          <tr><td><strong>ε<sub>i</sub></strong></td><td>epsilon</td><td>a residual — one point's error</td><td>W7</td></tr>
+          <tr><td><strong>Σ</strong></td><td>sigma (capital)</td><td>add up. <strong>Different job from lowercase σ.</strong></td><td>everywhere</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">Note that <strong>β and ε each get used for two different things</strong> in different weeks, and <strong>σ and Σ are the same letter in different cases</strong>. Context tells you which; nobody expects you to guess from the glyph alone.</p>
+      </div>
+
+      <!-- ===== OTHER ===== -->
+      <h2 id="nt-misc">Everything else</h2>
+      <div class="callout">
+        <table class="cmp-table">
+          <tr><th>symbol</th><th>say</th><th>means</th></tr>
+          <tr><td><strong>:=</strong></td><td>"is defined as"</td><td>a definition, not an equation to solve</td></tr>
+          <tr><td><strong>←</strong></td><td>"becomes" / "is updated to"</td><td>overwrite the left with the right, like <code>x = x + 1</code> in code</td></tr>
+          <tr><td><strong>⟹</strong></td><td>"implies" / "therefore"</td><td>—</td></tr>
+          <tr><td><strong>≈</strong></td><td>"is approximately"</td><td>rounded</td></tr>
+          <tr><td><strong>∞</strong></td><td>"infinity"</td><td>in UCB, a value that always wins</td></tr>
+          <tr><td><strong>√x</strong></td><td>"the square root of x"</td><td>—</td></tr>
+          <tr><td><strong>ln t</strong></td><td>"log t" / "natural log of t"</td><td><strong>base e, not base 10.</strong> ln 8 = 2.0794, log₁₀ 8 = 0.9031</td></tr>
+          <tr><td><strong>f(x)</strong></td><td>"f of x"</td><td>a thing that takes x and gives a number back</td></tr>
+        </table>
+      </div>
+
+      <!-- ===== DECODED ===== -->
+      <h2 id="nt-decoded">The five worst formulas, decoded</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">1 · Single-linkage &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Week 6)</span></div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
+          dist<sub>SL</sub>(C₁, C₂) := min<sub>p∈C₁, q∈C₂</sub> ‖p − q‖</div>
+        <table class="cmp-table">
+          <tr><td><code>dist<sub>SL</sub>(C₁,C₂)</code></td><td>the single-linkage distance between two clusters — the answer will be one number</td></tr>
+          <tr><td><code>:=</code></td><td>is defined as</td></tr>
+          <tr><td><code>min</code></td><td>take the smallest of everything that follows</td></tr>
+          <tr><td><code>p∈C₁, q∈C₂</code></td><td>for every point p in cluster 1, paired with every point q in cluster 2</td></tr>
+          <tr><td><code>‖p − q‖</code></td><td>the distance between that pair</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Out loud:</strong> "measure every point of C₁ against every point of C₂, and keep the smallest distance."</p>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">2 · Within-cluster variance &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Week 6)</span></div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
+          V(C<sub>k</sub>) = (1 / |C<sub>k</sub>|) &nbsp;Σ<sub>i,i′ ∈ C<sub>k</sub></sub> &nbsp;d(p<sub>i</sub>, p<sub>i′</sub>)²</div>
+        <table class="cmp-table">
+          <tr><td><code>V(C<sub>k</sub>)</code></td><td>the variance of cluster k — one number per cluster</td></tr>
+          <tr><td><code>|C<sub>k</sub>|</code></td><td>how many <em>points</em> are in it (not pairs)</td></tr>
+          <tr><td><code>Σ<sub>i,i′</sub></code></td><td>one term for every <em>unordered pair</em> of points in the cluster</td></tr>
+          <tr><td><code>d(p<sub>i</sub>, p<sub>i′</sub>)²</code></td><td>the distance between that pair, squared — no square root</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Out loud:</strong> "take every pair of points in the cluster, square the distance between them, add all of those up, then divide by the number of points."</p>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">3 · The Bellman update &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Week 4)</span></div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
+          U<sub>i+1</sub>(s) = R(s) + γ &nbsp;max<sub>a</sub> &nbsp;Σ<sub>s′</sub> P(s′ | s, a) U<sub>i</sub>(s′)</div>
+        <table class="cmp-table">
+          <tr><td><code>U<sub>i+1</sub>(s)</code></td><td>the new value of square s, after this sweep</td></tr>
+          <tr><td><code>R(s)</code></td><td>the reward for standing on s — the −0.04 fee</td></tr>
+          <tr><td><code>γ</code></td><td>the discount factor, 1 on this grid</td></tr>
+          <tr><td><code>max<sub>a</sub></code></td><td>try every action a, keep the best score</td></tr>
+          <tr><td><code>Σ<sub>s′</sub></code></td><td>one term for every square you might land on</td></tr>
+          <tr><td><code>P(s′|s,a)</code></td><td>the chance of landing on s′ — 0.8, 0.1 or 0.1</td></tr>
+          <tr><td><code>U<sub>i</sub>(s′)</code></td><td>what that square was worth <em>last</em> sweep</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Out loud:</strong> "for each action, average the old values of the squares it might take you to; keep the best action's number; discount it; add the fee for being here."</p>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">4 · Upper Confidence Bound &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Week 8)</span></div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
+          A<sub>t</sub> = arg max<sub>a</sub> [ Q<sub>t</sub>(a) + c √( ln t / N<sub>t</sub>(a) ) ]</div>
+        <table class="cmp-table">
+          <tr><td><code>A<sub>t</sub></code></td><td>the arm you pull at step t — the answer is <em>an arm</em>, because it is arg max</td></tr>
+          <tr><td><code>Q<sub>t</sub>(a)</code></td><td>your current estimate of arm a</td></tr>
+          <tr><td><code>c</code></td><td>the exploration parameter you chose in advance</td></tr>
+          <tr><td><code>ln t</code></td><td>natural log of the current step number</td></tr>
+          <tr><td><code>N<sub>t</sub>(a)</code></td><td>how many times you have pulled a <em>before</em> now</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Out loud:</strong> "for each arm, add its estimate to a bonus that grows when you have not tried it much; pull whichever arm scores highest."</p>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">5 · Gini-Split &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Week 7)</span></div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
+          Gini-Split(A<sub>i</sub>) = Σ<sub>j=1</sub><sup>a</sup> (n<sub>j</sub> / n) · Gini(v<sub>j</sub>)</div>
+        <table class="cmp-table">
+          <tr><td><code>A<sub>i</sub></code></td><td>the feature you are considering splitting on</td></tr>
+          <tr><td><code>Σ<sub>j=1</sub><sup>a</sup></code></td><td>one term for each value that feature can take — so one per child node</td></tr>
+          <tr><td><code>n<sub>j</sub> / n</code></td><td>what fraction of the rows land in child j — the <strong>weight</strong></td></tr>
+          <tr><td><code>Gini(v<sub>j</sub>)</code></td><td>how impure that child is</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Out loud:</strong> "split the rows by this feature; for each group, work out how mixed it is; average those, weighting each by how big the group is."</p>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">If a formula still will not open</div>
+        <strong>Put numbers in it.</strong> Take the smallest possible example — two points, two arms, one sweep — and write out every term longhand. A formula that looks impossible in symbols is nearly always three multiplications and an addition once you have actual numbers in front of you.
+        <p style="margin:10px 0 0 0;">Every tool in this file exists to do exactly that: they print the longhand version of the formula for whatever numbers you give them.</p>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Come back here whenever a symbol stops you.</p>
+    </section>

@@ -1,0 +1,156 @@
+<section id="cram" class="week-section">
+
+      <div class="week-header">
+        <div class="week-eyebrow">Revision · One-Page Quick Reference</div>
+        <h1>Exam Cram Sheet</h1>
+        <div class="week-subtitle">every core concept across all weeks, condensed</div>
+      </div>
+
+      <p class="no-print">A distilled summary of the whole module. Use <strong>Ctrl/Cmd+P</strong> to print it (the sidebar and tools are hidden in print). Each card maps to a week.</p>
+
+      <div class="cram-grid">
+
+        <div class="cram-card">
+          <h3>W1 · Core Concepts</h3>
+          <ul>
+            <li><span class="term">OS</span> = securely multiplexes (shares) hardware among programs/users.</li>
+            <li><span class="term">Concurrency</span> (interleaved, uncontrolled order) ≠ <span class="term">parallelism</span> (truly simultaneous).</li>
+            <li><span class="term">5 concepts:</span> address space · loading · user/kernel mode · limited direct execution · system calls.</li>
+            <li><span class="term">LDE</span> = run on real HW at full speed, but kept in check by (a) user mode blocking dangerous instructions + (b) timer interrupts returning control.</li>
+            <li><span class="term">Syscall</span> = trap instruction → kernel mode → handler (looked up by number in the trap table). Set at boot (privileged).</li>
+            <li><span class="term">Cooperative vs non-cooperative</span> control; timer interrupt enables preemption.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>W2 · Processes &amp; Scheduling</h3>
+          <ul>
+            <li><span class="term">Program</span> (file) vs <span class="term">process</span> (running instance). Chrome ×2 = 1 program, 2 processes.</li>
+            <li><span class="term">Memory:</span> text+data from file; stack+heap created by OS (grow toward each other).</li>
+            <li><span class="term">PCB</span> = PID, program counter, state, registers. <span class="term">States:</span> new→ready→running→terminated (+waiting on I/O).</li>
+            <li><span class="term">Context switch</span> = save/restore registers (pure overhead, ~1–2µs).</li>
+            <li><span class="term">FCFS</span> (convoy effect) · <span class="term">SJF/STCF</span> (optimal turnaround, risks starvation) · <span class="term">RR</span> (optimal response, fair).</li>
+            <li><span class="term">Trade-off:</span> turnaround vs response — can't optimise both.</li>
+            <li><span class="term">Threads</span> share code/data/heap, but each has its own stack → source of sync bugs.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>W3 · Virtual Memory &amp; Translation</h3>
+          <ul>
+            <li><span class="term">Address-binding problem:</span> programs embed fixed addresses but share physical RAM safely.</li>
+            <li><span class="term">Evolution:</span> relocation → base/limit → segmentation → paging → multi-level tables.</li>
+            <li><span class="term">Internal</span> frag (waste inside allocation) vs <span class="term">external</span> (scattered free space).</li>
+            <li><span class="term">Paging:</span> equal frames kill external frag. Split address into page# p + offset o.</li>
+            <li><span class="term">Translate:</span> index page table by p → frame f → combine with o.</li>
+            <li><span class="term">PT size</span> = m × 2ⁿ (32-bit, 4kB, 4B PTE → 4MB). <span class="term">Multi-level</span> tables skip unused chunks.</li>
+            <li><span class="term">TLB</span> caches translations; exploits locality (array example → 70% hits).</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>W4 · Demand Paging</h3>
+          <ul>
+            <li><span class="term">Page fault</span> = a hook, not just an error → OS can act &amp; resume.</li>
+            <li><span class="term">Lazy allocation</span> · <span class="term">lazy zeroing</span> (1 shared zero frame) · <span class="term">copy-on-write</span>.</li>
+            <li><span class="term">Virtual memory</span> = illusion of more RAM than physical, via swapping to disk.</li>
+            <li><span class="term">AMAT</span> = T_M + P_miss × T_D. Tiny miss rate dominates (T_D huge).</li>
+            <li><span class="term">Replacement:</span> Optimal (baseline) · FIFO (Belady anomaly!) · LRU (impossible exactly; stack property) · <span class="term">Clock</span> (second-chance, uses Used bit).</li>
+            <li><span class="term">Working set</span> (WSS); <span class="term">thrashing</span> when all processes &lt; WSS → equal shares is bad.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>W5 · User-Space (malloc, stack, I/O)</h3>
+          <ul>
+            <li><span class="term">malloc</span> = library code in the process; parcels small pieces from OS pages. 2 layers of frag.</li>
+            <li><span class="term">Free list</span> threaded through free space; <span class="term">first-fit</span> (fast) vs <span class="term">best-fit</span> (less waste).</li>
+            <li><span class="term">brk</span> (move program break) vs <span class="term">mmap</span> (flexible, no contended resource).</li>
+            <li><span class="term">Stack frame</span> = return address + saved frame pointer + locals. Walk it for backtrace.</li>
+            <li><span class="term">Buffer overflow</span> = unbounded input overwrites return address → hijack. C doesn't bounds-check; Java does.</li>
+            <li><span class="term">Handles/fds</span> opaque; fd 0/1/2 = stdin/out/err. <span class="term">IPC:</span> pipes, sockets, shared mmap.</li>
+            <li><span class="term">I/O:</span> polling → interrupts → DMA. Timer interrupt drives preemption.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>W7 · Security</h3>
+          <ul>
+            <li><span class="term">Security</span> (adversarial) ≠ <span class="term">fault-tolerance</span> (accidental).</li>
+            <li><span class="term">Mechanism</span> (OS) vs <span class="term">policy</span> (users). Unix checks at open() only.</li>
+            <li><span class="term">ACLs</span> (with objects, ambient authority, easy revoke/audit) vs <span class="term">capabilities</span> (with subjects, designated, easy delegate, hard revoke).</li>
+            <li><span class="term">CIA:</span> Confidentiality, Integrity, Availability (+authenticity). Relative to attack model.</li>
+            <li><span class="term">Least privilege</span>; setuid/setgid; <span class="term">confused deputy</span> (PwnKit: buffer overflow + ambient root abused via logging).</li>
+            <li><span class="term">Auth:</span> know/have/are. Never store passwords — store a <span class="term">cryptographic hash</span>.</li>
+            <li><span class="term">Crypto:</span> C=E(P,K). Symmetric (shared key, distribution problem) vs asymmetric (public/private, RSA → exchange symmetric key).</li>
+          </ul>
+        </div>
+
+        <div class="cram-card" style="border-top-color: var(--accent-2);">
+          <h3 style="color:var(--accent-2);">W8 · History &amp; Microkernels ★</h3>
+          <ul>
+            <li><span class="term">fork()</span> — once called, twice returned: child PID in parent, 0 in child, &lt;0 on fail. CoW memory.</li>
+            <li><span class="term">exec()</span> — replaces process with new program. fork-then-exec lets child set up fds/pipes/env.</li>
+            <li><span class="term">Microkernel</span> — drivers/FS/etc. as isolated server processes; kernel = interrupts + IPC only.</li>
+            <li><span class="term">Benefit:</span> fault isolation + least privilege. <span class="term">Cost:</span> IPC overhead (L4 optimised it).</li>
+            <li><span class="term">Monolithic</span> (Linux) won via development model &amp; quality control, not architecture.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card" style="border-top-color: var(--accent-3);">
+          <h3 style="color:var(--accent-3);">W9 · Java Concurrency</h3>
+          <ul>
+            <li><span class="term">3 ways to thread:</span> extend Thread, implement Runnable, lambda. Call <span class="term">start()</span> not run().</li>
+            <li><span class="term">Prefer Runnable</span> — frees inheritance + lets threads share one behaviour object.</li>
+            <li><span class="term">sleep()</span> (TIMED_WAITING) · stop via boolean flag · <span class="term">daemon</span> dies with Main · <span class="term">join()</span> waits for another thread.</li>
+            <li><span class="term">States:</span> NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, TERMINATED.</li>
+            <li><span class="term">Memory:</span> locals/refs on per-thread stack; objects+fields on shared heap.</li>
+            <li><span class="term">counter++</span> = READ/INC/WRITE (not atomic) → interleaving → <span class="term">lost update</span>.</li>
+            <li><span class="term">Race condition:</span> result depends on timing, not logic; needs shared mutable state.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card" style="border-top-color: var(--accent-3);">
+          <h3 style="color:var(--accent-3);">W10 · Java Synchronization</h3>
+          <ul>
+            <li><span class="term">Two problems:</span> mutual exclusion (atomicity) + visibility.</li>
+            <li><span class="term">Critical section</span> = one-thread-at-a-time code; protect with <span class="term">mutual exclusion</span> via locks.</li>
+            <li><span class="term">synchronized method</span> locks on <code>this</code>; blocks ALL synchronized methods on that object.</li>
+            <li><span class="term">Intrinsic lock</span> — every object has one; acquire on enter, release on exit, others BLOCK.</li>
+            <li><span class="term">synchronized block</span> — lock only what's needed; name the lock object.</li>
+            <li><span class="term">Immutable</span> objects are inherently thread-safe.</li>
+            <li><span class="term">Visibility:</span> per-core caches → stale copies. <span class="term">volatile</span> = flush/read RAM (visibility, not atomicity). synchronized gives both.</li>
+            <li><span class="term">Happens-before</span> — volatile/synchronized prevent dangerous instruction reordering.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card" style="border-top-color: var(--accent-3);">
+          <h3 style="color:var(--accent-3);">W11 · Deadlock &amp; Semaphores</h3>
+          <ul>
+            <li><span class="term">ReentrantLock</span> — explicit lock/unlock (in finally!); cross-method, fairness, tryLock, timed/interruptible.</li>
+            <li><span class="term">Reentrant</span> = holder can re-acquire; needed for nested synchronized calls.</li>
+            <li><span class="term">Deadlock:</span> A holds X needs Y, B holds Y needs X → stuck.</li>
+            <li><span class="term">4 conditions</span> (all must hold): mutual exclusion, hold-and-wait, no preemption, circular wait. Break ONE to prevent.</li>
+            <li><span class="term">Dining Philosophers</span> — all grab left → circular wait → starve.</li>
+            <li><span class="term">Fix:</span> lock ordering (global order, e.g. by id; last philosopher grabs right first) or tryLock (breaks hold-and-wait).</li>
+            <li><span class="term">Semaphore:</span> N permits, acquire/release, blocks at 0. Counting (N threads) vs binary (=lock).</li>
+          </ul>
+        </div>
+
+        <div class="cram-card" style="border-top-color: var(--accent-3);">
+          <h3 style="color:var(--accent-3);">📘 Cross-cutting threads</h3>
+          <ul>
+            <li><span class="term">Interrupts</span> tie everything: I/O completion, timer→preemption, page faults, syscalls.</li>
+            <li><span class="term">Fragmentation</span> recurs: segmentation, paging, malloc heap.</li>
+            <li><span class="term">The stack</span> recurs: procedure calls, syscalls, buffer overflows, fork frames.</li>
+            <li><span class="term">Copy-on-write</span> links W4 (lazy) and W8 (fork).</li>
+            <li><span class="term">Capabilities = file descriptors</span> links W5, W7, W8.</li>
+            <li><span class="term">Limited direct execution</span> (W1) underpins scheduling, memory protection, and security.</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <p style="margin-top:32px; padding-top:20px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Good luck! 🎓 Tip: for each card, try to explain every term out loud without looking — that's the fastest way to find gaps.</p>
+
+    </section>

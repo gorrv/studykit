@@ -1,0 +1,419 @@
+<section id="practice" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">★ Revision · Weeks 5 &amp; 11 · Selected questions from past exams</div>
+        <h1>Past-Exam Practice</h1>
+        <div class="week-subtitle">attempt first — the solutions are folded away</div>
+      </div>
+      <div class="callout">
+        <div class="callout-label">How to use this page</div>
+        Every solution below is <strong>hidden behind a "Show solution" fold</strong>. Write your answer out on paper <em>before</em> opening it — reading a worked solution feels like learning and mostly isn't. Where a question can be checked mechanically, there's a link to the relevant tool.
+        <p style="margin:10px 0 0 0;">The <strong>self-test generator</strong> below produces a fresh question each time and marks your answer, so you can drill the calculational parts (unification, SLD, big-step, typing) until they're automatic.</p>
+      </div>
+      <!-- ===== SELF TEST ===== -->
+      <h2 id="pr-selftest">🛠️ Self-test generator</h2>
+      <p>Randomly generated questions, computed and marked by the same engines used in the week-by-week tools. Pick a topic or leave it on <em>everything</em> and keep going until your score stops embarrassing you.</p>
+      <div class="tool" data-run="qzNext">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Generate a question and mark my answer</h3>
+        </div>
+        <div class="tool-desc">Answers are compared structurally where possible, so <code>{X -&gt; a, Y -&gt; b}</code>, <code>Y=b, X=a</code> and <code>X ↦ a, Y ↦ b</code> all count as the same substitution.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>topic</label>
+            <select id="qz-topic">
+              <option value="all">everything</option>
+              <option value="imp">Imperative &amp; semantics (W1–4)</option>
+              <option value="fun">Functional (W6, W8)</option>
+              <option value="log">Logic (W9–10)</option>
+              <option value="concept">Concept recall (all weeks)</option>
+            </select>
+          </div>
+          <button class="tool-btn green" onclick="qzNext()">New question ▶</button>
+          <button class="tool-btn secondary" onclick="qzReveal()">Show answer</button>
+          <button class="tool-btn danger" onclick="qzResetScore()">Reset score</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="qz-output" class="tool-output"></div>
+      </div>
+      <!-- ===== WEEK 5 ===== -->
+      <h2 id="pr-w5">Week 5 · selected questions from past exams</h2>
+      <div class="qcard" id="pr-w5e1">
+        <div class="q-n">Exercise 1 · the RBT robot language</div>
+        <h4>Ambiguity, abstract syntax, big-step semantics, and an "optimisation"</h4>
+        <p>The concrete syntax of RBT, a language for a robot moving in a grid:</p>
+        <div class="grammar" style="font-size:13px;">
+          <span class="nt">P</span> <span class="def">::=</span> <span class="nt">Decl</span> <span class="term">;</span> <span class="term">begin</span> <span class="nt">StatList</span> <span class="term">end</span><br>
+          <span class="nt">Decl</span> <span class="def">::=</span> <span class="nt">Num</span> <span class="term">∗</span> <span class="nt">Num</span><br>
+          <span class="nt">Num</span> <span class="def">::=</span> <span class="nt">Digit</span> <span class="bar">|</span> <span class="nt">Digit</span> <span class="nt">Num</span><br>
+          <span class="nt">Digit</span> <span class="def">::=</span> <span class="term">0|1|2|3|4|5|6|7|8|9</span><br>
+          <span class="nt">StatList</span> <span class="def">::=</span> <span class="nt">Stat</span> <span class="bar">|</span> <span class="nt">StatList</span> <span class="term">;</span> <span class="nt">StatList</span><br>
+          <span class="nt">Stat</span> <span class="def">::=</span> <span class="term">init</span> <span class="bar">|</span> <span class="term">north(</span><span class="nt">Num</span><span class="term">)</span> <span class="bar">|</span> <span class="term">south(</span><span class="nt">Num</span><span class="term">)</span> <span class="bar">|</span> <span class="term">east(</span><span class="nt">Num</span><span class="term">)</span> <span class="bar">|</span> <span class="term">west(</span><span class="nt">Num</span><span class="term">)</span>
+        </div>
+        <div class="pl">100 * 100;
+begin
+   init; north(5); east(5)
+end</div>
+        <p style="font-size:14px;">Call that program <strong>P₁</strong>. The user manual warns about an ambiguity in this grammar.</p>
+        <div class="q-part">1. Using an example, show that the grammar is indeed ambiguous.</div>
+        <div class="q-part">2. The abstract syntax of RBT is <code>P ::= prog(m, n, C)</code> and <code>C ::= skip | Init | N(k) | S(k) | E(k) | W(k) | seq(C, C)</code>. Give a possible abstract syntax tree for P₁.</div>
+        <div class="q-part">3. Using the big-step rules below, describe the execution of P₁ by a robot initially at position (5,5), and give its final position.</div>
+        <div class="sos" style="font-size:12px;">
+          <div class="sos-row">
+            <div class="inf"><div class="inf-rule"><span class="inf-line"></span></div><div class="inf-concl">⟨skip, (x,y)⟩<sub>m,n</sub> ⇓ ⟨skip, (x,y)⟩<sub>m,n</sub></div></div>
+            <div class="inf"><div class="inf-rule"><span class="inf-line"></span></div><div class="inf-concl">⟨Init, (x,y)⟩<sub>m,n</sub> ⇓ ⟨skip, (1,1)⟩<sub>m,n</sub></div></div>
+          </div>
+          <div class="sos-row">
+            <div class="inf"><div class="inf-rule"><span class="inf-line"></span><span class="inf-side">if y + k ≤ m</span></div><div class="inf-concl">⟨N(k), (x,y)⟩ ⇓ ⟨skip, (x, y+k)⟩</div></div>
+            <div class="inf"><div class="inf-rule"><span class="inf-line"></span><span class="inf-side">if y + k &gt; m</span></div><div class="inf-concl">⟨N(k), (x,y)⟩ ⇓ ⟨skip, (x, m)⟩</div></div>
+          </div>
+          <div class="sos-row">
+            <div class="inf"><div class="inf-rule"><span class="inf-line"></span><span class="inf-side">if x + k ≤ n</span></div><div class="inf-concl">⟨E(k), (x,y)⟩ ⇓ ⟨skip, (x+k, y)⟩</div></div>
+            <div class="inf"><div class="inf-rule"><span class="inf-line"></span><span class="inf-side">if x + k &gt; n</span></div><div class="inf-concl">⟨E(k), (x,y)⟩ ⇓ ⟨skip, (n, y)⟩</div></div>
+          </div>
+          <div class="sos-row">
+            <div class="inf">
+              <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨C₁,(x,y)⟩ ⇓ ⟨skip,(x′,y′)⟩</div></div><div class="inf"><div class="inf-concl">⟨C₂,(x′,y′)⟩ ⇓ ⟨skip,(x″,y″)⟩</div></div></div>
+              <div class="inf-rule"><span class="inf-line"></span></div>
+              <div class="inf-concl">⟨seq(C₁,C₂),(x,y)⟩ ⇓ ⟨skip,(x″,y″)⟩</div>
+            </div>
+          </div>
+        </div>
+        <div class="q-part">4. A student's compiler "optimises" any subtree <code>seq(N(i), N(j))</code> into <code>N(i+j)</code>. Is this optimisation correct? Prove it, or give a counter-example.</div>
+        <p class="attempt-note">Parts 1–3 are mechanical once you see them; part 4 is the one that carries the marks. Attempt it before opening.</p>
+        <details class="reveal"><summary>Show solution</summary><div class="rev-body">
+          <p><strong>1 · Ambiguity.</strong> The culprit is <code>StatList ::= Stat | StatList ; StatList</code> — recursive on <em>both</em> sides, exactly like <code>Exp ::= Exp Op Exp</code> in Week 1. The statement list <code>init; north(5); east(5)</code> has two distinct parse trees:</p>
+          <div class="pl">StatList(StatList(init ; north(5)) ; StatList(east(5)))
+StatList(StatList(init) ; StatList(north(5) ; east(5)))</div>
+          <p>i.e. <code>(init; north(5)); east(5)</code> versus <code>init; (north(5); east(5))</code>. Two parse trees for one string ⇒ <strong>the grammar is ambiguous</strong>.</p>
+          <p style="font-size:13.5px; color:var(--ink-soft);">Note that here the ambiguity is <em>harmless</em> semantically, because <code>seq</code> is associative under these rules — but ambiguity is a property of the <em>grammar</em>, not of the meanings, so it still counts.</p>
+          <p><strong>2 · Abstract syntax tree.</strong> Either grouping is acceptable; taking the right-nested one:</p>
+          <div class="pl">prog(100, 100, seq(Init, seq(N(5), E(5))))</div>
+          <p>As a tree: root <code>prog</code> with children 100, 100 and a <code>seq</code>; that <code>seq</code> has children <code>Init</code> and another <code>seq</code>, whose children are <code>N(5)</code> and <code>E(5)</code>.</p>
+          <p><strong>3 · Execution from (5,5), with m = n = 100.</strong></p>
+          <div class="goal-trace">
+            <div class="gt-row"><span class="gt-n">1</span><span class="gt-goal">⟨Init, (5,5)⟩ ⇓ ⟨skip, (1,1)⟩<span class="gt-note">Init rule — the robot jumps to the origin, ignoring its previous position</span></span></div>
+            <div class="gt-row"><span class="gt-n">2</span><span class="gt-goal">⟨N(5), (1,1)⟩ ⇓ ⟨skip, (1,6)⟩<span class="gt-note">y + k = 1 + 5 = 6 ≤ 100, so the first N rule applies</span></span></div>
+            <div class="gt-row"><span class="gt-n">3</span><span class="gt-goal">⟨E(5), (1,6)⟩ ⇓ ⟨skip, (6,6)⟩<span class="gt-note">x + k = 1 + 5 = 6 ≤ 100, so the first E rule applies</span></span></div>
+            <div class="gt-row ok"><span class="gt-n">4</span><span class="gt-goal">⟨seq(Init, seq(N(5), E(5))), (5,5)⟩ ⇓ ⟨skip, (6,6)⟩<span class="gt-note">two applications of the seq rule</span></span></div>
+          </div>
+          <p><strong>Final position: (6, 6).</strong> The initial (5,5) is irrelevant because <code>Init</code> resets to (1,1).</p>
+          <p><strong>4 · Is <code>seq(N(i), N(j)) ⟶ N(i+j)</code> correct? &nbsp;<span style="color:var(--accent-3);">Yes.</span></strong> Both rules for N amount to <code>y ↦ min(y + k, m)</code>. So write the two sides as functions of the starting y:</p>
+          <div class="pl">seq(N(i), N(j))  gives   min( min(y+i, m) + j , m )
+N(i+j)           gives   min( y+i+j , m )</div>
+          <p>Case analysis:</p>
+          <ul style="font-size:14px;">
+            <li><strong>y + i ≤ m.</strong> Then min(y+i, m) = y+i, and the left side is min(y+i+j, m) — identical to the right.</li>
+            <li><strong>y + i &gt; m.</strong> Then min(y+i, m) = m, so the left side is min(m+j, m) = m (as j ≥ 0). On the right, y+i+j ≥ y+i &gt; m, so it is also m.</li>
+          </ul>
+          <p>The two agree in every case, and the x coordinate is untouched by both. Hence the optimised program and the original produce the <strong>same final configuration from every starting position</strong>, so they are equivalent under the given semantics and <strong>the optimisation is correct</strong>.</p>
+          <div class="callout tip" style="margin-top:12px;">
+            <div class="callout-label">Why it works — and when it wouldn't</div>
+            The clipping function <code>min(· , m)</code> is <em>monotone</em> and <em>idempotent at the ceiling</em>, which is what makes two clipped steps equal one clipped step. The optimisation would <strong>fail</strong> if the grid wrapped around instead of clipping (e.g. <code>y ↦ (y+k) mod m</code> is fine, but <code>y ↦ m − (y+k−m)</code>, a "bounce", is not), or if N could move the robot <em>out</em> and something observed the intermediate position.
+          </div>
+        </div></details>
+      </div>
+      <div class="qcard" id="pr-w5e2">
+        <div class="q-n">Exercise 2 · extending SIMP</div>
+        <h4>A post-test loop: <code>do C while B</code></h4>
+        <div class="q-part">1. Give a formal definition of the semantics of <code>do C while B</code>, where the body C is repeated until B evaluates to <strong>False</strong>. (Abstract machine, small-step or big-step — your choice.)</div>
+        <div class="q-part">2. Show the extension does not change the computational power of the language, by translating <code>do C while B</code> into existing SIMP constructs. Show your translation is correct.</div>
+        <a class="try-link" href="#w4-bstool" onclick="showWeek('week4')">→ check your rules against the big-step prover (Week 4)</a>
+        <details class="reveal"><summary>Show solution</summary><div class="rev-body">
+          <p><strong>1 · Big-step rules.</strong> Two rules, mirroring <code>whileT</code>/<code>whileF</code> but with the body run <em>first</em>:</p>
+          <div class="sos">
+            <div class="sos-row">
+              <div class="inf">
+                <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨C, s⟩ ⇓ ⟨skip, s′⟩</div></div><div class="inf"><div class="inf-concl">⟨B, s′⟩ ⇓ ⟨False, s″⟩</div></div></div>
+                <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">do<sub>F</sub></span></div>
+                <div class="inf-concl">⟨do C while B, s⟩ ⇓ ⟨skip, s″⟩</div>
+              </div>
+            </div>
+            <div class="sos-row">
+              <div class="inf">
+                <div class="inf-prem">
+                  <div class="inf"><div class="inf-concl">⟨C, s⟩ ⇓ ⟨skip, s′⟩</div></div>
+                  <div class="inf"><div class="inf-concl">⟨B, s′⟩ ⇓ ⟨True, s″⟩</div></div>
+                  <div class="inf"><div class="inf-concl">⟨do C while B, s″⟩ ⇓ ⟨skip, s‴⟩</div></div>
+                </div>
+                <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">do<sub>T</sub></span></div>
+                <div class="inf-concl">⟨do C while B, s⟩ ⇓ ⟨skip, s‴⟩</div>
+              </div>
+            </div>
+          </div>
+          <p>Note the body appears as a premise in <em>both</em> rules — that is precisely what makes it a <strong>post-test</strong> loop: C runs at least once, whatever B says.</p>
+          <p><strong>Small-step alternative</strong> (a single axiom, in the style of Week 4's <code>while</code>):</p>
+          <div class="pl">⟨do C while B, s⟩ → ⟨C ; while B do C, s⟩</div>
+          <p><strong>2 · Translation.</strong></p>
+          <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:12px 0; color:var(--accent-3);">
+            do C while B &nbsp;&nbsp;≡&nbsp;&nbsp; C ; while B do C
+          </div>
+          <p><strong>Correctness.</strong> Show both sides relate the same pairs of stores.</p>
+          <p><em>(⇒)</em> Suppose <code>⟨do C while B, s⟩ ⇓ ⟨skip, s_f⟩</code>. Induct on the derivation.</p>
+          <ul style="font-size:14px;">
+            <li><strong>do<sub>F</sub>:</strong> then ⟨C,s⟩⇓⟨skip,s′⟩ and ⟨B,s′⟩⇓⟨False,s″⟩ with s_f = s″. By <code>whileF</code>, ⟨while B do C, s′⟩ ⇓ ⟨skip, s″⟩; then by <code>seq</code>, ⟨C; while B do C, s⟩ ⇓ ⟨skip, s″⟩. ✓</li>
+            <li><strong>do<sub>T</sub>:</strong> then ⟨C,s⟩⇓⟨skip,s′⟩, ⟨B,s′⟩⇓⟨True,s″⟩ and ⟨do C while B, s″⟩⇓⟨skip,s‴⟩. By the induction hypothesis ⟨C; while B do C, s″⟩⇓⟨skip,s‴⟩, and unfolding that with <code>seq</code> gives ⟨C,s″⟩⇓⟨skip,t⟩ and ⟨while B do C, t⟩⇓⟨skip,s‴⟩. Now apply <code>whileT</code> at s′ (test True, body C from s″… ) to get ⟨while B do C, s′⟩⇓⟨skip,s‴⟩, and then <code>seq</code> with the first premise gives ⟨C; while B do C, s⟩⇓⟨skip,s‴⟩. ✓</li>
+          </ul>
+          <p><em>(⇐)</em> Symmetric: any derivation of <code>⟨C; while B do C, s⟩ ⇓ ⟨skip, s_f⟩</code> begins with <code>seq</code>, whose second premise is a <code>while</code> derivation ending in <code>whileF</code>; peeling the <code>whileT</code>/<code>whileF</code> layers off reconstructs a do<sub>T</sub>/do<sub>F</sub> derivation of the same length.</p>
+          <p>Since every terminating run of one is a terminating run of the other <em>producing the same final store</em>, the constructs are equivalent — so <code>do</code> is <strong>syntactic sugar</strong> and adds no computational power.</p>
+          <div class="callout tip" style="margin-top:12px;">
+            <div class="callout-label">Sanity check with the Week 2 tool</div>
+            The loop tracer showed that a post-test loop runs its body <em>at least once</em>. The translation reflects that literally: the <code>C ;</code> sitting in front of the <code>while</code> <strong>is</strong> that guaranteed first iteration.
+          </div>
+        </div></details>
+      </div>
+      <div class="qcard" id="pr-w5e3">
+        <div class="q-n">Exercise 3 · equivalence and a modified rule</div>
+        <h4>if-then-else</h4>
+        <div class="q-part">1. Using the big-step rules for assignment and if-then-else, show that <code>if 2 &lt; 0 then x := 0 else x := 1</code> is equivalent to <code>x := 1</code>.</div>
+        <div class="q-part">2. Now replace the <code>ifF</code> rule by &nbsp;<code>⟨B,s⟩ ⇓ ⟨False,s′⟩ &nbsp;⟹&nbsp; ⟨if B then C₁ else C₂, s⟩ ⇓ ⟨skip, s′⟩</code>.
+          <br>(a) How is the semantics of the language affected? &nbsp;(b) With the new rule, what is the value of x after running the program above?</div>
+        <details class="reveal"><summary>Show solution</summary><div class="rev-body">
+          <p><strong>1 · The derivation.</strong> Take an arbitrary store s.</p>
+          <div class="deriv-box">
+            <div class="inf">
+              <div class="inf-prem">
+                <div class="inf">
+                  <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨2,s⟩ ⇓ ⟨2,s⟩</div></div><div class="inf"><div class="inf-concl">⟨0,s⟩ ⇓ ⟨0,s⟩</div></div></div>
+                  <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">bop</span><span class="inf-side">2 &lt; 0 = False</span></div>
+                  <div class="inf-concl">⟨2 &lt; 0, s⟩ ⇓ ⟨False, s⟩</div>
+                </div>
+                <div class="inf">
+                  <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨1,s⟩ ⇓ ⟨1,s⟩</div></div></div>
+                  <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">:=</span></div>
+                  <div class="inf-concl">⟨x := 1, s⟩ ⇓ ⟨skip, s[x↦1]⟩</div>
+                </div>
+              </div>
+              <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">ifF</span></div>
+              <div class="inf-concl">⟨if 2 &lt; 0 then x := 0 else x := 1, s⟩ ⇓ ⟨skip, s[x↦1]⟩</div>
+            </div>
+          </div>
+          <p>And directly, <code>⟨x := 1, s⟩ ⇓ ⟨skip, s[x↦1]⟩</code>. Both programs relate <strong>every</strong> store s to the same final store <code>s[x↦1]</code>, and both always terminate, so <strong>they are equivalent</strong>. (Note the condition is closed and always False, so the then-branch is never reachable.)</p>
+          <p><strong>2(a) · Effect of the new rule.</strong> The rule has <em>no premise for C₂</em>: when B is False the command simply terminates in s′, <strong>the else-branch is never executed</strong>. So under the modified semantics</p>
+          <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
+            if B then C₁ else C₂ &nbsp;&nbsp;behaves exactly like&nbsp;&nbsp; if B then C₁ else skip
+          </div>
+          <p>C₂ becomes <strong>dead code</strong> — it is parsed and type-checked but can never run. Two consequences worth stating: the language loses the ability to express a two-way choice (you would have to write two separate <code>if</code>s with complementary conditions), and any program whose else-branch mattered now silently does nothing instead.</p>
+          <p><strong>2(b) · The value of x.</strong> The condition <code>2 &lt; 0</code> is False, so the new rule fires and the program terminates in the <em>unchanged</em> store. Therefore <strong>x keeps whatever value it had before</strong> — it is <em>not</em> set to 1. If x was undefined in s (x ∉ dom(s)) it remains undefined.</p>
+        </div></details>
+      </div>
+      <div class="qcard" id="pr-w5e4">
+        <div class="q-n">Exercise 4 · substitution and soundness</div>
+        <h4>Replacing <code>!x</code> by <code>1</code></h4>
+        <div class="q-part">1. Show that for any integer expression E, the program <code>x := 1; y := E</code> is equivalent to <code>x := 1; y := E′</code>, where E′ is E with every occurrence of <code>!x</code> replaced by <code>1</code>.</div>
+        <div class="q-part">2. Explain why <code>x := 1; C</code> is <em>not</em> necessarily equivalent to <code>x := 1; C′</code> for an arbitrary command C. Give a command C for which the results differ.</div>
+        <details class="reveal"><summary>Show solution</summary><div class="rev-body">
+          <p><strong>1 · Proof.</strong> By <code>(:=)</code>, <code>⟨x := 1, s⟩ ⇓ ⟨skip, s₁⟩</code> where <strong>s₁ = s[x ↦ 1]</strong>, so <strong>s₁(x) = 1</strong>. By <code>(seq)</code>, both programs then evaluate their right-hand expression in this <em>same</em> store s₁. So it suffices to prove:</p>
+          <div class="callout" style="margin:10px 0;">
+            <div class="callout-label">Lemma</div>
+            For every integer expression E and every store s₁ with s₁(x) = 1: &nbsp;<code>⟨E, s₁⟩ ⇓ ⟨n, s₁⟩ &nbsp;iff&nbsp; ⟨E′, s₁⟩ ⇓ ⟨n, s₁⟩</code>, where E′ = E{!x ↦ 1}.
+          </div>
+          <p><strong>By structural induction on E</strong> (Week 4's principle — one case per constructor of the grammar <code>E ::= !l | n | E op E</code>):</p>
+          <ul style="font-size:14px;">
+            <li><strong>E = n.</strong> Then E′ = n and both give n by the constant axiom. ✓</li>
+            <li><strong>E = !x.</strong> Then E′ = 1. Left: the (var) rule gives <code>⟨!x, s₁⟩ ⇓ ⟨s₁(x), s₁⟩ = ⟨1, s₁⟩</code>. Right: <code>⟨1, s₁⟩ ⇓ ⟨1, s₁⟩</code>. Same value. ✓ <em>(This is the only case that uses the hypothesis s₁(x) = 1.)</em></li>
+            <li><strong>E = !l with l ≠ x.</strong> Then E′ = !l, unchanged, and both sides are the same derivation. ✓</li>
+            <li><strong>E = E₁ op E₂.</strong> Then E′ = E₁′ op E₂′. By the induction hypotheses ⟨E₁,s₁⟩⇓⟨n₁,s₁⟩ iff ⟨E₁′,s₁⟩⇓⟨n₁,s₁⟩ and likewise for E₂. The (op) rule computes n = n₁ op n₂ from the same two values, so both give the same n. ✓</li>
+          </ul>
+          <p>Hence <code>y := E</code> and <code>y := E′</code> produce the same final store <code>s₁[y ↦ n]</code>, and by (seq) the two whole programs are equivalent. ∎</p>
+          <p style="font-size:13.5px; color:var(--ink-soft);">Note where the proof leans: SIMP expressions have <strong>no side effects</strong>, so evaluating E cannot disturb s₁ — that is why the store in the conclusion is the same s₁ throughout.</p>
+          <p><strong>2 · Why it fails for commands.</strong> An expression cannot change the store, but a <strong>command can — including reassigning x itself</strong>. Once x has been given a new value, <code>!x</code> no longer denotes 1, while the substituted literal <code>1</code> is frozen. So the equivalence is lost.</p>
+          <p><strong>Counter-example.</strong> Take</p>
+          <div class="pl">C  =  x := 2; y := !x        C′ =  x := 2; y := 1</div>
+          <table style="margin-top:10px;">
+            <tr><th>Program</th><th>Final store</th></tr>
+            <tr><td><code>x := 1; x := 2; y := !x</code></td><td>x ↦ 2, <strong>y ↦ 2</strong></td></tr>
+            <tr><td><code>x := 1; x := 2; y := 1</code></td><td>x ↦ 2, <strong>y ↦ 1</strong></td></tr>
+          </table>
+          <p>Different results, so the programs are not equivalent.</p>
+          <a class="try-link" href="#w3-simptool" onclick="showWeek('week3')">→ run both in the SIMP machine (Week 3)</a>
+        </div></details>
+      </div>
+      <div class="qcard" id="pr-w5e5">
+        <div class="q-n">Exercise 5 · non-determinism</div>
+        <h4>Parallel composition <code>C₁ || C₂</code></h4>
+        <p>SIMP is extended with <code>C ::= C₁ || C₂</code> and the small-step rules:</p>
+        <div class="sos">
+          <div class="sos-row">
+            <div class="inf"><div class="inf-rule"><span class="inf-line"></span></div><div class="inf-concl">⟨skip || skip, s⟩ → ⟨skip, s⟩</div></div>
+          </div>
+          <div class="sos-row">
+            <div class="inf">
+              <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨C₁, s⟩ → ⟨C₁′, s′⟩</div></div></div>
+              <div class="inf-rule"><span class="inf-line"></span></div>
+              <div class="inf-concl">⟨C₁ || C₂, s⟩ → ⟨C₁′ || C₂, s′⟩</div>
+            </div>
+            <div class="inf">
+              <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨C₂, s⟩ → ⟨C₂′, s′⟩</div></div></div>
+              <div class="inf-rule"><span class="inf-line"></span></div>
+              <div class="inf-concl">⟨C₁ || C₂, s⟩ → ⟨C₁ || C₂′, s′⟩</div>
+            </div>
+          </div>
+        </div>
+        <div class="q-part">1. Describe in your own words the behaviour of <code>C₁ || C₂</code>.</div>
+        <div class="q-part">2. What are the possible results of &nbsp;<code>(x := 1) || (if !x = 0 then y := !y + 1 else skip)</code>&nbsp; when x = 0 and y = 1 initially?</div>
+        <details class="reveal"><summary>Show solution</summary><div class="rev-body">
+          <p><strong>1 · Behaviour.</strong> <code>||</code> is <strong>parallel (interleaved) composition</strong>. At each step the machine may advance <em>either</em> component by one small step — the two rules have the same left-hand side, so <strong>both are always applicable</strong> and the choice between them is free. The composite terminates only when <em>both</em> components have been reduced to <code>skip</code>, at which point the first axiom collapses <code>skip || skip</code> to <code>skip</code>.</p>
+          <p>Crucially, this makes the transition relation <strong>non-deterministic</strong>: a configuration can step to two different configurations. Everything in Weeks 3–4 was deterministic; here the same program can have <em>several</em> distinct terminating runs, and — because the two components share the store — they can yield <em>different final stores</em>. That is exactly the model of a race condition.</p>
+          <p><strong>2 · Possible results,</strong> starting from s = {x ↦ 0, y ↦ 1}. Everything hinges on <strong>whether the assignment <code>x := 1</code> completes before the condition <code>!x = 0</code> reads x</strong>.</p>
+          <table>
+            <tr><th>Interleaving</th><th>What happens</th><th>Final store</th></tr>
+            <tr>
+              <td>the conditional reads x <strong>first</strong></td>
+              <td><code>!x</code> evaluates to 0, so <code>0 = 0</code> is True; the then-branch runs, <code>y := !y + 1</code> gives y = 2. The assignment <code>x := 1</code> completes at some point.</td>
+              <td><strong>x ↦ 1, y ↦ 2</strong></td>
+            </tr>
+            <tr>
+              <td><code>x := 1</code> completes <strong>first</strong></td>
+              <td><code>!x</code> evaluates to 1, so <code>1 = 0</code> is False; the else-branch <code>skip</code> runs and y is untouched.</td>
+              <td><strong>x ↦ 1, y ↦ 1</strong></td>
+            </tr>
+          </table>
+          <p>So there are <strong>two possible results</strong>: <code>{x ↦ 1, y ↦ 2}</code> and <code>{x ↦ 1, y ↦ 1}</code>. x is 1 either way — only the second component's behaviour depends on the interleaving.</p>
+          <div class="callout tip" style="margin-top:12px;">
+            <div class="callout-label">The point of the question</div>
+            The result is <strong>not determined by the program alone</strong>. This is precisely the "unicity of normal forms" property from Week 6 <em>failing</em>: with shared mutable state and interleaving, an expression's value depends on the reduction order. It is also why Week 4's determinism theorem had to be proved rather than assumed.
+          </div>
+        </div></details>
+      </div>
+      <!-- ===== WEEK 11 ===== -->
+      <h2 id="pr-w11">Week 11 · revision exercises</h2>
+      <div class="qcard" id="pr-w11e1">
+        <div class="q-n">Exercise 1 · Prolog</div>
+        <h4>Glorious days</h4>
+        <div class="pl"><span class="at">sunny</span>(mon).
+<span class="at">sunny</span>(tue).
+<span class="at">sunny</span>(wed).
+<span class="at">warm</span>(mon).
+<span class="at">warm</span>(wed).
+<span class="at">glorious</span>(<span class="v">Day</span>) <span class="op">:-</span> sunny(<span class="v">Day</span>), warm(<span class="v">Day</span>).</div>
+        <div class="q-part">1. Write down <em>all</em> the responses Prolog gives to <code>:- glorious(Day).</code>, <strong>in the order they are given</strong>.</div>
+        <div class="q-part">2. Draw the SLD-tree Prolog builds for that query.</div>
+        <a class="try-link" href="#w10-sldtool" onclick="showWeek('week10')">→ check both parts with the SLD-tree builder (Week 10)</a>
+        <details class="reveal"><summary>Show solution</summary><div class="rev-body">
+          <p><strong>1 · The responses, in order.</strong> Prolog selects the left-most literal and tries clauses top to bottom, so it enumerates <code>sunny(Day)</code> in program order and checks <code>warm(Day)</code> for each:</p>
+          <div class="sols">
+            <div class="sol">Day = mon</div>
+            <div class="sol">Day = wed</div>
+            <div class="sol none">false &nbsp;<span style="font-weight:400;">(on the final back-track — no further solutions)</span></div>
+          </div>
+          <p><code>tue</code> is skipped: <code>sunny(tue)</code> succeeds but <code>warm(tue)</code> matches no clause, so that branch <strong>fails and back-tracks automatically</strong>. Order matters — <code>mon</code> comes before <code>wed</code> because <code>sunny(mon)</code> is written first.</p>
+          <p><strong>2 · The SLD-tree.</strong> The root resolves with the only <code>glorious</code> clause; the child then has three children, one per <code>sunny</code> fact:</p>
+          <div class="goal-trace">
+            <div class="gt-row"><span class="gt-n">1</span><span class="gt-goal">:- <b>glorious(Day)</b>.</span></div>
+            <div class="gt-row"><span class="gt-n">2</span><span class="gt-goal">:- <b>sunny(Day)</b>, warm(Day). &nbsp;&nbsp;<span style="color:var(--accent-4);">{Day ↦ Day}</span></span></div>
+            <div class="gt-row ok"><span class="gt-n">3a</span><span class="gt-goal">:- warm(mon). → □ &nbsp;&nbsp;<span style="color:var(--accent-4);">{Day ↦ mon}</span> — <strong>success</strong></span></div>
+            <div class="gt-row fail"><span class="gt-n">3b</span><span class="gt-goal">:- warm(tue). → failure &nbsp;&nbsp;<span style="color:var(--accent-4);">{Day ↦ tue}</span></span></div>
+            <div class="gt-row ok"><span class="gt-n">3c</span><span class="gt-goal">:- warm(wed). → □ &nbsp;&nbsp;<span style="color:var(--accent-4);">{Day ↦ wed}</span> — <strong>success</strong></span></div>
+          </div>
+          <p>So the tree has a root, one child, and then <strong>three branches</strong> left-to-right: success, failure, success. Reading the success branches left to right gives the answer order in part 1.</p>
+          <p style="font-size:13.5px; color:var(--ink-soft);">Drawn properly, each edge carries its mgu and the three <code>warm</code> goals sit at depth 3; two of them resolve with a fact to give <strong>□</strong>, and <code>warm(tue)</code> has no children at all.</p>
+        </div></details>
+      </div>
+      <div class="qcard" id="pr-w11e2">
+        <div class="q-n">Exercise 2 · Haskell</div>
+        <h4><code>until</code></h4>
+        <div class="q-part">1. Define a function <code>until</code> taking a function <code>f :: α → α</code>, a predicate <code>p :: α → Bool</code> and an element <code>x :: α</code>, which iterates f until an element satisfying p is obtained.</div>
+        <div class="q-part">2. Give the type of <code>until</code>.</div>
+        <details class="reveal"><summary>Show solution</summary><div class="rev-body">
+          <p><strong>1 · Definition.</strong></p>
+          <div class="hs"><span class="fn">until'</span> f p x = <span class="kw">if</span> p x <span class="kw">then</span> x <span class="kw">else</span> until' f p (f x)</div>
+          <p>Or with guards, which reads a little better:</p>
+          <div class="hs"><span class="fn">until'</span> f p x
+    | p x       = x
+    | otherwise = until' f p (f x)</div>
+          <p><strong>2 · The type.</strong></p>
+          <div class="hs"><span class="fn">until'</span> :: (<span class="ty">a</span> -> <span class="ty">a</span>) -> (<span class="ty">a</span> -> <span class="ty">Bool</span>) -> <span class="ty">a</span> -> <span class="ty">a</span></div>
+          <p>Read it with Week 6's conventions: the arrow associates to the right, so this is a <em>curried</em> function of three arguments returning an <code>a</code>. It is <strong>polymorphic</strong> — <code>a</code> is a type variable, and the definition never inspects the element, only passes it to <code>f</code> and <code>p</code>.</p>
+          <p><strong>Why the recursion terminates (or doesn't).</strong> Nothing in the type guarantees termination: <code>until' (+1) (&lt;0) 5</code> never stops. This is Week 8's point that a program passing the type checks is <em>free of type errors</em>, not correct.</p>
+          <p style="font-size:13.5px; color:var(--ink-soft);">Named <code>until'</code> because <code>until</code> is already in the Prelude — with its arguments the other way round, <code>until :: (a -&gt; Bool) -&gt; (a -&gt; a) -&gt; a -&gt; a</code>. The exercise asks for f first, so follow the exercise.</p>
+        </div></details>
+      </div>
+      <div class="qcard" id="pr-w11e3">
+        <div class="q-n">Exercise 3 · SFUN and laziness</div>
+        <h4><code>double</code>, evaluation strategies, and <code>map</code></h4>
+        <p>Consider the SFUN program &nbsp;<code>double(x) = 2 ∗ x</code>.</p>
+        <div class="q-part">1. Show by induction that for any natural number n, <code>double(n)</code> is equivalent to <code>n + n</code>.</div>
+        <div class="q-part">2. Explain why, for terms <code>double(t)</code> with t an arithmetic expression, call-by-value and call-by-name have the same behaviour and are <em>equally efficient</em>.</div>
+        <div class="q-part">3. With lists written <code>nil</code> and <code>x : l</code>, explain the behaviour of <code>map</code> below, and describe a call-by-name evaluation of <code>map double list</code>.</div>
+        <div class="pl">map f nil       = nil
+map f (x : l)   = (f x) : (map f l)</div>
+        <a class="try-link" href="#w8-sfuntool" onclick="showWeek('week8')">→ compare the two derivations in the SFUN tool (Week 8)</a>
+        <details class="reveal"><summary>Show solution</summary><div class="rev-body">
+          <p><strong>1 · Induction on n.</strong> We show <code>double(n) ⇓ v</code> and <code>n + n ⇓ v</code> for the same v.</p>
+          <div class="proof">
+            <div class="pf-lbl">Base case, n = 0</div>
+            <div class="pf-step">By (fn), <code>double(0) ⇓ (2 ∗ x){x ↦ 0} = 2 ∗ 0 ⇓ 0</code>; and <code>0 + 0 ⇓ 0</code>. Equal. ✓</div>
+            <div class="pf-lbl" style="margin-top:12px;">Induction hypothesis</div>
+            <div class="pf-step">Assume <code>double(n) ⇓ 2n</code> and <code>n + n ⇓ 2n</code>, i.e. the two agree at n.</div>
+            <div class="pf-lbl" style="margin-top:12px;">Induction step, n + 1</div>
+            <div class="pf-step"><code>double(n+1) ⇓ 2 ∗ (n+1) = 2n + 2</code></div>
+            <div class="pf-step"><code>(n+1) + (n+1) = (n + n) + 2 = 2n + 2</code> &nbsp;<span class="pf-just">using the IH for n + n</span></div>
+            <div class="pf-step" style="color:var(--accent-3); font-weight:600;">Both give 2n + 2, so the property holds at n + 1. ∎</div>
+          </div>
+          <p><strong>2 · Why the two strategies coincide here.</strong> The body of <code>double</code> is <code>2 ∗ x</code>, in which <strong>the parameter x occurs exactly once</strong>.</p>
+          <ul style="font-size:14px;">
+            <li><strong>Call-by-value</strong> (<code>fn<sub>val</sub></code>): t is evaluated <em>first</em>, to some value v, and v is substituted. t is evaluated <strong>once</strong>.</li>
+            <li><strong>Call-by-name</strong> (<code>fn<sub>name</sub></code>): t is substituted unevaluated, giving <code>2 ∗ t</code>; the (op) rule then demands a value for t, so t is evaluated <strong>once</strong>, at that point.</li>
+          </ul>
+          <p>Same value, and the same number of evaluations of t — hence the same behaviour and the <strong>same efficiency</strong>. The derivations have the same size; only the <em>order</em> of the steps differs.</p>
+          <div class="callout warn" style="margin-top:10px;">
+            <div class="callout-label">Contrast — and this is the examinable part</div>
+            For <code>square(x) = x ∗ x</code> the parameter occurs <strong>twice</strong>, so call-by-name substitutes t twice and evaluates it twice: <code>square(2+1)</code> takes 7 rule applications under CBV but 8 under CBN. Duplication of the argument is what makes the strategies differ — and <em>sharing</em> (lazy evaluation) is what removes the penalty. Where a parameter is <strong>linear</strong> (used once) the question does not arise.
+          </div>
+          <p><strong>3 · <code>map</code>.</strong> Behaviour: <code>map</code> <strong>applies f to every element of a list, returning the list of results</strong>, preserving length and order. It is defined by pattern matching on the list: the empty list maps to the empty list; a non-empty list <code>x : l</code> maps to <code>(f x)</code> consed onto <code>map f l</code>.</p>
+          <p><strong>Call-by-name evaluation of <code>map double list</code>:</strong></p>
+          <ul style="font-size:14px;">
+            <li>The application is unfolded first, so <code>list</code> is <strong>not</strong> evaluated up front — but the equations pattern-match on <code>nil</code> vs <code>x : l</code>, so <code>list</code> must be evaluated <em>just far enough</em> to reveal which of the two it is (weak head normal form).</li>
+            <li>If it reveals <code>x : l</code>, the second equation gives <code>(double x) : (map double l)</code>. Neither <code>double x</code> nor <code>map double l</code> is evaluated yet — <strong>both are left as unevaluated terms</strong> inside the result.</li>
+            <li>Each is evaluated only when something demands it: asking for the head forces <code>double x</code>; asking for the next element forces one more unfolding of <code>map</code>.</li>
+            <li>If it reveals <code>nil</code>, the first equation gives <code>nil</code> and evaluation stops.</li>
+          </ul>
+          <p>So the result list is produced <strong>lazily, one cell at a time, only as far as it is demanded</strong> — which is exactly why an infinite <code>list</code> is harmless provided you only ever inspect a finite prefix. Under call-by-value, by contrast, the whole of <code>list</code> would have to be evaluated before <code>map</code> could even start.</p>
+        </div></details>
+      </div>
+      <div class="qcard" id="pr-w11e4">
+        <div class="q-n">Exercise 4 · SLD-resolution and clause order</div>
+        <h4><code>even/1</code>, and what happens when you move the guard</h4>
+        <div class="pl"><span class="at">even</span>(0).
+<span class="at">even</span>(<span class="v">N</span>) <span class="op">:-</span> <span class="v">N</span> &gt; 1, <span class="v">N1</span> <span class="op">is</span> <span class="v">N</span>-2, even(<span class="v">N1</span>).</div>
+        <div class="q-part">1. Describe the SLD-resolution tree for <code>:- even(4).</code> and for <code>:- even(3).</code>, using the leftmost computation rule. (Assume <code>N &gt; 1</code> succeeds when N is instantiated to a number greater than 1, and fails otherwise.)</div>
+        <div class="q-part">2. What answers does Prolog give?</div>
+        <div class="q-part">3. Now replace the second clause by <code>even(N) :- N1 is N-2, even(N1), N &gt; 1.</code> How does Prolog behave with the same goals, and what are the answers?</div>
+        <a class="try-link" href="#w10-sldtool" onclick="showWeek('week10')">→ build all four trees in the SLD-tree builder (Week 10)</a>
+        <details class="reveal"><summary>Show solution</summary><div class="rev-body">
+          <p><strong>1 &amp; 2 · The original program.</strong></p>
+          <p><code>:- even(4).</code> — clause 1 (<code>even(0)</code>) does not unify with <code>even(4)</code>, so the only child uses clause 2 with {N ↦ 4}:</p>
+          <div class="goal-trace">
+            <div class="gt-row"><span class="gt-n">1</span><span class="gt-goal">:- <b>even(4)</b>.</span></div>
+            <div class="gt-row"><span class="gt-n">2</span><span class="gt-goal">:- <b>4 &gt; 1</b>, N1 is 4-2, even(N1). &nbsp;&nbsp;<span style="color:var(--accent-4);">{N ↦ 4}</span></span></div>
+            <div class="gt-row"><span class="gt-n">3</span><span class="gt-goal">:- <b>N1 is 4-2</b>, even(N1). &nbsp;&nbsp;<span style="color:var(--accent-4);">guard succeeds</span></span></div>
+            <div class="gt-row"><span class="gt-n">4</span><span class="gt-goal">:- <b>even(2)</b>. &nbsp;&nbsp;<span style="color:var(--accent-4);">{N1 ↦ 2}</span></span></div>
+            <div class="gt-row"><span class="gt-n">5</span><span class="gt-goal">:- <b>2 &gt; 1</b>, N1′ is 2-2, even(N1′). &nbsp;&nbsp;<span style="color:var(--accent-4);">{N ↦ 2}</span></span></div>
+            <div class="gt-row"><span class="gt-n">6</span><span class="gt-goal">:- <b>even(0)</b>. &nbsp;&nbsp;<span style="color:var(--accent-4);">{N1′ ↦ 0}</span></span></div>
+            <div class="gt-row ok"><span class="gt-n">7</span><span class="gt-goal">□ &nbsp;&nbsp;<span style="color:var(--accent-4);">clause 1</span> — <strong>success</strong></span></div>
+          </div>
+          <p style="font-size:13.5px;">At step 6 the goal <code>even(0)</code> also has a <em>second</em> child via clause 2, but it immediately fails because <code>0 &gt; 1</code> is false. So the tree has one success branch and a couple of short failure branches.</p>
+          <p><code>:- even(3).</code> — the same descent, but it runs out:</p>
+          <div class="goal-trace">
+            <div class="gt-row"><span class="gt-n">1</span><span class="gt-goal">:- <b>even(3)</b>.</span></div>
+            <div class="gt-row"><span class="gt-n">2</span><span class="gt-goal">:- <b>3 &gt; 1</b>, N1 is 3-2, even(N1). &nbsp;&nbsp;<span style="color:var(--accent-4);">{N ↦ 3}</span></span></div>
+            <div class="gt-row"><span class="gt-n">3</span><span class="gt-goal">:- <b>even(1)</b>. &nbsp;&nbsp;<span style="color:var(--accent-4);">{N1 ↦ 1}</span></span></div>
+            <div class="gt-row fail"><span class="gt-n">4</span><span class="gt-goal">:- <b>1 &gt; 1</b>, … → <strong>failure</strong> &nbsp;&nbsp;<span style="color:var(--accent-4);">the guard fails; clause 1 doesn't unify with even(1) either</span></span></div>
+          </div>
+          <p><strong>Answers:</strong> &nbsp;<code>:- even(4).</code> → <strong>true</strong>. &nbsp;<code>:- even(3).</code> → <strong>false</strong>. Both trees are <em>finite</em>: the guard <code>N &gt; 1</code> sits <em>before</em> the recursive call, so it stops the descent as soon as N drops to 1 or 0.</p>
+          <p><strong>3 · Moving the guard after the recursive call.</strong></p>
+          <div class="pl"><span class="at">even</span>(<span class="v">N</span>) <span class="op">:-</span> <span class="v">N1</span> <span class="op">is</span> <span class="v">N</span>-2, even(<span class="v">N1</span>), <span class="v">N</span> &gt; 1.</div>
+          <p>Now the recursion is no longer bounded on the way <em>down</em>: <code>N1 is N-2</code> always succeeds, and <code>even(N1)</code> is called before anything checks whether N is still big enough.</p>
+          <ul style="font-size:14px;">
+            <li><strong><code>:- even(4).</code></strong> — the left-most branch still reaches <code>even(0)</code>, which matches clause 1; the pending guards <code>2 &gt; 1</code> and <code>4 &gt; 1</code> then succeed on the way back up. So Prolog still answers <strong>true</strong>. <em>But</em> if you ask for another solution, it back-tracks into <code>even(0)</code>'s second clause, computes <code>-2</code>, then <code>-4</code>, … and <strong>never terminates</strong>.</li>
+            <li><strong><code>:- even(3).</code></strong> — the descent goes 3 → 1 → −1 → −3 → −5 → … <strong>forever</strong>. Nothing ever fails, because the only test that could stop it now comes <em>after</em> the recursive call and is never reached. Prolog <strong>does not terminate</strong> (in practice: a stack overflow / resource error), instead of answering <code>false</code>.</li>
+          </ul>
+          <div class="callout exam" style="margin-top:12px;">
+            <div class="callout-label">The moral</div>
+            The two programs are <strong>logically equivalent</strong> — conjunction is commutative, so <code>N&gt;1, N1 is N-2, even(N1)</code> and <code>N1 is N-2, even(N1), N&gt;1</code> denote the same relation. What changed is <em>only the order in which Prolog's left-most selection rule visits the literals</em>, and that is enough to turn a terminating program into a looping one.
+            <p style="margin:10px 0 0 0;">This is the same lesson as putting base clauses before recursive ones: <strong>SLD-resolution is complete, but Prolog's implementation of it is not</strong>. Put your guards where they can prune the search.</p>
+          </div>
+        </div></details>
+      </div>
+    </section>

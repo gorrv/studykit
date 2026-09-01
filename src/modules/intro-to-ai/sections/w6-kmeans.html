@@ -1,0 +1,287 @@
+<section id="w6-kmeans" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 06 · Part 1 · Unsupervised Learning</div>
+        <h1>K-Means Clustering</h1>
+        <div class="week-subtitle">finding groups when nobody tells you what they are</div>
+      </div>
+      <!-- ===== INTRO ===== -->
+      <h2 id="c-intro">Unsupervised learning</h2>
+      <div class="callout exam">
+        <div class="callout-label">The setting</div>
+        In the unsupervised learning setting, we <strong>look for patterns in the data without having the labels</strong> of such data points.
+        <p style="margin:10px 0 0 0;">For example, given pictures of cats and dogs, an unsupervised algorithm may be able to identify <strong>two groups of similar pictures</strong> in the dataset — <strong>without, of course, being able to 'name' them</strong>.</p>
+        <p style="margin:10px 0 0 0;">A very common technique to do that is <strong>clustering</strong>. This week covers two: <strong>K-Means</strong> and <strong>Hierarchical</strong> clustering.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">"Without being able to name them" is the whole difference from Week 5</div>
+        A supervised classifier trained on labelled photos outputs "cat". A clustering algorithm outputs "<em>group 2</em>" — it has found that some photos resemble each other more than others, and that is all. <strong>Nothing in the data says which group is the cats.</strong>
+        <p style="margin:10px 0 0 0;">This also means there is no accuracy, no precision, no F1 — <strong>there is no right answer to compare against.</strong> So the quality of a clustering has to be judged from the data's own geometry, which is exactly what "within-cluster variance" is for.</p>
+      </div>
+      <!-- ===== MOTIVATION ===== -->
+      <h2 id="c-motiv">Example 6.1 — where should p₄ go?</h2>
+      <div class="callout">
+        <div class="callout-label">The set-up</div>
+        Six points, and we want <strong>K = 2</strong> clusters. It is unclear which cluster point <strong>p₄</strong> should belong to. Should we have
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; margin:10px 0 0 14px;">
+          C̃₁ = {p₁, p₂, p₃, p₄} &nbsp; and &nbsp; C̃₂ = {p₅, p₆} &nbsp;&nbsp;<span style="color:var(--ink-muted);">(6.1)</span></div>
+        <p style="margin:10px 0 0 0;">or, instead,</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; margin:10px 0 0 14px;">
+          Ĉ₁ = {p₁, p₂, p₃} &nbsp; and &nbsp; Ĉ₂ = {p₄, p₅, p₆} &nbsp;&nbsp;<span style="color:var(--ink-muted);">(6.2)</span></div>
+      </div>
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 420 300" role="img" xmlns="http://www.w3.org/2000/svg">
+          <title>The six points of Example 6.1</title>
+          <desc>p1 at (1,2), p2 at (2,3), p3 at (3,0), p4 at (4,4), p5 at (6,7), p6 at (7,6). p4 sits between the lower-left group and the upper-right pair.</desc>
+          <g stroke="var(--rule)" stroke-width="0.6">
+            <line x1="50" y1="30" x2="50" y2="266"/><line x1="94" y1="30" x2="94" y2="266"/>
+            <line x1="138" y1="30" x2="138" y2="266"/><line x1="182" y1="30" x2="182" y2="266"/>
+            <line x1="226" y1="30" x2="226" y2="266"/><line x1="270" y1="30" x2="270" y2="266"/>
+            <line x1="314" y1="30" x2="314" y2="266"/><line x1="358" y1="30" x2="358" y2="266"/>
+            <line x1="46" y1="34" x2="380" y2="34"/><line x1="46" y1="63" x2="380" y2="63"/>
+            <line x1="46" y1="92" x2="380" y2="92"/><line x1="46" y1="121" x2="380" y2="121"/>
+            <line x1="46" y1="150" x2="380" y2="150"/><line x1="46" y1="179" x2="380" y2="179"/>
+            <line x1="46" y1="208" x2="380" y2="208"/><line x1="46" y1="237" x2="380" y2="237"/>
+          </g>
+          <line x1="46" y1="266" x2="384" y2="266" stroke="var(--ink-muted)" stroke-width="1.2"/>
+          <line x1="50" y1="26" x2="50" y2="270" stroke="var(--ink-muted)" stroke-width="1.2"/>
+          <g font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--ink-muted)" text-anchor="middle">
+            <text x="50" y="280">0</text><text x="94" y="280">1</text><text x="138" y="280">2</text>
+            <text x="182" y="280">3</text><text x="226" y="280">4</text><text x="270" y="280">5</text>
+            <text x="314" y="280">6</text><text x="358" y="280">7</text>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--ink-muted)" text-anchor="end">
+            <text x="43" y="269">0</text><text x="43" y="240">1</text><text x="43" y="211">2</text>
+            <text x="43" y="182">3</text><text x="43" y="153">4</text><text x="43" y="124">5</text>
+            <text x="43" y="95">6</text><text x="43" y="66">7</text>
+          </g>
+          <g>
+            <circle cx="94" cy="208" r="5" fill="var(--clu1)"/><text x="102" y="205" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--ink)">p₁ = (1,2)</text>
+            <circle cx="138" cy="179" r="5" fill="var(--clu1)"/><text x="146" y="176" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--ink)">p₂ = (2,3)</text>
+            <circle cx="182" cy="266" r="5" fill="var(--clu1)"/><text x="190" y="262" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--ink)">p₃ = (3,0)</text>
+            <circle cx="226" cy="150" r="6.5" fill="var(--accent-2)" stroke="var(--ink)" stroke-width="1"/><text x="234" y="147" font-family="IBM Plex Mono, monospace" font-size="10" font-weight="700" fill="var(--accent-2)">p₄ = (4,4)</text>
+            <circle cx="314" cy="63" r="5" fill="var(--clu3)"/><text x="322" y="60" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--ink)">p₅ = (6,7)</text>
+            <circle cx="358" cy="92" r="5" fill="var(--clu3)"/><text x="300" y="105" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--ink)">p₆ = (7,6)</text>
+          </g>
+        </svg>
+        <div class="caption">Figure 6.1 — p₄ sits awkwardly between the lower-left trio and the upper-right pair.</div>
+      </div>
+      <!-- ===== VARIANCE ===== -->
+      <h2 id="c-var">Within-cluster variance</h2>
+      <div class="callout exam">
+        <div class="callout-label">The key question, and the answer</div>
+        <strong>What does it mean to be a better cluster assignment than another?</strong> To answer, we need a metric for <strong>within-cluster variance</strong>, V(C<sub>k</sub>) — the value we want to <strong>minimise</strong>. We use the <strong>squared Euclidean distance</strong>:
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:16px; margin:14px 0;">
+          <strong>V(C<sub>k</sub>) = (1 / |C<sub>k</sub>|) &nbsp;Σ<sub>i,i′ ∈ C<sub>k</sub></sub> &nbsp;d(p<sub>i</sub>, p<sub>i′</sub>)²</strong> &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(6.3)</span></div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:8px 0 0 0;">
+          d(p<sub>i</sub>, p<sub>i′</sub>)² = Σ<sub>j=1</sub><sup>D</sup> (p<sub>ij</sub> − p<sub>i′j</sub>)² &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(6.4)</span></div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Three details that decide whether your answer is right</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>We do not count each pair i, i′ twice.</strong> For a cluster of 4 points there are <strong>6</strong> terms, not 12 — it is <em>every unordered pair</em>.</li>
+          <li><strong>The distance is squared, and stays squared.</strong> No square root anywhere in V.</li>
+          <li><strong>You divide by |C<sub>k</sub>| — the number of points, not the number of pairs.</strong> A 4-point cluster with 6 pair-terms is divided by <strong>4</strong>.</li>
+        </ol>
+        <p style="margin:10px 0 0 0;">The notes even flag their own abuse of notation here: C<sub>k</sub> is made of <em>points</em> p<sub>i</sub>, not indices i, so strictly the sum should be over p<sub>i</sub>, p<sub>i′</sub> ∈ C<sub>k</sub>. "You would be correct to feel something is off."</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The notes' worked calculation — V(Ĉ₂) where Ĉ₂ = {p₄, p₅, p₆}</div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:2; margin:8px 0 0 8px;">
+          V(Ĉ₂) = (1/3) [ d(p₄,p₅)² + d(p₄,p₆)² + d(p₅,p₆)² ]<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = (1/3) [ 13 + 13 + 2 ]<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ≈ <strong>9.33</strong></div>
+        <p style="margin:12px 0 0 0; font-size:13.5px;">Checking the three terms: d(p₄,p₅)² = (4−6)² + (4−7)² = 4 + 9 = 13 · d(p₄,p₆)² = (4−7)² + (4−6)² = 9 + 4 = 13 · d(p₅,p₆)² = (6−7)² + (7−6)² = 1 + 1 = 2.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Where this is going</div>
+        Compute V for both candidate clusterings, add up each pair, and the one with the lower <strong>total</strong> wins. That is <a href="#x-1" onclick="showWeek('w6-ex')">Exercise 1</a> — worked in full in Part 3, and the answer settles where p₄ goes. Do it yourself first; the calculator below will mark it.
+      </div>
+      <!-- ===== VARIANCE TOOL ===== -->
+      <h2 id="c-vtool">Tool · Within-cluster variance</h2>
+      <div class="tool" data-run="runWCV">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Every pair, every term, the total</h3></div>
+        <p class="tool-desc"><strong>Drag the points and every V recomputes; shift-click a point to move it between clusters.</strong> Every thin line on the canvas is one of the pairs being counted. Defaults to Example 6.1's two candidate clusterings — drag p₄ and watch which one wins change.</p>
+        <div class="compare-2" style="margin-top:4px;">
+          <div class="tool-field"><label for="wv-pts">Points — one per line, <code>name: x y …</code> (any number of dimensions)</label>
+            <textarea id="wv-pts" rows="7" spellcheck="false">p1: 1 2
+p2: 2 3
+p3: 3 0
+p4: 4 4
+p5: 6 7
+p6: 7 6</textarea></div>
+          <div class="tool-field"><label for="wv-clu">Clusterings — one per line; clusters separated by <code>|</code>, points by spaces</label>
+            <textarea id="wv-clu" rows="7" spellcheck="false">p1 p2 p3 p4 | p5 p6
+p1 p2 p3 | p4 p5 p6</textarea></div>
+        </div>
+        <div class="tool-controls" style="margin-top:12px;"><button class="tool-btn" onclick="runWCV()">Compute</button></div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="wv-output" class="tool-output"></div>
+      </div>
+      <!-- ===== ALGORITHM ===== -->
+      <h2 id="c-algo">The algorithm</h2>
+      <div class="callout warn">
+        <div class="callout-label">Why we need one at all</div>
+        <strong>There are too many cluster assignments to check.</strong> Considering only K = 2, the number of assignments for n = 20 is
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">2<sup>20</sup> − 1 = 1,048,575</div>
+        <p style="margin:0;">That may not look like much, but <strong>the number grows exponentially in n</strong>, becoming intractable very quickly on realistic data sets.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Definition 6.2 — the K-Means Clustering Algorithm</div>
+        Let p₁ … p<sub>n</sub> ∈ ℝ<sup>D</sup> be a set of points and K the desired number of clusters. Then:
+        <ol style="margin:10px 0 0 0;">
+          <li><strong>Select K different data points to be the initial cluster centres</strong> at time t = 0, µ<sub>k</sub><sup>(0)</sup>. There are no clusters yet at t = 0. Move time to t = 1.</li>
+          <li>At time t, <strong>assign each data point p<sub>i</sub> to the cluster C<sub>k</sub><sup>(t)</sup> with the closest cluster centre µ<sub>k</sub><sup>(t−1)</sup></strong>. <strong>Break ties by assigning the point to the cluster centre with the lowest index</strong> among the closest ones.</li>
+          <li>For each cluster, <strong>recalculate the cluster centre as the average of all its points</strong>:
+            <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:8px 0;">
+              µ<sub>k</sub><sup>(t)</sup> = (1 / |C<sub>k</sub><sup>(t)</sup>|) Σ<sub>i ∈ C<sub>k</sub><sup>(t)</sup></sub> p<sub>i</sub> &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(6.5)</span></div></li>
+          <li><strong>If clusters changed, go back to step 2</strong> with t + 1. <strong>If clusters have not changed, stop</strong> and return the final clusters.</li>
+        </ol>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Four things worth noticing in that definition</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>The initial centres are actual data points</strong> — "select K different data points" — not arbitrary coordinates. Later centres are averages and generally are <em>not</em> data points.</li>
+          <li><strong>The tie-break is specified</strong>: lowest index wins. This is unusual for a textbook and it matters — <a href="#x-2" onclick="showWeek('w6-ex')">Exercises 2 and 3</a> both hinge on a tie at p₄, and the tie-break is what sends it one way or the other.</li>
+          <li><strong>The stopping test is on the clusters, not the centres.</strong> If no point changes cluster, the centres cannot change either, so it is equivalent — but the notes phrase it in terms of clusters.</li>
+          <li><strong>K is an input.</strong> K-means does not discover how many clusters there are; you have to tell it. (Hierarchical clustering, in Part 2, gives you every K at once.)</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <div class="callout-label">In two words</div>
+        <strong>Assign, then average.</strong> Assign every point to its nearest centre; move every centre to the mean of what it caught; repeat until nothing moves.
+      </div>
+      <!-- ===== EXAMPLE ===== -->
+      <h2 id="c-example">The worked example</h2>
+      <p>Eight points, K = 3, with the first three points as the initial centres:</p>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1.9; margin:10px 0 0 8px;">
+        p₁ = (2,5) &nbsp; p₂ = (2,6) &nbsp; p₃ = (6,4) &nbsp; p₄ = (1,8)<br>
+        p₅ = (4,5) &nbsp; p₆ = (4,4) &nbsp; p₇ = (1,1) &nbsp; p₈ = (4,7)<br><br>
+        µ₁<sup>(0)</sup> = p₁ = (2,5) &nbsp;·&nbsp; µ₂<sup>(0)</sup> = p₂ = (2,6) &nbsp;·&nbsp; µ₃<sup>(0)</sup> = p₃ = (6,4)</div>
+      <table>
+        <tr><th>End of</th><th>C₁</th><th>C₂</th><th>C₃</th><th>µ₁</th><th>µ₂</th><th>µ₃</th></tr>
+        <tr><td><strong>iteration 1</strong></td><td>p₁ p₅ p₇</td><td>p₂ p₄ p₈</td><td>p₃ p₆</td>
+            <td>(2.33, 3.67)</td><td>(2.33, 7.00)</td><td>(5.00, 4.00)</td></tr>
+        <tr><td><strong>iteration 2</strong></td><td>p₁ p₇</td><td>p₂ p₄ p₈</td><td>p₃ p₅ p₆</td>
+            <td>(1.50, 3.00)</td><td>(2.33, 7.00)</td><td>(4.67, 4.33)</td></tr>
+        <tr><td><strong>iteration 3</strong></td><td>p₇</td><td>p₁ p₂ p₄ p₈</td><td>p₃ p₅ p₆</td>
+            <td>(1.00, 1.00)</td><td>(2.25, 6.50)</td><td>(4.67, 4.33)</td></tr>
+        <tr><td><strong>iteration 4</strong></td><td>p₇</td><td>p₁ p₂ p₄ p₈</td><td>p₃ p₅ p₆</td>
+            <td>(1.00, 1.00)</td><td>(2.25, 6.50)</td><td>(4.67, 4.33)</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">The note under Figure 6.2, and why it matters for exam bookkeeping</div>
+        <em>"In a real implementation, iteration number 5 would not even start. That is because at the end of iteration 4 we would identify that clusters have not changed from the end of iteration 3, and therefore terminate."</em>
+        <p style="margin:10px 0 0 0;">So the figure draws five panels but the algorithm does <strong>four</strong> iterations. If asked "how many iterations does it take?", the answer is the number at which the clusters first repeat — here <strong>4</strong>, because iteration 4 reproduced iteration 3's clusters.</p>
+        <p style="margin:10px 0 0 0;">Watch <strong>p₁</strong> across the table: it starts as its own centre in C₁, and by iteration 3 it has migrated to C₂. <strong>A point can leave the cluster it seeded.</strong> And C₁ shrinks to the single outlier p₇ = (1,1) — K-means will happily spend a whole cluster on one distant point.</p>
+      </div>
+      <!-- ===== TOOL ===== -->
+      <h2 id="c-tool">Tool · K-means tracer</h2>
+      <div class="tool" data-run="runKM">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Every assignment, every centroid, every iteration</h3></div>
+        <p class="tool-desc"><strong>Drag the points and centres around, add and delete them, and step through the algorithm one phase at a time.</strong> Runs Definition 6.2 exactly, including the lowest-index tie-break. Defaults to the worked example; the presets load Exercises 2 and 3.</p>
+        <div class="tool-controls" style="margin-bottom:10px;">
+          <div class="tool-field"><label for="km-preset">Preset</label>
+            <select id="km-preset" onchange="kmPreset()">
+              <option value="fig" selected>Figure 6.2 — 8 points, K = 3</option>
+              <option value="custom">— edited on the canvas —</option>
+              <option value="ex2">Exercise 2 — µ₁=(1,2), µ₂=(6,7)</option>
+              <option value="ex3">Exercise 3 — µ₁=(6,7), µ₂=(1,2)</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runKM()">Load from the boxes below</button>
+        </div>
+        <div class="compare-2">
+          <div class="tool-field"><label for="km-pts">Points — <code>name: x y</code></label>
+            <textarea id="km-pts" rows="9" spellcheck="false">p1: 2 5
+p2: 2 6
+p3: 6 4
+p4: 1 8
+p5: 4 5
+p6: 4 4
+p7: 1 1
+p8: 4 7</textarea></div>
+          <div class="tool-field"><label for="km-mu">Initial centres µ<sup>(0)</sup> — one per line, <code>x y</code></label>
+            <textarea id="km-mu" rows="9" spellcheck="false">2 5
+2 6
+6 4</textarea></div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="km-output" class="tool-output"></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Things worth trying in it</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Press ▶ play</strong> on the default and watch it converge. The phases alternate: <em>assign</em> draws a dashed line from every point to the centre that claimed it, then <em>recompute</em> slides each ✕ to the mean of what it caught, leaving a ghost where it was.</li>
+          <li>The default reproduces Figure 6.2 exactly — check the centroids against the table above, and note it reports <strong>4 iterations</strong>, not 5.</li>
+          <li>Switch to <strong>Exercise 2</strong>, then <strong>Exercise 3</strong>. Same six points, same K, <strong>only the two centres swapped over</strong> — and they converge to <em>different</em> clusterings with total variance <strong>14.75</strong> and <strong>16.00</strong>. That is a local minimum, live.</li>
+          <li>In both of those runs, look for the point ringed in orange and marked <span style="color:var(--accent-2); font-weight:600;">TIE</span>: p₄ is exactly 13 from both centres, and the lowest-index rule decides everything that follows. <strong>Now drag p₄ one square in any direction</strong> and watch the tie break on its own.</li>
+          <li><strong>Drag a centre into the middle of the other cluster</strong> and step through. You can watch K-means climb back out — or get stuck, if you place it badly enough.</li>
+          <li>The shaded regions are the <strong>decision boundaries</strong> for the current centres: perpendicular bisectors between neighbouring centres. Drag a centre and watch the whole partition of the plane move with it.</li>
+          <li>Hit <strong>+ K</strong> a few times, then <strong>⟳ reseed centres</strong> repeatedly. The final variance changes from run to run — that is exactly the <code>n_init</code> problem from §6.2.4, and you are watching it happen.</li>
+          <li><strong>Click empty space</strong> to drop in an outlier far from everything, and see K-means spend an entire cluster on it.</li>
+        </ul>
+      </div>
+      <!-- ===== INITIALISATION ===== -->
+      <h2 id="c-init">A few words on initialisation</h2>
+      <div class="callout exam">
+        <div class="callout-label">The problem and the two fixes</div>
+        Definition 6.2 does not specify how to choose the initial centres, and a bad choice can lead to a <strong>local minimum that is not a global minimum</strong> — as Exercise 3 demonstrates. Two main ways to address this (which <strong>can be combined</strong>):
+        <ol style="margin:10px 0 0 0;">
+          <li><strong>Run the clustering several times</strong>, with several random initialisations, and <strong>pick the best one</strong>.</li>
+          <li><strong>Select your initial centres in a smart way</strong> — for example, do not take points that are too close to each other, as it may lead to bad local minima or take too long to finish.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;">Both are used by <strong>scikit-learn</strong>'s K-means: the number of restarts is the parameter <code>n_init</code>, and <code>k-means++</code> selects initial centres from an empirical probability distribution over the points.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The terminology footnote is worth reading twice</div>
+        The notes are careful: <em>"a global minimum is, in particular, a local minimum. So our worry is to land on <strong>another</strong> local minimum, that is, one that does not happen to also be a global minimum."</em> And: <strong>there may be more than one global minimum</strong> — several assignments that are equally good and better than anything else.
+        <p style="margin:10px 0 0 0;">So the correct phrasing in an exam is "a local minimum that is not global", not "a local rather than a global minimum".</p>
+      </div>
+      <!-- ===== PROPOSITION ===== -->
+      <h2 id="c-prop">Why comparing to centres is enough</h2>
+      <div class="callout warn">
+        <div class="callout-label">The nagging question</div>
+        Step 2 assigns each point to its nearest <em>centre</em>. But V(C<sub>k</sub>) was defined over <em>all pairs of points</em>. <strong>How can just looking for the closest cluster centre be enough?</strong>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Proposition 6.3 &nbsp;<span style="font-weight:400; text-transform:none; letter-spacing:0;">— flagged in the notes as non-examinable</span></div>
+        Let C<sub>k</sub> be a cluster and µ<sub>k</sub> its centre. Then its within-cluster variance is equal to <strong>two times the sum of squared distances from each point to the cluster centre</strong>:
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:14px 0;">
+          (1/|C<sub>k</sub>|) Σ<sub>i,i′ ∈ C<sub>k</sub></sub> d(p<sub>i</sub>, p<sub>i′</sub>)² &nbsp;=&nbsp; 2 Σ<sub>i ∈ C<sub>k</sub></sub> d(p<sub>i</sub>, µ<sub>k</sub>)² &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(6.7)</span></div>
+        <p style="margin:0;"><strong>By reducing the sum of distances to cluster centres, one also reduces the sum of within-cluster variances.</strong> That is what makes step 2 legitimate.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Remark 6.4 — and why this justifies squared <em>Euclidean</em> distance specifically</div>
+        The proposition <strong>justifies the use of Euclidean distances (or their squares) as what we minimise</strong>. If we had used <strong>Manhattan distance instead, it is not clear how we would be minimising distances by deciding a point's cluster only from the closest cluster centre</strong>.
+        <p style="margin:10px 0 0 0;">In other words: the identity is a <em>property of the squared Euclidean metric and the arithmetic mean</em>, not a general fact. Swap the metric and "assign to nearest centre, then average" stops being guaranteed to reduce the objective. That is not an idle remark — <strong>Part 2's hierarchical clustering deliberately uses Manhattan distance</strong>, and it can, precisely because it never uses centres.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Careful — the factor of 2 only works if you count each pair twice</div>
+        Check Proposition 6.3 on the notes' own cluster. Ĉ₂ = {p₄, p₅, p₆} has <strong>V = 9.33</strong>, and its centre is µ = (17/3, 17/3). Summing squared distances to that centre:
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.9; margin:10px 0 0 10px;">
+          d(p₄,µ)² = (4 − 17/3)² + (4 − 17/3)² = 2 × (5/3)² ≈ 5.556<br>
+          d(p₅,µ)² = (6 − 17/3)² + (7 − 17/3)² ≈ 0.111 + 1.778 = 1.889<br>
+          d(p₆,µ)² = (7 − 17/3)² + (6 − 17/3)² ≈ 1.778 + 0.111 = 1.889<br>
+          <span style="color:var(--accent);">Σ = <strong>9.333</strong></span></div>
+        <p style="margin:12px 0 0 0;">That is <strong>V exactly</strong> — so with the chapter's own convention the identity is <strong>V(C<sub>k</sub>) = Σ<sub>i</sub> d(p<sub>i</sub>, µ<sub>k</sub>)²</strong>, <em>without</em> the 2. Doubling it would give 18.67.</p>
+        <p style="margin:10px 0 0 0;">The two statements are reconciled by <strong>which pairs the left-hand sum runs over</strong>. Equation 6.3 as <em>used</em> in the chapter counts each unordered pair once — "we do not count each pair i, i′ twice", and V(Ĉ₂) = (1/3)(13 + 13 + 2). Proposition 6.3's factor of 2 needs the sum over <strong>ordered</strong> pairs, which is twice as big. <strong>It is the same theorem, stated against a different reading of Σ<sub>i,i′</sub>.</strong></p>
+        <p style="margin:10px 0 0 0;">This changes none of the exercises and the proposition is non-examinable, but if you are asked to verify it numerically, <strong>use the convention you computed V with and say so.</strong> The variance calculator above prints both columns so you can see them line up.</p>
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="c-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 1</div>
+        <ol>
+          <li><strong>Unsupervised learning</strong> looks for patterns without labels; clustering can find the groups but <strong>cannot name them</strong>.</li>
+          <li><strong>V(C<sub>k</sub>) = (1/|C<sub>k</sub>|) Σ<sub>i,i′∈C<sub>k</sub></sub> d(p<sub>i</sub>,p<sub>i′</sub>)²</strong> with d² the sum of squared coordinate differences. <strong>Each pair counted once; divide by the number of points.</strong></li>
+          <li><strong>Be able to compute V by hand</strong> — V(Ĉ₂) = (1/3)(13 + 13 + 2) ≈ 9.33 is the model answer.</li>
+          <li><strong>A better clustering is the one with lower total within-cluster variance.</strong></li>
+          <li><strong>The four steps of Definition 6.2</strong> — pick K data points as centres; assign each point to the nearest centre (<em>ties to the lowest index</em>); recompute each centre as the mean of its cluster; repeat until the clusters stop changing.</li>
+          <li><strong>Why we need it</strong> — brute force is exponential; for n = 20 and K = 2 there are 2<sup>20</sup> − 1 = 1,048,575 assignments.</li>
+          <li><strong>K-means can converge to a local minimum that is not global</strong>, and the initialisation decides which. Two fixes: many random restarts (<code>n_init</code>), and choosing initial centres cleverly (<code>k-means++</code>).</li>
+          <li><strong>Proposition 6.3</strong> (non-examinable) — within-cluster variance equals twice the sum of squared distances to the centre, which is what licenses "assign to nearest centre". Remark 6.4: this is specific to <strong>Euclidean</strong> distance.</li>
+          <li><strong>Be able to run K-means by hand for two or three iterations</strong> on six to eight 2-D points. This is the most likely calculation question in the whole topic.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Part 1. Next: clustering without having to pick K in advance.</p>
+    </section>

@@ -1,0 +1,273 @@
+<section id="week9" class="week-section">
+
+      <div class="week-header">
+        <div class="week-eyebrow">Week 09 · Concurrency (Ian's material)</div>
+        <h1>Java Threads &amp; the Memory Model</h1>
+        <div class="week-subtitle">where shared data meets uncontrolled interleaving</div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Where this fits</div>
+        This begins the <strong>concurrency mini-course</strong> that runs alongside the OS material (and makes up ~40% of the exam). It builds directly on the <strong>threads</strong> ideas from Week 2 — especially the crucial fact that <em>threads share the heap but each has its own stack</em>. That sharing is exactly what makes concurrency powerful <em>and</em> dangerous.
+      </div>
+
+      <!-- ===== Multithreading basics ===== -->
+      <h2 id="w9-multithreading">Multithreading basics</h2>
+
+      <p>A <strong>single-threaded</strong> program has one thread of execution — the traditional style. A <strong>multithreaded</strong> program has multiple threads executing "at the same time." Whether that's <em>literally</em> the same time depends on cores: one core → multithreading creates the <em>illusion</em> of simultaneity (interleaving); multiple cores → threads can run <em>truly</em> in parallel. (Same concurrency-vs-parallelism distinction from Week 1.)</p>
+
+      <div class="callout tip">
+        <div class="callout-label">All Java programs are threaded</div>
+        Even if you never create a thread, the JVM does: a <strong>Main thread</strong> runs your program, plus background threads for garbage collection etc. Add a UI (JavaFX) and that's threaded too. So you're always in a multithreaded world.
+      </div>
+
+      <!-- ===== Creating threads ===== -->
+      <h2 id="w9-creating">Creating threads — three ways</h2>
+
+      <p>The work a thread does lives in its <code>run()</code> method (like a <code>main()</code> for threads). Crucially: <strong>you never call <code>run()</code> yourself — you call <code>start()</code></strong>, and the JVM calls <code>run()</code> at some point. When a thread reaches the end of <code>run()</code>, it terminates.</p>
+
+      <h3><span class="way-tag">Way 1</span> Extend the Thread class</h3>
+      <div class="code-block">
+public class ExtendThreadExample <span style="color:#e89b6d;">extends Thread</span> {
+    @Override
+    public void run() {
+        System.out.println("running...");
+    }
+    public static void main(String[] args) {
+        ExtendThreadExample t = new ExtendThreadExample();
+        t.start();   <span style="color:#7eb892;">// NOT t.run() !</span>
+    }
+}
+      </div>
+
+      <h3><span class="way-tag">Way 2</span> Implement Runnable</h3>
+      <div class="code-block">
+public class RunnableExample <span style="color:#e89b6d;">implements Runnable</span> {
+    @Override
+    public void run() { System.out.println("running..."); }
+
+    public static void main(String[] args) {
+        Thread t = new Thread(<span style="color:#e89b6d;">new RunnableExample()</span>);
+        t.start();
+    }
+}
+      </div>
+
+      <h3><span class="way-tag">Way 3</span> Lambda (Runnable is a functional interface)</h3>
+      <div class="code-block">
+Runnable r = () -> { System.out.println("running..."); };
+Thread t = new Thread(r);
+t.start();
+      </div>
+      <p style="font-size:13px; color:var(--ink-muted);"><code>Runnable</code> has only one abstract method, so it's a <strong>functional interface</strong> — the lambda's body <em>is</em> <code>run()</code> (the name is implied; empty parens = no parameters).</p>
+
+      <div class="callout exam">
+        <div class="callout-label">Extend Thread vs implement Runnable — common exam question</div>
+        <strong>Prefer Runnable.</strong> Two reasons:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Inheritance:</strong> Java allows only single inheritance. If you <code>extend Thread</code> you can't extend any other class. Implementing <code>Runnable</code> leaves you free to extend something else (and you can implement many interfaces).</li>
+          <li><strong>Decoupling &amp; sharing:</strong> extending Thread couples thread-management with behaviour in one object — each thread has its own. With Runnable you can pass the <em>same</em> Runnable object to multiple threads, making data sharing between them easy. (Thread = the "vehicle"; Runnable = the "behaviour".)</li>
+        </ul>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Threads are independent</div>
+        The Main thread and any thread you create are <strong>independent peers</strong> — neither owns the other; the OS manages both. Your new thread does <em>not</em> "belong" to Main.
+      </div>
+
+      <!-- ===== Lifecycle ===== -->
+      <h2 id="w9-lifecycle">Thread lifecycle: sleep, stop, join</h2>
+
+      <h3>Pausing — Thread.sleep()</h3>
+      <p>A static method that pauses the current thread for ~N milliseconds (timings are approximate), relinquishing the CPU. Used for cooperative behaviour (a low-priority background task acknowledging it doesn't need much CPU) or for timing. Must be wrapped in try/catch for <code>InterruptedException</code>.</p>
+
+      <h3>Stopping — use a boolean, not stop()</h3>
+      <div class="callout warn">
+        <div class="callout-label">Never use Thread.stop()</div>
+        <code>stop()</code> exists but is <strong>deprecated</strong> — it leaves your thread (and app) in an indeterminate state. Instead, control termination yourself with a <strong>boolean flag</strong> the run loop checks:
+      </div>
+      <div class="code-block">
+private volatile boolean stopped = false;
+public void setStopped() { this.stopped = true; }
+
+public void run() {
+    while (<span style="color:#e89b6d;">!stopped</span>) {
+        <span style="color:#7eb892;">// do work...</span>
+        Thread.sleep(1000);
+    }
+}
+      </div>
+
+      <h3>Daemon threads</h3>
+      <p>By default the JVM keeps running while <em>any</em> non-daemon thread lives — even after Main exits (Main is "just another thread"). To make a thread die when Main does, call <code>thread.setDaemon(true)</code> <em>before</em> starting it.</p>
+
+      <h3>Coordinating — Thread.join()</h3>
+      <p>The default is <em>no</em> coordination. If one thread must wait for another to finish (e.g. it needs a value the other computes), use <code>join()</code>: if thread A calls <code>B.join()</code>, <strong>A blocks until B terminates</strong>.</p>
+      <div class="code-block">
+Thread t = new Thread(runnable);
+t.start();
+t.join();   <span style="color:#7eb892;">// this thread blocks here until t finishes</span>
+System.out.println("t has terminated");
+      </div>
+
+      <!-- ===== States ===== -->
+      <h2 id="w9-states">JVM thread states</h2>
+      <p>The JVM defines its <em>own</em> thread states that don't map directly to OS states (notably, <strong>RUNNABLE</strong> means "is running" or ready to run):</p>
+
+      <div class="jvm-states">
+        <span class="jvm-state js-new">NEW</span>
+        <span class="jvm-arr">→start()→</span>
+        <span class="jvm-state js-runnable">RUNNABLE</span>
+        <span class="jvm-arr">↔</span>
+        <span class="jvm-state js-blocked">BLOCKED</span>
+        <span class="jvm-arr">↔</span>
+        <span class="jvm-state js-waiting">WAITING / TIMED_WAITING</span>
+        <span class="jvm-arr">→run() ends→</span>
+        <span class="jvm-state js-term">TERMINATED</span>
+      </div>
+      <table>
+        <tr><th>State</th><th>Meaning</th></tr>
+        <tr><td><strong>NEW</strong></td><td>Created but <code>start()</code> not yet called</td></tr>
+        <tr><td><strong>RUNNABLE</strong></td><td>Running or ready to run (the OS decides which)</td></tr>
+        <tr><td><strong>BLOCKED</strong></td><td>Waiting to acquire a lock (monitor)</td></tr>
+        <tr><td><strong>WAITING</strong></td><td>Waiting indefinitely (e.g. <code>join()</code>, <code>wait()</code>)</td></tr>
+        <tr><td><strong>TIMED_WAITING</strong></td><td>Waiting with a timeout — <strong>a sleeping thread is here</strong></td></tr>
+        <tr><td><strong>TERMINATED</strong></td><td>Finished <code>run()</code></td></tr>
+      </table>
+
+      <div class="callout tip">
+        <div class="callout-label">Order is not guaranteed</div>
+        Threads don't start or run in the order you create them. The OS uses <strong>preemptive scheduling</strong> (Week 2!) — it interrupts one thread to run another, and execution is <strong>interleaved</strong>. Two threads started "in order" may print their output in any order, and even interleave mid-output.
+      </div>
+
+      <!-- ===== Memory model ===== -->
+      <h2 id="w9-memory">The Java Memory Model</h2>
+
+      <p>To understand concurrency bugs, you must know <em>where Java puts things</em>. Recall from Week 2: each thread gets its <strong>own stack</strong>, but all threads <strong>share the heap</strong> of their process.</p>
+
+      <table>
+        <tr><th>What</th><th>Where</th></tr>
+        <tr><td>Primitive locals &amp; method parameters (<code>int</code>, <code>boolean</code>...)</td><td><strong>Stack</strong> of the running thread</td></tr>
+        <tr><td>Objects (created with <code>new</code>)</td><td><strong>Heap</strong> (shared)</td></tr>
+        <tr><td>A reference to an object (the variable)</td><td><strong>Stack</strong> (but it points to the heap)</td></tr>
+        <tr><td>An object's fields — including its primitives</td><td><strong>Heap</strong> (part of the object)</td></tr>
+        <tr><td>String literals</td><td><strong>Heap</strong> (a reserved literal area)</td></tr>
+      </table>
+
+      <div class="jmm">
+        <div class="jmm-col jmm-stack">
+          <h4>Thread-0 stack</h4>
+          <div class="jmm-item">int i (loop var)</div>
+          <div class="jmm-item">ref → ▸</div>
+          <div class="jmm-note">private to T0</div>
+        </div>
+        <div class="jmm-col jmm-stack">
+          <h4>Thread-1 stack</h4>
+          <div class="jmm-item">int i (loop var)</div>
+          <div class="jmm-item">ref → ▸</div>
+          <div class="jmm-note">private to T1</div>
+        </div>
+        <div class="jmm-col jmm-heap">
+          <h4>Shared heap</h4>
+          <div class="jmm-item">Runnable object { counter }</div>
+          <div class="jmm-item">String "..." literals</div>
+          <div class="jmm-note">if both refs point here → shared state!</div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Passing references = sharing the object</div>
+        When you pass an object reference to a method, the <em>reference</em> is copied onto the stack, but it still points to the <em>same</em> object on the heap. So a mutator call like <code>message.setMessage("SUCCESS")</code> changes the one shared object — visible to the caller afterwards. The same mechanism is what lets two threads share one <code>Runnable</code>: pass the same object to both <code>Thread</code> constructors.
+      </div>
+
+      <!-- ===== Race conditions ===== -->
+      <h2 id="w9-race">Race conditions</h2>
+
+      <p>Consider two threads each incrementing a shared <code>counter</code> 100,000 times. You'd expect 200,000. <strong>You won't get it.</strong> Why? Because <code>counter++</code> <em>looks</em> atomic but isn't — it's <strong>three operations</strong>:</p>
+
+      <div class="code-block">
+counter++   <span style="color:#7eb892;">// actually:</span>
+            <span style="color:#999;">1.</span> READ  counter  <span style="color:#7eb892;">// load into a register</span>
+            <span style="color:#999;">2.</span> INC   register
+            <span style="color:#999;">3.</span> WRITE counter  <span style="color:#7eb892;">// store back</span>
+      </div>
+
+      <p>If two threads interleave these steps, an update gets <strong>lost</strong>:</p>
+
+      <table class="race-table">
+        <tr><th>Step</th><th>Thread-0</th><th>Thread-1</th><th>counter</th></tr>
+        <tr><td>1</td><td class="race-t0">READ → reg=5</td><td></td><td class="race-counter">5</td></tr>
+        <tr><td>2</td><td></td><td class="race-t1">READ → reg=5 ⚠</td><td class="race-counter">5</td></tr>
+        <tr><td>3</td><td></td><td class="race-t1">INC → reg=6</td><td class="race-counter">5</td></tr>
+        <tr><td>4</td><td></td><td class="race-t1">WRITE → 6</td><td class="race-counter">6</td></tr>
+        <tr><td>5</td><td class="race-t0">INC → reg=6</td><td></td><td class="race-counter">6</td></tr>
+        <tr><td>6</td><td class="race-t0">WRITE → 6</td><td></td><td class="race-lost">6 ✗</td></tr>
+      </table>
+      <p>Two increments happened, but <code>counter</code> only went from 5 to 6 — it should be 7. Thread-0 overwrote Thread-1's update: a <strong>lost update</strong>.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">Definition: race condition</div>
+        A <strong>race condition</strong> is when the result of an operation depends on the <em>timing/ordering</em> of threads (a "race" between them) rather than on the program's logic. The shared-counter program gives <strong>indeterminate</strong> results — different every run (e.g. 125520, 137097, ...), never reliably 200000. The root cause is <strong>unsynchronised access to shared mutable state</strong> via non-atomic operations.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">When is there NO race?</div>
+        If each thread runs its <em>own</em> Runnable object, <code>counter</code> is a separate instance variable per object — not shared — so both reliably reach 100000. The race only appears when threads <strong>share</strong> the same object (and thus the same <code>counter</code> on the heap). Shared mutable state is the prerequisite for a race.
+      </div>
+
+      <!-- ===== RACE TOOL ===== -->
+      <h3 id="w9-racetool">🛠️ Interactive: Race Condition Demo</h3>
+      <p>Watch two threads increment a shared counter. Run them <em>interleaved</em> (realistic, lossy) versus <em>sequentially</em> (the naive expectation) and see the lost updates accumulate. This is the single most important concept of the week.</p>
+
+      <div class="tool">
+        <div class="tool-header">
+          <span class="tool-badge">Concurrency demo</span>
+          <h3>Lost Update Simulator</h3>
+        </div>
+        <div class="tool-desc">Each thread does <code>counter++</code> (READ→INC→WRITE) a number of times. Interleaving the steps causes lost updates — and the <strong>🔒 synchronized</strong> mode (from Week 10) shows the fix.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>Increments per thread</label>
+            <input type="number" id="race-iters" value="20" min="1" max="1000" style="width:90px;">
+          </div>
+          <div class="tool-field">
+            <label>Execution</label>
+            <select id="race-mode">
+              <option value="interleave">Interleaved (realistic)</option>
+              <option value="sequential">Sequential (naive)</option>
+              <option value="random">Random interleave</option>
+              <option value="synchronized">🔒 synchronized (the fix)</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runRace()">Run ▶</button>
+        </div>
+
+        <div id="race-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">What's next</div>
+        The fix — making operations atomic / mutually exclusive via <strong>synchronisation</strong> (locks, <code>synchronized</code>, atomics) — is the subject of the following lectures. The key takeaway for now: <em>shared mutable state + non-atomic operations + interleaving = bugs.</em>
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="w9-exam">Exam-style takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 9</div>
+        <ol>
+          <li><strong>Three ways to make a thread</strong> — extend Thread, implement Runnable, lambda. Call <code>start()</code> (not <code>run()</code>!).</li>
+          <li><strong>Runnable vs Thread</strong> — prefer Runnable: leaves inheritance free + lets you share one behaviour object across threads.</li>
+          <li><strong>sleep()</strong> (pause, TIMED_WAITING), <strong>boolean flag</strong> to stop (never <code>stop()</code>), <strong>daemon</strong> threads, <strong>join()</strong> (wait for another thread).</li>
+          <li><strong>Threads are independent</strong> — Main is "just another thread"; the JVM runs until all non-daemon threads finish.</li>
+          <li><strong>JVM thread states</strong> — NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, TERMINATED. (Sleeping = TIMED_WAITING; RUNNABLE = running/ready.)</li>
+          <li><strong>Memory model</strong> — locals/refs on the per-thread stack; objects + their fields on the shared heap. Passing a reference shares the object.</li>
+          <li><strong><code>counter++</code> is not atomic</strong> — READ, INC, WRITE. Be able to draw the interleaving that causes a <strong>lost update</strong>.</li>
+          <li><strong>Race condition</strong> — result depends on thread timing, not logic; needs <em>shared mutable state</em>. No sharing → no race.</li>
+        </ol>
+      </div>
+
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 9 notes. Next: synchronisation (locks, <code>synchronized</code>) to fix these races.</p>
+
+    </section>

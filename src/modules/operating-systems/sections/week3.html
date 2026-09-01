@@ -1,0 +1,523 @@
+<section id="week3" class="week-section">
+
+      <div class="week-header">
+        <div class="week-eyebrow">Week 03 · Memory Management</div>
+        <h1>Virtual Memory &amp; Address Translation</h1>
+        <div class="week-subtitle">how every process gets the illusion of its own private memory</div>
+      </div>
+
+      <p>This is one of the deepest topics in the course. It solves a single problem in progressively cleverer ways. The whole week is a story: each solution fixes a flaw in the one before. Understanding <em>why</em> each step happens is the key to the entire topic.</p>
+
+      <div class="callout">
+        <div class="callout-label">The evolution at a glance</div>
+        Load-time relocation → Base &amp; limit registers → Segmentation → <strong>Paging</strong> → Multi-level page tables. Each step trades complexity for better fault isolation, security, and less fragmentation.
+      </div>
+
+      <!-- ===== The problem ===== -->
+      <h2 id="w3-problem">The address-binding problem</h2>
+
+      <p>Recall the OS gives each process the illusion of its own computer — <em>including its own memory</em>. We need this for:</p>
+      <ul>
+        <li><strong>Reliability:</strong> stop a buggy process from corrupting another's memory.</li>
+        <li><strong>Security:</strong> stop a <em>malicious</em> process from reading/trashing another's memory — or the OS's.</li>
+      </ul>
+
+      <p>But here's the catch. <strong>Programs embed memory addresses directly in their machine code.</strong> An instruction like <code>callq 0x001330</code> references a specific, concrete address baked into the binary:</p>
+
+      <div class="code-block">
+83 ff 02        cmp    $0x2,%edi
+53              push   %rbx
+74 07           je     <span style="color:#e89b6d;">0x00139d</span>      <span style="color:#7eb892;">; jump to a fixed address</span>
+e8 93 ff ff ff  callq  <span style="color:#e89b6d;">0x001330</span>      <span style="color:#7eb892;">; call code at a fixed address</span>
+48 8b 3e        mov    (%rsi),%rdi
+be 0d 3f 00 00  mov    <span style="color:#e89b6d;">$0x003f0d</span>,%esi   <span style="color:#7eb892;">; load from a fixed address</span>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The problem in a nutshell</div>
+        How can programs be written <em>as if memory is private to themselves</em> (concrete instructions referencing specific addresses)... but still execute in a <em>shared slice</em> of physical memory... <strong>efficiently, reliably, and securely</strong>? If two processes both want to start at address 0, they can't both physically be there!
+      </div>
+
+      <h3>Why the obvious "non-solutions" fail</h3>
+      <table>
+        <tr><th>Idea</th><th>Why it fails</th></tr>
+        <tr><td>Only keep <strong>one program</strong> in memory at a time</td><td>Forgoes efficiency &amp; functionality; swapping all of memory to/from disk on every switch is unworkably slow.</td></tr>
+        <tr><td><strong>Statically assign</strong> address ranges to programs</td><td>What about multiple instances of the same program? How much does each need? Causes unworkable fragmentation; every program needs space reserved at all times.</td></tr>
+      </table>
+
+      <!-- ===== Load-time relocation ===== -->
+      <h2 id="w3-relocation">Solution 1 · Load-time relocation</h2>
+
+      <p>We already have to <em>copy</em> a program into memory to run it. <strong>Idea:</strong> while copying, <em>rewrite</em> all its embedded addresses to point to wherever we actually placed it.</p>
+
+      <div class="compare-2">
+        <div class="code-block" style="margin:0;">
+<span style="color:#7eb892;">// Original (assumes load at 0x0)</span>
+je    <span style="color:#e89b6d;">0x00139d</span>
+callq <span style="color:#e89b6d;">0x001330</span>
+mov   <span style="color:#e89b6d;">$0x003f0d</span>,%esi
+        </div>
+        <div class="code-block" style="margin:0;">
+<span style="color:#7eb892;">// Relocated to load at 0x400000</span>
+je    <span style="color:#7eb892;">0x40139d</span>
+callq <span style="color:#7eb892;">0x401330</span>
+mov   <span style="color:#7eb892;">$0x403f0d</span>,%esi
+        </div>
+      </div>
+
+      <p>Now different processes can be placed at different physical addresses and coexist:</p>
+
+      <div class="mem-map">
+        <div class="mem-col">
+          <div class="mem-col-title">Physical memory</div>
+          <div class="mem-seg mem-os">OS (reserved)</div>
+          <div class="mem-seg mem-free">free</div>
+          <div class="mem-seg mem-procA" style="padding:18px 8px;">Process 1<br>(relocated)</div>
+          <div class="mem-seg mem-free">free</div>
+          <div class="mem-seg mem-procB" style="padding:14px 8px;">Process 2<br>(relocated)</div>
+          <div class="mem-seg mem-free">free</div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The fatal flaws</div>
+        <strong>No fault isolation:</strong> a buggy process can still trash another's (or the OS's) memory — nothing stops it. <strong>No security:</strong> a malicious process can read/trash anything. Plus rewriting is slow and blocks memory sharing. Relocation solves <em>address binding</em> but nothing else.
+      </div>
+
+      <!-- ===== Base & limit ===== -->
+      <h2 id="w3-baselimit">Solution 2 · Base &amp; limit registers (a simple MMU)</h2>
+
+      <p>Add hardware to the CPU: a <strong>Memory Management Unit (MMU)</strong> with two special registers:</p>
+      <ul>
+        <li><strong>Base:</strong> where this process's memory starts in physical RAM.</li>
+        <li><strong>Limit:</strong> how big its region is.</li>
+      </ul>
+
+      <p>Now <strong>every memory access is checked by the hardware</strong>: the address must fall within <code>[base, base+limit]</code>. The CPU adds the base automatically, so the program still <em>thinks</em> it starts at 0.</p>
+
+      <div class="translate">
+        <div class="translate-step"><span class="step-num">1</span><div>Program issues a virtual address, e.g. <code>0x1000</code> (thinks it owns memory from 0).</div></div>
+        <div class="translate-step"><span class="step-num">2</span><div>Hardware checks: is <code>0x1000 &lt; limit</code>? If <strong>no</strong> → hardware interrupt → OS kills the process.</div></div>
+        <div class="translate-step"><span class="step-num">3</span><div>If <strong>yes</strong>: physical address = <code>base + 0x1000</code>.</div></div>
+      </div>
+
+      <h3>How it looks: the MMU in action</h3>
+      <p>Here's the whole machine. The CPU emits a <em>virtual</em> address; the MMU sits in the middle, checks it against <code>limit</code>, and (if valid) adds <code>base</code> to produce the <em>physical</em> address that actually hits RAM. Suppose this process has <strong>base = 0x400000</strong> and <strong>limit = 0x4000</strong> (a 16kB window).</p>
+
+      <div class="mmu-diagram">
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent-3); margin-bottom:14px;">✓ Scenario A — a valid access</div>
+        <div class="mmu-flow">
+          <div class="mmu-box mmu-cpu">
+            <div class="mmu-title">CPU</div>
+            <div style="font-size:12px; color:var(--ink-soft);">running the<br>process</div>
+          </div>
+          <div class="mmu-conn">
+            <div class="conn-label">virtual addr</div>
+            <div class="conn-val" style="color:var(--accent);">0x1000</div>
+            <div class="arrow-line">→</div>
+          </div>
+          <div class="mmu-box mmu-unit">
+            <div class="mmu-title">MMU</div>
+            <div class="mmu-reg"><span class="rname">base</span><span class="rval">0x400000</span></div>
+            <div class="mmu-reg"><span class="rname">limit</span><span class="rval">0x4000</span></div>
+            <div style="font-size:11px; color:var(--ink-muted); margin-top:6px;">check: 0x1000 &lt; 0x4000 ? ✓<br>add: 0x400000 + 0x1000</div>
+          </div>
+          <div class="mmu-conn">
+            <div class="conn-label">physical addr</div>
+            <div class="conn-val" style="color:var(--accent-3);">0x401000</div>
+            <div class="arrow-line">→</div>
+          </div>
+          <div class="mmu-box mmu-ram">
+            <div class="mmu-title">RAM</div>
+            <div style="font-size:12px; color:var(--ink-soft);">access<br>allowed</div>
+          </div>
+        </div>
+        <div class="mmu-check pass">0x1000 is within the limit → physical address = base + 0x1000 = <strong>0x401000</strong> ✓</div>
+      </div>
+
+      <div class="mmu-diagram">
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent-2); margin-bottom:14px;">✗ Scenario B — an out-of-bounds access</div>
+        <div class="mmu-flow">
+          <div class="mmu-box mmu-cpu">
+            <div class="mmu-title">CPU</div>
+            <div style="font-size:12px; color:var(--ink-soft);">running the<br>process</div>
+          </div>
+          <div class="mmu-conn">
+            <div class="conn-label">virtual addr</div>
+            <div class="conn-val" style="color:var(--accent);">0x5000</div>
+            <div class="arrow-line">→</div>
+          </div>
+          <div class="mmu-box mmu-unit" style="border-color:var(--accent-2);">
+            <div class="mmu-title">MMU</div>
+            <div class="mmu-reg"><span class="rname">base</span><span class="rval">0x400000</span></div>
+            <div class="mmu-reg"><span class="rname">limit</span><span class="rval">0x4000</span></div>
+            <div style="font-size:11px; color:var(--accent-2); margin-top:6px;">check: 0x5000 &lt; 0x4000 ? ✗</div>
+          </div>
+          <div class="mmu-conn">
+            <div class="conn-label">trap!</div>
+            <div class="conn-val" style="color:var(--accent-2);">⚡</div>
+            <div class="arrow-line" style="color:var(--accent-2);">→</div>
+          </div>
+          <div class="mmu-box" style="border-color:var(--accent-2); background:#fbeee4;">
+            <div class="mmu-title" style="color:var(--accent-2);">OS</div>
+            <div style="font-size:12px; color:var(--accent-2);">hardware<br>interrupt →<br>kill process</div>
+          </div>
+        </div>
+        <div class="mmu-check fail">0x5000 ≥ limit (0x4000) → the access is outside the process's window → hardware raises an interrupt → the OS (usually) kills the process. This is what stops one process reading/trashing another's memory.</div>
+      </div>
+
+      <p>And here's the same idea seen from <strong>physical memory</strong>. The <code>base</code> and <code>limit</code> together define a single contiguous "window" this process is allowed to touch. Everything outside it — including the OS and other processes — is off-limits:</p>
+
+      <div style="margin:24px 0 24px 70px;">
+        <div class="ram-strip">
+          <div class="ram-cell other"><span class="ram-addr">0x1fffff</span>OS &amp; others</div>
+          <div class="ram-cell window-edge"><span class="ram-addr">0x404000</span>↑ base+limit</div>
+          <div class="ram-cell window">process's</div>
+          <div class="ram-cell window">private</div>
+          <div class="ram-cell window">window</div>
+          <div class="ram-cell window-edge"><span class="ram-addr">0x400000</span>↓ base</div>
+          <div class="ram-cell other"><span class="ram-addr">0x0</span>OS &amp; others</div>
+        </div>
+      </div>
+      <p style="text-align:center; font-style:italic; color:var(--ink-muted); font-size:13px;">The process sees addresses 0 → 0x4000. The MMU silently shifts them into the real window at 0x400000 → 0x404000, and blocks anything beyond it.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Key mechanics</div>
+        Base and limit are set by <strong>privileged instructions</strong> (kernel mode only). On a <strong>context switch</strong>, they're saved and restored — just like other registers. On a <strong>system call</strong>, they're saved and reset, restored on return. This is how the OS controls each process's memory window.
+      </div>
+
+      <!-- ===== BASE/LIMIT CHECKER ===== -->
+      <h4 id="w3-bltool" style="font-family:'Fraunces',serif; font-size:18px; margin-top:28px;">🛠️ Try it: Base &amp; Limit Checker</h4>
+      <p style="font-size:14px;">Set a base and limit, then feed in virtual addresses and watch the hardware either translate (base + address) or trap. The bar shows where the address lands relative to the allowed window.</p>
+
+      <div class="tool">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Base &amp; Limit MMU</h3>
+        </div>
+        <div class="tool-desc">All values in hex. A valid access needs <code>0 ≤ virtual &lt; limit</code>; physical = base + virtual.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>Base (hex)</label>
+            <input type="text" id="bl-base" value="0x400000" style="width:120px;">
+          </div>
+          <div class="tool-field">
+            <label>Limit (hex)</label>
+            <input type="text" id="bl-limit" value="0x4000" style="width:120px;">
+          </div>
+          <div class="tool-field">
+            <label>Virtual addr (hex)</label>
+            <input type="text" id="bl-vaddr" value="0x1000" style="width:120px;">
+          </div>
+          <button class="tool-btn" onclick="blCheck()">Check ▶</button>
+        </div>
+
+        <div id="bl-output" class="tool-output"></div>
+      </div>
+
+      <table class="scorecard">
+        <tr><th>Quality</th><th>Base &amp; limit</th></tr>
+        <tr><td>Fault isolation</td><td class="good">✓ Good (between processes)</td></tr>
+        <tr><td>Security</td><td class="good">✓ Good</td></tr>
+        <tr><td>Rewriting cost</td><td class="good">✓ Avoided! (hardware adds base)</td></tr>
+        <tr><td>Fragmentation</td><td class="bad">✗ Still a problem</td></tr>
+      </table>
+
+      <div class="callout">
+        <div class="callout-label">Two kinds of fragmentation (important!)</div>
+        <strong>Internal:</strong> wasted space <em>inside</em> a process's allocated region (allocated but unused). <strong>External:</strong> free memory exists but is scattered in non-contiguous chunks, so a big new process won't fit anywhere. Fragmentation is a problem <em>whenever allocations must be contiguous</em>.
+      </div>
+
+      <!-- ===== Segmentation ===== -->
+      <h2 id="w3-segmentation">Solution 3 · Segmentation</h2>
+
+      <p>A natural evolution: instead of <em>one</em> (base, limit) pair per process, support <strong>many</strong>. Each pair is a <strong>segment</strong> — a logical chunk like the stack, code, or data.</p>
+
+      <p>A complete address becomes a pair <strong>(s, o)</strong> — segment number + offset. Each segment has its own base, limit, and even <strong>permission bits</strong> (e.g. can't write to a code segment, can't execute a stack segment).</p>
+
+      <div class="mem-map">
+        <div class="mem-col" style="width:220px;">
+          <div class="mem-col-title">Segmented process</div>
+          <div class="mem-seg mem-stack">Stack segment<br><span style="font-size:10px;color:var(--ink-muted);">base + limit + perms (rw-)</span></div>
+          <div class="mem-seg mem-data">Data segment<br><span style="font-size:10px;color:var(--ink-muted);">base + limit + perms (rw-)</span></div>
+          <div class="mem-seg mem-text">Text segment<br><span style="font-size:10px;color:var(--ink-muted);">base + limit + perms (r-x)</span></div>
+        </div>
+      </div>
+
+      <p>Instructions usually have a <strong>default segment</strong>: a jump works within the text segment, a stack push uses the stack segment, etc. This was historically handy for <strong>extending the address space of small-word-size machines</strong> — e.g. a 16-bit machine naturally gets multiple 64kB segments. (The Intel 80286 of 1982 used exactly this: 16-bit segment offsets, 24-bit physical addresses, with DS/CS/SS/ES segment registers.)</p>
+
+      <table class="scorecard">
+        <tr><th>Quality</th><th>Segmentation</th></tr>
+        <tr><td>Fault isolation</td><td class="good">✓ Better — finer-grained, with permissions</td></tr>
+        <tr><td>Security</td><td class="good">✓ Better — A can't even refer to B's private memory</td></tr>
+        <tr><td>Rewriting cost</td><td class="good">✓ No longer an issue (segment-relative addresses)</td></tr>
+        <tr><td>Internal fragmentation</td><td class="good">✓ Fine — segments can be any size</td></tr>
+        <tr><td>External fragmentation</td><td class="bad">✗ Still a problem! Segments need contiguous physical memory</td></tr>
+      </table>
+
+      <div class="callout warn">
+        <div class="callout-label">The remaining headache</div>
+        Segments have a "funny shape": different sizes, can overlap, need <em>contiguous</em> physical memory. Even if lots of RAM is free, if it's not contiguous the OS may fail to load a new program. The MMU is also complex to build for arbitrary sizes/alignments. <strong>This is what paging fixes.</strong>
+      </div>
+
+      <!-- ===== Paging ===== -->
+      <h2 id="w3-paging">Solution 4 · Paged virtual addressing</h2>
+
+      <p>The key insight: <em>"What if we had lots and lots of segments, but all the same small size?"</em></p>
+
+      <p>Divide <strong>physical memory</strong> into equal-sized <strong>frames</strong> (e.g. 4kB each), aligned from zero. Divide each process's <strong>virtual address space</strong> into same-sized <strong>pages</strong>. A <strong>page</strong> is just a frame-sized chunk of virtual memory; once mapped to a frame, it's "a mapped frame."</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Why equal sizes are magic</div>
+        Any aligned 4kB physical chunk is as good as any other → <strong>no external fragmentation</strong>. Contiguous virtual areas need <em>not</em> be contiguous physically. Internal fragmentation is limited: worst case a program wastes only 4,095 bytes (the tail of its last page).
+      </div>
+
+      <h3>Splitting an address into page number + offset</h3>
+
+      <p>With 4kB pages, the low 12 bits of any address are the <strong>offset</strong> (since 2¹² = 4096), and the upper bits are the <strong>page number</strong>. (One hex digit = 4 bits, so the offset is the bottom 3 hex digits.)</p>
+
+      <div class="vaddr-bits">
+        <div class="bit-group pnum">page number <strong>p</strong><span class="bit-label">upper bits</span></div>
+        <div class="bit-group off">offset <strong>o</strong><span class="bit-label">low 12 bits</span></div>
+      </div>
+
+      <p>Programs only ever use <strong>virtual addresses</strong> (p, o). The MMU's job is to translate the page number <strong>p</strong> into a physical frame number <strong>f</strong>, leaving the offset <strong>o</strong> untouched.</p>
+
+      <!-- ===== Translation ===== -->
+      <h2 id="w3-translation">Address translation &amp; the page table</h2>
+
+      <p>Each process has its own <strong>page table</strong>: conceptually an array mapping page number → frame number. The <strong>PTBR (page table base register)</strong> tells the MMU where the current process's page table lives.</p>
+
+      <h3>Translation in action (worked example)</h3>
+      <p>Translating virtual address <code>0x5123</code>, where the page table maps page 5 → frame <code>0x1ffa</code>:</p>
+
+      <div class="translate">
+        <div class="vaddr-bits">
+          <div class="bit-group pnum">p = 0x5<span class="bit-label">page number</span></div>
+          <div class="bit-group off">o = 0x123<span class="bit-label">offset</span></div>
+        </div>
+        <div style="display:flex; gap:24px; align-items:center; justify-content:center; flex-wrap:wrap; margin:20px 0;">
+          <div class="pt-grid">
+            <div class="pt-entry"><div class="idx">7</div><div class="frame invalid">X</div></div>
+            <div class="pt-entry"><div class="idx">6</div><div class="frame invalid">X</div></div>
+            <div class="pt-entry highlight"><div class="idx">5</div><div class="frame">1ffa</div></div>
+            <div class="pt-entry"><div class="idx">4</div><div class="frame">4</div></div>
+            <div class="pt-entry"><div class="idx">3</div><div class="frame">2</div></div>
+            <div class="pt-entry"><div class="idx">2</div><div class="frame invalid">X</div></div>
+            <div class="pt-entry"><div class="idx">1</div><div class="frame invalid">X</div></div>
+            <div class="pt-entry"><div class="idx">0</div><div class="frame invalid">X</div></div>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; max-width:300px;">
+            <div class="translate-step"><span class="step-num">1</span><div>Index the page table by <strong>p = 5</strong></div></div>
+            <div class="translate-step"><span class="step-num">2</span><div>Read frame number: <strong>f = 0x1ffa</strong></div></div>
+            <div class="translate-step"><span class="step-num">3</span><div>Copy the offset <strong>o = 0x123</strong> unchanged</div></div>
+            <div class="translate-step"><span class="step-num">4</span><div>Combine: <strong>(f, o)</strong></div></div>
+          </div>
+        </div>
+        <div class="paddr-result">physical address = 0x1ffa123</div>
+      </div>
+
+      <h3>Problem 1: it's now TWO memory accesses</h3>
+      <p>What was one access is now two: (1) look up the page table for the translation, then (2) do the actual access. Memory is already slow — won't doubling it be unacceptable?</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Solution: the TLB</div>
+        Add a hardware cache of recent page-table entries to the MMU — the <strong>TLB (Translation Lookaside Buffer)</strong>. It's a custom, very fast content-associative memory storing recently-used translations. It exploits <em>locality of reference</em> (programs tend to reuse the same pages).
+      </div>
+
+      <div class="tlb-flow">
+        <div class="tlb-node">Virtual address (p, o)</div>
+        <span class="tlb-arrow">→</span>
+        <div class="tlb-node cache">Check TLB</div>
+        <span class="tlb-arrow">→</span>
+        <div class="tlb-node hit"><strong>HIT</strong><br><span style="font-size:11px;">use cached frame — fast!</span></div>
+      </div>
+      <div class="tlb-flow">
+        <div class="tlb-node miss"><strong>MISS</strong></div>
+        <span class="tlb-arrow">→</span>
+        <div class="tlb-node">Walk the page table (slow), then cache the result</div>
+      </div>
+      <p style="text-align:center; font-style:italic; color:var(--ink-muted); font-size:13px;">Only do a full page-table lookup on a TLB miss. This had better not happen often!</p>
+
+      <div class="callout">
+        <div class="callout-label">📘 Why the TLB works: a concrete example (OSTEP Ch.19)</div>
+        Imagine looping over an array of 10 integers, with a tiny page size where 4 array elements fit per page. Walking through the accesses:
+      </div>
+
+      <div class="tlb-trace">
+        <div class="tlb-acc miss"><span class="el">a[0]</span><span class="vpn">VPN 6</span><span class="res">MISS</span></div>
+        <div class="tlb-acc hit"><span class="el">a[1]</span><span class="vpn">VPN 6</span><span class="res">hit</span></div>
+        <div class="tlb-acc hit"><span class="el">a[2]</span><span class="vpn">VPN 6</span><span class="res">hit</span></div>
+        <div class="tlb-acc miss"><span class="el">a[3]</span><span class="vpn">VPN 7</span><span class="res">MISS</span></div>
+        <div class="tlb-acc hit"><span class="el">a[4]</span><span class="vpn">VPN 7</span><span class="res">hit</span></div>
+        <div class="tlb-acc hit"><span class="el">a[5]</span><span class="vpn">VPN 7</span><span class="res">hit</span></div>
+        <div class="tlb-acc hit"><span class="el">a[6]</span><span class="vpn">VPN 7</span><span class="res">hit</span></div>
+        <div class="tlb-acc miss"><span class="el">a[7]</span><span class="vpn">VPN 8</span><span class="res">MISS</span></div>
+        <div class="tlb-acc hit"><span class="el">a[8]</span><span class="vpn">VPN 8</span><span class="res">hit</span></div>
+        <div class="tlb-acc hit"><span class="el">a[9]</span><span class="vpn">VPN 8</span><span class="res">hit</span></div>
+      </div>
+      <p>Only the <em>first</em> access to each page misses; the rest hit because they're on the same page already cached. That's <strong>3 misses, 7 hits → 70% hit rate</strong>, even on the very first pass through the array. Two reasons caches like the TLB work:</p>
+      <ul>
+        <li><strong>Spatial locality:</strong> if you access address <em>x</em>, you'll likely soon access something near <em>x</em> (e.g. the next array element). Bigger pages → even fewer misses.</li>
+        <li><strong>Temporal locality:</strong> if you access something now, you'll likely access it again soon (e.g. a loop variable). Loop over the array a <em>second</em> time and you'd get 10/10 hits.</li>
+      </ul>
+
+      <div class="callout tip">
+        <div class="callout-label">📘 Who handles a TLB miss? (hardware vs software)</div>
+        <strong>Hardware-managed (CISC, e.g. x86):</strong> the hardware itself knows the page-table format, "walks" it on a miss, fills the TLB, and retries — no OS involvement. <br><br>
+        <strong>Software-managed (RISC, e.g. MIPS/SPARC):</strong> on a miss the hardware just raises an exception; an OS trap handler does the lookup, updates the TLB with a privileged instruction, and returns so the instruction retries. <br><br>
+        <em>Subtle detail:</em> unlike a syscall's return-from-trap (which resumes at the <em>next</em> instruction), a TLB-miss return-from-trap must <strong>retry the same instruction</strong> — this time it hits.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">📘 Why not just build one giant TLB/cache?</div>
+        Because physics. A fast cache <em>must</em> be small — speed-of-light and other physical constraints mean any large memory is inherently slow. So we're stuck with small, fast caches, and the whole art is using them well (exploiting locality to make the common case fast).
+      </div>
+
+      <h3>Problem 2: page tables are huge</h3>
+      <p>In a 32-bit address space with 4kB pages: offset is 12 bits, so the page number <strong>p is 20 bits</strong> → <strong>2²⁰ = 1,048,576</strong> entries per process! If each entry is 4 bytes:</p>
+
+      <div class="code-block">
+PT size = m × 2ⁿ
+        = 4 bytes × 2²⁰
+        = 4,194,304 bytes
+        = <span style="color:#e89b6d;">4 MB per process</span>   <span style="color:#7eb892;">// just for the page table!</span>
+      </div>
+
+      <p>That's unacceptable per process. The fix is the next topic.</p>
+
+      <div class="callout">
+        <div class="callout-label">What's actually in a Page Table Entry (PTE)?</div>
+        Not just a frame number! A real PTE also has flag bits: <strong>V</strong> (valid?), <strong>R/W</strong> (permissions), <strong>U</strong> (used?), <strong>D</strong> (dirty?), plus the frame number. E.g. in a 32-bit PTE, 6 bits for flags + 26 bits for the frame number.
+      </div>
+
+      <!-- ===== INTERACTIVE TRANSLATOR ===== -->
+      <h3 id="w3-translator">🛠️ Interactive: Address Translator</h3>
+      <p>Practice the mechanic that's almost guaranteed to appear in the exam. Enter a virtual address and page size, and watch it split into page number + offset, look up the frame, and combine into the physical address. The page table is editable — change any frame number.</p>
+
+      <div class="tool">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Virtual → Physical Translator</h3>
+        </div>
+        <div class="tool-desc">Single-level paging. Addresses in hex. Try the exam-style example: address <code>0x5123</code>, page size <code>4</code> kB.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>Virtual address (hex)</label>
+            <input type="text" id="xl-vaddr" value="0x5123" style="width:130px;">
+          </div>
+          <div class="tool-field">
+            <label>Page size</label>
+            <select id="xl-pagesize">
+              <option value="1">1 kB</option>
+              <option value="4" selected>4 kB</option>
+              <option value="16">16 kB</option>
+              <option value="64">64 kB</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label>Addr width</label>
+            <select id="xl-width">
+              <option value="16">16-bit</option>
+              <option value="32" selected>32-bit</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runTranslate()">Translate ▶</button>
+        </div>
+
+        <div id="xl-output" class="tool-output"></div>
+      </div>
+
+      <h3>Pages vs Segments — the comparison</h3>
+      <table>
+        <tr><th>Segments</th><th>Pages</th></tr>
+        <tr><td>Any size (up to a max)</td><td>Fixed size (e.g. 4kB)</td></tr>
+        <tr><td>Start anywhere</td><td>Aligned (multiple of page size)</td></tr>
+        <tr><td>Form a coherent logical unit</td><td>Usually an arbitrary division</td></tr>
+        <tr><td>External fragmentation</td><td>No external fragmentation</td></tr>
+        <tr><td>Little/no internal fragmentation</td><td>Internal fragmentation (up to page size)</td></tr>
+        <tr><td>Fairly simple MMU</td><td>Fairly complex MMU (needs a TLB)</td></tr>
+        <tr><td>Non-linear virtual address space</td><td>Linear virtual address space</td></tr>
+        <tr><td>Sometimes addressed implicitly</td><td>Always addressed explicitly</td></tr>
+        <tr><td>Good for small-word-size machines</td><td>Needs larger word size (≥32-bit)</td></tr>
+      </table>
+
+      <!-- ===== Multi-level ===== -->
+      <h2 id="w3-multilevel">Solution 5 · Multi-level page tables</h2>
+
+      <p>The insight: <strong>most processes don't use all 2ⁿ pages</strong>, so most page-table entries are invalid (empty). Why store a giant array that's mostly empty? Use a data structure that handles <em>sparseness</em> better — a <strong>tree</strong> (of fixed depth, since hardware isn't recursive).</p>
+
+      <div class="callout">
+        <div class="callout-label">A simpler first attempt: PTLR</div>
+        Before the tree: a <strong>Page Table Length Register</strong> caps the table length — start short, grow on demand. But it requires the virtual address space to be <em>contiguous</em> (breaks our "stack grows down, heap grows up" layout with two growable areas), and growing still needs contiguous physical memory. The tree handles both.
+      </div>
+
+      <h3>How the two-level scheme works</h3>
+      <p>Split the 20-bit page number into <strong>two 10-bit halves</strong>. The top 10 bits index a <strong>page directory</strong> (root); the bottom 10 bits index a <strong>leaf page table</strong>. Each table has 2¹⁰ = 1024 entries (a "1024-ary tree" of depth 2).</p>
+
+      <p>The magic: if an entry in the page directory is marked invalid (X), that means an <em>entire chunk</em> of the page table is unused — <strong>and doesn't need to be stored at all</strong>. That's the space saving.</p>
+
+      <h3>Two-stage translation (worked example)</h3>
+      <p>Translating virtual address <code>0xfffff123</code> → physical <code>0xf00f123</code>:</p>
+
+      <div class="translate">
+        <div class="vaddr-bits">
+          <div class="bit-group pnum" style="background:#cfe3f7;">p[high] = 1023<span class="bit-label">top 10 bits</span></div>
+          <div class="bit-group pnum" style="background:#b8d4ee; border-left:1px dashed var(--accent);">p[low] = 1023<span class="bit-label">next 10 bits</span></div>
+          <div class="bit-group off">o = 0x123<span class="bit-label">offset</span></div>
+        </div>
+        <div class="translate-step"><span class="step-num">1</span><div>Index the <strong>page directory</strong> by the high bits of p (1023) → get a pointer to the relevant leaf page table.</div></div>
+        <div class="translate-step"><span class="step-num">2</span><div>Follow that pointer to the <strong>leaf-level page table</strong>.</div></div>
+        <div class="translate-step"><span class="step-num">3</span><div>Index the leaf table by the low bits of p (1023) → retrieve frame number <strong>f = 0xf00f</strong>.</div></div>
+        <div class="translate-step"><span class="step-num">4</span><div>Combine with the unchanged offset <strong>o = 0x123</strong>.</div></div>
+        <div class="paddr-result">physical address = 0xf00f123</div>
+      </div>
+
+      <h3>The trade-off, and why TLBs become critical</h3>
+      <p>The idea generalises — modern 64-bit architectures (secretly usually only 48-bit) often use <strong>4 levels</strong> (on x86-64: PML4, PDP, PD, PT). But each level adds a memory access!</p>
+
+      <div class="callout warn">
+        <div class="callout-label">The performance crunch</div>
+        A 4-level scheme means <strong>4 extra memory accesses</strong> for every single translation — on top of the actual access. This would be catastrophic without the <strong>TLB</strong>. Like any cache, a TLB lookup either <em>hits</em> (use the cached translation — fast) or <em>misses</em> (do the full multi-level walk). The more levels, the more critical TLB hit rate becomes.
+      </div>
+
+      <table class="scorecard">
+        <tr><th>Aspect</th><th>Multi-level page tables</th></tr>
+        <tr><td>Space overhead</td><td class="good">✓ Greatly reduced (unused chunks not stored)</td></tr>
+        <tr><td>Sparseness handling</td><td class="good">✓ Excellent (tree, not flat array)</td></tr>
+        <tr><td>Lookup speed</td><td class="mid">~ Slower (more levels = more accesses) — relies on TLB</td></tr>
+      </table>
+
+      <div class="callout tip">
+        <div class="callout-label">Number of levels depends on...</div>
+        (1) the size of the virtual address space, and (2) the page size (how many bits are in p vs o). More levels = slower lookups = TLB performance matters more.
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="w3-exam">Exam-style takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 3</div>
+        <ol>
+          <li><strong>State the address-binding problem</strong> — programs embed fixed addresses but must run in shared physical memory, reliably and securely.</li>
+          <li><strong>Walk the evolution</strong>: relocation → base/limit → segmentation → paging → multi-level. Know what flaw each step fixes.</li>
+          <li><strong>Internal vs external fragmentation</strong> — define both; know which schemes suffer which.</li>
+          <li><strong>How a base/limit MMU checks an access</strong>, and what happens on a failed check (interrupt → OS kills process).</li>
+          <li><strong>Why paging eliminates external fragmentation</strong> — equal-sized frames.</li>
+          <li><strong>Split an address into (p, o)</strong> given a page size. Practice: 4kB → 12 offset bits.</li>
+          <li><strong>Perform a translation</strong> — index page table by p, get f, combine with o. Be able to do this by hand.</li>
+          <li><strong>Calculate page table size</strong>: m × 2ⁿ. (32-bit, 4kB, 4-byte PTE → 4MB.)</li>
+          <li><strong>Why multi-level tables save space</strong> — unused chunks aren't stored.</li>
+          <li><strong>Do a two-level translation</strong> — split p into high/low bits, two lookups.</li>
+          <li><strong>The TLB</strong> — what it caches, hit vs miss, why it's critical (especially with many levels).</li>
+          <li>📘 <strong>Compute a TLB hit rate</strong> from an access trace (the array example → 70%); explain it via spatial &amp; temporal locality.</li>
+          <li>📘 <strong>Who handles a TLB miss</strong> — hardware-managed (x86/CISC) vs software-managed (RISC), and why a TLB-miss retries the same instruction.</li>
+          <li><strong>Pages vs segments</strong> — be ready to contrast them across several dimensions.</li>
+        </ol>
+      </div>
+
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 3 notes. Send Week 4 slides whenever you're ready.</p>
+
+    </section>

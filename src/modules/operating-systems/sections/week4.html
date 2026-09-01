@@ -1,0 +1,357 @@
+<section id="week4" class="week-section">
+
+      <div class="week-header">
+        <div class="week-eyebrow">Week 04 · Memory Management II</div>
+        <h1>Demand Paging &amp; Virtual Memory</h1>
+        <div class="week-subtitle">turning page faults from errors into superpowers</div>
+      </div>
+
+      <p>Week 3 built page tables that map virtual pages to physical frames. This week's big idea: <strong>a page fault isn't necessarily an error — it's an opportunity.</strong> When a process touches an unmapped page, the hardware traps into the OS. Instead of just killing the process, the OS can do something clever and then resume. This single hook enables a whole family of "useful illusions."</p>
+
+      <div class="callout">
+        <div class="callout-label">The illusions, in order of ambition</div>
+        Lazy allocation → lazy zeroing → copy-on-write → <strong>demand-paged virtual memory</strong> (the illusion of more RAM than you physically have) → and the hard decisions that follow: page replacement &amp; frame allocation.
+      </div>
+
+      <!-- ===== Page faults ===== -->
+      <h2 id="w4-faults">Page faults as a point of interposition</h2>
+
+      <p>Recall: most of a process's virtual address space is <strong>unmapped</strong> (unused). The MMU translates addresses; accessing an unmapped address causes a <strong>page fault</strong> — a hardware interrupt that hands control to the OS.</p>
+
+      <p>The <em>simple</em> response is to kill the process — this is the dreaded "Segmentation fault" (a misnomer these days). But the OS doesn't have to. It can <strong>handle the fault and resume the process</strong>, which is where all the magic comes from.</p>
+
+      <div class="fault-flow">
+        <div class="fault-steps">
+          <div class="fault-step-box">
+            <div class="fault-icon user">📝</div>
+            <div class="fault-step-text"><strong>1. Process accesses memory</strong>The program reads/writes an address it believes it owns.</div>
+          </div>
+          <div class="fault-connector"></div>
+          <div class="fault-step-box">
+            <div class="fault-icon hw">⚡</div>
+            <div class="fault-step-text"><strong>2. MMU finds no valid mapping</strong>Hardware raises a page fault interrupt, jumping into the OS (kernel mode).</div>
+          </div>
+          <div class="fault-connector"></div>
+          <div class="fault-step-box">
+            <div class="fault-icon os">🧠</div>
+            <div class="fault-step-text"><strong>3. OS fault handler runs</strong>Looks at the faulting address &amp; process, decides what to do (allocate? load from disk? copy? or kill?).</div>
+          </div>
+          <div class="fault-connector"></div>
+          <div class="fault-step-box">
+            <div class="fault-icon resume">▶️</div>
+            <div class="fault-step-text"><strong>4. Resume at the faulting instruction</strong>The instruction re-runs — and now succeeds. The program is oblivious to all of it.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">In InfOS (your lab)</div>
+        The fault handler reads the faulting address from control register <code>cr2</code>. The simplest handler just logs it and terminates the process. A smarter one looks up <em>what should happen</em> for that address and acts accordingly — that's what you'll extend.
+      </div>
+
+      <!-- ===== Lazy ===== -->
+      <h2 id="w4-lazy">Lazy allocation &amp; lazy zeroing</h2>
+
+      <p>The first illusion: reserve virtual address space <em>without</em> actually allocating physical memory. Run the process as if memory is there. When it touches that "memory," a fault fires, and only <em>then</em> does the OS allocate a real frame. This is <strong>lazy allocation</strong> — work deferred until actually needed.</p>
+
+      <table>
+        <tr><th>Region</th><th>Lazy strategy</th></tr>
+        <tr><td>Stack</td><td>Allocate / grow as used</td></tr>
+        <tr><td>Heap</td><td>Mostly grown <em>explicitly</em> by system call, not lazily by fault (we'll see why later)</td></tr>
+        <tr><td>Program segments</td><td>Copied from disk only as needed (in page-sized chunks)</td></tr>
+      </table>
+
+      <h3>Lazy zeroing — a beautiful trick</h3>
+      <p>Programs often need large <strong>zero-initialised</strong> regions. Naively, you'd allocate and zero out tons of frames upfront. Instead:</p>
+
+      <ol>
+        <li>Map the whole region <strong>read-only</strong> to a <em>single</em> shared zero frame — many pages → one frame.</li>
+        <li>Reads work fine (they all see zeroes).</li>
+        <li>On the <strong>first write</strong>, a page fault fires; the handler maps a fresh frame just for that page.</li>
+      </ol>
+
+      <div class="callout tip">
+        <div class="callout-label">Why this is clever</div>
+        Allocation appears <strong>instant</strong>, it allows <strong>sparse</strong> use of memory (O(n) zeroes fit in O(1) memory until written), and the zeroes are <strong>readable at all times</strong>. You only pay for pages you actually modify.
+      </div>
+
+      <!-- ===== CoW ===== -->
+      <h2 id="w4-cow">Copy-on-Write (CoW)</h2>
+
+      <p>Lazy zeroing is really a special case of a more general idea: <strong>copy-on-write</strong>. Any shared data (not just zeroes) can be shared via many-to-one <strong>read-only</strong> mappings. You only make a private copy at the moment someone writes — <em>if that ever happens</em>.</p>
+
+      <div class="cow-diagram">
+        <div class="cow-procs">
+          <div class="cow-page">Process A<br>page → </div>
+          <div class="cow-page b">Process B<br>page → </div>
+        </div>
+        <div class="cow-arrows">both map<br>read-only →<br>──────▶</div>
+        <div class="cow-frame">Shared frame<br>(read-only)<br><span style="color:var(--accent-2);">e.g. text segment</span></div>
+      </div>
+      <p style="text-align:center; font-style:italic; color:var(--ink-muted); font-size:13px;">Before any write: A and B share one physical frame. On a write, the fault handler allocates a fresh frame, copies the contents, remaps it private, and resumes.</p>
+
+      <h3>The CoW fault sequence (worked through)</h3>
+      <p>When a process writes to a read-only shared (zero) page, e.g. <code>mov $0x00120348, (%rax)</code>:</p>
+      <div class="code-block">
+<span style="color:#999;">1.</span> Fault handler considers the faulting address &amp; which process
+<span style="color:#999;">2.</span> Determines this area is "copy-on-write"
+<span style="color:#999;">3.</span> Allocates a <span style="color:#7eb892;">fresh frame</span>
+<span style="color:#999;">4.</span> Maps it at the faulting page (replacing the shared mapping)
+<span style="color:#999;">5.</span> Copies the shared contents (e.g. zeroes) into the new frame
+<span style="color:#999;">6.</span> Resumes the process at the faulting instruction
+<span style="color:#999;">7.</span> ...which now <span style="color:#7eb892;">succeeds</span> — the program never knew
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Real-world use</div>
+        CoW is heavily used for <strong>text segments</strong> of executables. Programs rarely write to their own code, so all processes running the same program can share one copy in memory — big savings. (The data is also lazily brought in from disk in the first place.)
+      </div>
+
+      <!-- ===== Virtual memory ===== -->
+      <h2 id="w4-vm">Virtual memory: swapping to disk</h2>
+
+      <p>So far we've lazily <em>given out</em> memory. Now the reverse: <strong>taking it back</strong>. Memory is scarce, so can we create the illusion of having <em>more</em> than we physically do — to run more or bigger processes?</p>
+
+      <p><strong>Yes</strong> — by swapping data to and from disk, using page faults to trigger re-loading. Not all memory is used at once, so not-recently-used pages can be <strong>evicted</strong> to disk, freeing their frames. When the process touches an evicted page later, a fault brings it back.</p>
+
+      <div class="callout">
+        <div class="callout-label">Precise terminology</div>
+        <strong>"Virtual memory"</strong> properly refers to <em>this specific illusion</em>: that the machine has more memory available than its physical DRAM. (That's why the slides carefully said "virtual <em>address space</em>" / "virtual <em>addressing</em>" earlier — those are different things from "virtual memory.") Data is moved to a <strong>swap device</strong> — a disk further down the storage hierarchy.
+      </div>
+
+      <p style="font-size:14px; color:var(--ink-muted);">Notice the resemblance to a <strong>cache</strong>: not-recently-used pages get replaced, just like cache lines. The difference is that this cache is managed by <em>software</em> (the OS), not hardware.</p>
+
+      <!-- ===== Hierarchy ===== -->
+      <h2 id="w4-hierarchy">The storage hierarchy</h2>
+
+      <p>For the best performance-per-£, systems mix technologies: small/fast/expensive at the top, big/slow/cheap at the bottom.</p>
+
+      <div class="pyramid">
+        <div class="pyramid-level pyr-1">Registers <span class="pl-tech">(flip-flops · a few kB)</span></div>
+        <div class="pyramid-level pyr-2">Cache <span class="pl-tech">(SRAM · a few MB)</span></div>
+        <div class="pyramid-level pyr-3">Main memory <span class="pl-tech">(DRAM · a few GB)</span></div>
+        <div class="pyramid-level pyr-4">Backing store <span class="pl-tech">(HDD / SSD · a few TB)</span></div>
+        <div class="pyramid-labels"><span>↑ fastest, priciest per MB</span><span>↓ slowest, cheapest per MB</span></div>
+      </div>
+
+      <p>Virtual memory <strong>extends this hierarchy in software</strong>: combine DRAM with a reserved <em>swap area</em> on disk. The crucial contrast:</p>
+
+      <table>
+        <tr><th>Cache ↔ main memory</th><th>Main memory ↔ swap (disk)</th></tr>
+        <tr><td>Unified by <strong>hardware</strong> (cache coherency)</td><td>Unified by <strong>software</strong> (the OS virtual memory system)</td></tr>
+      </table>
+
+      <div class="callout">
+        <div class="callout-label">Interlude: disks are block devices</div>
+        Disks read/write in <strong>blocks</strong> (typically 512 bytes – 4kB), not individual bytes/words. They're persistent but only <em>block-addressable</em>. The disk controller exposes a linear sequence of blocks; the OS builds the <strong>filesystem</strong> (a tree of files &amp; directories) on top. Block devices can alternatively hold swap areas or databases instead of a filesystem.
+      </div>
+
+      <!-- ===== Tracking ===== -->
+      <h2 id="w4-tracking">Tracking swapped-out pages</h2>
+
+      <p>Problem: hardware page tables only know how to map a page to <em>a frame</em> or <em>"invalid."</em> But now we need richer states like "swapped out to disk block 42," "load deferred," or "treat as copy-on-write." Two approaches:</p>
+
+      <div class="compare-2">
+        <div class="mode-box kernel" style="background:#fbeee4; border-color:var(--accent-2);">
+          <h4>Cheap &amp; nasty</h4>
+          <p style="font-size:13px; margin:0;">Stash extra info in <strong>invalid PTEs</strong>. If the valid bit is clear, the hardware ignores the other bits — so the OS is free to use them however it likes (e.g. encode a disk block number). <em>This is your lab exercise: "stash a cookie" in the PTE for lazy loading.</em></p>
+        </div>
+        <div class="mode-box user" style="background:#ecf4e6; border-color:var(--accent-3);">
+          <h4>Realistic</h4>
+          <p style="font-size:13px; margin:0;">Keep a <strong>separate OS data structure</strong>. Linux uses a red-black tree of <strong>virtual memory areas (VMAs)</strong>. This even allows lazy creation of the page table entries themselves.</p>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Naming wart</div>
+        InfOS uses "VMA" to mean the <em>whole</em> virtual address space (better called "VAS"). Linux uses "VMA" for individual regions. Don't get confused between the two.
+      </div>
+
+      <p>If you stash data in the PTE, the encoding is entirely up to the OS — but it must capture <em>everything needed to handle a future fault</em>: which disk block, what permissions, whether CoW applies, etc. It needn't even be a block number; something more abstract can work.</p>
+
+      <h3>Demand paging + prefetching</h3>
+      <p>Modern systems are <strong>demand-paged</strong>: they transfer page-sized chunks <em>on demand</em>, i.e. when a fault arrives (the lazy approach). But laziness isn't free — fault handling makes processes wait on slow I/O, and frequent swapping kills performance.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Prefetching</div>
+        Being <em>more eager</em> can save time — <strong>if</strong> we can accurately predict which pages will be needed. Proactively transferring data before it's needed is <strong>prefetching</strong>. Modern systems combine demand paging with judicious prefetching, guided by heuristics or predictive models.
+      </div>
+
+      <!-- ===== Replacement ===== -->
+      <h2 id="w4-replacement">Page replacement</h2>
+
+      <p>When physical memory is full and a process needs more, the OS must <strong>evict</strong> a page to free a frame. <em>Which</em> page? This is <strong>page replacement</strong> — analogous to cache replacement, but done in software. Common policies:</p>
+
+      <div class="callout tip">
+        <div class="callout-label">📘 Memory IS a cache (OSTEP Ch.22)</div>
+        OSTEP's key reframing: <strong>main memory is just a cache for the pages living on disk</strong>. So the goal of page replacement is exactly a cache goal — minimise misses (maximise hits). This lets us measure it with <strong>AMAT</strong> (Average Memory Access Time):
+        <div class="code-block" style="margin:10px 0 4px 0;">AMAT = T<sub>M</sub> + (P<sub>miss</sub> × T<sub>D</sub>)
+     ↑ memory access   ↑ disk access cost
+     (always paid)     (only on a miss)</div>
+        With realistic numbers (T<sub>M</sub> = 100ns, T<sub>D</sub> = 10ms), even a <strong>tiny</strong> miss rate dominates: at 90% hits, AMAT ≈ 1ms (~10,000× slower than memory!). At 99.9% hits, AMAT drops to ~10µs. <em>This is the concrete version of the "T ≥ 10,000" idea</em> — the whole game is pushing the hit rate towards 100%.
+      </div>
+
+      <table>
+        <tr><th>Policy</th><th>How it picks a victim</th></tr>
+        <tr><td><strong>Optimal (MIN)</strong></td><td>Evict the page that will be used <em>furthest in the future</em>. Provably the fewest misses — but needs to see the future, so it's impossible to build. Used only as a <em>comparison baseline</em>.</td></tr>
+        <tr><td><strong>FIFO</strong></td><td>Treat the resident-page list as a queue; evict from the head (oldest / least-recently-<em>added</em>).</td></tr>
+        <tr><td><strong>Random</strong></td><td>Pick a page at random.</td></tr>
+        <tr><td><strong>LRU</strong> (Least Recently Used)</td><td>Evict the page used longest ago. Best approximates the ideal — thanks to <em>locality of reference</em>.</td></tr>
+      </table>
+
+      <div class="callout">
+        <div class="callout-label">📘 Why the Optimal policy matters even though it's impossible</div>
+        You can't build it (you don't know the future), but it's invaluable as a <strong>yardstick</strong>. Saying "my policy gets 80% hits" is meaningless alone; saying "optimal gets 82%, mine gets 80%" tells you you're nearly perfect and can stop optimising. Its logic: if you must evict something, evict the page you'll need <em>furthest</em> away — all the others will be touched before it.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">📘 The Three C's — types of miss (OSTEP)</div>
+        Useful vocabulary for <em>why</em> a miss happened:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Compulsory (cold-start)</strong> — the very first reference to a page; the cache was empty, so it's unavoidable.</li>
+          <li><strong>Capacity</strong> — the cache ran out of room and had to evict something it later needed.</li>
+          <li><strong>Conflict</strong> — a hardware-cache artifact (placement restrictions). <em>Doesn't occur</em> for OS page caches, since any page can go in any frame (fully associative).</li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Why we can't implement true LRU</div>
+        LRU needs a <strong>timestamp</strong> on every access — but the hardware doesn't give us that! All we get is a <strong>Used bit</strong> (a.k.a. Referenced bit) that the hardware sets whenever a page is accessed, plus a <strong>Dirty bit</strong> set on writes. The OS periodically clears all Used bits, so a set bit means "used recently" — but not <em>how</em> recently relative to others.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">📘 Belady's Anomaly — a favourite exam "gotcha"</div>
+        You'd expect <em>more</em> frames → <em>fewer</em> faults. Usually true — but with <strong>FIFO</strong> it can get <em>worse</em>! The classic stream <code>1 2 3 4 1 2 5 1 2 3 4 5</code> gives <strong>9 faults with 3 frames but 10 with 4 frames</strong>. (Try it in the tool below!) <br><br>
+        <strong>LRU never does this</strong> because it has the <em>stack property</em>: a cache of size N+1 always contains everything a size-N cache would. FIFO and Random lack this property, so they can behave anomalously.
+      </div>
+
+      <h3>The Clock algorithm (Second-Chance FIFO)</h3>
+      <p>Our best practical approximation of LRU. Walk the resident pages oldest→newest like FIFO:</p>
+      <ul>
+        <li>See a page with <strong>Used = 0</strong> → evict it.</li>
+        <li>See a page with <strong>Used = 1</strong> → give it a "second chance": clear its Used bit and move on (it survives this round).</li>
+      </ul>
+      <p>To avoid expensive list manipulation, use a <strong>circular list with a "hand" pointer</strong> that resumes from where it stopped. That's the <strong>Clock</strong> algorithm.</p>
+
+      <div class="clock-viz">
+        <div class="clock-ring">
+          <div class="clock-slot"><span>P0</span><span class="u1">U=1</span></div>
+          <div class="clock-slot"><span>P1</span><span class="u1">U=1</span></div>
+          <div class="clock-slot hand">👉<span>P2</span><span class="u0">U=0</span></div>
+          <div class="clock-slot"><span>P7</span><span class="u1">U=1</span></div>
+          <div class="clock-slot clock-center">🕐</div>
+          <div class="clock-slot"><span>P3</span><span class="u0">U=0</span></div>
+          <div class="clock-slot"><span>P6</span><span class="u1">U=1</span></div>
+          <div class="clock-slot"><span>P5</span><span class="u1">U=1</span></div>
+          <div class="clock-slot"><span>P4</span><span class="u0">U=0</span></div>
+        </div>
+        <div style="max-width:240px; font-size:13px;">
+          <p style="margin:0 0 8px 0;">The hand sweeps clockwise. At <strong>P2 (U=0)</strong> → evict it. Had it been U=1, the hand would clear the bit and advance, leaving P2 vulnerable next sweep.</p>
+          <p style="margin:0; color:var(--ink-muted); font-style:italic; font-size:12px;">Recently-used pages keep getting "second chances"; idle pages eventually get caught.</p>
+        </div>
+      </div>
+
+      <!-- ===== PAGE REPLACEMENT SIMULATOR ===== -->
+      <h3 id="w4-prsim">🛠️ Interactive: Page Replacement Simulator</h3>
+      <p>The classic exam question: given a reference string and N frames, trace the evictions and count page faults. Step through it one access at a time, or run it all at once. Try comparing FIFO vs LRU on the same string.</p>
+
+      <div class="tool">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Page Replacement Tracer</h3>
+        </div>
+        <div class="tool-desc">FIFO, LRU, and Clock (Second-Chance). Watch faults, hits, and which page gets evicted.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>Reference string</label>
+            <input type="text" id="pr-refs" value="7 0 1 2 0 3 0 4 2 3 0 3 2" style="width:240px;">
+          </div>
+          <div class="tool-field">
+            <label>Frames</label>
+            <input type="number" id="pr-numframes" value="3" min="1" max="8" style="width:70px;">
+          </div>
+          <div class="tool-field">
+            <label>Algorithm</label>
+            <select id="pr-algo">
+              <option value="fifo">FIFO</option>
+              <option value="lru">LRU</option>
+              <option value="clock">Clock (2nd chance)</option>
+              <option value="opt">Optimal (MIN)</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="prStep()">Step ▶</button>
+          <button class="tool-btn" onclick="prRunAll()">Run all ⏭</button>
+          <button class="tool-btn danger" onclick="prReset()">Reset ↺</button>
+        </div>
+
+        <div id="pr-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== Allocation ===== -->
+      <h2 id="w4-allocation">Frame allocation &amp; thrashing</h2>
+
+      <p>The other big decision: <strong>how many frames does each process get?</strong> The key concept is the <strong>working set</strong>.</p>
+
+      <div class="callout">
+        <div class="callout-label">Working Set (WSS)</div>
+        Each process has a set of pages it's "using now" — the pages it needs to make uninterrupted progress over a small interval (say 100ms). That's its <strong>working set</strong>; its size is the <strong>working set size (WSS)</strong>. You can <em>estimate</em> WSS by counting Used bits set since you last cleared them ~100ms ago.
+      </div>
+
+      <h3>The thrashing curve</h3>
+      <p>Here's why this matters. The cost of a page fault is enormous — the "traverse time" <strong>T ≥ 10,000</strong> (a disk swap-in is ~10,000× slower than a memory access). So even a tiny rise in miss probability crushes efficiency:</p>
+
+      <div class="thrash-chart">
+        <svg viewBox="0 0 460 300" xmlns="http://www.w3.org/2000/svg" style="max-width:480px; width:100%; font-family:'IBM Plex Sans',sans-serif;">
+          <line x1="55" y1="20" x2="55" y2="255" stroke="#1a1f2e" stroke-width="1.5"/>
+          <line x1="55" y1="255" x2="440" y2="255" stroke="#1a1f2e" stroke-width="1.5"/>
+          <path d="M 55.0,20.0 L 56.9,98.3 L 58.9,137.5 L 60.8,161.0 L 62.7,176.7 L 64.6,187.9 L 66.5,196.2 L 68.5,202.8 L 70.4,208.0 L 72.3,212.3 L 74.2,215.8 L 76.2,218.8 L 78.1,221.4 L 80.0,223.7 L 82.0,225.6 L 83.9,227.4 L 85.8,228.9 L 87.7,230.3 L 89.7,231.5 L 91.6,232.6 L 93.5,233.6 L 95.4,234.6 L 97.3,235.4 L 99.3,236.2 L 101.2,236.9 L 103.1,237.6 L 105.1,238.2 L 107.0,238.8 L 108.9,239.3 L 110.8,239.8 L 112.8,240.3 L 114.7,240.8 L 116.6,241.2 L 118.5,241.6 L 120.5,241.9 L 122.4,242.3 L 124.3,242.6 L 126.2,242.9 L 128.2,243.2 L 130.1,243.5 L 132.0,243.8 L 133.9,244.1 L 135.8,244.3 L 137.8,244.6 L 139.7,244.8 L 141.6,245.0 L 143.6,245.2 L 145.5,245.4 L 147.4,245.6 L 149.3,245.8 L 151.2,246.0 L 153.2,246.1 L 155.1,246.3 L 157.0,246.5 L 158.9,246.6 L 160.9,246.8 L 162.8,246.9 L 164.7,247.0 L 166.6,247.2 L 168.6,247.3 L 170.5,247.4 L 172.4,247.5 L 174.3,247.7 L 176.3,247.8 L 178.2,247.9 L 180.1,248.0 L 182.1,248.1 L 184.0,248.2 L 185.9,248.3 L 187.8,248.4 L 189.8,248.5 L 191.7,248.6 L 195.5,248.7 L 199.4,248.9 L 203.2,249.1 L 207.1,249.2 L 210.9,249.3 L 214.8,249.5 L 218.6,249.6 L 222.5,249.7 L 226.3,249.8 L 230.2,249.9 L 234.0,250.1 L 237.9,250.2 L 241.7,250.3 L 245.6,250.3 L 249.4,250.4 L 253.3,250.5 L 257.1,250.6 L 261.0,250.7 L 264.8,250.8 L 268.7,250.8 L 272.5,250.9 L 276.4,251.0 L 280.2,251.1 L 284.1,251.1 L 287.9,251.2 L 291.8,251.2 L 295.6,251.3 L 299.5,251.4 L 303.3,251.4 L 307.2,251.5 L 311.0,251.5 L 314.9,251.6 L 318.7,251.6 L 322.6,251.7 L 326.4,251.7 L 330.3,251.8 L 334.1,251.8 L 338.0,251.8 L 341.8,251.9 L 345.7,251.9 L 349.5,252.0 L 353.4,252.0 L 357.2,252.0 L 361.1,252.1 L 364.9,252.1 L 368.8,252.2 L 372.6,252.2 L 376.5,252.2 L 380.3,252.3 L 384.2,252.3 L 388.0,252.3 L 391.9,252.3 L 395.7,252.4 L 399.6,252.4 L 403.4,252.4 L 407.3,252.5 L 411.1,252.5 L 415.0,252.5 L 418.8,252.5 L 422.7,252.6 L 426.5,252.6 L 430.4,252.6 L 434.2,252.6 L 438.1,252.7 L 440.0,252.7" fill="none" stroke="#c2410c" stroke-width="2.5"/>
+          <line x1="86" y1="20" x2="86" y2="255" stroke="#5b7f3a" stroke-width="1" stroke-dasharray="4 3"/>
+          <text x="91" y="50" font-size="10" fill="#5b7f3a">≈ working set</text>
+          <text x="91" y="62" font-size="10" fill="#5b7f3a">satisfied here</text>
+          <text x="200" y="160" font-size="11" fill="#c2410c" font-weight="600">← thrashing zone</text>
+          <text x="248" y="292" font-size="11" fill="#3d4555" text-anchor="middle">probability of a miss (swapping in a page) →</text>
+          <text x="15" y="138" font-size="11" fill="#3d4555" text-anchor="middle" transform="rotate(-90 15 138)">execution efficiency →</text>
+          <text x="49" y="26" font-size="10" fill="#6b7080" text-anchor="end">100%</text>
+          <text x="49" y="255" font-size="10" fill="#6b7080" text-anchor="end">0%</text>
+        </svg>
+        <p style="font-style:italic; color:var(--ink-muted); font-size:13px; margin-top:8px;">As soon as a process can't keep its working set in memory, efficiency falls off a cliff. (After Denning, 1968.)</p>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Thrashing</div>
+        <strong>"Equal shares" is a bad policy!</strong> If <em>all</em> processes get less than their WSS, the system spends ~all its time waiting on I/O, the number of runnable processes plummets, and <strong>throughput drops to nearly zero</strong>. This is <strong>thrashing</strong>.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The fix</div>
+        Better to give <em>some</em> processes at least their WSS of frames (and make others wait) than to starve everyone equally. Other strategies exist too — e.g. Linux's <strong>OOM killer</strong> (the big hammer: kill a process to reclaim memory). Also: never let physical memory fill <em>completely</em> — the OS itself needs some free memory just to perform page replacement!
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="w4-exam">Exam-style takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 4</div>
+        <ol>
+          <li><strong>Page fault as interposition</strong> — the 4-step flow (access → trap → handler → resume). Why it's a feature, not just an error.</li>
+          <li><strong>Lazy allocation</strong> — reserve address space, allocate frames only on first fault.</li>
+          <li><strong>Lazy zeroing</strong> — many pages → one read-only zero frame; fresh frame on first write. Know the three benefits.</li>
+          <li><strong>Copy-on-write</strong> — generalisation of lazy zeroing; the 7-step fault sequence; used for text segments.</li>
+          <li><strong>Define "virtual memory" precisely</strong> — the illusion of more memory than physical DRAM, via swapping. Distinguish from "virtual address space."</li>
+          <li><strong>Storage hierarchy</strong> — order it (registers→cache→DRAM→disk); know cache↔RAM is hardware-unified but RAM↔swap is software-unified.</li>
+          <li><strong>Block devices</strong> — disks are block-addressable, not byte-addressable.</li>
+          <li><strong>Tracking swapped pages</strong> — stash a cookie in invalid PTEs (cheap) vs separate structure like Linux VMAs (realistic).</li>
+          <li><strong>Demand paging vs prefetching</strong> — lazy vs eager; the trade-off.</li>
+          <li><strong>Replacement policies</strong> — FIFO, Random, LRU. Why true LRU is impossible (no hardware timestamps, only Used/Dirty bits).</li>
+          <li><strong>Clock / Second-Chance FIFO</strong> — be able to trace the hand and Used-bit clearing.</li>
+          <li><strong>Working set &amp; WSS</strong>, and how to estimate it (count Used bits).</li>
+          <li><strong>Thrashing</strong> — what causes it (everyone below WSS), why "equal shares" fails, and the role of T ≥ 10,000.</li>
+        </ol>
+      </div>
+
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 4 notes. Send Week 5 slides whenever you're ready.</p>
+
+    </section>

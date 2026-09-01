@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function(){
+  var t = null;
+  try { t = localStorage.getItem('pld-theme'); } catch (e) {}
+  if (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
+  document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+})();
+</script>
+<title>PLD Study Notes — Programming Language Design Paradigms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+<!--@include styles.css--></style>
+</head>
+<body>
+<div class="layout">
+  <!-- ============ SIDEBAR ============ -->
+  <aside>
+<!--@include nav.html--></aside>
+  <!-- ============ MAIN ============ -->
+  <main>
+    <!-- ============ WEEK 1 ============ -->
+    <!--@include sections/week1.html-->
+    <!-- ============ WEEK 2 ============ -->
+    <!--@include sections/week2.html-->
+    <!-- ============ WEEK 3 ============ -->
+    <!--@include sections/week3.html-->
+    <!-- ============ WEEK 4 ============ -->
+    <!--@include sections/week4.html-->
+    <!-- ============ WEEK 6 ============ -->
+    <!--@include sections/week6.html-->
+    <!-- ============ WEEK 8 ============ -->
+    <!--@include sections/week8.html-->
+    <!-- ============ WEEK 9 ============ -->
+    <!--@include sections/week9.html-->
+    <!-- ============ WEEK 10 ============ -->
+    <!--@include sections/week10.html-->
+    <!-- ============ PRACTICE ============ -->
+    <!-- ============ CONCEPTS & DEFINITIONS ============ -->
+    <!--@include sections/concepts.html-->
+    <!--@include sections/practice.html-->
+    <!-- ============ CRAM SHEET ============ -->
+    <!--@include sections/cram.html-->
+  </main>
+</div>
+<script>
+<!--@include js/preamble.js--><!--@include js/interaction-layer.js--><!--@include js/tool-1-fetch-execute-cycle-simulator.js--><!--@include js/tool-2-ambiguity-parse-tree-derivation-explorer.js--><!--@include js/tool-3-transition-system-explorer.js--><!--@include js/tool-4-w2-static-vs-dynamic-scope-resolver.js--><!--@include js/tool-5-w2-dangling-else.js--><!--@include js/tool-6-w2-loop-tracer-pre-test-vs-post-test.js--><!--@include js/tool-7-w3-f-i-i-evaluation-order.js--><!--@include js/tool-8-w3-simp-abstract-machine.js--><!--@include js/w4-shared-store-helpers-value-tests-inference-tree-rendering.js--><!--@include js/tool-9-w4-small-step-sos-reducer.js--><!--@include js/tool-10-w4-big-step-derivation-prover.js--><!--@include js/tool-11-w4-three-semantics-compared.js--><!--@include js/tool-12-w6-reduction-strategy-explorer.js--><!--@include js/tool-13-w6-type-parser-composition-check-partial-application.js--><!--@include js/tool-16-w8-pattern-matching-evaluator.js--><!--@include js/tool-14-w8-sfun-syntax-cbv-cbn-evaluation-derivations.js--><!--@include js/tool-15-w8-sfun-typing-derivations-t.js--><!--@include js/w9-shared-first-order-term-parser-printer.js--><!--@include js/tool-17-w9-term-literal-clause-checker.js--><!--@include js/tool-18-w9-substitution-applier.js--><!--@include js/tool-19-w9-prolog-interpreter-sld-resolution-backtracking.js--><!--@include js/tool-20-w10-unification-stepper-martelli-montanari.js--><!--@include js/tool-21-w10-sld-resolution-tree-builder.js--><!--@include js/tool-22-self-test-generator.js--><!--@include js/generic-tool-reset.js--><!--@include js/tool-most-general-type-hindley-milner-inference.js--><!--@include js/site-search-full-text-across-every-section.js--></script>
+</body>
+</html>

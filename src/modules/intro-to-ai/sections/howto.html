@@ -1,0 +1,313 @@
+<section id="howto" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">★ Final Revision · The Recipes</div>
+        <h1>How To Compute It</h1>
+        <div class="week-subtitle">every calculation in the module, as steps you can follow</div>
+      </div>
+      <div class="callout">
+        <div class="callout-label">How to use this page</div>
+        The theory page tells you <em>what things mean</em>. <strong>This page tells you what to actually write down</strong>, in order, when a question says "compute", "find" or "apply".
+        <p style="margin:10px 0 0 0;">Each recipe is: what you are given &rarr; the steps &rarr; a tiny worked example &rarr; <strong>the check</strong> and <strong>the trap</strong>. If you can run all of these, the calculation marks are safe.</p>
+      </div>
+
+      <!-- ===== SEARCH ===== -->
+      <h2 id="hw-search">Run a search algorithm</h2>
+      <div class="callout exam">
+        <div class="callout-label">BFS · DFS · UCS · Greedy · A*</div>
+        <p style="margin:0 0 8px 0;"><strong>Given:</strong> a graph with edge costs, a start, a goal, and (for greedy/A*) a table of h values.</p>
+        <ol style="margin:0;">
+          <li>Put the start in the <strong>frontier</strong>.</li>
+          <li>Pick the frontier node with the smallest <strong>f</strong>, where f is:
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.8; margin:6px 0 6px 12px;">
+              BFS &rarr; depth &nbsp;&middot;&nbsp; DFS &rarr; deepest first &nbsp;&middot;&nbsp; UCS &rarr; g<br>
+              Greedy &rarr; h &nbsp;&middot;&nbsp; <strong>A* &rarr; g + h</strong></div></li>
+          <li>If it is the goal, <strong>stop</strong>. Otherwise move it to the <em>explored</em> set.</li>
+          <li>Add its neighbours to the frontier with their g values (cost so far).</li>
+          <li>Repeat from 2.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>Worked:</strong> from ARAD, children are A (g 118, h 329), B (g 75, h 374), D (g 140, h 253). A* takes f = 118+329 = 447, 75+374 = 449, 140+253 = <strong>393</strong> &rarr; expand <strong>D</strong>.</p>
+        <p style="margin:10px 0 0 0;"><strong>&#9888; Trap:</strong> g is the cost <em>from the start to that node</em>, not the cost of the last edge. Add it up along the path.</p>
+        <p style="margin:8px 0 0 0;"><strong>&#10003; Check:</strong> A* and UCS must return the same total cost if h is admissible.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Check a heuristic is admissible</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>For each node, work out the <strong>true cheapest cost to the goal</strong> (h*).</li>
+          <li>Compare: admissible means <strong>h(n) &#8804; h*(n) for every n</strong>.</li>
+          <li>One violation anywhere and it is not admissible.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>Worked:</strong> h(D) = 253; true road D&rarr;E&rarr;G&rarr;BUC = 80+97+101 = 278. 253 &#8804; 278 &#10003;</p>
+        <p style="margin:8px 0 0 0;"><strong>&#9888; Trap:</strong> h must never <em>over</em>estimate. Under is fine, and h = 0 is always admissible.</p>
+      </div>
+
+      <!-- ===== MINIMAX ===== -->
+      <h2 id="hw-minimax">Minimax and alpha-beta</h2>
+      <div class="callout exam">
+        <div class="callout-label">Minimax value of a tree</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Start at the <strong>leaves</strong> — their values are given.</li>
+          <li>Work <strong>upward</strong>. At a MAX node take the <strong>largest</strong> child; at a MIN node the <strong>smallest</strong>.</li>
+          <li>The root's value is the answer; the move is the child that produced it.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>&#9888; Trap:</strong> the root is usually MAX and the layers alternate. Count the layers before you start.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Alpha-beta pruning</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Walk the tree <strong>left to right, depth first</strong>.</li>
+          <li>Carry two numbers down: <strong>&#945;</strong> (best MAX can guarantee, only ever rises) and <strong>&#946;</strong> (best MIN can guarantee, only ever falls). Start &#945; = &#8722;&#8734;, &#946; = +&#8734;.</li>
+          <li>At a MAX node update &#945;; at a MIN node update &#946;.</li>
+          <li><strong>Prune the remaining children as soon as &#946; &#8804; &#945;.</strong></li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>&#10003; Check:</strong> the value at the root must be <strong>identical</strong> to plain minimax. Pruning never changes the answer, only the work.</p>
+      </div>
+
+      <!-- ===== CSP ===== -->
+      <h2 id="hw-csp">Solve a CSP by hand</h2>
+      <div class="callout exam">
+        <div class="callout-label">Backtracking with the heuristics</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Pick the variable</strong>: fewest legal values left (<strong>MRV</strong>). If tied, most unassigned neighbours (<strong>degree</strong>).</li>
+          <li><strong>Pick the value</strong>: the one ruling out fewest options for neighbours (<strong>LCV</strong>).</li>
+          <li>Assign it, then <strong>forward check</strong>: delete that value from every unassigned neighbour's domain.</li>
+          <li>If any domain becomes <strong>empty</strong>, undo and try the next value.</li>
+          <li>Repeat until every variable is assigned.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>Worked:</strong> Australia, all regions start with 3 colours, so MRV ties 7 ways &rarr; degree picks <strong>SA</strong> (touches 5 others).</p>
+        <p style="margin:8px 0 0 0;"><strong>&#9888; Trap:</strong> degree counts only <em>unassigned</em> neighbours, and it recounts as you go.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">AC-3</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Put <strong>every arc</strong> (both directions of every constraint) in a queue.</li>
+          <li>Take an arc X&rarr;Y. For each value in X's domain, is there <em>some</em> legal partner in Y? If not, <strong>delete it from X</strong>.</li>
+          <li>If you deleted anything, <strong>put every arc pointing back into X</strong> onto the queue again.</li>
+          <li>Repeat until the queue is empty. An empty domain means failure.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>&#9888; Trap:</strong> arcs are directional. X&rarr;Y and Y&rarr;X are two separate checks.</p>
+      </div>
+
+      <!-- ===== PLANNING ===== -->
+      <h2 id="hw-plan">Planning</h2>
+      <div class="callout exam">
+        <div class="callout-label">Apply an action</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Check every <strong>precondition</strong> is true in the current state. If not, the action is not applicable.</li>
+          <li>Take the current state, <strong>remove</strong> the delete list, <strong>add</strong> the add list.</li>
+          <li>Anything not mentioned stays as it was (and anything not listed is <strong>false</strong> &mdash; closed-world).</li>
+        </ol>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Build the RPG and read off h</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Fact layer f(0) = the initial state.</li>
+          <li>Action layer a(i) = <strong>every action whose preconditions are all in f(i)</strong>.</li>
+          <li>Fact layer f(i+1) = f(i) <strong>plus every add effect</strong> of a(i). <strong>Ignore all delete effects.</strong></li>
+          <li>Stop when the goal is in a fact layer, or nothing new appears.</li>
+          <li>Extract a relaxed plan backwards, then <strong>h = &#931; |O&#7522;|</strong>, the number of actions in it.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>&#9888; Trap:</strong> fact layers only ever grow, because deletes are ignored. If a layer shrank, you used a delete effect.</p>
+      </div>
+
+      <!-- ===== MDP ===== -->
+      <h2 id="hw-mdp">One Bellman update</h2>
+      <div class="callout exam">
+        <div class="callout-label">The core Week 4 calculation</div>
+        <p style="margin:0 0 8px 0;"><strong>Given:</strong> the grid, R, &#947;, the slip probabilities, and last sweep's U values.</p>
+        <ol style="margin:0;">
+          <li>Pick a square. For <strong>each of the four actions</strong>:
+            <ul style="margin:4px 0;">
+              <li>list the <strong>three</strong> outcomes: intended (0.8) and the two perpendicular slips (0.1 each)</li>
+              <li>a blocked move leaves you <strong>on your own square</strong> &mdash; use your own value</li>
+              <li>multiply each probability by that square's <strong>previous</strong> U and add them up</li>
+            </ul></li>
+          <li>Take the <strong>largest</strong> of the four totals.</li>
+          <li><strong>U<sub>new</sub> = R + &#947; &#215; that largest total.</strong></li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>Worked</strong> &mdash; (3,3) at sweep 2, R = &#8722;0.04, &#947; = 1:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; margin:6px 0 0 12px;">
+          Right: 0.8&#215;1 + 0.1&#215;0.76 (slip up bounces off the edge) + 0.1&#215;(&#8722;0.04) = 0.872<br>
+          U = &#8722;0.04 + 1&#215;0.872 = <strong>0.832</strong></div>
+        <p style="margin:10px 0 0 0;"><strong>&#9888; Traps:</strong> use <em>last</em> sweep's numbers for every square, not ones you just recomputed. Terminals always contribute their raw &#177;1. A blocked slip still happens &mdash; it just leaves you where you were.</p>
+        <p style="margin:8px 0 0 0;"><strong>&#10003; Check:</strong> 0.8 + 0.1 + 0.1 = 1. If your outcomes do not sum to 1 you have missed one.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Extract the policy</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Wait until U has stopped changing.</li>
+          <li>At each square do the <strong>same expected-value sum</strong> for all four actions.</li>
+          <li>Write down the <strong>action</strong> that scored highest, not the number. That is &#960;(s).</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>&#9888; Trap:</strong> R and &#947; drop out here &mdash; they are the same for every action, so they cannot change which one wins.</p>
+      </div>
+
+      <!-- ===== METRICS ===== -->
+      <h2 id="hw-metrics">Classification and regression metrics</h2>
+      <div class="callout exam">
+        <div class="callout-label">From a confusion matrix</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Label the four cells: <strong>TP, FP, FN, TN</strong>.</li>
+          <li>Then:
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.9; margin:6px 0 0 12px;">
+              accuracy&nbsp; = (TP + TN) / everything<br>
+              precision = TP / (TP + FP) &nbsp;&nbsp;<span style="color:var(--ink-muted);">&#8592; of my yeses</span><br>
+              recall&nbsp;&nbsp;&nbsp; = TP / (TP + FN) &nbsp;&nbsp;<span style="color:var(--ink-muted);">&#8592; of the real yeses</span><br>
+              F1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = 2PR / (P + R)</div></li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>&#9888; Trap:</strong> precision and recall share TP on top &mdash; the difference is what is on the bottom. <strong>Higher is better</strong> for all four.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">MAE, MSE, RMSE</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Column of errors: <strong>e = &#375; &#8722; y</strong> for each point.</li>
+          <li>Column of <strong>|e|</strong>, and column of <strong>e&#178;</strong>.</li>
+          <li>MAE = sum of |e| &#247; n &nbsp;&middot;&nbsp; MSE = sum of e&#178; &#247; n &nbsp;&middot;&nbsp; <strong>RMSE = &#8730;MSE</strong>.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>&#10003; Check:</strong> RMSE &#8805; MAE always. <strong>Lower is better</strong> for all three.</p>
+        <p style="margin:8px 0 0 0;"><strong>&#9888; Trap:</strong> divide by n <em>before</em> the square root.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Diagnose under- or overfitting</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Is the training error high?</strong> &rarr; underfitting. Stop.</li>
+          <li><strong>Training low but validation much higher?</strong> &rarr; overfitting.</li>
+          <li>Both low and close &rarr; fine.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>&#9888; Trap:</strong> with <em>accuracy</em> the direction flips &mdash; overfitting is high train, low validation.</p>
+      </div>
+
+      <!-- ===== CLUSTERING ===== -->
+      <h2 id="hw-clu">Clustering</h2>
+      <div class="callout exam">
+        <div class="callout-label">Distances</div>
+        <p style="margin:0 0 8px 0;">Subtract coordinate by coordinate first, once. Then:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.9; margin:0 0 0 12px;">
+          L&#8321; = add the <strong>absolute values</strong><br>
+          d&#178; = add the <strong>squares</strong><br>
+          L&#8322; = <strong>&#8730;</strong> of that
+        </div>
+        <p style="margin:12px 0 0 0;"><strong>Worked:</strong> (4,4) to (6,7) &rarr; differences &#8722;2, &#8722;3 &rarr; L&#8321; = 5, d&#178; = 13, L&#8322; = 3.61.</p>
+        <p style="margin:8px 0 0 0;"><strong>&#10003; Check:</strong> L&#8322; &#8804; L&#8321; always.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Within-cluster variance V(C)</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>List every <strong>unordered pair</strong> in the cluster &mdash; n points give n(n&#8722;1)/2 pairs.</li>
+          <li>For each pair compute <strong>d&#178;</strong> (no square root).</li>
+          <li>Add them all up.</li>
+          <li><strong>Divide by |C|, the number of points</strong> &mdash; not the number of pairs.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>Worked:</strong> {(4,4),(6,7),(7,6)} &rarr; 13 + 13 + 2 = 28, then 28/3 = <strong>9.33</strong>.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">One K-means iteration</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Assign:</strong> each point goes to the nearest centre. <strong>Ties &rarr; lowest cluster index.</strong></li>
+          <li><strong>Update:</strong> each centre becomes the <strong>mean</strong> of its points.</li>
+          <li>Repeat. <strong>Stop when the assignments stop changing</strong> (not when the centres barely move).</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>&#9888; Trap:</strong> you can compare d&#178; instead of d when assigning &mdash; same winner, no square roots needed.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">One hierarchical merge</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>For every <strong>pair of clusters</strong>, list all cross distances (every point of one against every point of the other).</li>
+          <li>Reduce each list to one number: <strong>single</strong> = min, <strong>complete</strong> = max, <strong>average</strong> = mean.</li>
+          <li>Merge the two clusters with the <strong>smallest</strong> such number, and record that number as the merge height.</li>
+          <li>Repeat until one cluster remains.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>To read a dendogram:</strong> find the tallest vertical gap and cut just below it. The number of lines you cross is K.</p>
+      </div>
+
+      <!-- ===== REGRESSION ===== -->
+      <h2 id="hw-reg">Fit a line</h2>
+      <div class="callout exam">
+        <div class="callout-label">Theorem 7.3 &mdash; five numbers</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Build columns: <strong>x, y, x&#178;, xy</strong>. Add each up.</li>
+          <li>You now have <strong>n, &#931;x, &#931;y, &#931;x&#178;, &#931;xy</strong>.</li>
+          <li>Denominator (same for both): <strong>n&#931;x&#178; &#8722; (&#931;x)&#178;</strong>.</li>
+          <li><strong>&#946;&#770;&#8321; = (n&#931;xy &#8722; &#931;x&#931;y) / denominator</strong></li>
+          <li><strong>&#946;&#770;&#8320; = (&#931;x&#178;&#931;y &#8722; &#931;x&#931;xy) / denominator</strong></li>
+          <li>Predict with <strong>&#375; = &#946;&#770;&#8320; + &#946;&#770;&#8321;x</strong>.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>Worked:</strong> (&#8722;1,2), (0,0), (2,0) &rarr; n=3, &#931;x=1, &#931;y=2, &#931;x&#178;=5, &#931;xy=&#8722;2, denom=14 &rarr; &#946;&#8321; = &#8722;8/14 = &#8722;4/7, &#946;&#8320; = 12/14 = 6/7.</p>
+        <p style="margin:8px 0 0 0;"><strong>&#10003; Check:</strong> the residuals must sum to <strong>zero</strong>. Ten seconds, catches almost everything.</p>
+      </div>
+
+      <!-- ===== TREES ===== -->
+      <h2 id="hw-tree">Decision trees</h2>
+      <div class="callout exam">
+        <div class="callout-label">Gini of one node</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Count the classes: a vector like [2, 0, 4], total n = 6.</li>
+          <li>For each class, <strong>p&#7522; = count / n</strong>.</li>
+          <li><strong>Gini = &#931; p&#7522;(1 &#8722; p&#7522;)</strong>.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>Worked:</strong> [2,0,4], n=6 &rarr; (2/6)(4/6) + 0 + (4/6)(2/6) = 16/36 = <strong>0.444</strong>.</p>
+        <p style="margin:8px 0 0 0;"><strong>&#10003; Check:</strong> 0 means pure; the biggest it can be is <strong>1 &#8722; 1/k</strong>.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Gini-Split, and choosing the feature</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Split the rows by the feature &mdash; one group per value.</li>
+          <li>Compute <strong>Gini for each group</strong>.</li>
+          <li>Weight each by <strong>group size / total rows</strong>.</li>
+          <li>Add them up &mdash; that is Gini-Split for that feature.</li>
+          <li>Repeat for every feature and take the <strong>arg min</strong>.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>Worked:</strong> HasJob &rarr; (6/15)(0) + (9/15)(0.494) = <strong>0.296</strong>; OwnsHome &rarr; (6/15)(0.444) + (9/15)(0.494) = 0.474. HasJob wins.</p>
+        <p style="margin:8px 0 0 0;"><strong>&#9888; Traps:</strong> the weights are where the marks are. And the answer is a <strong>feature name</strong>, not a number.</p>
+      </div>
+
+      <!-- ===== RL ===== -->
+      <h2 id="hw-rl">Reinforcement learning</h2>
+      <div class="callout exam">
+        <div class="callout-label">Q<sub>t</sub>(a) from a history</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Look only at steps <strong>strictly before t</strong>.</li>
+          <li>Pick out the ones where that arm was chosen.</li>
+          <li><strong>Average their rewards.</strong> No pulls at all &rarr; Q = 0.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>Worked:</strong> A paid 0.5, then &#8722;0.3, then (B), then 1.0. At t = 5: Q(A) = (0.5 &#8722; 0.3 + 1.0)/3 = <strong>0.4</strong>.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">&#949;-greedy probability of an action</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Everyone gets <strong>&#949;/k</strong> from the random branch.</li>
+          <li>Find the arm(s) with the <strong>highest Q</strong>. They share the remaining <strong>1 &#8722; &#949;</strong> equally.</li>
+          <li>Add the two parts for the arm you were asked about.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>Worked:</strong> k = 2, &#949; = 0.5, and a&#8322; is greedy &rarr; 0.25 + 0.5 = <strong>0.75</strong>. If a&#8322; is <em>not</em> greedy &rarr; just <strong>0.25</strong>.</p>
+        <p style="margin:8px 0 0 0;"><strong>&#9888; Trap:</strong> a non-greedy arm is never probability 0 &mdash; the random branch still reaches it.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">One UCB step</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Note <strong>t</strong>, compute <strong>ln t</strong>.</li>
+          <li>For each arm read off <strong>N</strong> (pulls before now) and <strong>Q</strong>.</li>
+          <li><strong>Bonus = c &#215; &#8730;(ln t / N)</strong>, or <strong>&#8734; if N = 0</strong>.</li>
+          <li>Total = Q + bonus. <strong>Pull the biggest; ties &rarr; lowest index.</strong></li>
+          <li>Take that arm's next reward, update its N and Q, move to t+1.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>Worked</strong> &mdash; t = 8, c = 2, ln 8 = 2.079:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; margin:6px 0 0 12px;">
+          a&#8321;: N=4, Q=4.75 &rarr; 4.75 + 2&#8730;(2.079/4) = 4.75 + 1.442 = 6.192<br>
+          a&#8322;: N=1, Q=3.5&nbsp; &rarr; 3.50 + 2&#8730;(2.079/1) = 3.50 + 2.884 = <strong>6.384</strong> &#8592; wins</div>
+        <p style="margin:10px 0 0 0;"><strong>&#9888; Traps:</strong> it is <strong>ln</strong>, not log&#8321;&#8320;. c sits <strong>outside</strong> the root. N counts pulls <em>before</em> t.</p>
+        <p style="margin:8px 0 0 0;"><strong>Shortcut:</strong> if every arm has the same N, the bonus is identical, so just compare Q.</p>
+      </div>
+
+      <!-- ===== ORDER ===== -->
+      <h2 id="hw-order">The direction check, before anything else</h2>
+      <div class="callout warn">
+        <div class="callout-label">Half the marks are picking min vs max correctly</div>
+        <table class="cmp-table">
+          <tr><th>minimise / take the smallest</th><th>maximise / take the largest</th></tr>
+          <tr><td>path cost g, and f in A*<br>Gini and Gini-Split (<strong>arg min</strong>)<br>within-cluster variance<br>SSE, MAE, MSE, RMSE<br>&#948; in value iteration</td>
+              <td>utility U(s) (<strong>arg max</strong>)<br>expected reward, Q(a), UCB<br>accuracy, precision, recall, F1<br>minimax value at a MAX node</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Rule:</strong> anything called <em>error, loss, cost, impurity or variance</em> you minimise. Anything called <em>accuracy, utility, reward, value or score</em> you maximise.</p>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Now go and be tested on it.</p>
+    </section>

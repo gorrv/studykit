@@ -1,0 +1,97 @@
+<section id="w4-prob" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 04 · Part 3 · Uncertainty in AI</div>
+        <h1>Expected Utility</h1>
+        <div class="week-subtitle">turning a spread of possible outcomes into one number</div>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The job of this page</div>
+        Part 2 ended with a problem. An action no longer has <em>an</em> outcome, so it no longer has <em>a</em> value — and if actions have no values, you cannot compare them. <strong>This page builds the one number that lets you compare them.</strong> It is called an expected value, and you already know how to compute one.
+      </div>
+
+      <!-- ===== EXPECTED VALUE ===== -->
+      <h2 id="e-value">Expected value, with a coin</h2>
+      <div class="callout exam">
+        <div class="callout-label">The idea</div>
+        <p style="margin:0 0 10px 0;">I flip a fair coin. Heads pays you <strong>£5</strong>, tails pays <strong>£0</strong>. What is a flip worth?</p>
+        <p style="margin:0 0 10px 0;">Not £5 — you only get that half the time. Not £0 either. The honest answer is <strong>what you would average if you did it many times</strong>:</p>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:10px 0;">
+          (0.5 × £5) + (0.5 × £0) = <strong>£2.50</strong></div>
+        <p style="margin:0;">£2.50 is not a possible outcome of a single flip. <strong>It is still the right number to make decisions with</strong> — if someone charged £2 a flip you should play, and at £3 you should not.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The recipe, and it never changes</div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
+          expected value = Σ<sub>outcomes</sub> (probability of it) × (value of it)</div>
+        <p style="margin:0;"><strong>For each thing that could happen, multiply how likely it is by what it is worth. Add those up.</strong> That is all an expectation ever is, in any subject.</p>
+        <p style="margin:10px 0 0 0;">The <strong>Σ</strong> (sigma) just means "add up the following, once for each outcome". <strong>E[X]</strong> is the standard shorthand for "the expected value of X".</p>
+      </div>
+
+      <!-- ===== PROBABILITY ===== -->
+      <h2 id="e-prob">The three probability facts you need</h2>
+      <div class="callout exam">
+        <div class="callout-label">That is genuinely all</div>
+        <table class="cmp-table">
+          <tr><th>fact</th><th>meaning</th><th>on the grid</th></tr>
+          <tr><td><strong>0 ≤ P ≤ 1</strong></td><td>0 is impossible, 1 is certain</td><td>P(you move up) = 0.8</td></tr>
+          <tr><td><strong>the options sum to 1</strong></td><td>something must happen</td><td>0.8 + 0.1 + 0.1 = 1 ✓</td></tr>
+          <tr><td><strong>P(A | B)</strong></td><td>probability of A <em>given</em> B already happened</td><td>P(land on (1,2) <em>given</em> you were at (1,1) and pressed Up) = 0.8</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">The vertical bar is read <strong>"given"</strong>. It is not division. <code>P(s′ | s, a)</code> is just "the chance of ending at s′, given you were at s and did a" — the transition model from Part 2, written the standard way.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">A check worth doing on every exam question</div>
+        <strong>Add up the probabilities of an action's outcomes. If they do not come to 1, you have missed an outcome</strong> — usually a slip that bumps a wall and leaves you where you started. That single check catches most arithmetic slips in these questions.
+      </div>
+
+      <!-- ===== EU ===== -->
+      <h2 id="e-util">The expected utility of an action</h2>
+      <div class="callout exam">
+        <div class="callout-label">The coin formula, with the names changed</div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14.5px; margin:10px 0;">
+          E[U | s, a] &nbsp;=&nbsp; Σ<sub>s′</sub> P(s′ | s, a) · U(s′)</div>
+        <p style="margin:0 0 10px 0;"><strong>In words:</strong> for each square you might land on, multiply the chance of landing there by what that square is worth. Add them up. That is what taking action <em>a</em> from square <em>s</em> is worth.</p>
+        <table class="cmp-table">
+          <tr><th></th><th>the coin</th><th>the grid</th></tr>
+          <tr><td><strong>the things that could happen</strong></td><td>heads, tails</td><td>the squares you might land on</td></tr>
+          <tr><td><strong>how likely each is</strong></td><td>0.5 each</td><td>0.8, 0.1, 0.1</td></tr>
+          <tr><td><strong>what each is worth</strong></td><td>£5 or £0</td><td>U(s′), the utility of that square</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>It is literally the same sum.</strong> If you can price a coin flip you can price an action.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The one genuine difference — and it is the reason for Part 4</div>
+        With the coin, you were <em>told</em> that heads is worth £5. <strong>On the grid, nobody tells you what U(s′) is.</strong>
+        <p style="margin:10px 0 0 0;">A square's worth depends on where you can get to from it, which depends on what <em>those</em> squares are worth, which depends back on the first one. <strong>The definition is circular.</strong></p>
+        <p style="margin:10px 0 0 0;">So you cannot just look the numbers up. You have to compute them, and the way to break the circle is to guess and repeat. <strong>That is value iteration, and it is Part 4.</strong></p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">A worked example on the grid</div>
+        <p style="margin:0 0 10px 0;">You are at <strong>(3,3)</strong>, one square left of the +1. Suppose every ordinary square is currently valued at 0, and you take action <strong>Right</strong>.</p>
+        <table class="cmp-table">
+          <tr><th>probability</th><th>you land on</th><th>worth</th><th>contribution</th></tr>
+          <tr><td>0.8</td><td>(4,3), the +1</td><td>1</td><td>0.8 × 1 = <strong>0.8</strong></td></tr>
+          <tr><td>0.1</td><td>slip up → off the grid → stay at (3,3)</td><td>0</td><td>0.1 × 0 = 0</td></tr>
+          <tr><td>0.1</td><td>slip down → (3,2)</td><td>0</td><td>0.1 × 0 = 0</td></tr>
+          <tr><td colspan="3" style="text-align:right;"><strong>E[U | (3,3), Right] =</strong></td><td><strong>0.8</strong></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">Do the same for Up, Down and Left and they all come out 0, because every square they can reach is still 0. <strong>So Right is the best action here, worth 0.8.</strong></p>
+        <p style="margin:10px 0 0 0;">The <a href="#v-eu" onclick="showWeek('w4-vi')">Bellman calculator</a> in Part 4 prints this table for any square, any action and any stage of the computation.</p>
+      </div>
+
+      <!-- ===== EXAM ===== -->
+      <h2 id="e-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">What to have ready</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Expected value = Σ (probability × value)</strong>, over everything that could happen. Same formula for coins and for actions.</li>
+          <li><strong>E[U | s, a] = Σ<sub>s′</sub> P(s′ | s, a) · U(s′)</strong> — the value of taking action a from square s.</li>
+          <li><strong>P(A | B) is read "A given B"</strong>, and the bar is not division.</li>
+          <li><strong>Probabilities of an action's outcomes must sum to 1</strong> — use it as a check. Missing outcome is usually a wall bump.</li>
+          <li><strong>Every action has three outcomes here</strong>: 0.8 intended, 0.1 each side. Never backwards.</li>
+          <li><strong>U(s′) is not given to you.</strong> Its definition is circular, and value iteration exists to break the circle.</li>
+          <li><strong>An expected value need not be a possible outcome</strong> — £2.50 is not a coin result, and it is still the right number to decide with.</li>
+        </ul>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Part 4 breaks the circle.</p>
+    </section>

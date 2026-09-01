@@ -1,0 +1,44 @@
+<section id="practice" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">★ Revision</div>
+        <h1>Past-Exam Practice</h1>
+        <div class="week-subtitle">attempt first — solutions stay folded away</div>
+      </div>
+      <div class="callout">
+        <div class="callout-label">How this page will work</div>
+        Past-exam questions get written out in full, with each solution hidden behind a <strong>show solution</strong> fold so you have to attempt it first. Where a question can be checked mechanically, there'll be a link to the tool that does it.
+      </div>
+      <h2 id="pr-selftest">Self-test generator</h2>
+      <div class="tool" data-run="qzNext">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Generate a question and mark my answer</h3>
+        </div>
+        <div class="tool-desc">Questions are generated from the course material and marked by the same code the week-by-week tools use.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>topic</label>
+            <select id="qz-topic">
+              <option value="all">everything</option>
+              <option value="ai-intro">W1 · what is AI</option>
+              <option value="search">W1 · search, BFS, DFS, UCS</option>
+              <option value="astar">W1 · A* &amp; heuristics</option>
+              <option value="minimax">W2 · minimax &amp; alpha-beta</option>
+              <option value="csp">W2 · constraint satisfaction</option>
+              <option value="planning">W3 · planning, PDDL &amp; RPG</option>
+              <option value="mdp">W4 · MDPs &amp; value iteration</option>
+              <option value="ml">W5 · machine learning</option>
+              <option value="clustering">W6 · clustering</option>
+              <option value="supervised">W7 · regression &amp; decision trees</option>
+              <option value="rl">W8 · reinforcement learning</option>
+              <option value="ethics">W9 · AI ethics</option>
+            </select>
+          </div>
+          <button class="tool-btn green" onclick="qzNext()">New question ▶</button>
+          <button class="tool-btn secondary" onclick="qzReveal()">Show answer</button>
+          <button class="tool-btn danger" onclick="qzResetScore()">Reset score</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="qz-output" class="tool-output"></div>
+      </div>
+    </section>

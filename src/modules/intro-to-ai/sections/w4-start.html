@@ -1,0 +1,175 @@
+<section id="w4-start" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 04 · Start here</div>
+        <h1>MDPs, Slowly</h1>
+        <div class="week-subtitle">read this before the other three parts — no equations until the end</div>
+      </div>
+      <div class="callout">
+        <div class="callout-label">If Week 4 is not going in, it is almost always one of four things</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Not seeing <strong>what problem</strong> any of this solves.</li>
+          <li>Thinking <strong>U(s)</strong> means the reward of a square. It does not.</li>
+          <li>Not noticing that the definition of U is <strong>circular</strong>, so wondering why we iterate at all.</li>
+          <li>Meeting the Bellman equation as one long line of symbols instead of four separate ideas.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;">This page does those four, in that order, with no equation until the last one. Then the formal parts will read like notes rather than code.</p>
+      </div>
+
+      <!-- ===== 1 ===== -->
+      <h2 id="s4-why">1 · The one thing that changed</h2>
+      <div class="callout exam">
+        <div class="callout-label">You press Up. You do not always go up.</div>
+        In every search problem so far, actions did exactly what they said. <strong>Here they do not.</strong> You command <em>Up</em> and:
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; line-height:2; margin:12px 0 0 14px;">
+          <strong>0.8</strong> &nbsp;you go up<br>
+          <strong>0.1</strong> &nbsp;you veer left instead<br>
+          <strong>0.1</strong> &nbsp;you veer right instead
+        </div>
+        <p style="margin:12px 0 0 0;">That is the <strong>only</strong> new ingredient in Week 4. Everything else — policies, utilities, Bellman, value iteration — is a consequence of it. If you keep that one line in your head, the rest has somewhere to attach.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Why that one change breaks everything you already know</div>
+        A <strong>plan</strong> is a list: <em>Up, Up, Right, Right</em>. It only works if step 1 lands you where you expected, so that step 2 still makes sense. <strong>With slipping, step 1 might not.</strong> Two squares in you are somewhere the list never anticipated, and the rest of it is nonsense.
+        <p style="margin:10px 0 0 0;">So you cannot answer <em>“what should I do?”</em> once. You have to answer it <strong>for every square you might end up standing on</strong>. That answer — one action per state — is a <strong>policy</strong>, written π(s).</p>
+        <table class="cmp-table" style="margin-top:12px;">
+          <tr><th></th><th>Plan (Weeks 1–3)</th><th>Policy (Week 4)</th></tr>
+          <tr><td><strong>Shape</strong></td><td>a sequence of actions</td><td>an action for <em>every</em> state</td></tr>
+          <tr><td><strong>Read it</strong></td><td>from the start, in order</td><td>look up wherever you are</td></tr>
+          <tr><td><strong>Survives a surprise?</strong></td><td>no</td><td><strong>yes</strong> — that is the point</td></tr>
+        </table>
+      </div>
+
+      <!-- ===== 2 ===== -->
+      <h2 id="s4-u">2 · What U(s) actually means</h2>
+      <div class="callout warn">
+        <div class="callout-label">The single most common misreading</div>
+        <strong>U(s) is not the reward of square s.</strong> The reward is R(s), and on this grid it is −0.04 almost everywhere — a small fee for taking one more step.
+        <p style="margin:10px 0 0 0;"><strong>U(s) is the total value of everything that happens from here on</strong>, if you stand on s and then behave optimally forever. It bundles up: the fee you pay now, the fees you will pay on the way, and the +1 or −1 you eventually hit.</p>
+        <table class="cmp-table" style="margin-top:12px;">
+          <tr><th></th><th>R(s)</th><th>U(s)</th></tr>
+          <tr><td><strong>Is</strong></td><td>what this square pays you <em>right now</em></td><td>what standing here is <em>worth in total</em></td></tr>
+          <tr><td><strong>Given or computed?</strong></td><td><strong>given</strong> in the problem</td><td><strong>computed</strong> — it is the whole answer</td></tr>
+          <tr><td><strong>On the grid</strong></td><td>−0.04 nearly everywhere</td><td>near +1 by the goal, near −1 by the pit</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">So a square right next to the +1 has a <em>bad</em> reward (−0.04) and a <strong>great</strong> utility (about 0.9), because of where it lets you go next. <strong>Utility is about location, not payout.</strong></p>
+      </div>
+
+      <!-- ===== 3 ===== -->
+      <h2 id="s4-circle">3 · Why we cannot just work it out</h2>
+      <div class="callout exam">
+        <div class="callout-label">The circle</div>
+        Ask what a square is worth and you get:
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:2; margin:12px 0 0 14px;">
+          U(3,3) depends on U(4,3), U(3,2), U(3,3) …<br>
+          U(3,2) depends on U(3,3), U(3,1), U(4,2) …<br>
+          U(3,1) depends on U(3,2), U(2,1), U(4,1) …
+        </div>
+        <p style="margin:12px 0 0 0;"><strong>Every square's value is defined in terms of its neighbours' values, and theirs in terms of it.</strong> There is no square you can start from and no substitution that unwinds it. This is not a gap in the notes — the definition really is circular, and that is exactly why an <em>algorithm</em> is needed rather than a formula.</p>
+      </div>
+
+      <!-- ===== 4 ===== -->
+      <h2 id="s4-spread">4 · How iteration breaks the circle</h2>
+      <div class="callout exam">
+        <div class="callout-label">Guess, then let the truth spread</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Set every non-terminal square to 0.</strong> Not because it is worth nothing — because we have to start somewhere, and 0 is as good a lie as any.</li>
+          <li><strong>The terminals are not a guess.</strong> +1 and −1 are given. They are the only true numbers on the board.</li>
+          <li><strong>Do one sweep:</strong> recompute every square from its neighbours' current values.</li>
+          <li><strong>Repeat</strong> until the numbers stop moving.</li>
+        </ol>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">And here is the bit that makes it click</div>
+        On the first sweep, almost every square averages over neighbours that are <strong>all still 0</strong>, so it gets <code>R + γ·0 = −0.04</code> and learns nothing. <strong>The only squares that learn anything are the ones touching a terminal.</strong>
+        <p style="margin:10px 0 0 0;">On the second sweep, <em>their</em> neighbours can finally see a non-zero number. On the third, the next ring out. <strong>One Bellman sweep carries information exactly one square</strong> — a square four steps from a terminal cannot possibly move before sweep four. The +1 spreads outward like a stone dropped in water, and value iteration is just waiting for the ripple to reach every corner.</p>
+        <p style="margin:10px 0 0 0;">Watch it happen — the outlined ring is the squares whose value moved for the first time this sweep:</p>
+      </div>
+      <div class="tool" data-run="runSpread">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Tool · Watch the value spread</h3></div>
+        <p class="tool-desc">Step through the sweeps. <strong>“Unmoved” means the square is still sitting on the do-nothing baseline</strong> — its number is nothing but accumulated step-fees. The outlined ring is what moved this sweep, and it spreads out from the +1 one square at a time.</p>
+        <div class="tool-controls" style="margin-top:4px;"><button class="tool-btn" onclick="runSpread()">Show the ripple</button></div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="sp-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">One asymmetry the tool will show you</div>
+        <strong>The +1 spreads visibly. The −1 mostly does not</strong> — squares right next to the pit sit on the baseline for several sweeps, looking as though they have heard nothing.
+        <p style="margin:10px 0 0 0;">They have heard. It just does not change what they are worth <em>yet</em>. The best action next to a pit is to step away from it, and stepping away costs exactly what any other pointless step costs. <strong>Bad news only changes a square's value once it starts closing off the good routes</strong> — which happens later, when the surrounding values have risen and avoiding the pit finally means giving something up.</p>
+        <p style="margin:10px 0 0 0;">Worth knowing, because it is the sort of thing that looks like a bug in your own hand-computed table when it is not.</p>
+      </div>
+      <!-- ===== 5 ===== -->
+      <h2 id="s4-one">5 · One number, computed very slowly</h2>
+      <div class="callout exam">
+        <div class="callout-label">Where 0.76 comes from</div>
+        Take square <strong>(3,3)</strong> — one to the left of the +1 goal — on the very first sweep, when every non-terminal square is still 0. Try the action <strong>Right</strong>.
+        <p style="margin:12px 0 0 0;"><strong>Step 1 — list what could actually happen.</strong> You command Right, so:</p>
+        <table class="cmp-table" style="margin-top:8px;">
+          <tr><th>with probability</th><th>you end up at</th><th>whose current value is</th><th>contribution</th></tr>
+          <tr><td>0.8</td><td>(4,3) — the +1 goal</td><td><code>1</code></td><td><code>0.8 × 1 = 0.80</code></td></tr>
+          <tr><td>0.1</td><td>veer up → off the grid → <strong>stay at (3,3)</strong></td><td><code>0</code></td><td><code>0.1 × 0 = 0</code></td></tr>
+          <tr><td>0.1</td><td>veer down → (3,2)</td><td><code>0</code></td><td><code>0.1 × 0 = 0</code></td></tr>
+          <tr><td colspan="3" style="text-align:right;"><strong>expected value of taking Right</strong></td><td><strong>0.80</strong></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Step 2 — do the same for Up, Down and Left.</strong> All three point away from the goal, and every square they can reach is still 0, so they all score 0. <strong>Right wins.</strong></p>
+        <p style="margin:10px 0 0 0;"><strong>Step 3 — add the fee for being here.</strong></p>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:16px; margin:12px 0; color:var(--accent-3);">
+          U₁(3,3) = R + γ × 0.80 = −0.04 + 1 × 0.80 = <strong>0.76</strong></div>
+        <p style="margin:0;">That is the entire Bellman update, done once, by hand. <strong>Value iteration is that calculation, repeated for every square, over and over.</strong> Nothing more happens.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Two things that trip people up in that table</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Bumping into a wall or an edge leaves you where you were.</strong> You do not lose a turn or vanish — you stay put, and the value you "land on" is your own current value.</li>
+          <li><strong>The slips are perpendicular</strong> to the direction you asked for. Command Right and you can veer up or down — never backwards. That is why every action has exactly three outcomes, not four.</li>
+        </ul>
+      </div>
+
+      <!-- ===== 6 ===== -->
+      <h2 id="s4-read">6 · Now the equation, read out loud</h2>
+      <div class="callout exam">
+        <div class="callout-label">Four ideas, not one line</div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:10px 0 16px 0;">
+          U<sub>i+1</sub>(s) &nbsp;=&nbsp; R(s) &nbsp;+&nbsp; γ &nbsp;max<sub>a</sub> &nbsp;Σ<sub>s′</sub> P(s′|s,a) · U<sub>i</sub>(s′)</div>
+        <table class="cmp-table">
+          <tr><th>piece</th><th>says</th><th>in the worked example</th></tr>
+          <tr><td><strong>R(s)</strong></td><td>the fee for standing here</td><td>−0.04</td></tr>
+          <tr><td><strong>γ</strong></td><td>how much the future is worth relative to now</td><td>1 — the future counts fully</td></tr>
+          <tr><td><strong>max<sub>a</sub></strong></td><td><strong>you choose</strong>, so take the best action</td><td>Right beat Up, Down and Left</td></tr>
+          <tr><td><strong>Σ<sub>s′</sub> P(·)·U(·)</strong></td><td><strong>the world chooses</strong>, so average over what it might do</td><td>0.8×1 + 0.1×0 + 0.1×0 = 0.80</td></tr>
+        </table>
+        <p style="margin:14px 0 0 0;">Read right to left it is a sentence: <em>average over what the world might do, take the best action you could pick, discount it, and add the fee for being here.</em></p>
+        <p style="margin:10px 0 0 0;"><strong>Max over your options, average over the world's.</strong> That one line is the Bellman equation, and it is the only thing you have to remember.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why there is a max at all</div>
+        Drop the <code>max<sub>a</sub></code> and you have a <strong>Markov chain</strong> — a world that evolves on its own with nobody steering. <strong>The max is the agent.</strong> It is the single symbol that turns "watching a process" into "making decisions", and it is what makes this an MDP.
+      </div>
+
+      <!-- ===== 7 ===== -->
+      <h2 id="s4-after">7 · Two things that happen after the numbers settle</h2>
+      <div class="callout exam">
+        <div class="callout-label">Stopping, and then reading off the answer</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>When to stop.</strong> Track δ, the largest change any square made this sweep. When <code>δ &lt; ε(1 − γ)/γ</code>, the numbers are close enough and you stop. In practice: stop when nothing is moving.</li>
+          <li><strong>Getting the policy.</strong> The utilities are not the answer you wanted — you wanted <em>what do I do?</em> Once U has settled, go to each square and run <strong>the same expected-value calculation one last time</strong>, but instead of keeping the best <em>number</em>, keep the best <em>action</em>. That is π(s).</li>
+        </ul>
+        <p style="margin:12px 0 0 0;">So the pipeline is: <strong>guess zeros → sweep until still → read off the arrows.</strong> Value iteration computes numbers; policy extraction turns them into behaviour.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The one genuinely surprising result in Week 4</div>
+        Change R and the optimal policy changes <em>shape</em>, not just slightly. Make the step fee harsh enough and the best policy is to <strong>run at the nearest terminal — including the −1</strong> — because dying quickly beats paying the fee forever.
+        <p style="margin:10px 0 0 0;">That is Week 1's <strong>value alignment problem</strong> arriving as arithmetic. <strong>The reward function is the specification</strong>: you did not tell it to survive, you told it to maximise a sum, and R = −1.65 quietly means "please die quickly". The <a href="#v-sweep" onclick="showWeek('w4-vi')">reward sweep tool</a> shows exactly where the policy flips.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Where to go next</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><a href="#w4-uncert" onclick="showWeek('w4-uncert')">Part 1 · Uncertainty</a> — why the earlier weeks' methods stop working.</li>
+          <li><a href="#k-def" onclick="showWeek('w4-mdp')">Part 2 · What an MDP is</a> — the formal definition, now that you know what it is for.</li>
+          <li><a href="#e-value" onclick="showWeek('w4-prob')">Part 3 · Expected value</a> — the coin-flip version of the sum you just did by hand.</li>
+          <li><a href="#v-eu" onclick="showWeek('w4-vi')">Part 4 · The Bellman calculator</a> — click any square and it prints the table from step 5 for you, for any sweep.</li>
+        </ol>
+        <p style="margin:12px 0 0 0;">If Part 3's <code>E[U | s, a] = Σ P(s′|s,a) U(s′)</code> still looks alien, it is exactly the "expected value of taking Right" column you already computed. Same sum, formal name.</p>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Now the rest of Week 4 should read like notes.</p>
+    </section>

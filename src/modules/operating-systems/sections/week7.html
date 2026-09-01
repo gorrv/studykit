@@ -1,0 +1,311 @@
+<section id="week7" class="week-section">
+
+      <div class="week-header">
+        <div class="week-eyebrow">Week 07 · Security</div>
+        <h1>Access Control, Authentication &amp; Cryptography</h1>
+        <div class="week-subtitle">a mindset of constant suspicion</div>
+      </div>
+
+      <p>This is the big security week. The core mindset: <strong>security means adversarial</strong> — someone is <em>actively trying</em> to break your system. This is different from mere <strong>fault-tolerance</strong> (protecting against accidental error/incompetence). C, Unix, and the Internet weren't really designed for adversaries — which is why security is hard.</p>
+
+      <!-- ===== Access control ===== -->
+      <h2 id="w7-accesscontrol">Access control basics</h2>
+
+      <p>Most modern OSes are <strong>multi-user</strong>: they give each process a <strong>user identity</strong> (alice, bob, ...) — abstractly, a label denoting privilege. Access to shareable objects (like files) is controlled by the system according to a <strong>policy</strong>: "Alice can read Alice's mail, but Bob can't."</p>
+
+      <div class="callout">
+        <div class="callout-label">System defines mechanism; users define policy</div>
+        The OS provides expressive <strong>mechanisms</strong> that can represent a <em>range</em> of policies. The specific <strong>policy</strong> is decided by the users. E.g. Alice might make a file <code>plan</code> that anyone can read but only she can write, and a file <code>project</code> that only she and Bob can read/write. Keeping the mechanism simple, flexible, expressive <em>and</em> efficient is the deep challenge.
+      </div>
+
+      <h3>Unix example: pathnames, inodes &amp; file descriptors</h3>
+      <p>In Unix you <code>open()</code> a file by pathname, then <code>read()</code>/<code>write()</code> on the returned handle:</p>
+      <div class="code-block">
+int fd = open("/home/alice/mail", O_RDONLY);
+
+<span style="color:#7eb892;">$ ls -l ~/mail</span>
+-rw------- 1 alice alice 450871 Mar 4 2023 /home/alice/mail
+<span style="color:#7eb892;">  ↑ permission bits   ↑ owner   ↑ group</span>
+<span style="color:#7eb892;">  rw- : owner (alice) can read+write, not execute</span>
+<span style="color:#7eb892;">  --- : group members can do nothing</span>
+<span style="color:#7eb892;">  --- : other users can do nothing</span>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Checks happen only at open()!</div>
+        Permission bits live in the file's <strong>inode</strong> (~one per file). The check is done <em>once, at <code>open()</code></em> — after that, <strong>having the file handle is enough</strong>; <code>read()</code>/<code>write()</code> don't re-check. This design has consequences:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Cost of checking is amortised</strong> (checked once, not per access).</li>
+          <li><strong>Delegation is possible</strong> — you can even transmit the fd to another process.</li>
+          <li><strong>Revocation is hard</strong> — changing permissions doesn't revoke already-open fds.</li>
+        </ul>
+      </div>
+
+      <!-- ===== Matrix / ACL vs cap ===== -->
+      <h2 id="w7-matrix">The access control matrix: ACLs vs capabilities</h2>
+
+      <p>We can model <em>all</em> policy as one big table — the <strong>access control matrix</strong> — of who (subject) has what access to which object:</p>
+
+      <table class="acm">
+        <tr><th>subject ↓ / object →</th><th>/etc/passwd</th><th>/vmunix</th><th>/usr/bin/ls</th><th>/home/alice/project</th></tr>
+        <tr><td class="subj">alice</td><td class="perm">read</td><td class="none">–</td><td class="perm">r-x</td><td class="perm">rw-</td></tr>
+        <tr><td class="subj">bob</td><td class="perm">read</td><td class="none">–</td><td class="perm">r-x</td><td class="perm">rw-</td></tr>
+        <tr><td class="subj">charlie</td><td class="perm">read</td><td class="none">–</td><td class="perm">r-x</td><td class="none">–</td></tr>
+      </table>
+
+      <p>Storing the whole matrix is impractical. There are <strong>two ways to slice it</strong> into a real data structure:</p>
+
+      <div class="ac-split">
+        <div class="ac-card acl">
+          <div class="ac-where">slice by column — store with each object</div>
+          <h4>Access Control Lists (ACLs)</h4>
+          <p style="font-size:13px;">Each <strong>object</strong> stores a list of <em>(who, what access)</em> pairs. Unix's user/group/other bits are a limited ACL. The ACL lives <strong>on the object</strong> and protects it there.</p>
+          <p style="font-size:12px; color:var(--ink-soft); margin-top:8px;"><strong>Good:</strong> easy to revoke (remove from list), easy to audit/understand, easy to retrofit. <strong>Bad:</strong> can get large &amp; slow with many users/files; authority is <em>ambient</em> ("based on who you are").</p>
+        </div>
+        <div class="ac-card cap">
+          <div class="ac-where">slice by row — store with each subject</div>
+          <h4>Capabilities</h4>
+          <p style="font-size:13px;">Each <strong>subject</strong> holds a list of <em>(which object, what access)</em> pairs. Each pair is a <strong>capability</strong> — exactly like a file descriptor! An unforgeable token: <em>possessing a valid reference is enough</em>.</p>
+          <p style="font-size:12px; color:var(--ink-soft); margin-top:8px;"><strong>Good:</strong> easy to delegate, easily fine-grained, distributes scalably, authority is <em>designated</em>. <strong>Bad:</strong> hard to revoke, hard to audit (after delegation), must "design in".</p>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The keyring analogy</div>
+        A capability is like a <strong>key on a keyring</strong>: each key embodies distinct, fine-grained authority; to open a door you must <em>pick a specific key</em> (designated, not ambient); and more than one key might open the same door in different ways. A "secret link" emailed to you (that grants access without logging in) is also a capability — made unforgeable with cryptography.
+      </div>
+
+      <table>
+        <tr><th>ACLs</th><th>Capabilities</th></tr>
+        <tr><td>Stored with objects</td><td>Stored with subjects</td></tr>
+        <tr><td>Check permissions on access</td><td>Check on issue + validity on use</td></tr>
+        <tr><td>Easy to revoke</td><td>Hard to revoke</td></tr>
+        <tr><td>Hard to delegate</td><td>Easy to delegate</td></tr>
+        <tr><td>Usually coarse-grained</td><td>Easily fine-grained</td></tr>
+        <tr><td>Easy to audit</td><td>Hard to audit (after delegation)</td></tr>
+        <tr><td>Authority is <strong>ambient</strong></td><td>Authority is <strong>designated</strong></td></tr>
+        <tr><td>Tend to bottleneck distribution</td><td>Distribute more scalably</td></tr>
+      </table>
+
+      <!-- ===== CIA ===== -->
+      <h2 id="w7-cia">Security properties (the CIA triad + more)</h2>
+
+      <div class="cia-grid">
+        <div class="cia-card">
+          <h4>Confidentiality</h4>
+          <p>Information is not <em>disclosed</em> to unintended parties.</p>
+        </div>
+        <div class="cia-card">
+          <h4>Integrity</h4>
+          <p>Information is not <em>modified</em> by unintended parties — tamper-proof, or at least tamper-<em>evident</em>.</p>
+        </div>
+        <div class="cia-card">
+          <h4>Availability</h4>
+          <p>Attackers can't <em>deprive</em> others of the service (e.g. denial-of-service, like a <code>fork()</code> bomb).</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Always relative to an attack model</div>
+        These properties only hold <em>up to certain assumptions</em> (the "attack model") and the attacker's budget/resources — e.g. can they break into your house? plant agents in your org? They also almost always <strong>trade off against performance and convenience</strong> ("we've just texted you a convenient code..."). ACLs and capabilities give us confidentiality &amp; integrity; for availability we need <strong>resource limits</strong> (max processes/memory per user, rate-limit process creation).
+      </div>
+
+      <h3>The Swiss cheese model</h3>
+      <p>Security is never absolute — methods are complex and can be performed incorrectly. So effective security relies on <strong>layers of defence</strong>: each layer has holes, but an attack only succeeds if it passes through holes in <em>every</em> layer.</p>
+
+      <div class="swiss">
+        <div class="swiss-arrow">🦠→</div>
+        <div class="swiss-slice"><div class="swiss-hole" style="align-self:flex-start; margin-left:10px;"></div><div class="swiss-hole" style="align-self:flex-end; margin-right:14px;"></div><div class="swiss-label">defensive programming</div></div>
+        <div class="swiss-slice"><div class="swiss-hole" style="align-self:center;"></div><div class="swiss-hole" style="align-self:flex-start; margin-left:8px;"></div><div class="swiss-label">access control</div></div>
+        <div class="swiss-slice"><div class="swiss-hole" style="align-self:flex-end; margin-right:10px;"></div><div class="swiss-label">authentication</div></div>
+        <div class="swiss-slice"><div class="swiss-hole" style="align-self:flex-start; margin-left:20px;"></div><div class="swiss-label">firewalling</div></div>
+        <div class="swiss-arrow">✓</div>
+      </div>
+      <p style="text-align:center; font-style:italic; color:var(--ink-muted); font-size:13px; margin-top:24px;">Each slice is a distinct practice (defensive programming, static analysis, memory-safe languages, authentication, tight access control, firewalling, audit logging, user training...). An attack only gets through if the holes line up.</p>
+
+      <!-- ===== Least privilege ===== -->
+      <h2 id="w7-leastpriv">Least privilege</h2>
+
+      <p>When you run a program, how much privilege does it get? Usually <strong>all of yours</strong> — it can access any of your files, run anything you can run. That's fine <em>if</em> the program is correct and trustworthy. But what about a big, complex program like a web server running as <strong>root</strong> (the superuser, who can do everything)?</p>
+
+      <div class="callout warn">
+        <div class="callout-label">Privilege escalation</div>
+        A web server doesn't <em>need</em> to do everything — but if it runs as root and gets exploited, the attacker gets everything. Complex software can be tricked into doing unintended things; using that to gain more privilege than intended is <strong>privilege escalation</strong>. The <strong>principle of least privilege</strong>: give each program only the authority it actually needs.
+      </div>
+
+      <p>One fix: run the web server as a dedicated, restricted user: <code>sudo -u httpd ./httpd</code>. Then even if exploited, the worst it can do is "things the httpd user can do," not "anything." But splitting privilege finely is hard work — you must create all those users and set up their permissions, and mistakes cause programs to fail mid-execution.</p>
+
+      <h3>Unix's "80% solution": setuid / setgid</h3>
+      <p>Some programs genuinely need to <strong>combine multiple authorities</strong> (e.g. <code>submit</code> needs <em>your</em> permission on your coursework + <em>the system's</em> permission on the submission directory). Unix handles this with special permission bits:</p>
+      <div class="code-block">
+$ ls -l /shared/5CCS2OSC/submit
+-rwsrws--x 1 k2144518 k2144518 ... submit
+<span style="color:#7eb892;">    ↑   ↑</span>
+<span style="color:#7eb892;">  first s : setuid — runs with the OWNER's uid, not the invoker's</span>
+<span style="color:#7eb892;">  second s: setgid — runs with the owner's gid</span>
+<span style="color:#7eb892;">  final x : anyone can run it</span>
+      </div>
+      <p>A <code>setuid</code> program owned by root is <strong>setuid root</strong> — it runs as the all-powerful root user no matter who invokes it. <code>seteuid()</code> lets a program <em>drop</em> the owner's privileges and switch to the invoker's. Powerful, but "flexible" means "complex" means "liable to be got wrong."</p>
+
+      <!-- ===== Confused deputy ===== -->
+      <h2 id="w7-confused">The confused deputy &amp; the PwnKit exploit</h2>
+
+      <p>A <strong>confused deputy</strong> is a specific kind of privilege escalation: buggy code acting under <em>two or more authorities</em> is tricked by a crafty input/environment into doing something under <em>the wrong one</em>. The classic real-world example is <strong>PwnKit (CVE-2021-4034)</strong> in <code>pkexec</code> — a setuid-root program installed by default on every major Linux distro, vulnerable from its creation in 2009 until 2022.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">How PwnKit worked (chain of tricks)</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Invoke unusually:</strong> call <code>pkexec</code> with an <em>empty</em> argument list (<code>argc = 0</code>). A loop counter then reads/writes <strong>out of bounds</strong> past the arguments into adjacent environment memory.</li>
+          <li><strong>Re-introduce an unsafe env var:</strong> that out-of-bounds write smuggles back a dangerous variable (like <code>GCONV_PATH</code>) that the system normally strips from setuid programs.</li>
+          <li><strong>Exploit logging:</strong> to print an error, <code>pkexec</code> calls a logging function that needs character-set conversion...</li>
+          <li><strong>Character conversion loads code:</strong> conversion routines are <em>dynamically loaded shared libraries</em>, located via <code>GCONV_PATH</code>.</li>
+          <li><strong>Point to a nefarious library:</strong> the attacker's <code>GCONV_PATH</code> points to <em>their</em> library, whose code then runs <strong>as root</strong>. Game over.</li>
+        </ol>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Post-mortem — why this is a confused deputy</div>
+        The key vulnerability is a <strong>buffer overflow</strong> (out-of-bounds write). But the deeper lesson: <code>pkexec</code> ran its <em>logging code</em> (an incidental task) with <strong>root authority</strong> instead of the invoking user's. The logging was tricked into loading nefarious code — harmless if run as the user, catastrophic as root. The deputy was "confused" about which authority to act under.
+      </div>
+
+      <h3>What could prevent attacks like this?</h3>
+      <ul>
+        <li><strong>Memory safety / bounds checking</strong> — in Java the buffer overflow simply couldn't happen.</li>
+        <li><strong>Eliminate ambient authority</strong> — the root-ness was "ambient" in the user ID. If <em>every</em> operation had to explicitly designate its authority via a <strong>handle/capability</strong>, the logging code wouldn't have had root to abuse.</li>
+        <li>Ideally, <code>pkexec</code> would be granted a single narrow capability ("create a new process as a different user") and nothing else — so "accidental use of root" becomes impossible. (This is essentially a more object-oriented, capability-based syscall interface.)</li>
+      </ul>
+
+      <!-- ===== Authentication ===== -->
+      <h2 id="w7-auth">Authentication</h2>
+
+      <p>A new property: <strong>authenticity</strong> — communicated information (and communicating parties) are what/who they purport to be. <strong>Authentication</strong> is establishing trust in identity — and trust goes <em>both ways</em>: does the system trust the user's claimed identity, and does the user trust the system's? (Thinking adversarially: people lie about who they are, and software lies about what it is.)</p>
+
+      <h3>Three factors</h3>
+      <div class="factors">
+        <div class="factor"><div class="fic">🧠</div><h4>Something you know</h4><p>a password, a PIN</p></div>
+        <div class="factor"><div class="fic">🔑</div><h4>Something you have</h4><p>a key, smartcard, phone/SIM, Yubikey</p></div>
+        <div class="factor"><div class="fic">👁️</div><h4>Something you are</h4><p>biometrics (fingerprint, face)</p></div>
+      </div>
+      <p>Combining these is <strong>multi-factor authentication</strong>. Passwords ("something you know") are by far the most popular — despite huge problems: they can be forgotten, guessed, or leaked (and once leaked, knowledge spreads and can't be confined).</p>
+
+      <!-- ===== Passwords ===== -->
+      <h2 id="w7-passwords">Passwords &amp; hashing</h2>
+
+      <table>
+        <tr><th>Attack</th><th>Defence</th></tr>
+        <tr><td><strong>Brute force</strong> — try all strings</td><td>Rate-limit attempts/sec, escalating (e.g. 30-min lockout after n wrong)</td></tr>
+        <tr><td><strong>Dictionary</strong> — try all common words</td><td>Forbid dictionary words; rate-limiting helps less here</td></tr>
+        <tr><td><strong>Offline dictionary</strong> — attacker has the leaked password file</td><td>Rate-limiting useless (not using your service); need strong hashing + no dictionary words</td></tr>
+        <tr><td><strong>Timing channel</strong> — measure how long "no" takes</td><td>Random delay (better: don't store passwords at all)</td></tr>
+      </table>
+
+      <div class="callout exam">
+        <div class="callout-label">The no-excuses rule: never store passwords</div>
+        Don't store the secret! Instead store <strong>f(password)</strong> where f is a <strong>cryptographic hash function</strong>, and check <code>f(input) == f(password)</code> (the stored value). This is <em>not</em> the same as encrypting passwords — it's better, because knowing the hashes doesn't help an attacker (much). <strong>Most mass password leaks are only damaging because passwords were stored in the clear.</strong> Any CS graduate should know this is a no-no.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The human bottleneck</div>
+        Correctly <em>enforcing</em> policy is the easy part. The hard parts are human: getting the policy right, and users who re-use passwords, write them down, or pick guessable personal ones. Also worth knowing: most password authentication happens in <em>random web sites and apps</em>, not the OS — and is usually implemented badly. "Think twice before implementing an authentication service. Then if you still want to, think again."
+      </div>
+
+      <h3>System-to-user authentication</h3>
+      <p>It goes the other way too: before you type your password, you should trust the machine is what it claims (not a fake fullscreen login). OS approach: an <strong>untrappable key combination</strong> (e.g. Ctrl+Alt+Delete) the OS guarantees apps can't intercept — so the login screen that appears must be genuine. Websites use <strong>cryptographic certificate verification</strong> instead (a chain of trusted authorities). Either way, phishing still defeats the human.</p>
+
+      <!-- ===== Cryptography ===== -->
+      <h2 id="w7-crypto">Cryptography</h2>
+
+      <p><strong>Cryptography</strong> = techniques for secure communication in the presence of adversaries, using codes. (If your channel is <em>physically</em> secure — only intended parties can participate — you don't need it.) Interesting OS insight: operating systems <em>contain</em> lots of communication (and isolate processes), so they use relatively little crypto internally — but the layer above (browsers, networked apps) uses it heavily, because data paths <em>out</em> of the machine aren't controlled.</p>
+
+      <h3>Ciphers, formalised</h3>
+      <div class="code-block">
+A cipher is a pair of functions:  E (encrypt),  D (decrypt)
+plaintext P  →  ciphertext C       C = E(P)      P = D(C)
+
+<span style="color:#7eb892;">Problem: ciphers are well-known maths. No security if the method is known.</span>
+<span style="color:#7eb892;">Fix: parameterise by a secret KEY K:</span>
+
+   C = E(P, K)        P = D(C, K)        <span style="color:#7eb892;">// works only if K stays secret</span>
+      </div>
+
+      <p>How the CIA properties fall out of this:</p>
+      <ul>
+        <li><strong>Confidentiality:</strong> send <code>C = E(P, K)</code>; recipient recovers <code>P = D(C, K)</code>.</li>
+        <li><strong>Integrity:</strong> send <code>C = E(P ++ hash(P), K)</code>. Recipient decrypts to <code>(Q ++ H)</code> and checks <code>H == hash(Q)</code>. Without K, an attacker can't tamper <em>and</em> fix the hash → tampering is detected.</li>
+        <li><strong>Authenticity:</strong> a <strong>challenge–response</strong> protocol — send a random <em>nonce</em> X; a correct response of <code>E(X, K)</code> proves the responder knows K. (Passwords are the degenerate case: empty challenge, E is the identity function — which is why you're sending a secret in the clear and the channel had better be secure!)</li>
+      </ul>
+
+      <h3>Symmetric vs asymmetric</h3>
+      <div class="ac-split">
+        <div class="ac-card acl">
+          <h4>Symmetric</h4>
+          <p style="font-size:13px;">The <strong>same key</strong> encrypts and decrypts. Goal: computationally infeasible to crack without the key, but affordable with it. Many are <strong>block ciphers</strong> (fixed-size chunks + fixed-size key), e.g. AES. Exploit exponentials: key space grows exponentially with length, so pick a length where brute force takes longer than the age of the universe. <strong>Problem: key distribution</strong> — how do both sides get the shared secret?</p>
+        </div>
+        <div class="ac-card cap">
+          <h4>Asymmetric (public-key)</h4>
+          <p style="font-size:13px;">Keys come in two parts: <strong>public</strong> and <strong>private</strong>. To send Bob a secret: Alice encrypts with <em>Bob's public key</em>; only <em>Bob's private key</em> can decrypt. Solves key distribution! <strong>RSA</strong> (1977, Turing-award-winning) relies on factoring large near-primes being hard. Downside: exponentials are slow — so in practice you use RSA just to exchange a fresh <em>symmetric</em> key, then switch to that (ssh does exactly this).</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Cryptographic hash functions</div>
+        Like any hash, <code>h(m)</code> maps arbitrary data to fixed-width integers. It's <strong>cryptographic</strong> if, given an output <code>h(m)</code>, it's computationally infeasible to find <code>m</code> — or any <code>m'</code> with <code>h(m') == h(m)</code> (collision resistance). Uses: <strong>storing passwords</strong> (store the hash!) and <strong>authenticating software/data</strong> (publish a file's hash). Examples: MD5 &amp; SHA-1 (both <em>broken</em>), SHA-2 (still secure).
+      </div>
+
+      <h3>Two simple ciphers (for the tool below)</h3>
+      <ul>
+        <li><strong>Caesar / ROT13:</strong> shift each letter by K positions mod 26. ROT13 is the special case K=13 (and is self-inverting). Trivially broken by frequency analysis.</li>
+        <li><strong>One-time pad:</strong> key is a random string <em>as long as the message</em>; XOR each byte. Capable of <em>perfect</em> secrecy — but needs enormous key material, and key distribution is again the practical problem.</li>
+      </ul>
+
+      <!-- ===== CIPHER TOOL ===== -->
+      <h3 id="w7-ciphertool">🛠️ Interactive: Caesar / ROT13 Cipher</h3>
+      <p>Encrypt and decrypt with a shift cipher. Set the key to 13 for ROT13 and notice that encrypting twice gets you back to the start. Try frequency analysis on a longer message to see why it's trivially breakable.</p>
+
+      <div class="tool">
+        <div class="tool-header">
+          <span class="tool-badge">Crypto demo</span>
+          <h3>Shift Cipher Playground</h3>
+        </div>
+        <div class="tool-desc">C transforms each letter sᵢ → (sᵢ + K) mod 26. Decryption uses −K. Non-letters pass through unchanged.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1;">
+            <label>Plaintext</label>
+            <input type="text" id="cip-text" value="attack at dawn" style="width:100%;">
+          </div>
+          <div class="tool-field">
+            <label>Key (shift)</label>
+            <input type="number" id="cip-key" value="3" min="0" max="25" style="width:80px;">
+          </div>
+          <button class="tool-btn" onclick="runCipher()">Encrypt ▶</button>
+        </div>
+
+        <div id="cip-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="w7-exam">Exam-style takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 7</div>
+        <ol>
+          <li><strong>Security vs fault-tolerance</strong> — adversarial (malicious) vs accidental (incompetent).</li>
+          <li><strong>Mechanism vs policy</strong> — OS provides mechanism, users define policy.</li>
+          <li><strong>Unix checks at open() only</strong> — amortised cost, delegation possible, revocation hard.</li>
+          <li><strong>The access control matrix</strong>, and the two ways to slice it.</li>
+          <li><strong>ACLs vs capabilities</strong> — be able to contrast across all dimensions (stored where, revoke/delegate/audit, ambient vs designated authority). This is a <em>very</em> common exam question.</li>
+          <li><strong>The CIA triad</strong> + authenticity; that properties hold only relative to an attack model.</li>
+          <li><strong>Least privilege</strong> &amp; privilege escalation; setuid/setgid and their danger.</li>
+          <li><strong>The confused deputy</strong> — define it; explain PwnKit as an example (buffer overflow + ambient root authority abused via logging).</li>
+          <li><strong>What would prevent it</strong> — memory safety, eliminating ambient authority via capabilities/handles.</li>
+          <li><strong>Three authentication factors</strong>; multi-factor; why passwords persist despite flaws.</li>
+          <li><strong>Never store passwords</strong> — store a cryptographic hash; why this beats the in-the-clear leaks. Know the four attack types and defences.</li>
+          <li><strong>Cipher basics</strong> — E/D, why a secret key is needed; how confidentiality, integrity (E(P++hash(P),K)), and authenticity (challenge–response) are achieved.</li>
+          <li><strong>Symmetric vs asymmetric</strong> — key distribution problem; RSA used to exchange a symmetric key; cryptographic hash properties.</li>
+        </ol>
+      </div>
+
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 7 notes.</p>
+
+    </section>

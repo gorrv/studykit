@@ -1,0 +1,397 @@
+<section id="w2-csp2" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 02 · Part 4 · CSPs</div>
+        <h1>Solving a CSP</h1>
+        <div class="week-subtitle">backtracking, heuristics, and inference</div>
+      </div>
+      <!-- ===== SEARCH ===== -->
+      <h2 id="sc-search">A CSP as a search problem</h2>
+      <div class="callout exam">
+        <div class="callout-label">The four components</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>States</strong> — assignments of variables to values within domains.</li>
+          <li><strong>Initial state</strong> — no variables assigned.</li>
+          <li><strong>Action</strong> — assign a value to any unassigned variable, <strong>provided it does not violate a constraint</strong>. If no legal assignments, return failure.</li>
+          <li><strong>Goal test</strong> — all variables are assigned values, satisfying all constraints.</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The important word is "provided"</div>
+        Compare Week 1's search problem: there, actions were legal or not by the transition model, and the goal test happened at the end. Here <strong>the constraint check is folded into the action itself</strong> — you never even generate an inconsistent state. That's the first efficiency, and it's free.
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The size of the naïve tree</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>The complete search tree is only of <strong>depth n</strong> (one layer per variable) — <em>every</em> solution is at the bottom, so depth is not the problem.</li>
+          <li>But with <strong>m</strong> possible values per variable, there are <strong>n! × m<sup>n</sup></strong> paths through the tree.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">The <strong>n!</strong> is pure waste: it counts the <em>orders</em> in which you could have made the same assignments.</p>
+      </div>
+      <!-- ===== BACKTRACKING ===== -->
+      <h2 id="sc-back">Backtracking search</h2>
+      <div class="callout exam">
+        <div class="callout-label">What it is</div>
+        A variation of <strong>depth-first search</strong> with two ingredients:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Single-variable assignments</strong> — only one variable is assigned at each level of the search tree.
+            <ul style="margin:6px 0 0 0;">
+              <li><strong>Commutativity:</strong> [WA = red, NT = green] = [NT = green, WA = red].</li>
+              <li>This <strong>reduces paths from n! × m<sup>n</sup> to m<sup>n</sup></strong>.</li>
+            </ul>
+          </li>
+          <li><strong>For each assignment</strong> — check for failure; backtrack on failure to the next assignment; if all assignments fail, return failure.</li>
+        </ul>
+      </div>
+      <pre><code><span class="kw">function</span> RECURSIVE-BACKTRACKING(<span class="ty">assignment</span>, <span class="ty">csp</span>)
+    <span class="kw">if</span> assignment is complete <span class="kw">then return</span> assignment
+    var ← SELECT-UNASSIGNED-VARIABLE(VARIABLES[csp], assignment, csp)
+    <span class="kw">for each</span> value <span class="kw">in</span> ORDER-DOMAIN-VALUES(var, assignment, csp)
+        <span class="kw">if</span> value is consistent with assignment given CONSTRAINTS[csp]
+            add {var = value} <span class="kw">to</span> assignment
+            result ← RECURSIVE-BACKTRACKING(assignment, csp)
+            <span class="kw">if</span> result ≠ failure <span class="kw">then return</span> result
+            remove {var = value} <span class="kw">from</span> assignment
+    <span class="kw">return</span> failure</code></pre>
+      <div class="callout tip">
+        <div class="callout-label">Where the improvements plug in</div>
+        Look at the two capitalised helper functions — they are deliberately left abstract:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>SELECT-UNASSIGNED-VARIABLE</strong> → the variable-ordering heuristics (MRV, degree).</li>
+          <li><strong>ORDER-DOMAIN-VALUES</strong> → the value-ordering heuristic (LCV).</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">The extended version adds a third: an <strong>INFERENCE</strong> step after each assignment, which is where forward checking and arc consistency live. Everything in the rest of this deck is one of those three slots.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Still not good enough</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>It's inefficient</strong> — still exhaustively trying all combinations until failure at a given level; <strong>arbitrary selection of values</strong>.</li>
+          <li><strong>Improving the algorithm:</strong> decide <em>which variable</em> we assign at each level; decide <em>the order</em> in which values are tried.</li>
+        </ul>
+      </div>
+      <pre><code><span class="kw">function</span> BACKTRACK(<span class="ty">assignment</span>, <span class="ty">csp</span>) <span class="cm">/* the version with inference */</span>
+    <span class="kw">if</span> assignment is complete <span class="kw">then return</span> assignment
+    var ← SELECT-UNASSIGNED-VARIABLE(csp)
+    <span class="kw">for each</span> value <span class="kw">in</span> ORDER-DOMAIN-VALUES(var, assignment, csp) <span class="kw">do</span>
+        <span class="kw">if</span> value is consistent with assignment <span class="kw">then</span>
+            add {var = value} <span class="kw">to</span> assignment
+            <span class="cm">inferences ← INFERENCE(csp, var, value)</span>
+            <span class="cm">if inferences ≠ failure then</span>
+                <span class="cm">add inferences to assignment</span>
+                <span class="cm">result ← BACKTRACK(assignment, csp)</span>
+                <span class="cm">if result ≠ failure then return result</span>
+            remove {var = value} and inferences <span class="kw">from</span> assignment
+    <span class="kw">return</span> failure</code></pre>
+      <!-- ===== VAR HEURISTICS ===== -->
+      <h2 id="sc-varh">Which variable to assign next?</h2>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">Most constrained variable</h4>
+          <ul style="font-size:13.5px;">
+            <li>Choose the variable with the <strong>fewest legal values</strong>.</li>
+            <li>Known as the <strong>minimum remaining values (MRV)</strong> heuristic.</li>
+          </ul>
+        </div>
+        <div class="mode-box" style="background:var(--tint-b); border-color:var(--accent-2);">
+          <h4 style="color:var(--accent-2);">Most constraining variable</h4>
+          <ul style="font-size:13.5px;">
+            <li>Imposes the <strong>most constraints</strong> on the remaining values (for other variables).</li>
+            <li>In graph terms: <strong>highest degree</strong>.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">"Fail first" — and why that's a good thing</div>
+        Both heuristics aim to <strong>hit the dead end as early as possible</strong>. If a variable has only one legal value left, assigning it can't go wrong; if it has zero, you find out now instead of after ten more pointless assignments. Pruning near the root of a tree removes an exponential amount of work; pruning near a leaf saves almost nothing.
+        <p style="margin:10px 0 0 0;">In practice they're used together: <strong>MRV first, degree as the tie-breaker</strong> — which is why on Australia the first variable picked is SA (every variable starts with 3 values, so MRV ties, and SA wins on degree 5).</p>
+      </div>
+      <!-- ===== VAL HEURISTIC ===== -->
+      <h2 id="sc-valh">Variable selected — what value to try?</h2>
+      <div class="callout exam">
+        <div class="callout-label">Least constraining value (LCV)</div>
+        Choose the value that <strong>rules out the fewest values in the remaining variables</strong>.
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why value ordering pulls the opposite way to variable ordering</div>
+        This looks contradictory — variables "fail first", values "fail last" — but the asymmetry is real:
+        <ul style="margin:8px 0 0 0;">
+          <li>You must assign <strong>every</strong> variable, so you want the hopeless one exposed immediately.</li>
+          <li>You only need <strong>one</strong> value per variable to work, so you want the most promising one tried first.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">Same goal both times: reach a solution, or a refutation, with the least search.</p>
+      </div>
+      <!-- ===== FORWARD CHECKING ===== -->
+      <h2 id="sc-fc">Detecting failure early: forward checking</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Keep track of remaining legal values for unassigned variables.</strong></li>
+          <li><strong>Terminate search when any variable has no legal values.</strong></li>
+        </ul>
+        <p style="margin:10px 0 0 0;">Forward checking <strong>propagates information from assigned to unassigned variables</strong>.</p>
+      </div>
+      <p>The slides' worked run, on the Australia map:</p>
+      <table class="dom-table">
+        <tr><th class="steplab">after</th><th>WA</th><th>NT</th><th>Q</th><th>NSW</th><th>V</th><th>SA</th><th>T</th></tr>
+        <tr><td class="steplab">— start —</td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td></tr>
+        <tr><td class="steplab">WA = red</td>
+          <td class="assigned"><span class="vbox"><span class="v v-red"></span></span></td>
+          <td><span class="vbox"><span class="v v-red gone"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red gone"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td></tr>
+        <tr><td class="steplab">Q = green</td>
+          <td class="assigned"><span class="vbox"><span class="v v-red"></span></span></td>
+          <td><span class="vbox"><span class="v v-red gone"></span><span class="v v-green gone"></span><span class="v v-blue"></span></span></td>
+          <td class="assigned"><span class="vbox"><span class="v v-green"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green gone"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red gone"></span><span class="v v-green gone"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td></tr>
+        <tr><td class="steplab">V = blue</td>
+          <td class="assigned"><span class="vbox"><span class="v v-red"></span></span></td>
+          <td><span class="vbox"><span class="v v-red gone"></span><span class="v v-green gone"></span><span class="v v-blue"></span></span></td>
+          <td class="assigned"><span class="vbox"><span class="v v-green"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green gone"></span><span class="v v-blue gone"></span></span></td>
+          <td class="assigned"><span class="vbox"><span class="v v-blue"></span></span></td>
+          <td class="wipeout"><span class="vbox"><span class="v v-red gone"></span><span class="v v-green gone"></span><span class="v v-blue gone"></span></span><span class="vlabel">empty!</span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td></tr>
+      </table>
+      <div class="callout warn">
+        <div class="callout-label">The failure is detected at V = blue</div>
+        SA borders WA (red), Q (green) <em>and</em> V (blue), so after the third assignment it has <strong>no legal values left</strong> and the search backtracks — without ever having tried to assign SA. That is forward checking earning its keep.
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">But it isn't enough</div>
+        <strong>Forward checking only detects constraints early. Constraint propagation <em>enforces</em> constraints.</strong>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Spot the missed inference</div>
+        Look at the row after <strong>Q = green</strong>: NT = {blue} and SA = {blue}. NT and SA are <em>neighbours</em>, and both are down to the same single value — the position is already dead. Forward checking cannot see it, because it only ever compares an <strong>assigned</strong> variable with its unassigned neighbours; it never compares two <em>unassigned</em> variables with each other. Fixing exactly that is arc consistency.
+      </div>
+      <!-- ===== ARC CONSISTENCY ===== -->
+      <h2 id="sc-arc">Constraint propagation: arc consistency</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        The <strong>simplest form of constraint propagation</strong> — keep pairs of variables consistent.
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>X → Y is consistent iff for each value of X there are allowed values of Y.</strong></li>
+          <li>When checking X → Y, <strong>throw out any values of X for which there isn't an allowed value of Y</strong>.</li>
+          <li><strong>If X loses a value, all pairs Z → X need to be rechecked.</strong></li>
+        </ul>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Arcs are directed — this trips everyone up</div>
+        X → Y and Y → X are <strong>two different arcs</strong> and are checked separately. Checking X → Y only ever deletes values from <strong>X</strong>, never from Y. That's why the third bullet exists: shrinking X can break arcs that <em>point into</em> X, so they all go back in the queue.
+      </div>
+      <p>Running it on the same problem, with only <strong>WA = red</strong> and <strong>Q = green</strong> assigned:</p>
+      <table class="dom-table">
+        <tr><th class="steplab">step</th><th>WA</th><th>NT</th><th>Q</th><th>NSW</th><th>V</th><th>SA</th><th>T</th></tr>
+        <tr><td class="steplab">after FC</td>
+          <td class="assigned"><span class="vbox"><span class="v v-red"></span></span></td>
+          <td><span class="vbox"><span class="v v-blue"></span></span></td>
+          <td class="assigned"><span class="vbox"><span class="v v-green"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td></tr>
+        <tr><td class="steplab">NSW → SA</td>
+          <td class="assigned"><span class="vbox"><span class="v v-red"></span></span></td>
+          <td><span class="vbox"><span class="v v-blue"></span></span></td>
+          <td class="assigned"><span class="vbox"><span class="v v-green"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-blue gone"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td></tr>
+        <tr><td class="steplab">V → NSW</td>
+          <td class="assigned"><span class="vbox"><span class="v v-red"></span></span></td>
+          <td><span class="vbox"><span class="v v-blue"></span></span></td>
+          <td class="assigned"><span class="vbox"><span class="v v-green"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-blue gone"></span></span></td>
+          <td><span class="vbox"><span class="v v-red gone"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-blue"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td></tr>
+        <tr><td class="steplab">SA → NT</td>
+          <td class="assigned"><span class="vbox"><span class="v v-red"></span></span></td>
+          <td><span class="vbox"><span class="v v-blue"></span></span></td>
+          <td class="assigned"><span class="vbox"><span class="v v-green"></span></span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-blue gone"></span></span></td>
+          <td><span class="vbox"><span class="v v-red gone"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td>
+          <td class="wipeout"><span class="vbox"><span class="v v-blue gone"></span></span><span class="vlabel">empty!</span></td>
+          <td><span class="vbox"><span class="v v-red"></span><span class="v v-green"></span><span class="v v-blue"></span></span></td></tr>
+      </table>
+      <div class="callout exam">
+        <div class="callout-label">The headline result</div>
+        <strong>Arc consistency detects failure earlier than forward checking</strong> — here with only <strong>two</strong> assignments instead of three. It <strong>can be run before or after each assignment is made</strong>.
+      </div>
+      <h3>AC-3</h3>
+      <pre><code><span class="kw">function</span> AC-3(<span class="ty">csp</span>) <span class="kw">returns</span> the CSP, possibly with reduced domains
+    <span class="cm">inputs:</span> csp, a binary CSP with variables {X₁, X₂, …, Xₙ}
+    <span class="cm">local variables:</span> queue, a queue of arcs, initially all the arcs in csp
+
+    <span class="kw">while</span> queue is not empty
+        (Xᵢ, Xⱼ) ← REMOVE-FIRST(queue)
+        <span class="kw">if</span> REMOVE-INCONSISTENT-VALUES(Xᵢ, Xⱼ) <span class="kw">then</span>
+            <span class="kw">for each</span> X_k <span class="kw">in</span> NEIGHBORS[Xᵢ] <span class="kw">do</span>
+                add (X_k, Xᵢ) to queue
+
+<span class="kw">function</span> REMOVE-INCONSISTENT-VALUES(<span class="ty">Xᵢ</span>, <span class="ty">Xⱼ</span>) <span class="kw">returns</span> true iff succeeds
+    removed ← false
+    <span class="kw">for each</span> x <span class="kw">in</span> DOMAIN[Xᵢ]
+        <span class="kw">if</span> no value y in DOMAIN[Xⱼ] allows (x, y) to satisfy the constraint Xᵢ ↔ Xⱼ
+            <span class="kw">then</span> delete x from DOMAIN[Xᵢ]; removed ← true
+    <span class="kw">return</span> removed</code></pre>
+      <div class="callout tip">
+        <div class="callout-label">Reading AC-3 in three lines</div>
+        <strong>1.</strong> Put every arc in a queue. <strong>2.</strong> Pop one, prune the tail's domain against the head's. <strong>3.</strong> If anything was pruned, push back every arc <em>pointing at</em> the tail, because they may have become stale.
+        <p style="margin:10px 0 0 0;">It terminates because domains only ever shrink, and it costs <code>O(n²d³)</code> for n variables with domain size d. Failure = some domain becomes empty. Note it can also finish with all domains non-empty and <em>still</em> have no solution — arc consistency is a filter, not a solver.</p>
+      </div>
+      <!-- ===== TOOLS ===== -->
+      <h2 id="sc-tool">Tool · CSP solver</h2>
+      <div class="tool" data-run="runCSP">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Backtracking search with heuristics and inference</h3></div>
+        <p class="tool-desc"><strong>The constraint graph is drawn for you — drag it apart, then step through the backtracking search one decision at a time</strong> watching nodes fill in and edges flash orange when violated. All the heuristic buttons re-solve instantly. Defaults to the Australia map-colouring problem.</p>
+        <div class="compare-2" style="margin-top:4px;">
+          <div class="tool-field">
+            <label for="cs-vars">Variables and domains — <code>NAME : v1 v2 v3</code> per line</label>
+            <textarea id="cs-vars" rows="8" spellcheck="false">WA : red green blue
+NT : red green blue
+Q  : red green blue
+NSW: red green blue
+V  : red green blue
+SA : red green blue
+T  : red green blue</textarea>
+          </div>
+          <div class="tool-field">
+            <label for="cs-cons">Constraints — <code>A != B</code> or <code>A = B</code>, one per line</label>
+            <textarea id="cs-cons" rows="8" spellcheck="false">SA != WA
+SA != NT
+SA != Q
+SA != NSW
+SA != V
+WA != NT
+NT != Q
+Q != NSW
+NSW != V</textarea>
+          </div>
+        </div>
+        <div class="tool-controls" style="margin-top:14px;">
+          <div class="tool-field"><label for="cs-var">Variable order</label>
+            <select id="cs-var">
+              <option value="static">static (listed order)</option>
+              <option value="mrv">MRV — fewest legal values</option>
+              <option value="deg">degree — most constraining</option>
+              <option value="mrvdeg" selected>MRV, degree tie-break</option>
+            </select>
+          </div>
+          <div class="tool-field"><label for="cs-val">Value order</label>
+            <select id="cs-val">
+              <option value="static" selected>static (listed order)</option>
+              <option value="lcv">LCV — least constraining</option>
+            </select>
+          </div>
+          <div class="tool-field"><label for="cs-inf">Inference</label>
+            <select id="cs-inf">
+              <option value="none">none — plain backtracking</option>
+              <option value="fc" selected>forward checking</option>
+              <option value="ac3">arc consistency (MAC)</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runCSP()">Load from the boxes</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="cs-output" class="tool-output"></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Things worth trying in it</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>With <strong>MRV + degree</strong>, check that the first variable chosen is <strong>SA</strong> — every domain has 3 values so MRV ties, and SA wins the tie-break with degree 5.</li>
+          <li><strong>Australia with three colours is too easy to show off the heuristics</strong> — every setting solves it in 7 assignments with no backtracking. To see them work, <strong>delete <code>blue</code> from every domain</strong>. Now the problem is impossible, and proving it takes <strong>10</strong> assignments with no inference, <strong>4</strong> with forward checking, and <strong>2</strong> with arc consistency.</li>
+          <li>For a solvable problem that needs real search, replace the CSP with a tangled chain: variables <code>X1…X5</code> over <code>a b c</code> and <code>X6 X7</code> over <code>a b</code>, constrained <code>X1≠X2, X2≠X3, X3≠X4, X4≠X5, X5≠X6, X6≠X7, X7≠X1, X1≠X4, X2≠X5, X6≠X1, X7≠X2</code>. Static order with no inference needs <strong>69</strong> assignments; MRV + degree needs <strong>7</strong>.</li>
+          <li>Add the constraint <code>WA != T</code> and watch T stop being a free variable.</li>
+        </ul>
+      </div>
+      <h2 id="sc-actool">Tool · Forward checking vs AC-3</h2>
+      <div class="tool" data-run="runAC3">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Inference comparison</h3></div>
+        <p class="tool-desc"><strong>Click values to build any partial assignment, then walk AC-3 forward one arc at a time</strong> and watch the domains shrink next to what forward checking manages on the same input. Uses the CSP entered above.</p>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1; min-width:260px;">
+            <label for="ac-assign">Partial assignment — <code>VAR=value</code>, comma separated</label>
+            <input type="text" id="ac-assign" value="WA=red, Q=green" style="width:100%;">
+          </div>
+          <button class="tool-btn" onclick="runAC3()">Compare</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="ac-output" class="tool-output"></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The demonstration to run</div>
+        With <code>WA=red, Q=green</code>, forward checking survives but AC-3 <strong>empties a domain</strong> — the slide's exact claim that arc consistency detects failure earlier. Then try <code>WA=red, Q=green, V=blue</code> and watch forward checking finally catch up.
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Which variable empties is not fixed — and that's fine</div>
+        The slide's trace ends with <strong>SA</strong> empty; the tool may report <strong>NT</strong>. Both are correct. After WA=red and Q=green, <strong>NT and SA are neighbours that have both been reduced to {blue}</strong>, so whichever arc — SA→NT or NT→SA — comes off the queue first is the one that wipes out.
+        <p style="margin:10px 0 0 0;">AC-3 gives no guarantee about <em>which</em> domain empties, only that <strong>if the CSP is arc-inconsistent, some domain will</strong>. In an exam, name the variable your own trace produces and show the arc that did it.</p>
+      </div>
+      <!-- ===== VALUE ===== -->
+      <h2 id="sc-value">Why constraint propagation pays off</h2>
+      <div class="callout exam">
+        <div class="callout-label">The argument</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>Constraint propagation is <strong>often faster than traditional state-space search</strong>, because state-space search only cares if a state is the <em>goal</em>, not whether it is <strong>valid</strong> — and it is <strong>not immediately obvious what a good heuristic is</strong> for this kind of problem.</li>
+          <li>Constraint propagation <strong>eliminates areas of the state space that are no longer relevant</strong>: if we know this state isn't a valid solution, we can discard it <strong>and all further refinements of it</strong>.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The numbers from the slide</div>
+        For <strong>{SA = blue}</strong>:
+        <ul style="margin:8px 0 0 0;">
+          <li>This state leaves <strong>3<sup>5</sup> = 243</strong> possible states for the neighbouring values — a lot of them invalid.</li>
+          <li>With constraint propagation: <strong>2<sup>5</sup> = 32</strong> possible states.</li>
+          <li>A <strong>reduction of 87%</strong>.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">This enables dense or intractable problems to be searched through much faster.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Where 243 and 32 come from</div>
+        SA has <strong>five</strong> neighbours (WA, NT, Q, NSW, V). Before propagation each has 3 colours: 3⁵ = 243. Setting SA = blue removes blue from every neighbour, leaving 2 each: 2⁵ = 32. And <strong>32/243 ≈ 0.13</strong>, so 87% of that subtree is gone from a single assignment — which is the whole argument for inference in one line.
+      </div>
+      <div class="callout">
+        <div class="callout-label">Summary of the deck</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>Problems of assignment are <strong>less concerned with the path taken than the solution</strong>.</li>
+          <li><strong>CSPs</strong> let us define assignment problems with specific variables, domains and constraints.</li>
+          <li><strong>Backtracking search</strong> is one approach towards solving a simple CSP.</li>
+          <li>We can improve <strong>variable selection through heuristics</strong>.</li>
+          <li><strong>Forward checking and arc consistency</strong> help prevent wasted search.</li>
+        </ul>
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="sc-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 4</div>
+        <ol>
+          <li><strong>CSP as a search problem</strong> — states are assignments; initial state has nothing assigned; an action assigns a value <em>provided it violates no constraint</em>; the goal test is all variables assigned and all constraints satisfied.</li>
+          <li><strong>The tree is only depth n</strong>, but has <strong>n! × m<sup>n</sup></strong> paths.</li>
+          <li><strong>Commutativity</strong> — [WA=red, NT=green] = [NT=green, WA=red] — lets single-variable assignment cut n! × m<sup>n</sup> down to <strong>m<sup>n</sup></strong>. Know this reduction.</li>
+          <li><strong>Backtracking search is depth-first search</strong> with one variable assigned per level, checking for failure and backtracking.</li>
+          <li><strong>MRV</strong> = most constrained variable = fewest legal values. <strong>Degree</strong> = most constraining variable = imposes the most constraints on others. <strong>LCV</strong> = least constraining value = rules out the fewest values elsewhere.</li>
+          <li><strong>Forward checking</strong> — track remaining legal values for unassigned variables; terminate when any variable has none; it propagates from <em>assigned</em> to <em>unassigned</em> variables.</li>
+          <li><strong>Arc consistency</strong> — X → Y is consistent iff for each value of X there is an allowed value of Y; checking X → Y deletes values <em>from X</em>; if X loses a value, all arcs Z → X must be rechecked.</li>
+          <li><strong>Arc consistency detects failure earlier than forward checking</strong>, and can be run before or after each assignment.</li>
+          <li><strong>Be able to reproduce both worked runs</strong> — FC fails after WA=red, Q=green, V=blue (SA empties); AC fails after just WA=red, Q=green.</li>
+          <li><strong>AC-3</strong> — a queue of all arcs; pop, run REMOVE-INCONSISTENT-VALUES, and if it removed anything, add every arc (X_k, Xᵢ) for neighbours X_k back to the queue.</li>
+          <li><strong>The 87% figure</strong> — {SA = blue} goes from 3⁵ = 243 to 2⁵ = 32 states for its five neighbours.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 2.</p>
+    </section>

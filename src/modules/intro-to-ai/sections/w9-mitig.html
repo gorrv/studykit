@@ -1,0 +1,220 @@
+<section id="w9-mitig" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 09 · Part 4 · AI Ethics</div>
+        <h1>Mitigation &amp; Responsibility</h1>
+        <div class="week-subtitle">principles, governance, named methods — and who is answerable</div>
+      </div>
+      <!-- ===== PRINCIPLES ===== -->
+      <h2 id="mt-prin">Designing with ethical principles</h2>
+      <div class="callout">
+        <div class="callout-label">Who publishes these</div>
+        <strong>Many institutions are adopting guidelines for the ethical development and deployment of AI</strong> — <strong>governmental</strong> (UK EPSRC, NHS, EU…) and <strong>professional</strong> (IEEE, ACM…).
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The seven principles table — reproduced in full</div>
+        <table class="cmp-table">
+          <tr><th>Principle</th><th>Description</th></tr>
+          <tr><td><strong>Human oversight and agency</strong></td><td>Upholding fundamental rights, informed decisions, correct trust, human-in-the-loop</td></tr>
+          <tr><td><strong>Safety and robustness</strong></td><td>Minimization of errors, functioning for a range of settings, resilience to attack</td></tr>
+          <tr><td><strong>Privacy</strong></td><td>Consent, anonymity, access, de-anonymization</td></tr>
+          <tr><td><strong>Transparency</strong></td><td>Documentation and logging of data/decisions, explainability, informing when AI is used</td></tr>
+          <tr><td><strong>Fairness</strong></td><td>Non-discrimination, accessibility, stakeholder participation</td></tr>
+          <tr><td><strong>Societal &amp; environmental wellbeing</strong></td><td>Environmental impact, impact to social relationships, democracy, politics</td></tr>
+          <tr><td><strong>Accountability</strong></td><td>Auditability, documenting how dilemmas and trade-offs were resolved, responsibility for harms</td></tr>
+        </table>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The structure that makes this table memorable</div>
+        <strong>The principles are the harms, restated as requirements.</strong> Line them up: agency ↔ human agency harms, safety ↔ safety and wellbeing, privacy ↔ privacy, fairness ↔ fairness and dignity, societal &amp; environmental ↔ the last two harm categories, accountability ↔ accountability harms.
+        <p style="margin:10px 0 0 0;">The one principle with no matching harm category is <strong>transparency</strong> — and the one harm category with no matching principle name is <em>none</em>, since societal and environmental are merged into one principle. So the mapping is nearly one-to-one, with transparency as the extra. <strong>If you can recall the seven harms you can reconstruct this table.</strong></p>
+        <p style="margin:10px 0 0 0;">Note also what sits under accountability: <strong>documenting how dilemmas and trade-offs were resolved.</strong> Not <em>avoiding</em> trade-offs — recording how you made them. That is a realistic standard, and worth quoting.</p>
+      </div>
+      <!-- ===== GOVERNANCE ===== -->
+      <h2 id="mt-gov">Governance methods</h2>
+      <div class="callout exam">
+        <div class="callout-label">Three items</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Strengthening regulations, standards, codes of conduct</strong> — to <strong>safeguard current deployments</strong> and to <strong>guide/constrain the trajectory of future development</strong>.</li>
+          <li><strong>Implementing processes of internal and external auditing, verification and validation.</strong></li>
+          <li><strong>“Trustworthy AI”: design AND governance that leads to AI we can trust</strong> — designing AI with ethical principles, <em>and</em> governing development and deployment.</li>
+        </ul>
+        <p style="margin:12px 0 0 0;">The capitalised <strong>AND</strong> is the lecture's own emphasis, and it is the examinable point: <strong>“trustworthy AI” is not a design property alone.</strong> A perfectly principled system inside an ungoverned organisation is not trustworthy, and vice versa.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Two timescales in one bullet</div>
+        Regulation is doing two different jobs: <strong>safeguarding what is already deployed</strong> (a present-tense job, backward-looking) and <strong>constraining the trajectory of future development</strong> (a forward-looking one). Most public argument about AI regulation conflates them, and separating them is a good move in a discussion answer.
+        <p style="margin:10px 0 0 0;">Note too that <strong>auditing is specified as internal <em>and</em> external</strong>. Internal audit alone has an obvious conflict of interest, and external audit alone lacks access — the pairing is the point.</p>
+      </div>
+      <!-- ===== VALUE ALIGNMENT ===== -->
+      <h2 id="mt-val">Value alignment methods</h2>
+      <div class="callout exam">
+        <div class="callout-label">What it is</div>
+        <strong>Aligning AI behaviour with human values.</strong>
+        <ul style="margin:10px 0 0 0;">
+          <li><strong>Used extensively in chatbots.</strong></li>
+          <li>For example, <strong>a machine learning model trained to predict how aligned a given output is to human values</strong> (e.g. honesty, clarity) <strong>based on many examples</strong>.</li>
+        </ul>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Both a technical and a social problem</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>How to encode behaviour rules into a system</strong> — the technical half.</li>
+          <li><strong>Finding out what values we (and society) want for a system</strong> — the social half.</li>
+        </ul>
+        <p style="margin:12px 0 0 0;"><strong>Important in Game AI, credit scoring, Gen AI — most systems.</strong></p>
+        <p style="margin:10px 0 0 0;">The split is the thing to remember. Solving the technical half perfectly gets you a system that faithfully implements whatever values were specified — which, if the second half was skipped, is exactly the political-control slide from Part 1.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The third appearance of this idea</div>
+        Value alignment was introduced in <strong>Week 1</strong> as the difficulty of exactly specifying “good”. <strong>Weeks 4 and 8</strong> made it concrete: the reward function <em>is</em> the specification, and an agent optimises precisely what you wrote, not what you meant. Here it returns as a named mitigation method. Being able to trace it through all three is the kind of cross-week connection that reads well in an exam.
+      </div>
+      <!-- ===== BIAS MITIGATION ===== -->
+      <h2 id="mt-bias">Bias mitigation methods</h2>
+      <div class="callout exam">
+        <div class="callout-label">Four named methods — and they are genuinely different</div>
+        <table class="cmp-table">
+          <tr><th>Method</th><th>What it changes</th><th>The lecture's description</th></tr>
+          <tr><td><strong>Dataset curation</strong></td><td>the data itself</td><td>Improve the curation process, to appropriately represent minority and marginalized groups, to remove harmful content, etc. Includes <strong>participatory design</strong>.</td></tr>
+          <tr><td><strong>Reweighting</strong></td><td>the weight of each example</td><td>During training, <strong>weight data from minority groups more highly</strong>.</td></tr>
+          <tr><td><strong>Resampling</strong></td><td>how often each example is drawn</td><td>During training, <strong>sample data from minority groups more often</strong>.</td></tr>
+          <tr><td><strong>Fairness functions</strong></td><td>the objective</td><td>Instead of maximizing average accuracy → <strong>maximize minimum accuracy</strong>; maximize accuracy and minimize performance differences, etc.</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Reweighting and resampling are not the same method described twice.</strong> One changes each example's contribution to the loss; the other changes the composition of the batches. They often have similar effects, and an answer that treats them as synonyms is losing an easy mark.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Which method for which cause</div>
+        The four map onto the five causes from Part 3 rather neatly, and pairing them is a strong way to answer a “how would you mitigate this” question:
+        <table class="cmp-table" style="margin-top:10px;">
+          <tr><th>cause</th><th>method that addresses it</th></tr>
+          <tr><td>Representation bias</td><td>dataset curation · resampling · reweighting</td></tr>
+          <tr><td>Measurement bias</td><td>none of the four — you must change the <strong>label</strong>, or abandon the task</td></tr>
+          <tr><td>Algorithm bias</td><td><strong>fairness functions</strong></td></tr>
+          <tr><td>Evaluation bias</td><td>disaggregated metrics — the “performance differences between social groups” row of the anticipation table</td></tr>
+          <tr><td>World bias</td><td>fairness functions, or reconsidering the label — no data fix exists</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Measurement bias is the one with no technical remedy on the list</strong>, which is why the phrenology slide ends the way it does.</p>
+      </div>
+      <!-- ===== FAIRNESS TOOL ===== -->
+      <h2 id="mt-ftool">Tool · What a fairness function actually changes</h2>
+      <div class="tool" data-run="runFair">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Average accuracy vs minimum accuracy vs smallest gap</h3></div>
+        <p class="tool-desc">The fourth bias-mitigation bullet says to maximise the <em>minimum</em> accuracy rather than the average. This computes both, plus the gap, for any table of per-group accuracies — and tells you when the three objectives <strong>pick different models</strong>. Group sizes go in the header as <code>name (n=…)</code>, which is what makes the overall figure diverge from the macro average. Presets: the <strong>Gender Shades</strong> table from the lecture's own slide, a case built so the objectives disagree, and Week 5's accuracy trap.</p>
+        <div class="tool-field"><label for="fr-data">Per-group accuracy (%) — header row is <code>label, group (n=…), …</code>, then one row per model</label>
+          <textarea id="fr-data" rows="5" spellcheck="false">system, Type I, Type II, Type III, Type IV, Type V, Type VI
+Microsoft, 98.3, 98.9, 96.7, 100, 76.8, 75.0
+Face++, 88.1, 90.3, 91.8, 86.1, 67.6, 53.5
+IBM, 94.9, 92.6, 91.8, 91.7, 66.7, 53.2</textarea></div>
+        <div class="tool-controls" style="margin-top:12px;"><button class="tool-btn" onclick="runFair()">Compare</button></div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="fr-output" class="tool-output"></div>
+      </div>
+      <!-- ===== PRIVACY ===== -->
+      <h2 id="mt-priv">Privacy mitigation methods</h2>
+      <div class="callout exam">
+        <div class="callout-label">Two named methods</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Anonymization algorithms</strong> — <strong>face blurring</strong>; <strong>text anonymization techniques</strong>.</li>
+          <li><strong>Differential privacy</strong> — <strong>releasing information about a dataset in a way that does not allow you to know if a person is part of that dataset</strong>, usually by <strong>adding noise to computations in a smart way</strong>.</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The distinction the definition is making</div>
+        Anonymization removes identifying <em>content</em>. Differential privacy protects something stronger and less obvious: <strong>membership</strong>. Even a fully anonymised aggregate can leak the fact that a particular person was in the dataset — and if the dataset is “patients treated for X”, membership is the sensitive fact. That is why noise is added to the <em>computation</em> rather than to the records.
+        <p style="margin:10px 0 0 0;">“In a smart way” is doing real work: the noise has to be calibrated so the aggregate stays useful while any single person's presence stays undetectable.</p>
+      </div>
+      <!-- ===== ENVIRONMENT ===== -->
+      <h2 id="mt-env">Environmental mitigation methods</h2>
+      <div class="callout exam">
+        <div class="callout-label">Two named methods</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Code emission estimation methods</strong> — many libraries exist, e.g. <strong>CodeCarbon</strong>.</li>
+          <li><strong>Solving problems with smaller models.</strong></li>
+        </ul>
+        <p style="margin:12px 0 0 0;">Note the order: <strong>measure first, then reduce.</strong> It is the same shape as the anticipation table in Part 2 — you cannot manage what you have not instrumented.</p>
+      </div>
+      <!-- ===== TOOL ===== -->
+      <h2 id="mt-ptool">Tool · Principles &amp; mitigation reference</h2>
+      <div class="tool" data-run="runPrin">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>The two tables, plus a drill on the principles</h3></div>
+        <p class="tool-desc">Both reference tables in one place — the <strong>seven principles</strong> with their descriptions, and every <strong>mitigation method</strong> the lecture names, grouped by the area it addresses. <strong>★ name the principle</strong> shows you a description and asks which principle it belongs to, which is the form these come up in.</p>
+        <div class="tool-controls" style="margin-top:4px;"><button class="tool-btn" onclick="runPrin()">Open</button></div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="pn-output" class="tool-output"></div>
+      </div>
+      <!-- ===== RESPONSIBILITY ===== -->
+      <h2 id="mt-resp">Who is responsible for the harms of AI?</h2>
+      <div class="callout exam">
+        <div class="callout-label">Three answers, and the lecture gives all three</div>
+        <table class="cmp-table">
+          <tr><th>Who</th><th>For what</th></tr>
+          <tr><td><strong>The institution that designs the system</strong></td><td>For allowing any of the harms to take place</td></tr>
+          <tr><td><strong>The ethics board</strong></td><td>For passing an unethical product/application</td></tr>
+          <tr><td><strong>The developers</strong></td>
+            <td>
+              <ul style="margin:0;">
+                <li><strong>Many harms are best anticipated by developers</strong></li>
+                <li><strong>Many harms can only be tested or minimized by developers</strong></li>
+                <li>Responsible for <strong>algorithm transparency, inefficiency, power consumption…</strong></li>
+              </ul></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>The argument for developer responsibility is an argument from position, not from blame.</strong> It is not that developers are the worst actors — it is that they are frequently the <em>only</em> people who can see the problem coming and the only ones who can test for it. Responsibility follows capability. That is the reasoning to reproduce, and it is why four of the five bias causes carry the ★.</p>
+      </div>
+      <!-- ===== MINIMISING ===== -->
+      <h2 id="mt-min">Minimising the harms of AI</h2>
+      <div class="callout exam">
+        <div class="callout-label">The nine-item list</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Awareness of ethical issues; staying informed; being critical</strong></li>
+          <li><strong>Participatory design</strong></li>
+          <li><strong>Team diversity</strong> — <em>marginalized communities have different lived experience</em>, and it is <em>important to anticipate issues</em></li>
+          <li><strong>Balanced datasets</strong></li>
+          <li><strong>Testing with diverse groups</strong></li>
+          <li><strong>Documenting datasets, models, algorithms, design choices</strong></li>
+          <li><strong>Logging, explainable methods</strong></li>
+          <li><strong>Ethics boards</strong></li>
+          <li><strong>Whistleblowing</strong></li>
+        </ol>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The list has a shape worth pointing out</div>
+        It runs roughly through the lifecycle: <strong>before building</strong> (awareness, participatory design, team diversity) → <strong>while building</strong> (balanced datasets, testing with diverse groups) → <strong>documenting what you built</strong> (documentation, logging, explainability) → <strong>institutional checks</strong> (ethics boards) → <strong>and, when all of that fails, whistleblowing.</strong>
+        <p style="margin:10px 0 0 0;">Whistleblowing being last is not an accident. It is the remedy for the second branch of the causes slide — the case where the risk was obvious, the task was problematic, and the organisation decided to proceed anyway. <strong>Every other item on the list assumes good faith; that one does not.</strong></p>
+        <p style="margin:10px 0 0 0;">A “how would you minimise these harms” answer that names items from <em>several</em> stages will beat one that lists three technical fixes.</p>
+      </div>
+      <!-- ===== CONCLUSION ===== -->
+      <h2 id="mt-concl">The conclusion slide — all five questions answered</h2>
+      <div class="callout exam">
+        <div class="callout-label">Worth learning close to verbatim</div>
+        <table class="cmp-table">
+          <tr><th>Question</th><th>The lecture's answer</th></tr>
+          <tr><td><strong>How is AI applied in practice? Who has access? Who benefits?</strong></td>
+            <td>Well-meaning and bad applications; <strong>unequal access; unequal benefits</strong></td></tr>
+          <tr><td><strong>What are the harms and ethical considerations of AI? Who is harmed?</strong></td>
+            <td>Human agency, safety, privacy, transparency, fairness, societal, environmental, accountability; <strong>more harm often to already marginalized groups</strong></td></tr>
+          <tr><td><strong>How does bias manifest in AI? Why does it arise?</strong></td>
+            <td>Different impact on different social groups; because of <strong>world / representation / measurement / algorithm / evaluation bias</strong>, and <strong>lack of anticipation, testing and action</strong></td></tr>
+          <tr><td><strong>Who is responsible for the harms of AI?</strong></td>
+            <td><strong>Institutions designing algorithms, managers, ethics boards, and developers too</strong></td></tr>
+          <tr><td><strong>How do we minimise these harms?</strong></td>
+            <td><strong>Awareness, anticipation, participation, diversity, testing, documentation, reporting, whistleblowing</strong></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">Two things to notice. The harms line in the conclusion says <strong>“transparency”</strong> where the harms slide said <em>fairness and dignity</em> — the conclusion is loosely blending the harm list with the principles list, so quote whichever the question asks for. And <strong>“more harm often to already marginalized groups”</strong> is the single sentence that ties the entire lecture together: it is the answer to “who is harmed?” in every section.</p>
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="mt-key">Exam takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">What to have ready</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>The seven principles:</strong> human oversight and agency · safety and robustness · privacy · transparency · fairness · societal &amp; environmental wellbeing · accountability. They mirror the seven harms, with transparency as the extra.</li>
+          <li><strong>Governance:</strong> regulations/standards/codes (safeguard present, constrain future) · internal <em>and</em> external auditing, verification, validation · <strong>“Trustworthy AI” = design AND governance.</strong></li>
+          <li><strong>Value alignment</strong> is technical (encode the rules) <em>and</em> social (decide what the values are).</li>
+          <li><strong>Bias mitigation:</strong> dataset curation (incl. participatory design) · reweighting · resampling · fairness functions. Know that reweighting ≠ resampling, and that <strong>fairness functions maximise the minimum accuracy.</strong></li>
+          <li><strong>Privacy mitigation:</strong> anonymization (face blurring, text) · differential privacy (hides <em>membership</em>, by adding noise to computations).</li>
+          <li><strong>Environmental mitigation:</strong> emission estimation (e.g. CodeCarbon) · smaller models.</li>
+          <li><strong>Responsibility:</strong> the institution, the ethics board, and developers — the last because they are best placed to anticipate and the only ones able to test.</li>
+          <li><strong>Minimising:</strong> awareness · participatory design · team diversity · balanced datasets · testing with diverse groups · documentation · logging and explainability · ethics boards · whistleblowing.</li>
+          <li><strong>The conclusion slide answers all five key questions</strong> in one line each — the safest possible structure for an open-ended question.</li>
+        </ul>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 9.</p>
+    </section>

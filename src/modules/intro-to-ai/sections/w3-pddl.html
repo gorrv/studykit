@@ -1,0 +1,228 @@
+<section id="w3-pddl" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 03 · Part 2 · Automated planning</div>
+        <h1>PDDL Basics</h1>
+        <div class="week-subtitle">the language every planner speaks</div>
+      </div>
+      <!-- ===== WHY ===== -->
+      <h2 id="d-why">Language + algorithm</h2>
+      <div class="callout exam">
+        <div class="callout-label">The general approach to solving planning problems</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>A <strong>planning language</strong> — allows you to write the definition of a planning problem in text.</li>
+          <li>A <strong>planning algorithm</strong> — allows you to solve <em>any</em> problem given to it in that language.</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">This separation is the entire idea</div>
+        Because the language is standard, <strong>your model and their solver are independent</strong>. Improve the model and every planner benefits; improve the planner and every model benefits. It is the same bargain as SQL: describe <em>what</em>, and someone else's engine works out <em>how</em>.
+        <p style="margin:10px 0 0 0;">Hence the long list of planners in the slides — Zeno, FF, MetricFF, VHPOP, Marvin, Crikey, POPF, MIPS-XXL, LPGP, LPRPG, CoLin, Fast Downward, UPMurphi, Gamer, MBP — all competing in the <strong>International Planning Competition</strong>, all consuming the same input.</p>
+      </div>
+      <!-- ===== VERSIONS ===== -->
+      <h2 id="d-vers">PDDL and its versions</h2>
+      <div class="callout exam">
+        <div class="callout-label">PDDL — Planning Domain Definition Language</div>
+        The <strong>standard language spoken by the planners</strong>. If you write a correct model of your planning problem in PDDL, you can use existing planners to solve it.
+        <p style="margin:10px 0 0 0;">Different versions (levels), each able to handle different features:</p>
+        <table style="margin:10px 0 0 0;">
+          <tr><td><strong>PDDL</strong></td><td>propositional planning</td></tr>
+          <tr><td><strong>PDDL 2.1</strong></td><td>numbers + time</td></tr>
+          <tr><td><strong>PDDL 3</strong></td><td>preferences</td></tr>
+          <tr><td><strong>PDDL+</strong></td><td>continuous change, processes, events</td></tr>
+        </table>
+      </div>
+      <!-- ===== FILES ===== -->
+      <h2 id="d-files">Domain and problem files</h2>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">Domain file — one</h4>
+          <ul style="font-size:13.5px;">
+            <li><strong>General description of the world.</strong></li>
+            <li>Which types of objects are involved.</li>
+            <li>What actions can be applied, etc.</li>
+          </ul>
+        </div>
+        <div class="mode-box" style="background:var(--tint-b); border-color:var(--accent-2);">
+          <h4 style="color:var(--accent-2);">Problem file(s) — many</h4>
+          <ul style="font-size:13.5px;">
+            <li><strong>The specific situation you want to solve.</strong></li>
+            <li>List of objects.</li>
+            <li>Initial state, goal state.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">One domain, many problems</div>
+        The slides draw one <em>Domain</em> in the middle with eight <em>Problems</em> orbiting it. That's the shape to remember: <strong>the rules of the world are written once</strong>, and each puzzle you want solved is a small file naming the objects, what's true at the start, and what you want true at the end.
+        <p style="margin:10px 0 0 0;">Quick test of whether something belongs in the domain: <em>would it still be true for a different puzzle in the same world?</em> "A gripper can hold one ball" → domain. "There are four balls and they start in room A" → problem.</p>
+      </div>
+      <!-- ===== GRIPPER ===== -->
+      <h2 id="d-grip">The Gripper domain</h2>
+      <div class="callout">
+        <div class="callout-label">The problem</div>
+        A robot can move between two rooms and pick up or drop balls with either of his two arms.
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Initial state:</strong> balls b1..b5 in room A, robot in room A.</li>
+          <li><strong>Goal state:</strong> balls b1..b5 in room B, robot in room B.</li>
+          <li><strong>Actions:</strong> move from one room to the other; pick up a ball in a gripper; drop a ball.</li>
+        </ul>
+      </div>
+      <table>
+        <tr><th>Action</th><th>Parameters</th><th>Preconditions</th><th>Effects</th></tr>
+        <tr><td><strong>Move</strong></td><td>Room <em>x</em><br>Room <em>y</em></td><td><code>at-robot(x)</code></td>
+            <td><code style="color:var(--accent-3);">+ at-robot(y)</code><br><code style="color:var(--accent-2);">− at-robot(x)</code></td></tr>
+        <tr><td><strong>PickUp</strong></td><td>Room <em>x</em><br>Ball <em>b</em><br>Gripper <em>g</em></td>
+            <td><code>at-robot(x)</code><br><code>at(b, x)</code><br><code>free(g)</code></td>
+            <td><code style="color:var(--accent-3);">+ carry(g, b)</code><br><code style="color:var(--accent-2);">− at(b, x)</code><br><code style="color:var(--accent-2);">− free(g)</code></td></tr>
+        <tr><td><strong>Drop</strong></td><td>Room <em>x</em><br>Ball <em>b</em><br>Gripper <em>g</em></td>
+            <td><code>at-robot(x)</code><br><code>carry(g, b)</code></td>
+            <td><code style="color:var(--accent-3);">+ at(b, x)</code><br><code style="color:var(--accent-3);">+ free(g)</code><br><code style="color:var(--accent-2);">− carry(g, b)</code></td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">Where the "two arms" constraint actually is</div>
+        Nowhere explicit — it falls out of <code>free(g)</code>. PickUp requires the gripper to be free and deletes that fact; Drop restores it. So <strong>each gripper holds at most one ball, and with two gripper objects the robot carries at most two</strong>. There's no counting anywhere. That's the classical-PDDL style: capacity limits are encoded as facts that get consumed and released. When you want to say "capacity 4" instead of "capacity 1", you need <em>fluents</em> — Part 3.
+      </div>
+      <h3>In PDDL</h3>
+      <p><strong>Objects and predicates:</strong></p>
+      <pre><code>(<span class="kw">:objects</span> roomA roomB
+          ball1 ball2 ball3 ball4
+          left right)
+
+(<span class="kw">:predicates</span> (<span class="ty">ROOM</span> ?x) (<span class="ty">BALL</span> ?x) (<span class="ty">GRIPPER</span> ?x)
+             (<span class="ty">at-robot</span> ?x) (<span class="ty">at</span> ?x ?y)
+             (<span class="ty">free</span> ?x) (<span class="ty">carry</span> ?x ?y))</code></pre>
+      <div class="callout warn">
+        <div class="callout-label">Why ROOM, BALL and GRIPPER are predicates here</div>
+        This version of PDDL has <strong>no type system</strong>, so "x is a room" has to be stated as an ordinary fact — hence the upper-case type predicates, asserted in <code>:init</code> and tested in every precondition. With <code>:typing</code> (used in Part 3) you write <code>?x - room</code> instead and the checking is free. Conventionally the type predicates are capitalised so you can see at a glance which preconditions are real and which are just type checks.
+      </div>
+      <p><strong>Initial state:</strong></p>
+      <pre><code>(<span class="kw">:init</span> (<span class="ty">ROOM</span> rooma) (<span class="ty">ROOM</span> roomb)
+       (<span class="ty">BALL</span> ball1) (<span class="ty">BALL</span> ball2) (<span class="ty">BALL</span> ball3) (<span class="ty">BALL</span> ball4)
+       (<span class="ty">GRIPPER</span> left) (<span class="ty">GRIPPER</span> right)
+       (<span class="ty">free</span> left) (<span class="ty">free</span> right)
+       (<span class="ty">at-robot</span> rooma)
+       (<span class="ty">at</span> ball1 rooma) (<span class="ty">at</span> ball2 rooma)
+       (<span class="ty">at</span> ball3 rooma) (<span class="ty">at</span> ball4 rooma))</code></pre>
+      <p><strong>Goal state:</strong></p>
+      <pre><code>(<span class="kw">:goal</span> (<span class="kw">and</span> (<span class="ty">at</span> ball1 roomb)
+            (<span class="ty">at</span> ball2 roomb)
+            (<span class="ty">at</span> ball3 roomb)
+            (<span class="ty">at</span> ball4 roomb)))</code></pre>
+      <p><strong>The three actions:</strong></p>
+      <pre><code>(<span class="kw">:action</span> move
+ <span class="kw">:parameters</span> (?x ?y)
+ <span class="kw">:precondition</span> (<span class="kw">and</span> (<span class="ty">ROOM</span> ?x) (<span class="ty">ROOM</span> ?y)
+                    (<span class="ty">at-robot</span> ?x))
+ <span class="kw">:effect</span>
+   (<span class="kw">and</span> (<span class="ty">at-robot</span> ?y) (<span class="kw">not</span> (<span class="ty">at-robot</span> ?x))))
+
+(<span class="kw">:action</span> pick-up
+ <span class="kw">:parameters</span> (?x ?y ?z)
+ <span class="kw">:precondition</span> (<span class="kw">and</span> (<span class="ty">BALL</span> ?x) (<span class="ty">ROOM</span> ?y) (<span class="ty">GRIPPER</span> ?z)
+                    (<span class="ty">at</span> ?x ?y) (<span class="ty">at-robot</span> ?y)
+                    (<span class="ty">free</span> ?z))
+ <span class="kw">:effect</span>
+   (<span class="kw">and</span> (<span class="ty">carry</span> ?z ?x) (<span class="kw">not</span> (<span class="ty">at</span> ?x ?y)) (<span class="kw">not</span> (<span class="ty">free</span> ?z))))
+
+(<span class="kw">:action</span> drop
+ <span class="kw">:parameters</span> (?x ?y ?z)
+ <span class="kw">:precondition</span> (<span class="kw">and</span> (<span class="ty">BALL</span> ?x) (<span class="ty">ROOM</span> ?y) (<span class="ty">GRIPPER</span> ?z)
+                    (<span class="ty">carry</span> ?z ?x) (<span class="ty">at-robot</span> ?y))
+ <span class="kw">:effect</span>
+   (<span class="kw">and</span> (<span class="ty">at</span> ?x ?y) (<span class="ty">free</span> ?z) (<span class="kw">not</span> (<span class="ty">carry</span> ?z ?x))))</code></pre>
+      <div class="callout exam">
+        <div class="callout-label">The syntax rules worth writing on a cheat sheet</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Everything is a parenthesised list</strong> — Lisp style.</li>
+          <li><strong><code>?x</code> is a variable</strong>; a bare name is an object.</li>
+          <li>An action has <strong><code>:parameters</code>, <code>:precondition</code>, <code>:effect</code></strong>.</li>
+          <li>Multiple conditions are joined with <strong><code>(and …)</code></strong>.</li>
+          <li><strong>Delete effects are written <code>(not (fact))</code></strong> inside the effect — there is no separate delete list.</li>
+          <li>The goal is <code>(:goal (and …))</code>, the start is <code>(:init …)</code>.</li>
+        </ul>
+      </div>
+      <!-- ===== FULL ===== -->
+      <h2 id="d-full">The full domain file</h2>
+      <pre><code>(<span class="kw">define</span> (<span class="kw">domain</span> gripper-strips)
+  (<span class="kw">:predicates</span> (<span class="ty">room</span> ?r) (<span class="ty">ball</span> ?b) (<span class="ty">gripper</span> ?g)
+               (<span class="ty">at-robot</span> ?r) (<span class="ty">at</span> ?b ?r) (<span class="ty">free</span> ?g) (<span class="ty">carry</span> ?o ?g))
+
+  (<span class="kw">:action</span> move
+     <span class="kw">:parameters</span> (?from ?to)
+     <span class="kw">:precondition</span> (<span class="kw">and</span> (<span class="ty">room</span> ?from) (<span class="ty">room</span> ?to) (<span class="ty">at-robot</span> ?from))
+     <span class="kw">:effect</span> (<span class="kw">and</span> (<span class="ty">at-robot</span> ?to) (<span class="kw">not</span> (<span class="ty">at-robot</span> ?from))))
+
+  (<span class="kw">:action</span> pick
+     <span class="kw">:parameters</span> (?ball ?room ?gripper)
+     <span class="kw">:precondition</span> (<span class="kw">and</span> (<span class="ty">ball</span> ?ball) (<span class="ty">room</span> ?room) (<span class="ty">gripper</span> ?gripper)
+                        (<span class="ty">at</span> ?ball ?room) (<span class="ty">at-robot</span> ?room) (<span class="ty">free</span> ?gripper))
+     <span class="kw">:effect</span> (<span class="kw">and</span> (<span class="ty">carry</span> ?ball ?gripper) (<span class="kw">not</span> (<span class="ty">at</span> ?ball ?room))
+                  (<span class="kw">not</span> (<span class="ty">free</span> ?gripper))))
+
+  (<span class="kw">:action</span> drop
+     <span class="kw">:parameters</span> (?ball ?room ?gripper)
+     <span class="kw">:precondition</span> (<span class="kw">and</span> (<span class="ty">ball</span> ?ball) (<span class="ty">room</span> ?room) (<span class="ty">gripper</span> ?gripper)
+                        (<span class="ty">carry</span> ?ball ?gripper) (<span class="ty">at-robot</span> ?room))
+     <span class="kw">:effect</span> (<span class="kw">and</span> (<span class="ty">at</span> ?ball ?room) (<span class="ty">free</span> ?gripper)
+                  (<span class="kw">not</span> (<span class="ty">carry</span> ?ball ?gripper)))))</code></pre>
+      <div class="callout">
+        <div class="callout-label">Summary of the deck</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>PDDL allows us to define problems in a <strong>set-theoretic language</strong>.</li>
+          <li><strong>Domain files</strong> store all the predicates and actions we require.</li>
+          <li>We store the actual <strong>problem instances</strong> in other files.</li>
+        </ul>
+      </div>
+      <!-- ===== BLOCKS ===== -->
+      <h2 id="d-blocks">Appendix: the Blocks World domain</h2>
+      <p>Five predicates, four actions. This is the domain Part 4 uses, so it's worth knowing well.</p>
+      <pre><code>(<span class="kw">:predicates</span> (<span class="ty">on</span> ?x ?y) (<span class="ty">ontable</span> ?x) (<span class="ty">clear</span> ?x) (<span class="ty">handempty</span>) (<span class="ty">holding</span> ?x))</code></pre>
+      <pre><code>(<span class="kw">define</span> (<span class="kw">domain</span> blocks)
+  (<span class="kw">:predicates</span> (<span class="ty">on</span> ?x ?y) (<span class="ty">ontable</span> ?x) (<span class="ty">clear</span> ?x) (<span class="ty">handempty</span>) (<span class="ty">holding</span> ?x))
+
+  (<span class="kw">:action</span> pick-up
+     <span class="kw">:parameters</span> (?x)
+     <span class="kw">:precondition</span> (<span class="kw">and</span> (<span class="ty">clear</span> ?x) (<span class="ty">ontable</span> ?x) (<span class="ty">handempty</span>))
+     <span class="kw">:effect</span> (<span class="kw">and</span> (<span class="kw">not</span> (<span class="ty">ontable</span> ?x)) (<span class="kw">not</span> (<span class="ty">clear</span> ?x))
+                  (<span class="kw">not</span> (<span class="ty">handempty</span>)) (<span class="ty">holding</span> ?x)))
+
+  (<span class="kw">:action</span> put-down
+     <span class="kw">:parameters</span> (?x)
+     <span class="kw">:precondition</span> (<span class="ty">holding</span> ?x)
+     <span class="kw">:effect</span> (<span class="kw">and</span> (<span class="kw">not</span> (<span class="ty">holding</span> ?x)) (<span class="ty">clear</span> ?x)
+                  (<span class="ty">handempty</span>) (<span class="ty">ontable</span> ?x)))
+
+  (<span class="kw">:action</span> stack
+     <span class="kw">:parameters</span> (?x ?y)
+     <span class="kw">:precondition</span> (<span class="kw">and</span> (<span class="ty">holding</span> ?x) (<span class="ty">clear</span> ?y))
+     <span class="kw">:effect</span> (<span class="kw">and</span> (<span class="kw">not</span> (<span class="ty">holding</span> ?x)) (<span class="kw">not</span> (<span class="ty">clear</span> ?y)) (<span class="ty">clear</span> ?x)
+                  (<span class="ty">handempty</span>) (<span class="ty">on</span> ?x ?y)))
+
+  (<span class="kw">:action</span> unstack
+     <span class="kw">:parameters</span> (?x ?y)
+     <span class="kw">:precondition</span> (<span class="kw">and</span> (<span class="ty">on</span> ?x ?y) (<span class="ty">clear</span> ?x) (<span class="ty">handempty</span>))
+     <span class="kw">:effect</span> (<span class="kw">and</span> (<span class="ty">holding</span> ?x) (<span class="ty">clear</span> ?y) (<span class="kw">not</span> (<span class="ty">clear</span> ?x))
+                  (<span class="kw">not</span> (<span class="ty">handempty</span>)) (<span class="kw">not</span> (<span class="ty">on</span> ?x ?y)))))</code></pre>
+      <div class="callout tip">
+        <div class="callout-label">The four actions come in two mirror pairs</div>
+        <strong>pick-up ↔ put-down</strong> (table) and <strong>unstack ↔ stack</strong> (another block). Each pair swaps <code>handempty</code> for <code>holding ?x</code> and back.
+        <p style="margin:10px 0 0 0;">Note that <code>(clear ?x)</code> is deleted when you pick a block up — because while you're holding it, nothing can be placed on it either. And the table is never mentioned as an object: "on the table" is its own predicate, <code>ontable</code>. Part 4's slides simplify all four of these into a <em>single</em> action, <code>Put X on Y from Z</code>, by treating the table as just another destination.</p>
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="d-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 2</div>
+        <ol>
+          <li><strong>Language + algorithm</strong> — a planning language lets you write the problem down; a planning algorithm solves <em>any</em> problem written in it.</li>
+          <li><strong>PDDL = Planning Domain Definition Language</strong>, the standard language spoken by planners.</li>
+          <li><strong>The versions</strong> — PDDL propositional · PDDL 2.1 numbers + time · PDDL 3 preferences · PDDL+ continuous change, processes, events.</li>
+          <li><strong>Two file types</strong> — one <em>domain</em> file (types, predicates, actions) and many <em>problem</em> files (objects, initial state, goal).</li>
+          <li><strong>Be able to write an action</strong>: <code>:parameters</code>, <code>:precondition</code>, <code>:effect</code>, with <code>(and …)</code> and delete effects as <code>(not (…))</code>.</li>
+          <li><strong>Be able to reproduce the Gripper table</strong> — Move / PickUp / Drop with their parameters, preconditions and effects, and translate it into PDDL.</li>
+          <li><strong>Type predicates</strong> like <code>(ROOM ?x)</code> exist because plain PDDL has no type system.</li>
+          <li><strong>Blocks World</strong> — predicates <code>on, ontable, clear, handempty, holding</code>; actions <code>pick-up, put-down, stack, unstack</code>.</li>
+          <li><strong>A likely exam task:</strong> given an informal domain description, write the PDDL predicates and one or two actions. Practise on something unfamiliar.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Part 2. Next: numbers and clocks.</p>
+    </section>

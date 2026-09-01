@@ -1,0 +1,168 @@
+<section id="w8-ucb" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 08 · Part 3 · Reinforcement Learning</div>
+        <h1>Upper Confidence Bound</h1>
+        <div class="week-subtitle">explore on purpose, not at random</div>
+      </div>
+
+      <!-- ===== WHY ===== -->
+      <h2 id="uc-why">What is wrong with ε-greedy</h2>
+      <div class="callout exam">
+        <div class="callout-label">It explores stupidly</div>
+        <p style="margin:0 0 10px 0;">When ε-greedy decides to explore, it picks <strong>completely at random</strong>. Suppose you have three machines:</p>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
+          Q(a₁) = 1 &nbsp;&nbsp; Q(a₂) = 10 &nbsp;&nbsp; Q(a₃) = 100</div>
+        <p style="margin:0;">You have pulled a₁ fifty times. You are <em>certain</em> it is bad. But when ε-greedy explores, <strong>a₁ is just as likely to be picked as anything else.</strong> That pull is wasted.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The fix, in one sentence</div>
+        <strong>Explore the machines you are unsure about, not random ones.</strong>
+        <p style="margin:10px 0 0 0;">To do that you need to track not just <em>what you think</em> a machine is worth, but <strong>how confident you are</strong> about it. And confidence has a simple proxy: <strong>how many times you have pulled it.</strong></p>
+      </div>
+<div class="callout">
+        <div class="callout-label">The figure</div>
+        <div class="ix-canvas"><svg width="100%" viewBox="0 0 660 210" role="img" xmlns="http://www.w3.org/2000/svg"><title>Figure 8.5</title><desc>Two actions with confidence intervals. a1 has the better estimate but a narrow interval; a2 has a lower estimate and a much wider one, so its upper bound is higher.</desc><text x="76.0" y="65.0" text-anchor="end" font-family="IBM Plex Mono" font-size="13" fill="var(--ink-muted)" font-weight="600">a&#8321;</text><line x1="381.7" y1="60" x2="465.0" y2="60" stroke="var(--ink-muted)" stroke-width="2.5"/><line x1="381.7" y1="52" x2="381.7" y2="68" stroke="var(--ink-muted)" stroke-width="2.4"/><line x1="465.0" y1="52" x2="465.0" y2="68" stroke="var(--ink-muted)" stroke-width="2.4"/><circle cx="423.3" cy="60" r="4.5" fill="var(--accent-4)"/><text x="423.3" y="46.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-4)">Q = 6</text><text x="475.0" y="64.0" text-anchor="start" font-family="IBM Plex Mono" font-size="10.5" fill="var(--ink-muted)">upper bound 7</text><text x="76.0" y="123.0" text-anchor="end" font-family="IBM Plex Mono" font-size="13" fill="var(--accent)" font-weight="600">a&#8322;</text><line x1="131.7" y1="118" x2="548.3" y2="118" stroke="var(--accent)" stroke-width="3.5"/><line x1="131.7" y1="110" x2="131.7" y2="126" stroke="var(--accent)" stroke-width="2.4"/><line x1="548.3" y1="110" x2="548.3" y2="126" stroke="var(--accent)" stroke-width="2.4"/><circle cx="340.0" cy="118" r="4.5" fill="var(--accent-4)"/><text x="340.0" y="104.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-4)">Q = 4</text><text x="558.3" y="122.0" text-anchor="start" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent)">upper bound 9</text><line x1="548.3" y1="40" x2="548.3" y2="140" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="4 3"/><text x="548.3" y="32.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent)">highest upper bound wins</text><line x1="84" y1="168" x2="590" y2="168" stroke="var(--ink-muted)"/><text x="131.7" y="184.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">-1</text><text x="215.0" y="184.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">1</text><text x="298.3" y="184.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">3</text><text x="381.7" y="184.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">5</text><text x="465.0" y="184.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">7</text><text x="548.3" y="184.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">9</text></svg></div>
+        <p style="margin:12px 0 0 0;"><strong>a&#8321; has the better estimate</strong> (Q = 6 against 4) <strong>but a narrow interval</strong> &mdash; we have pulled it a lot and we are confident. <strong>a&#8322; has been pulled barely at all</strong>, so its interval is wide and its upper end reaches 9. <strong>UCB picks a&#8322;</strong>, because it might be much better than it currently looks.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Reading that picture</div>
+        <p style="margin:0 0 10px 0;">Each bar is a machine. The dot is its current average; the bar is <strong>how uncertain you are</strong> — wide means "barely tried it".</p>
+        <ul style="margin:0;">
+          <li><strong>a₁</strong> has the better average (6 vs 4), and a narrow bar. You have pulled it a lot and you trust the 6.</li>
+          <li><strong>a₂</strong> has a worse average but a very wide bar. You have barely tried it, so it <em>could</em> be much better than 4.</li>
+        </ul>
+        <p style="margin:12px 0 0 0;"><strong>UCB judges by the right-hand end of the bar.</strong> a₂'s reaches 9, a₁'s only reaches 7 — so it takes a₂. Not because a₂ looks good, but because it <em>might</em> be good and you do not yet know.</p>
+        <p style="margin:10px 0 0 0;">And this cannot go on forever. Every time you pull a₂ its bar shrinks. Eventually it either proves itself, or its bar drops below a₁'s and you go back to a₁.</p>
+      </div>
+
+      <!-- ===== DEFINITION ===== -->
+      <h2 id="uc-def">The rule</h2>
+      <div class="callout exam">
+        <div class="callout-label">In words first</div>
+        <strong>For each machine, add a bonus to its average. The bonus is big when you have not pulled it much. Then pull whichever total is highest.</strong>
+        <p style="margin:12px 0 0 0;">That is the entire method. The formula just says how big the bonus is.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Definition 8.7</div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:12px 0;">
+          A<sub>t</sub> = arg max<sub>a</sub> [ Q<sub>t</sub>(a) + c √( ln t / N<sub>t</sub>(a) ) ]</div>
+        <table class="cmp-table">
+          <tr><th>piece</th><th>is</th></tr>
+          <tr><td><strong>A<sub>t</sub></strong></td><td>the machine you pull at step t. It is <code>arg max</code>, so <strong>the answer is a machine, not a number</strong>.</td></tr>
+          <tr><td><strong>Q<sub>t</sub>(a)</strong></td><td>its average so far — the same running average from Part 1</td></tr>
+          <tr><td><strong>N<sub>t</sub>(a)</strong></td><td>how many times you pulled it <strong>before</strong> now</td></tr>
+          <tr><td><strong>t</strong></td><td>which step you are on overall</td></tr>
+          <tr><td><strong>c</strong></td><td>a dial you set in advance — bigger c means more exploring</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">Because <strong>N is on the bottom of the fraction</strong>, a machine you have barely pulled gets a big bonus. Pull it more and the bonus shrinks.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Remark 8.8 — two rules you need before you can compute anything</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>If you have never pulled a machine, N = 0, and dividing by zero gives ∞.</strong> An infinite score always wins, so <strong>every machine gets tried once before any machine gets tried twice.</strong> A UCB trace therefore always starts a₁, a₂, a₃, … in order.</li>
+          <li><strong>If two machines tie, take the lower-numbered one.</strong> a₁ beats a₂.</li>
+        </ul>
+        <p style="margin:12px 0 0 0;"><strong>Careful:</strong> the greedy method breaks ties by <em>randomising</em>. UCB breaks them by <em>lowest index</em>. Two different rules in the same week, and swapping them wrecks a whole trace.</p>
+        <p style="margin:10px 0 0 0;">One nice consequence: because N = 0 forces a pull, <strong>UCB needs no starting value for Q</strong>, unlike greedy.</p>
+      </div>
+
+      <!-- ===== TERMS ===== -->
+      <h2 id="uc-terms">The two halves</h2>
+            <div class="callout tip">
+        <div class="callout-label">Computing ln t without a calculator</div>
+        <p style="margin:0 0 10px 0;">Most papers give you these or allow a calculator &mdash; but t is always small, so four numbers cover everything:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1.9; margin:0 0 12px 14px;">
+          ln 2 = 0.693 &nbsp;&nbsp; ln 3 = 1.099 &nbsp;&nbsp; ln 5 = 1.609 &nbsp;&nbsp; ln 7 = 1.946
+        </div>
+        <p style="margin:0 0 10px 0;">Everything else is those added together, because <strong>multiplying inside a log means adding outside it</strong>:</p>
+        <table class="cmp-table">
+          <tr><th>ln 1</th><th>ln 4</th><th>ln 6</th><th>ln 8</th><th>ln 9</th><th>ln 10</th></tr>
+          <tr><td>&mdash;</td><td>2&#183;ln2</td><td>ln2+ln3</td><td>3&#183;ln2</td><td>2&#183;ln3</td><td>ln2+ln5</td></tr>
+          <tr><td><strong>0</strong></td><td><strong>1.386</strong></td><td><strong>1.792</strong></td><td><strong>2.079</strong></td><td><strong>2.197</strong></td><td><strong>2.303</strong></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>For the square root, bracket it.</strong> &#8730;1.386 sits between 1.1 (1.21) and 1.2 (1.44); try 1.18, whose square is 1.392. Two decimals is plenty.</p>
+        <p style="margin:10px 0 0 0;"><strong>And a shortcut that often saves the whole calculation:</strong> when every arm has the same N, the bonus is identical for all of them, so it cannot change the ranking &mdash; just compare the Q values. That is exactly what happens at t = 4 in Exercise 8.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">One half is what you know, the other is what you don't</div>
+        <table class="cmp-table">
+          <tr><th>part</th><th>name</th><th>what it is doing</th></tr>
+          <tr><td><strong>Q<sub>t</sub>(a)</strong></td><td>exploitation term</td><td>use what you have learned</td></tr>
+          <tr><td><strong>c √(ln t / N<sub>t</sub>(a))</strong></td><td>exploration term</td><td>reward machines you are unsure about</td></tr>
+          <tr><td><strong>c</strong></td><td>exploration <em>parameter</em></td><td>how much you care about being unsure</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">c is called a <strong>parameter</strong> because you choose it before you start and it never changes. Everything else in the formula is produced by playing.</p>
+        <p style="margin:10px 0 0 0;"><strong>c = 0</strong> kills the bonus entirely, and UCB becomes the greedy method. A common choice is <strong>√2</strong>; Exercise 8 uses <strong>c = 2</strong>.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why ln t is up there</div>
+        <p style="margin:0 0 10px 0;">The bonus has <strong>t on top and N on the bottom</strong>, so:</p>
+        <ul style="margin:0;">
+          <li><strong>Pull a machine → N grows → its bonus shrinks.</strong> You are getting surer about it.</li>
+          <li><strong>Ignore a machine → t keeps growing while its N stays fixed → its bonus slowly creeps up.</strong> Time passing makes old information less trustworthy.</li>
+        </ul>
+        <p style="margin:12px 0 0 0;">That second point is why <strong>UCB can never abandon a machine forever</strong>. And because it is <strong>ln</strong> t rather than t, the creep is slow — otherwise UCB would just cycle through every machine in turn and never settle.</p>
+        <p style="margin:10px 0 0 0;">The notes also ask you to see that <strong>√(ln t / t) → 0</strong>: keep pulling the same machine and its bonus vanishes. A-level calculus is enough; no proof required.</p>
+      </div>
+
+      <!-- ===== TOOL ===== -->
+      <h2 id="uc-tool">Tool · UCB, step by step</h2>
+<div class="tool" data-run="runUCB">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Every arg max, with the intervals drawn</h3></div>
+        <p class="tool-desc">Loaded with <strong>Exercise 8</strong>. The picture is Figure 8.5 redrawn at whatever step you are on: one interval per arm, centred on Q<sub>t</sub>(a) with half-width equal to the exploration term, and <strong>the method takes the one whose right-hand end reaches furthest right.</strong> Step through with ▶ and the table below shows the full arithmetic — ln t, each √(ln t / N), each UCB. <strong>Drag c to 0 and watch UCB become the greedy method.</strong></p>
+        <div class="tool-field"><label for="uc-rew">Rewards each arm will pay, in order — <code>name: r1, r2, …</code></label>
+          <textarea id="uc-rew" rows="3" spellcheck="false">a1: 5, 4, 7, 3, 7
+a2: 3.5, 7, 1, 1, 1
+a3: 6, 0, 4, 4, 3</textarea></div>
+        <div class="tool-controls" style="margin-top:12px;"><button class="tool-btn" onclick="runUCB()">Trace</button></div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="uc-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== MDP ===== -->
+      <h2 id="uc-mdp">How this relates to Week 4</h2>
+      <div class="callout exam">
+        <div class="callout-label">Two differences, and the lecture names both</div>
+        <table class="cmp-table">
+          <tr><th></th><th>Week 4 · MDPs</th><th>Week 8 · Bandits</th></tr>
+          <tr><td><strong>Rewards</strong></td><td><strong>given to you</strong> — you can compute the answer up front</td><td><strong>unknown</strong> — you must estimate them by playing</td></tr>
+          <tr><td><strong>States</strong></td><td>many; where you are matters</td><td><strong>only one</strong> — after every pull you face the same choice again</td></tr>
+          <tr><td><strong>You estimate</strong></td><td>U(s), a value per square</td><td>q⋆(a), a value per machine</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">Because there is only one state, some researchers hesitate to call bandits reinforcement learning at all. <strong>In a richer problem you would need q⋆(s, a)</strong> — a value for every state-and-action pair, not just every action. That single change is the bridge to everything beyond this course.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The chapter's own summary — each line is a complaint about the one before</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>We have k actions and get rewards from our choices.</li>
+          <li>Stick with whichever looks best. &nbsp;<span style="color:var(--ink-muted); font-style:italic;">→ greedy</span></li>
+          <li>But what if we were just unlucky with the others? &nbsp;<span style="color:var(--ink-muted); font-style:italic;">→ ε-greedy</span></li>
+          <li>But now we explore even the obviously bad ones. &nbsp;<span style="color:var(--ink-muted); font-style:italic;">→ UCB</span></li>
+          <li>And all of this has only one state. &nbsp;<span style="color:var(--ink-muted); font-style:italic;">→ MDPs and beyond</span></li>
+        </ol>
+        <p style="margin:12px 0 0 0;"><strong>Learn those five lines and you can rebuild the whole chapter.</strong></p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Sources</div>
+        The notation follows <strong>Sutton &amp; Barto, <em>Reinforcement Learning: An Introduction</em>, Chapter 2</strong>. For UCB specifically, <strong>Auer, Cesa-Bianchi &amp; Fischer (2002)</strong> — flagged in the notes as heavy maths, and not examinable.
+      </div>
+
+      <!-- ===== EXAM ===== -->
+      <h2 id="uc-key">Exam takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">What to have ready</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Why UCB exists:</strong> ε-greedy explores at random, wasting pulls on machines it already knows are bad.</li>
+          <li><strong>The rule:</strong> score = average + bonus; bonus is big when N is small; pull the highest score.</li>
+          <li><strong>UCB<sub>t</sub>(a) = Q<sub>t</sub>(a) + c√(ln t / N<sub>t</sub>(a))</strong>, and A<sub>t</sub> is the <strong>arg max</strong> of it.</li>
+          <li><strong>N = 0 gives ∞</strong>, so the first k steps are a₁ … a<sub>k</sub> in order, and <strong>no starting Q is needed</strong>.</li>
+          <li><strong>Ties → lowest index.</strong> (Greedy randomises. Different rule.)</li>
+          <li><strong>N counts pulls before now; ln t uses the current step.</strong> Mixing these up shifts every number.</li>
+          <li><strong>c = 0 gives greedy.</strong> Bigger c explores more. Common value √2; Exercise 8 uses 2.</li>
+          <li><strong>ln t on top</strong> means a neglected machine slowly becomes attractive again — UCB never abandons anything permanently.</li>
+          <li><strong>vs MDPs:</strong> rewards unknown, and only one state, so we estimate q⋆(a) not q⋆(s, a).</li>
+          <li><strong>Show a table</strong> — t, N, Q, bonus, total, arg max. Exercise 8 is marked on the working.</li>
+        </ul>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Part 4 works all eight exercises.</p>
+    </section>

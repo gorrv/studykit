@@ -1,0 +1,177 @@
+<section id="w8-bandit" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 08 · Part 1 · Reinforcement Learning</div>
+        <h1>Bandits &amp; Action Values</h1>
+        <div class="week-subtitle">two numbers per machine, and that is the whole algorithm</div>
+      </div>
+
+      <!-- ===== INTRO ===== -->
+      <h2 id="bd-intro">What reinforcement learning is</h2>
+      <div class="callout exam">
+        <div class="callout-label">In one line</div>
+        <strong>Learn by doing.</strong> You try things, you see what you get, and you get better at choosing.
+        <p style="margin:10px 0 0 0;">That is the lecture's own phrasing: <strong>by repeatedly attempting to solve a problem, the agent learns about it and about the result of each of their actions.</strong></p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">How it differs from Week 4</div>
+        In Week 4 you were <em>told</em> the rewards. You could sit down and compute the answer before moving.
+        <p style="margin:10px 0 0 0;"><strong>Here nobody tells you anything.</strong> The only way to find out what an action is worth is to do it and see. That is the entire difference, and everything in Week 8 follows from it.</p>
+      </div>
+
+      <!-- ===== THE SETUP ===== -->
+      <h2 id="bd-armed">The setup: a row of slot machines</h2>
+      <div class="callout exam">
+        <div class="callout-label">The k-armed bandit</div>
+        <p style="margin:0 0 10px 0;">You are in front of <strong>k slot machines</strong>. Each one pays out a different amount on average, but you do not know which is which. You pull one machine per turn.</p>
+        <p style="margin:0;"><strong>Your goal: collect as much as possible in total.</strong></p>
+        <p style="margin:10px 0 0 0;">Each pull gives a <strong>random</strong> amount. Even the best machine sometimes pays badly, and the worst one sometimes pays well. That is what makes this hard.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">Example 8.1 — two machines</div>
+        <p style="margin:0 0 10px 0;">Two machines, <strong>A</strong> and <strong>B</strong>. You press one and get whatever it pays. You can do this as often as you like.</p>
+        <p style="margin:0;"><strong>Should you keep pressing the one that has done well so far, or try the other?</strong> That question is the whole week.</p>
+        <p style="margin:10px 0 0 0;">The notes suggest <strong>A ∼ N(10, 1)</strong> and <strong>B ∼ N(11, 4)</strong> for experimenting. Careful: <strong>N(11, 4) means variance 4, so σ = 2</strong>. B is better on average but twice as noisy, which is exactly why it takes a while to tell them apart.</p>
+      </div>
+<div class="callout">
+        <div class="callout-label">The figure</div>
+        <div class="ix-canvas"><svg width="100%" viewBox="0 0 660 270" role="img" xmlns="http://www.w3.org/2000/svg"><title>Figures 8.1 and 8.2</title><desc>The reward distributions of arms A and B. B has the higher mean but is twice as spread out.</desc><rect x="60" y="40" width="540" height="180" rx="4" fill="var(--surface-2)" stroke="var(--rule)" stroke-width="0.7"/><path d="M 60.0 220.0 L 63.4 220.0 L 66.8 220.0 L 70.1 220.0 L 73.5 220.0 L 76.9 220.0 L 80.2 220.0 L 83.6 220.0 L 87.0 220.0 L 90.4 220.0 L 93.8 220.0 L 97.1 220.0 L 100.5 220.0 L 103.9 219.9 L 107.2 219.9 L 110.6 219.9 L 114.0 219.9 L 117.4 219.8 L 120.7 219.8 L 124.1 219.7 L 127.5 219.6 L 130.9 219.5 L 134.2 219.4 L 137.6 219.2 L 141.0 219.0 L 144.4 218.7 L 147.8 218.4 L 151.1 218.0 L 154.5 217.5 L 157.9 216.9 L 161.2 216.2 L 164.6 215.4 L 168.0 214.3 L 171.4 213.2 L 174.8 211.7 L 178.1 210.1 L 181.5 208.2 L 184.9 206.0 L 188.2 203.5 L 191.6 200.7 L 195.0 197.5 L 198.4 194.0 L 201.8 190.0 L 205.1 185.6 L 208.5 180.9 L 211.9 175.7 L 215.2 170.1 L 218.6 164.1 L 222.0 157.7 L 225.4 151.0 L 228.8 144.0 L 232.1 136.8 L 235.5 129.4 L 238.9 121.8 L 242.3 114.3 L 245.6 106.8 L 249.0 99.5 L 252.4 92.4 L 255.8 85.6 L 259.1 79.3 L 262.5 73.5 L 265.9 68.3 L 269.2 63.9 L 272.6 60.2 L 276.0 57.3 L 279.4 55.3 L 282.8 54.2 L 286.1 54.1 L 289.5 54.8 L 292.9 56.5 L 296.2 59.1 L 299.6 62.5 L 303.0 66.8 L 306.4 71.7 L 309.8 77.3 L 313.1 83.5 L 316.5 90.1 L 319.9 97.1 L 323.2 104.3 L 326.6 111.8 L 330.0 119.3 L 333.4 126.9 L 336.8 134.3 L 340.1 141.6 L 343.5 148.7 L 346.9 155.5 L 350.2 162.0 L 353.6 168.1 L 357.0 173.8 L 360.4 179.2 L 363.8 184.1 L 367.1 188.6 L 370.5 192.7 L 373.9 196.4 L 377.2 199.7 L 380.6 202.6 L 384.0 205.2 L 387.4 207.5 L 390.7 209.5 L 394.1 211.2 L 397.5 212.7 L 400.9 214.0 L 404.3 215.0 L 407.6 215.9 L 411.0 216.7 L 414.4 217.3 L 417.8 217.9 L 421.1 218.3 L 424.5 218.6 L 427.9 218.9 L 431.2 219.2 L 434.6 219.3 L 438.0 219.5 L 441.4 219.6 L 444.8 219.7 L 448.1 219.8 L 451.5 219.8 L 454.9 219.9 L 458.2 219.9 L 461.6 219.9 L 465.0 219.9 L 468.4 220.0 L 471.8 220.0 L 475.1 220.0 L 478.5 220.0 L 481.9 220.0 L 485.2 220.0 L 488.6 220.0 L 492.0 220.0 L 495.4 220.0 L 498.8 220.0 L 502.1 220.0 L 505.5 220.0 L 508.9 220.0 L 512.2 220.0 L 515.6 220.0 L 519.0 220.0 L 522.4 220.0 L 525.8 220.0 L 529.1 220.0 L 532.5 220.0 L 535.9 220.0 L 539.2 220.0 L 542.6 220.0 L 546.0 220.0 L 549.4 220.0 L 552.8 220.0 L 556.1 220.0 L 559.5 220.0 L 562.9 220.0 L 566.2 220.0 L 569.6 220.0 L 573.0 220.0 L 576.4 220.0 L 579.8 220.0 L 583.1 220.0 L 586.5 220.0 L 589.9 220.0 L 593.3 220.0 L 596.6 220.0 L 600.0 220.0" fill="none" stroke="var(--accent)" stroke-width="2.3"/><line x1="285.0" y1="220.0" x2="285.0" y2="54.0" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3"/><path d="M 60.0 219.1 L 63.4 219.0 L 66.8 218.8 L 70.1 218.7 L 73.5 218.6 L 76.9 218.4 L 80.2 218.2 L 83.6 218.0 L 87.0 217.8 L 90.4 217.6 L 93.8 217.4 L 97.1 217.1 L 100.5 216.8 L 103.9 216.5 L 107.2 216.1 L 110.6 215.7 L 114.0 215.3 L 117.4 214.9 L 120.7 214.4 L 124.1 213.9 L 127.5 213.4 L 130.9 212.8 L 134.2 212.2 L 137.6 211.5 L 141.0 210.8 L 144.4 210.1 L 147.8 209.3 L 151.1 208.5 L 154.5 207.6 L 157.9 206.7 L 161.2 205.7 L 164.6 204.7 L 168.0 203.6 L 171.4 202.4 L 174.8 201.3 L 178.1 200.0 L 181.5 198.7 L 184.9 197.4 L 188.2 196.0 L 191.6 194.5 L 195.0 193.1 L 198.4 191.5 L 201.8 189.9 L 205.1 188.3 L 208.5 186.6 L 211.9 184.9 L 215.2 183.2 L 218.6 181.4 L 222.0 179.6 L 225.4 177.8 L 228.8 175.9 L 232.1 174.1 L 235.5 172.2 L 238.9 170.3 L 242.3 168.4 L 245.6 166.5 L 249.0 164.6 L 252.4 162.8 L 255.8 160.9 L 259.1 159.1 L 262.5 157.3 L 265.9 155.6 L 269.2 153.9 L 272.6 152.3 L 276.0 150.7 L 279.4 149.1 L 282.8 147.7 L 286.1 146.3 L 289.5 145.0 L 292.9 143.8 L 296.2 142.6 L 299.6 141.6 L 303.0 140.7 L 306.4 139.8 L 309.8 139.1 L 313.1 138.4 L 316.5 137.9 L 319.9 137.5 L 323.2 137.2 L 326.6 137.1 L 330.0 137.0 L 333.4 137.1 L 336.8 137.2 L 340.1 137.5 L 343.5 137.9 L 346.9 138.4 L 350.2 139.1 L 353.6 139.8 L 357.0 140.7 L 360.4 141.6 L 363.8 142.6 L 367.1 143.8 L 370.5 145.0 L 373.9 146.3 L 377.2 147.7 L 380.6 149.1 L 384.0 150.7 L 387.4 152.3 L 390.7 153.9 L 394.1 155.6 L 397.5 157.3 L 400.9 159.1 L 404.3 160.9 L 407.6 162.8 L 411.0 164.6 L 414.4 166.5 L 417.8 168.4 L 421.1 170.3 L 424.5 172.2 L 427.9 174.1 L 431.2 175.9 L 434.6 177.8 L 438.0 179.6 L 441.4 181.4 L 444.8 183.2 L 448.1 184.9 L 451.5 186.6 L 454.9 188.3 L 458.2 189.9 L 461.6 191.5 L 465.0 193.1 L 468.4 194.5 L 471.8 196.0 L 475.1 197.4 L 478.5 198.7 L 481.9 200.0 L 485.2 201.3 L 488.6 202.4 L 492.0 203.6 L 495.4 204.7 L 498.8 205.7 L 502.1 206.7 L 505.5 207.6 L 508.9 208.5 L 512.2 209.3 L 515.6 210.1 L 519.0 210.8 L 522.4 211.5 L 525.8 212.2 L 529.1 212.8 L 532.5 213.4 L 535.9 213.9 L 539.2 214.4 L 542.6 214.9 L 546.0 215.3 L 549.4 215.7 L 552.8 216.1 L 556.1 216.5 L 559.5 216.8 L 562.9 217.1 L 566.2 217.4 L 569.6 217.6 L 573.0 217.8 L 576.4 218.0 L 579.8 218.2 L 583.1 218.4 L 586.5 218.6 L 589.9 218.7 L 593.3 218.8 L 596.6 219.0 L 600.0 219.1" fill="none" stroke="var(--accent-3)" stroke-width="2.3"/><line x1="330.0" y1="220.0" x2="330.0" y2="137.0" stroke="var(--accent-3)" stroke-width="1" stroke-dasharray="3 3"/><text x="285.0" y="46.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--accent)">A ~ N(10, 1)</text><text x="392.0" y="129.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--accent-3)">B ~ N(11, 4)  &#963;=2</text><line x1="60" y1="220" x2="600" y2="220" stroke="var(--ink-muted)"/><text x="105.0" y="236.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">6</text><text x="195.0" y="236.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">8</text><text x="285.0" y="236.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">10</text><text x="375.0" y="236.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">12</text><text x="465.0" y="236.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">14</text><text x="555.0" y="236.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">16</text><text x="330.0" y="254.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--ink-muted)">reward</text></svg></div>
+        <p style="margin:12px 0 0 0;">The two arms from Example 8.1. <strong>B has the higher mean (11 vs 10), so B is the better arm</strong> — but it is twice as spread out, which is exactly what makes it hard to tell them apart from a few pulls. Remember N(11, <strong>4</strong>) means variance 4, so &#963; = 2.</p>
+      </div>
+
+      <!-- ===== TOOL ===== -->
+      <h2 id="bd-tool">Tool · Play a bandit</h2>
+<div class="tool" data-run="runBandit">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Pull the arms yourself, then let a policy try</h3></div>
+        <p class="tool-desc"><strong>Click an arm to pull it.</strong> Every reward it has paid appears as a dot, and the orange bar is your current Q<sub>t</sub>(a). The true distributions stay hidden until you tick <em>reveal the true q⋆</em> — so do what the notes ask: <strong>pull a few times, commit to a guess about which arm is better, and only then look.</strong> Then hand the controls to greedy, random, ε-greedy or UCB and watch how each one spends its pulls.</p>
+        <div class="tool-field"><label for="bd-arms">Arms — one per line, <code>name mean σ</code> &nbsp;<span style="opacity:.7;">(σ, not σ² — B ∼ N(11, 4) is <code>B 11 2</code>)</span></label>
+          <textarea id="bd-arms" rows="3" spellcheck="false">A  10  1
+B  11  2</textarea></div>
+        <div class="tool-controls" style="margin-top:12px;">
+          <button class="tool-btn" onclick="runBandit()">Set up</button>
+          <button class="tool-btn secondary" onclick="bdPreset('ex81')">Example 8.1</button>
+          <button class="tool-btn secondary" onclick="bdPreset('ten')">10-armed testbed</button>
+          <button class="tool-btn secondary" onclick="bdPreset('trap')">the greedy trap</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="bd-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== TRUE VALUE ===== -->
+      <h2 id="bd-value">The number you can never see: q⋆(a)</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition 8.2</div>
+        <strong>q⋆(a) is what machine a really pays on average.</strong> Written formally:
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:12px 0;">q⋆(a) = E[R<sub>t</sub> | A<sub>t</sub> = a]</div>
+        <p style="margin:0;"><strong>Read it as:</strong> the average reward you get, given that you pulled machine a. That is all <code>E[…]</code> means — "the average of".</p>
+        <p style="margin:10px 0 0 0;">For A ∼ N(10, 1), q⋆(A) is just <strong>10</strong>. The mean of the distribution.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The important part</div>
+        <strong>You never get to see q⋆.</strong> It is a fact about the machine, not about you. The agent playing Example 8.1 has no way of learning that A's true mean is exactly 10.
+        <p style="margin:10px 0 0 0;">In an exam you are handed q⋆ only so the question can be marked. <strong>The star means "the real one" — the thing you are trying to guess.</strong></p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why the definition has a t in it</div>
+        The full version is <code>q⋆(a, t)</code>, because in principle a machine could change over time. <strong>This course assumes it does not</strong> — the machines are <em>stationary</em> — so the t is pointless and we drop it.
+      </div>
+
+      <!-- ===== ESTIMATE ===== -->
+      <h2 id="bd-est">The number you actually keep: Q<sub>t</sub>(a)</h2>
+      <div class="callout exam">
+        <div class="callout-label">Q is a running average. That is genuinely all it is.</div>
+        <p style="margin:0 0 10px 0;">For each machine you write down two things:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:2; margin:0 0 0 14px;">
+          <strong>N(a)</strong> &nbsp;— how many times you have pulled it<br>
+          <strong>Q(a)</strong> &nbsp;— the average of what it has paid you
+        </div>
+        <p style="margin:12px 0 0 0;"><strong>Those two numbers per machine are the entire state of the algorithm.</strong> Nothing else is remembered.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Watch it update — this is Exercise 2</div>
+        <p style="margin:0 0 10px 0;">Suppose the pulls go: <strong>A pays 0.5, A pays −0.3, B pays 0.4, A pays 1.0, B pays 1.5.</strong></p>
+        <p style="margin:0 0 10px 0;">Here is what you know <em>each time you are about to choose</em>:</p>
+        <table class="cmp-table">
+          <tr><th>about to choose…</th><th>what has happened so far</th><th>Q(A)</th><th>Q(B)</th></tr>
+          <tr><td>step 1</td><td>nothing</td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
+          <tr><td>step 2</td><td>A paid 0.5</td><td><code>0.5/1</code> = <strong>0.5</strong></td><td><strong>0</strong></td></tr>
+          <tr><td>step 3</td><td>A paid 0.5, −0.3</td><td><code>0.2/2</code> = <strong>0.1</strong></td><td><strong>0</strong></td></tr>
+          <tr><td>step 4</td><td>… and B paid 0.4</td><td><strong>0.1</strong></td><td><code>0.4/1</code> = <strong>0.4</strong></td></tr>
+          <tr><td>step 5</td><td>… and A paid 1.0</td><td><code>1.2/3</code> = <strong>0.4</strong></td><td><strong>0.4</strong></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">Read the Q columns straight down and that is the answer to Exercise 2.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The three things that catch people</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Q<sub>t</sub> uses everything <em>before</em> step t, not including it.</strong> When you are deciding what to pull at step 5, you have seen steps 1 to 4. So the 1.5 that B pays at step 5 does not appear anywhere in the table above.</li>
+          <li><strong>A machine you have never pulled has Q = 0.</strong> Not "unknown", not "blank" — the convention is zero. So <strong>Q₁(a) = 0 for everything.</strong></li>
+          <li><strong>Only that machine's own rewards count.</strong> Money from B never touches Q(A).</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The formula, now that you know what it says</div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:13px; margin:10px 0;">
+          Q<sub>t</sub>(a) = <span style="border-bottom:1px solid var(--ink);">total paid by a before step t</span> / <span style="border-top:1px solid var(--ink);">number of times a was pulled before t</span></div>
+        <p style="margin:0;">Written with symbols it becomes equation (8.4), and the <strong>1<sub>Aᵢ=a</sub></strong> in it is just a switch: <strong>1 on the steps where a was chosen, 0 everywhere else</strong>. It is there to pick out the right rewards. Nothing more.</p>
+      </div>
+
+      <!-- ===== QT TOOL ===== -->
+      <h2 id="bd-qtool">Tool · Q<sub>t</sub>(a) from a history</h2>
+<div class="tool" data-run="runQT">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Every step, every average, and what greedy would do next</h3></div>
+        <p class="tool-desc">Type a sequence of <code>action reward</code> lines and step through it. <strong>The table is exactly the one Exercise 2 asks for</strong>, and the panel underneath spells out which rewards went into each average — including the ones that are still 0 because the arm has never been touched. Loaded with Table 8.1 by default.</p>
+        <div class="tool-field"><label for="qt-hist">History — one <code>A<sub>t</sub> R<sub>t</sub></code> per line, in order</label>
+          <textarea id="qt-hist" rows="5" spellcheck="false">A 0.5
+A -0.3
+B 0.4
+A 1.0
+B 1.5</textarea></div>
+        <div class="tool-controls" style="margin-top:12px;">
+          <button class="tool-btn" onclick="runQT()">Trace</button>
+          <button class="tool-btn secondary" onclick="qtLoad('ex2')">Table 8.1</button>
+          <button class="tool-btn secondary" onclick="qtLoad('outlier')">the outlier story</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="qt-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== EXPLORE/EXPLOIT ===== -->
+      <h2 id="bd-ee">The dilemma</h2>
+      <div class="callout exam">
+        <div class="callout-label">The whole problem in two sentences</div>
+        <p style="margin:0 0 10px 0;">One machine currently has the best average. <strong>Do you keep playing it, or try another one?</strong></p>
+        <table class="cmp-table">
+          <tr><th></th><th>Exploit</th><th>Explore</th></tr>
+          <tr><td><strong>You do</strong></td><td>play the machine with the best average so far</td><td>play a different one</td></tr>
+          <tr><td><strong>Because</strong></td><td>it is the best thing you know about</td><td>your averages might be wrong</td></tr>
+          <tr><td><strong>Risk</strong></td><td>you never discover a better machine</td><td>you waste pulls on bad machines</td></tr>
+        </table>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why your averages might be wrong</div>
+        <strong>You may have been unlucky.</strong> Pull the best machine twice and get two poor payouts, and its average now looks terrible — so you stop playing it and never find out.
+        <p style="margin:10px 0 0 0;">The notes make this point early with A and B: your very first result from a machine <strong>could just be an outlier</strong>. One sample tells you almost nothing.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Do not look for a threshold</div>
+        There is <strong>no number</strong> that says how much exploring is enough. The lecture says so outright: what counts as too much exploration in one situation is too little in another.
+        <p style="margin:10px 0 0 0;"><strong>What is examinable is the trade-off itself and the named methods that manage it</strong> — which is Part 2.</p>
+      </div>
+
+      <!-- ===== EXAM ===== -->
+      <h2 id="bd-key">Exam takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">What to have ready</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>RL = learn by doing.</strong> The rewards are unknown; you find out by acting.</li>
+          <li><strong>k-armed bandit:</strong> k machines, one pull per turn, each pays randomly, maximise the total.</li>
+          <li><strong>q⋆(a) = E[R<sub>t</sub> | A<sub>t</sub> = a]</strong> — the machine's true average. Unknown to the agent. Constant, because we assume stationary.</li>
+          <li><strong>Q<sub>t</sub>(a)</strong> — your running average, from the pulls <strong>strictly before</strong> step t. <strong>Q₁(a) = 0</strong>, and 0 for anything never pulled.</li>
+          <li><strong>N(a)</strong> — how many times you pulled it. Q and N are the only things you store.</li>
+          <li><strong>1<sub>predicate</sub></strong> is a switch: 1 when true, 0 when false. It selects the right rewards in (8.4).</li>
+          <li><strong>N(µ, σ²) carries the variance.</strong> N(11, 4) means σ = 2.</li>
+          <li><strong>Exploit</strong> = play the current best. <strong>Explore</strong> = try something else in case you were unlucky. No fixed definition of "too much".</li>
+        </ul>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Part 2 turns the dilemma into three rules.</p>
+    </section>

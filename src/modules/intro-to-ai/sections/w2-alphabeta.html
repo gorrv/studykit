@@ -1,0 +1,142 @@
+<section id="w2-alphabeta" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 02 · Part 2 · Adversarial search</div>
+        <h1>Alpha-Beta Pruning</h1>
+        <div class="week-subtitle">the same answer, fewer nodes</div>
+      </div>
+      <!-- ===== OBSERVATIONS ===== -->
+      <h2 id="ab-obs">Two observations</h2>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">At a MAX node → α</h4>
+          <p style="font-size:13.5px; margin:0;">When some of the children of a MAX node have been evaluated, there is a <strong>lower bound α</strong> on how much MAX can get, even if the other children have not been evaluated yet.</p>
+          <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:20px; margin-top:12px; color:var(--accent);">≥ 3</div>
+        </div>
+        <div class="mode-box" style="background:var(--tint-b); border-color:var(--accent-2);">
+          <h4 style="color:var(--accent-2);">At a MIN node → β</h4>
+          <p style="font-size:13.5px; margin:0;">When some of the children of a MIN node have been evaluated, there is in turn an <strong>upper bound β</strong> on how much MIN can get, even if the other children have not been evaluated yet.</p>
+          <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:20px; margin-top:12px; color:var(--accent-2);">≤ 5</div>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why bounds, and why they only go one way</div>
+        A MAX node that has already seen a child worth 3 <strong>can never end up below 3</strong> — it can always just take that child. So its value is <code>≥ 3</code>: a floor that only rises as more children are seen. Symmetrically, a MIN node that has seen a 5 can never end up <em>above</em> 5: a ceiling that only falls.
+        <p style="margin:10px 0 0 0;">These are <strong>partial results computed before the node is finished</strong> — which is what makes them useful. If a floor from somewhere above already beats a ceiling here, nothing below this point can matter.</p>
+      </div>
+      <!-- ===== RULE ===== -->
+      <h2 id="ab-rule">α, β, and the cut rule</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definitions</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>α</strong> is the <strong>minimum score the MAX player could get</strong> (the best MAX has secured so far anywhere on the path).</li>
+          <li><strong>β</strong> is the <strong>maximum score the MIN player could get</strong> (the best MIN has secured so far anywhere on the path).</li>
+        </ul>
+        <p style="margin:12px 0 0 0;"><strong>Two optimisations:</strong></p>
+        <ul style="margin:6px 0 0 0;">
+          <li>Skip the rest of a <strong>MIN</strong> node's children when <strong>β ≤ α</strong>.</li>
+          <li>Skip the rest of a <strong>MAX</strong> node's children when <strong>β ≤ α</strong>.</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">One rule, said in English</div>
+        <code>β ≤ α</code> reads: <em>"the best this branch can possibly offer MAX is already no better than something MAX can guarantee elsewhere."</em> So MAX would never come here — and there is no point finishing the evaluation.
+        <p style="margin:10px 0 0 0;">Notice the condition is <strong>the same at both node types</strong>. What differs is only which of the two values you were about to update. That is why it's one algorithm, not two.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">What pruning does <em>not</em> do</div>
+        <strong>Alpha-beta returns exactly the same value as plain minimax.</strong> It is not an approximation, not a heuristic, and it never changes the chosen move. The only thing it changes is <em>how many terminal nodes get evaluated</em>. If an exam question asks for "the minimax value with alpha-beta pruning", the value is the same number — the extra marks are for saying which nodes were skipped.
+      </div>
+      <!-- ===== WORKED ===== -->
+      <h2 id="ab-worked">The worked example</h2>
+      <p>Same tree as Part 1, evaluated left to right.</p>
+      <table>
+        <tr><th>Step</th><th>What happens</th><th>State</th></tr>
+        <tr><td>1</td><td>Descend to B, evaluate its leaves <strong>3, 12, 8</strong>. B is done.</td><td>B = 3, so root is <strong>≥ 3</strong> (α = 3)</td></tr>
+        <tr><td>2</td><td>Descend to C, evaluate its first leaf: <strong>2</strong>.</td><td>C is <strong>≤ 2</strong> (β = 2)</td></tr>
+        <tr><td>3</td><td><strong>β = 2 ≤ α = 3 → prune.</strong> C's other two leaves are never looked at.</td><td>C ≤ 2, marked ✗ ✗</td></tr>
+        <tr><td>4</td><td>Descend to D, evaluate <strong>14</strong>, then <strong>5</strong>.</td><td>D is ≤ 14, then <strong>≤ 5</strong></td></tr>
+        <tr><td>5</td><td>Evaluate D's last leaf <strong>2</strong>. D = 2.</td><td>D = 2</td></tr>
+        <tr><td>6</td><td>Root takes max(3, ≤2, 2).</td><td>A = <strong>3</strong>, play a₁</td></tr>
+      </table>
+      <div class="callout">
+        <div class="callout-label">The result</div>
+        <div class="pathbox">Value <strong>3</strong> — identical to minimax · leaves evaluated <strong>7</strong> instead of <strong>9</strong> · pruned: C's second and third leaves (4 and 6)</div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why C got cut but D did not</div>
+        C's first leaf was <strong>2</strong>, which instantly capped C at ≤ 2 — below the 3 MAX already had. Dead branch, stop.
+        <p style="margin:10px 0 0 0;">D's first leaf was <strong>14</strong>, which caps D at ≤ 14 — still above 3, so D might yet beat B and must be explored. Then 5 caps it at ≤ 5, still above 3. Only the final 2 settles it. <strong>The order the leaves happen to appear in decides how much you save</strong> — which is the next section.</p>
+      </div>
+      <!-- ===== TOOL ===== -->
+      <h2 id="ab-tool">Tool · Game tree solver</h2>
+      <div class="tool" data-run="runGameTree">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Minimax &amp; alpha-beta</h3></div>
+        <p class="tool-desc"><strong>Step through the alpha-beta walk one evaluation at a time</strong> and watch the bounds tighten until a cut fires. Enter any game tree as nested brackets; you also get the minimax value of every node and exactly which leaves get pruned. Defaults to the tree from the slides.</p>
+        <div class="tool-field" style="width:100%;">
+          <label for="gt-tree">Tree — nested brackets, numbers at the leaves. e.g. <code>[[3,12,8],[2,4,6],[14,5,2]]</code></label>
+          <textarea id="gt-tree" rows="3" spellcheck="false">[[3,12,8],[2,4,6],[14,5,2]]</textarea>
+        </div>
+        <div class="tool-controls" style="margin-top:12px;">
+          <div class="tool-field"><label for="gt-root">Root player</label>
+            <select id="gt-root"><option value="max" selected>MAX</option><option value="min">MIN</option></select>
+          </div>
+          <div class="tool-field"><label for="gt-mode">Show</label>
+            <select id="gt-mode">
+              <option value="both" selected>Minimax + alpha-beta</option>
+              <option value="minimax">Minimax only</option>
+              <option value="ab">Alpha-beta only</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runGameTree()">Solve</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="gt-output" class="tool-output"></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Things worth trying in it</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Press ▶ play</strong> and watch the depth-first walk. Unvisited nodes are ghosted, so you see exactly how little of the tree alpha-beta ever touches.</li>
+          <li>The default tree — 7 of 9 leaves evaluated, the 4 and 6 under C pruned. That's the slide. <strong>Stop on the step marked "β ≤ α — prune"</strong> and look at the two bounds that caused it.</li>
+          <li>Reverse the last group to <code>[[3,12,8],[2,4,6],[2,5,14]]</code> — D now caps at ≤ 2 immediately and <strong>two more leaves vanish</strong>. Same answer, less work.</li>
+          <li>Try a 3-level tree such as <code>[[[3,5],[6,9]],[[1,2],[0,7]]]</code> to see pruning cascade through the layers.</li>
+          <li>Switch the root to <strong>MIN</strong> and watch every max and min swap while the pruning rule stays <code>β ≤ α</code>.</li>
+        </ul>
+      </div>
+      <!-- ===== ORDERING ===== -->
+      <h2 id="ab-order">How much does pruning save?</h2>
+      <div class="callout">
+        <div class="callout-label">It depends entirely on move ordering</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Worst case</strong> — children arrive in the least helpful order and nothing is pruned: back to <code>O(b<sup>d</sup>)</code>.</li>
+          <li><strong>Best case</strong> — the best move is examined first at every node, and the cost drops to roughly <code>O(b<sup>d/2</sup>)</code>.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">Halving the exponent means you can search <strong>twice as deep</strong> in the same time — which, in a game, is the difference between a weak player and a strong one.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The intuition for "best move first"</div>
+        Cuts happen when a bound gets tight <em>early</em>. Finding a strong move immediately raises α at once and makes every later sibling easy to dismiss; stumbling on it last means you carried a useless bound the whole way. Real engines therefore spend effort <strong>guessing a good move order before searching</strong> — which is why "try the move that was best last time" is such a common trick.
+      </div>
+      <div class="callout">
+        <div class="callout-label">Summary of the deck</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>With more than one agent, we need <strong>different approaches</strong>.</li>
+          <li><strong>Adversarial search like minimax</strong> lets us consider the <strong>best-worst outcomes</strong> and make decisions to guide towards them.</li>
+          <li><strong>Alpha-beta pruning</strong> lets us <strong>trim and reduce the number of states we evaluate</strong>.</li>
+        </ul>
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="ab-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 2</div>
+        <ol>
+          <li><strong>The two observations</strong> — a partly-evaluated MAX node has a <em>lower</em> bound α; a partly-evaluated MIN node has an <em>upper</em> bound β.</li>
+          <li><strong>α</strong> = minimum score the MAX player could get. <strong>β</strong> = maximum score the MIN player could get. Learn these two sentences verbatim.</li>
+          <li><strong>The cut rule</strong> — skip the remaining children of a MIN node when <strong>β ≤ α</strong>, and skip the remaining children of a MAX node when <strong>β ≤ α</strong>. Same condition both times.</li>
+          <li><strong>Alpha-beta returns the identical value to minimax</strong> — it only changes how many nodes are evaluated.</li>
+          <li><strong>Be able to run the worked tree by hand</strong> — B = 3 sets α = 3; C's first leaf 2 gives β = 2 ≤ 3, so C's remaining two leaves are pruned; D needs all three because 14 and 5 don't settle it. Answer <strong>3</strong>, 7 leaves evaluated instead of 9.</li>
+          <li><strong>Savings depend on move ordering</strong> — worst case <code>O(b<sup>d</sup>)</code>, best case about <code>O(b<sup>d/2</sup>)</code>, i.e. twice the depth for the same effort.</li>
+          <li><strong>Show your working</strong> — in a pruning question the marks are for the α/β values at each node and the crossed-out leaves, not just the final number.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Part 2. Next: problems where the path doesn't matter at all.</p>
+    </section>

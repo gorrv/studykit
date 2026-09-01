@@ -1,0 +1,153 @@
+<section id="w7-ex" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 07 · Part 3 · Worked Solutions</div>
+      <div class="callout">
+        <div class="callout-label">Figure 7.5 &mdash; with the labels its own vectors imply</div>
+        <div class="ix-canvas"><svg width="100%" viewBox="0 0 680 320" role="img" xmlns="http://www.w3.org/2000/svg"><title>Figure 7.5, corrected</title><desc>Decision tree with gini, counts and class vectors; three labels differ from the printed figure.</desc><path d="M 330 76 C 330 96, 175 96, 175 116" fill="none" stroke="var(--ink-muted)" stroke-width="1.4"/><path d="M 330 76 C 330 96, 470 96, 470 116" fill="none" stroke="var(--ink-muted)" stroke-width="1.4"/><text x="235.0" y="100.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-3)">True</text><text x="415.0" y="100.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-2)">False</text><path d="M 470 182 C 470 202, 350 202, 350 222" fill="none" stroke="var(--ink-muted)" stroke-width="1.4"/><path d="M 470 182 C 470 202, 590 202, 590 222" fill="none" stroke="var(--ink-muted)" stroke-width="1.4"/><text x="392.0" y="206.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-3)">True</text><text x="556.0" y="206.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-2)">False</text><rect x="250" y="20" width="160" height="56" rx="7" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="1.5"/><text x="330" y="36" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="var(--accent)" font-weight="600">HasJob &#8804; 0.5</text><text x="330" y="49" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">gini 0.658 &#183; n 15</text><text x="330" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--ink)" font-weight="600">[6, 5, 4] &#8594; High</text><rect x="100" y="116" width="150" height="66" rx="7" fill="var(--tint-c)" stroke="var(--accent-3)" stroke-width="1.5"/><text x="175" y="132" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--accent-3)">leaf</text><text x="175" y="145" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">gini 0.0 &#183; n 6</text><text x="175" y="158" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">[6, 0, 0]</text><text x="175" y="171" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="var(--ink)" font-weight="600">High</text><rect x="395" y="116" width="150" height="66" rx="7" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="1.5"/><text x="470" y="132" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--accent)" font-weight="600">OwnsHome &#8804; 0.5</text><text x="470" y="145" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">gini 0.494 &#183; n 9</text><text x="470" y="158" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">[0, 5, 4]</text><text x="470" y="171" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="var(--accent-2)" font-weight="600">Low</text><rect x="275" y="222" width="150" height="66" rx="7" fill="var(--tint-c)" stroke="var(--accent-3)" stroke-width="1.5"/><text x="350" y="238" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--accent-3)">leaf</text><text x="350" y="251" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">gini 0.0 &#183; n 4</text><text x="350" y="264" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">[0, 0, 4]</text><text x="350" y="277" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="var(--accent-2)" font-weight="600">Medium</text><rect x="515" y="222" width="150" height="66" rx="7" fill="var(--tint-c)" stroke="var(--accent-3)" stroke-width="1.5"/><text x="590" y="238" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--accent-3)">leaf</text><text x="590" y="251" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">gini 0.0 &#183; n 5</text><text x="590" y="264" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">[0, 5, 0]</text><text x="590" y="277" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="var(--accent-2)" font-weight="600">Low</text><text x="330" y="308" text-anchor="middle" font-family="IBM Plex Sans" font-size="11" fill="var(--accent-2)">labels in red are where Figure 7.5 disagrees with its own vectors</text></svg></div>
+        <p style="margin:12px 0 0 0;">Class order is alphabetical, <code>[High, Low, Medium]</code>. Read every label off the vector: <code>[0,5,4]</code> is Low, <code>[0,0,4]</code> is Medium, <code>[0,5,0]</code> is Low. The printed figure has Low and Medium swapped in those three nodes.</p>
+      </div>
+        <h1>The Five Exercises, Worked</h1>
+        <div class="week-subtitle">every solution box in the PDF is blank — these are filled in and checked</div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Why this section exists</div>
+        Chapter 7 poses five exercises and prints an empty <em>Solution to Exercise n</em> box after each one. Every answer below has been worked from the definitions and <strong>independently re-computed in exact arithmetic</strong>, so the fractions are exact rather than rounded. Attempt each one before reading on — these are close to the shape of an exam question.
+      </div>
+
+      <!-- ===== EX 1 ===== -->
+      <div class="exbox" id="y-1">
+        <div class="extag">Exercise 1</div>
+        <p class="q">Estimate the value of x = 5 using the regression line from the values in Table 7.1.</p>
+        <p style="margin:0 0 10px 0;">The line was found in §7.2.2 to be <code>ŷ = −(4/7)x + 6/7</code>. Prediction is one substitution:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:14px; line-height:2; margin:0 0 0 12px;">
+          ŷ(5) = −(4/7)·5 + 6/7 = −20/7 + 6/7 = −14/7
+        </div>
+        <div class="ans"><span class="lbl">answer</span><strong>ŷ(5) = −2</strong>, exactly. Table 7.1's missing entry is −2.</div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">Worth noticing</div>
+          x = 5 is well outside the range of the data, which runs from −1 to 2. The arithmetic is trivial; the honest caveat is that this is <strong>extrapolation</strong>, and a linear model has nothing to say about whether the straight-line relationship survives out there. If a question asks you to comment, that is the comment.
+        </div>
+      </div>
+
+      <!-- ===== EX 2 ===== -->
+      <div class="exbox" id="y-2">
+        <div class="extag">Exercise 2</div>
+        <p class="q">Find the best fit line for the dataset that is the same as this one but changing the last point to (2, 1), instead of (2, 0).</p>
+        <p style="margin:0 0 8px 0;">Data: <code>(−1, 2), (0, 0), (2, 1)</code>. Doing it the notes' way — residuals first:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:2; margin:0 0 12px 12px;">
+          ε₁² = (2 − β₀ + β₁)²&nbsp;&nbsp;&nbsp;ε₂² = (0 − β₀)²&nbsp;&nbsp;&nbsp;ε₃² = (1 − β₀ − 2β₁)²
+        </div>
+        <p style="margin:0 0 8px 0;">Expanding and collecting:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; margin:0 0 12px 12px;">
+          SSE = 3β₀² + 5β₁² + 2β₀β₁ − 6β₀ + 0·β₁ + 5
+        </div>
+        <p style="margin:0 0 8px 0;">The β₁ term has vanished, because Σxᵢyᵢ = (−1)(2) + 0 + (2)(1) = <strong>0</strong>. Reading the two vertices at −b/2a:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; line-height:2.2; margin:0 0 12px 12px;">
+          β̂₀ = (6 − 2β₁)/6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;β̂₁ = −2β₀/10 = −β₀/5<br>
+          30β₀ = 30 + 2β₀ &nbsp;⟹&nbsp; 28β₀ = 30
+        </div>
+        <p style="margin:0 0 8px 0;">Or straight from Theorem 7.3 with n = 3, Σx = 1, Σy = 3, Σx² = 5, Σxy = 0, denominator 3·5 − 1² = 14:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:2; margin:0 0 0 12px;">
+          β̂₁ = (3·0 − 1·3)/14 = −3/14&nbsp;&nbsp;&nbsp;&nbsp;β̂₀ = (5·3 − 1·0)/14 = 15/14
+        </div>
+        <div class="ans"><span class="lbl">answer</span>
+          <strong>β̂₀ = 15/14 ≈ 1.0714 and β̂₁ = −3/14 ≈ −0.2143</strong>, so
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:15px; margin:8px 0 0 0;">ŷ = −(3/14)x + 15/14</div>
+          <p style="margin:8px 0 0 0;">SSE at the optimum is <strong>25/14 ≈ 1.7857</strong>.</p>
+        </div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">What moving one point by one unit did</div>
+          The slope went from −4/7 = −8/14 to −3/14 — <strong>flattened to just over a third of its former steepness</strong> — and the intercept rose from 6/7 to 15/14. With only three points, every one of them is high leverage. That is the whole reason Week 5 spent time on outliers and MSE.
+        </div>
+      </div>
+
+      <!-- ===== EX 3 ===== -->
+      <div class="exbox" id="y-3">
+        <div class="extag">Exercise 3</div>
+        <p class="q">Using your favourite method (formula or ‘by hand’), find values for β₀ and β₁ from the dataset in Table 7.2: (−1, 2), (0, 0), (2, 1), (3, −7).</p>
+        <p style="margin:0 0 8px 0;">Four points, so the formula route is the sane one. The five numbers:</p>
+        <table class="cmp-table" style="max-width:520px;">
+          <tr><th>xᵢ</th><th>yᵢ</th><th>xᵢ²</th><th>xᵢyᵢ</th></tr>
+          <tr><td>−1</td><td>2</td><td>1</td><td>−2</td></tr>
+          <tr><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>2</td><td>1</td><td>4</td><td>2</td></tr>
+          <tr><td>3</td><td>−7</td><td>9</td><td>−21</td></tr>
+          <tr style="font-weight:600;"><td>Σ = 4</td><td>Σ = −4</td><td>Σ = 14</td><td>Σ = −21</td></tr>
+        </table>
+        <p style="margin:12px 0 8px 0;">n = 4, so the shared denominator is <code>n·Σx² − (Σx)² = 4·14 − 4² = 40</code>.</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; line-height:2.2; margin:0 0 0 12px;">
+          β̂₁ = (4·(−21) − 4·(−4)) / 40 = (−84 + 16)/40 = −68/40 = <strong>−17/10</strong><br>
+          β̂₀ = (14·(−4) − 4·(−21)) / 40 = (−56 + 84)/40 = 28/40 = <strong>7/10</strong>
+        </div>
+        <div class="ans"><span class="lbl">answer</span>
+          <strong>β̂₀ = 0.7 and β̂₁ = −1.7</strong>, so <code>ŷ = −1.7x + 0.7</code>. SSE at the optimum is <strong>21.1</strong>.
+        </div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">Check it before you move on</div>
+          Predictions are 2.4, 0.7, −2.7, −4.4; residuals are −0.4, −0.7, 3.7, −2.6. <strong>They sum to 0.</strong> Any answer whose residuals do not cancel is arithmetically wrong, and this check costs one line.
+          <p style="margin:10px 0 0 0;">Also note how much worse the fit is than in Exercises 1–2: SSE 21.1 against 1.79. And look <em>where</em> the error ends up. The squared residuals are 0.16, 0.49, <strong>13.69</strong> and 6.76 — the biggest by far belongs to <strong>(2, 1)</strong>, not to the obviously odd (3, −7). Squared error pulls the line so hard towards the extreme point that a perfectly ordinary point becomes the worst-fitted one, contributing <strong>65% of the total</strong>. That is outlier sensitivity doing real damage, and it is the argument for Least Absolute Deviations in a sentence.</p>
+        </div>
+      </div>
+
+      <!-- ===== EX 4 ===== -->
+      <div class="exbox" id="y-4">
+        <div class="extag">Exercise 4</div>
+        <p class="q">For a vector with two dimensions (k = 2), what is the maximum possible Gini(v)?</p>
+        <p style="margin:0 0 8px 0;">With k = 2, write p₁ = p, so p₂ = 1 − p. Definition 7.4 gives</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:14px; line-height:2; margin:0 0 12px 12px;">
+          Gini(v) = p(1 − p) + (1 − p)p = <strong>2p(1 − p)</strong> = 2p − 2p²
+        </div>
+        <p style="margin:0 0 8px 0;">A downward parabola in p. Its vertex is at <code>p = −b/2a = −2/(2·(−2)) = ½</code>, and there</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:14px; margin:0 0 0 12px;">
+          Gini = 2·(½)·(½) = <strong>½</strong>
+        </div>
+        <div class="ans"><span class="lbl">answer</span>
+          <strong>The maximum is ½, reached when the two classes are exactly balanced</strong> — v = (m, m) for any m. The minimum is 0, at p = 0 or p = 1, i.e. a pure node.
+        </div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">The general result, which is what a follow-up would ask</div>
+          For k classes, Gini = 1 − Σpᵢ², and Σpᵢ² is minimised subject to Σpᵢ = 1 when every pᵢ = 1/k. So
+          <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14.5px; margin:10px 0;">max Gini = 1 − k·(1/k)² = <strong>1 − 1/k</strong></div>
+          k = 2 → ½, k = 3 → ⅔ ≈ 0.667, k = 4 → ¾. Note that <strong>the root of Figure 7.5 sits at 0.658 against a ceiling of 0.667</strong> — that node is very nearly as impure as three classes can be, which is why any split at all looks like an improvement.
+        </div>
+      </div>
+
+      <!-- ===== EX 5 ===== -->
+      <div class="exbox" id="y-5">
+        <div class="extag">Exercise 5</div>
+        <p class="q">Refer to the toy dataset in Table 7.4 — 20 data points, 3 binary features, 4 classes. Which of the 3 attributes should we start splitting the tree by, and what are the three Gini-Split values involved?</p>
+        <p style="margin:0 0 10px 0;">Classes in alphabetical order <strong>A, B, C, D</strong>. The 20 rows give A 6, B 5, C 5, D 4, so the root is <code>[6, 5, 5, 4]</code> and</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; margin:0 0 14px 12px;">
+          Gini(root) = (6·14 + 5·15 + 5·15 + 4·16)/20² = 298/400 = <strong>0.745</strong>
+        </div>
+        <p style="margin:0 0 8px 0;">Now split by each feature in turn. Every feature is binary and — conveniently — splits 10/10, 9/11 and 10/10, so the weights are easy.</p>
+        <table class="cmp-table">
+          <tr><th>split</th><th>rows</th><th>value [A,B,C,D]</th><th>Gini of that child</th></tr>
+          <tr><td><strong>Feature1</strong> = 0</td><td>10</td><td><code>[4, 2, 4, 0]</code></td><td><code>0.24 + 0.16 + 0.24 + 0 = 0.64</code></td></tr>
+          <tr><td><strong>Feature1</strong> = 1</td><td>10</td><td><code>[2, 3, 1, 4]</code></td><td><code>0.16 + 0.21 + 0.09 + 0.24 = 0.70</code></td></tr>
+          <tr><td><strong>Feature2</strong> = 0</td><td>9</td><td><code>[3, 2, 3, 1]</code></td><td><code>58/81 ≈ 0.7160</code></td></tr>
+          <tr><td><strong>Feature2</strong> = 1</td><td>11</td><td><code>[3, 3, 2, 3]</code></td><td><code>90/121 ≈ 0.7438</code></td></tr>
+          <tr><td><strong>Feature3</strong> = 0</td><td>10</td><td><code>[2, 3, 3, 2]</code></td><td><code>0.16 + 0.21 + 0.21 + 0.16 = 0.74</code></td></tr>
+          <tr><td><strong>Feature3</strong> = 1</td><td>10</td><td><code>[4, 2, 2, 2]</code></td><td><code>0.24 + 0.16 + 0.16 + 0.16 = 0.72</code></td></tr>
+        </table>
+        <p style="margin:14px 0 8px 0;">Weighted averages, by Definition 7.5:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; line-height:2.3; margin:0 0 0 12px;">
+          Gini-Split(Feature1) = (10/20)(0.64) + (10/20)(0.70) = <strong>0.67</strong><br>
+          Gini-Split(Feature2) = (9/20)(58/81) + (11/20)(90/121) = 362/495 ≈ <strong>0.7313</strong><br>
+          Gini-Split(Feature3) = (10/20)(0.74) + (10/20)(0.72) = <strong>0.73</strong>
+        </div>
+        <div class="ans"><span class="lbl">answer</span>
+          <strong>Split by Feature1</strong>, the arg min. The three values are <strong>0.67, 0.7313… and 0.73</strong> for Features 1, 2 and 3 respectively.
+        </div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">Two things this exercise is really testing</div>
+          <ul style="margin:6px 0 0 0;">
+            <li><strong>Feature2 is the one that does not split 10/10.</strong> If you average its two child Ginis unweighted you get 0.7299, which would beat Feature3 and change nothing — but on a differently shaped dataset the unweighted average flips the answer outright. Write the (nⱼ/n) factors down.</li>
+            <li><strong>Every split is barely an improvement.</strong> The root sits at 0.745 and the best split only reaches 0.67 — against a theoretical maximum of 1 − ¼ = 0.75 for four classes. These features carry almost no information about the class, which is exactly why the tree that eventually gets built cannot classify the training set perfectly.</li>
+          </ul>
+          <p style="margin:10px 0 0 0;">Build it in the <a href="#d-ttool" onclick="showWeek('w7-trees')">tree tool</a> with the <em>Table 7.4</em> preset: three binary features give at most 8 distinct feature vectors for 20 rows across 4 classes, so several leaves stay impure and training accuracy tops out well below 100%.</p>
+        </div>
+      </div>
+
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 7.</p>
+    </section>

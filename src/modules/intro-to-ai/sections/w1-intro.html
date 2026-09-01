@@ -1,0 +1,241 @@
+<section id="w1-intro" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 01 · Part 1 · Introduction</div>
+        <h1>What is Artificial Intelligence?</h1>
+        <div class="week-subtitle">definitions, approaches, and the rational agent</div>
+      </div>
+      <!-- ===== TWO SENSES ===== -->
+      <h2 id="ai-two">Two senses of the phrase</h2>
+      <div class="callout exam">
+        <div class="callout-label">The distinction the lecture opens with</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>AI is a kind of intelligence</strong> — artificial, created by humans.
+            <ul style="margin:6px 0 0 0;">
+              <li>You can <em>use</em> (artificial) intelligence to solve a problem.</li>
+              <li>Some thing or behaviour can <em>be</em> (artificially) intelligent.</li>
+              <li>But there is <strong>NO such thing as using "an AI" / "an intelligence"</strong>.</li>
+            </ul>
+          </li>
+          <li><strong>AI is a science / field of study / field of research</strong> — with the goal of creating intelligent systems.</li>
+        </ol>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why the slide bothers making this point</div>
+        "An AI" treats intelligence as a countable object, like a gadget. The lecture insists it's either a <em>property</em> something has, or a <em>field</em> that studies how to give things that property. Worth using the careful phrasing in written answers — it signals you understood the framing.
+      </div>
+      <div class="callout">
+        <div class="callout-label">The founding definition — John McCarthy, 1956</div>
+        <em>"AI is the science and engineering of making intelligent machines, especially intelligent computer programs. It is related to the similar task of using computers to understand human intelligence, but AI does not have to confine itself to methods that are biologically observable."</em>
+        <p style="margin:10px 0 0 0;">The last clause is the load-bearing one: <strong>an intelligent machine does not have to work the way a brain works.</strong> That single sentence is what licenses the "rational" column in the table below.</p>
+      </div>
+      <!-- ===== APPROACHES ===== -->
+      <h2 id="ai-approaches">Four approaches to AI</h2>
+      <p>If AI is "the science of making intelligent machines" — what counts as an <em>intelligent machine</em>? There are two independent choices, giving four approaches:</p>
+      <table>
+        <tr><th></th><th>Like humans<br><span style="font-weight:400; text-transform:none; letter-spacing:0;">cognitive models of how humans think</span></th><th>Rationally<br><span style="font-weight:400; text-transform:none; letter-spacing:0;">laws from logic, probability</span></th></tr>
+        <tr><td><strong>Think</strong></td><td>Systems that <strong>think like humans</strong></td><td>Systems that <strong>think rationally</strong></td></tr>
+        <tr><td><strong>Act</strong></td><td>Systems that <strong>act like humans</strong></td><td>Systems that <strong>act rationally</strong></td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">Reading the two axes</div>
+        <strong>Think vs act</strong> — is the machine judged on its internal reasoning, or only on its behaviour?<br>
+        <strong>Humanly vs rationally</strong> — is the benchmark <em>what a person would do</em>, or <em>what is provably the best thing to do</em>?
+        <p style="margin:10px 0 0 0;">These give very different research programmes. Copying humans means copying our mistakes too; being rational means possibly behaving in ways no person would. This module is almost entirely in the <strong>act rationally</strong> box.</p>
+      </div>
+      <!-- ===== TURING ===== -->
+      <h2 id="ai-turing">Systems that act like humans</h2>
+      <div class="callout exam">
+        <div class="callout-label">The criterion</div>
+        <strong>A system is intelligent if a person cannot distinguish its behaviour from a human's.</strong>
+      </div>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">Turing test</h4>
+          <p style="font-size:13.5px; margin:0 0 8px 0;">Proposed by <strong>Alan Turing in 1950</strong>.</p>
+          <ul style="font-size:13.5px;">
+            <li>Let a human <strong>ask questions</strong> to a system.</li>
+            <li>If the human cannot tell whether the answers came from a human or a machine, it <strong>passes the test</strong>.</li>
+          </ul>
+        </div>
+        <div class="mode-box" style="background:var(--tint-b); border-color:var(--accent-2);">
+          <h4 style="color:var(--accent-2);">Total Turing test</h4>
+          <ul style="font-size:13.5px;">
+            <li>A <strong>robot</strong> is intelligent if a person cannot distinguish its behaviour from a human's.</li>
+            <li><strong>Includes physical behaviour</strong> — not just conversation.</li>
+          </ul>
+        </div>
+      </div>
+      <!-- ===== AGENTS ===== -->
+      <h2 id="ai-agents">Systems that act rationally: agents</h2>
+      <div class="callout exam">
+        <div class="callout-label">Three definitions to know exactly</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Agent</strong> — a unit that makes an intelligent decision when given the opportunity. It uses the knowledge it has <em>at that point in time</em> to make the decision, and the decision is <em>limited by the range of actions possible at that point in time</em>.</li>
+          <li><strong>Autonomous agent</strong> — makes decisions <strong>without human input</strong>.</li>
+          <li><strong>Rational agent</strong> — <strong>always takes the best action</strong> at a given point.</li>
+        </ul>
+      </div>
+      <p>Examples: a robot, an autonomous vehicle, an enemy monster in a game.</p>
+      <div class="diagram">
+        <div style="font-family:'IBM Plex Sans',sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--ink-muted); margin-bottom:14px;">the agent loop, built up over three slides</div>
+        <svg width="100%" viewBox="0 0 640 300" role="img" xmlns="http://www.w3.org/2000/svg">
+          <title>The rational agent architecture</title>
+          <desc>An agent receives perception through sensors, updates what the world is like now, predicts what the world will be like after an action, decides what action to do now, and acts on the environment through effectors. Knowledge of how the world evolves, effects of actions, and goals feeds into these stages.</desc>
+          <rect x="12" y="34" width="380" height="238" rx="8" fill="none" stroke="var(--rule)" stroke-dasharray="4 3"/>
+          <text x="24" y="52" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--ink-muted)">AGENT</text>
+          <rect x="430" y="34" width="196" height="238" rx="8" fill="var(--tint-c)" stroke="var(--accent-3)"/>
+          <text x="528" y="158" text-anchor="middle" font-family="IBM Plex Sans" font-size="13" fill="var(--accent-3)">ENVIRONMENT</text>
+          <rect x="236" y="60" width="120" height="26" rx="4" fill="var(--tint-a)" stroke="var(--accent)"/>
+          <text x="296" y="78" text-anchor="middle" font-family="IBM Plex Sans" font-size="12" fill="var(--accent)">Sensors</text>
+          <rect x="212" y="104" width="168" height="30" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <text x="296" y="123" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" fill="var(--ink)">What the world is like now</text>
+          <rect x="212" y="146" width="168" height="30" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <text x="296" y="159" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" fill="var(--ink)">What it will be like</text>
+          <text x="296" y="171" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" fill="var(--ink)">if I do action A</text>
+          <rect x="212" y="188" width="168" height="30" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <text x="296" y="207" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" fill="var(--ink)">What action I should do now</text>
+          <rect x="236" y="232" width="120" height="26" rx="4" fill="var(--tint-b)" stroke="var(--accent-2)"/>
+          <text x="296" y="250" text-anchor="middle" font-family="IBM Plex Sans" font-size="12" fill="var(--accent-2)">Effectors</text>
+          <rect x="30" y="104" width="152" height="114" rx="6" fill="var(--tint-d)" stroke="var(--accent-4)"/>
+          <text x="106" y="122" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--accent-4)">KNOWLEDGE</text>
+          <text x="106" y="145" text-anchor="middle" font-family="IBM Plex Sans" font-size="11" fill="var(--ink)">How the world evolves</text>
+          <text x="106" y="171" text-anchor="middle" font-family="IBM Plex Sans" font-size="11" fill="var(--ink)">Effects of my actions</text>
+          <text x="106" y="197" text-anchor="middle" font-family="IBM Plex Sans" font-size="11" fill="var(--ink)">Goals</text>
+          <line x1="182" y1="119" x2="210" y2="119" stroke="var(--accent-4)" stroke-width="1"/>
+          <line x1="182" y1="161" x2="210" y2="161" stroke="var(--accent-4)" stroke-width="1"/>
+          <line x1="182" y1="203" x2="210" y2="203" stroke="var(--accent-4)" stroke-width="1"/>
+          <line x1="296" y1="86" x2="296" y2="102" stroke="var(--ink-muted)" stroke-width="1"/>
+          <line x1="296" y1="134" x2="296" y2="144" stroke="var(--ink-muted)" stroke-width="1"/>
+          <line x1="296" y1="176" x2="296" y2="186" stroke="var(--ink-muted)" stroke-width="1"/>
+          <line x1="296" y1="218" x2="296" y2="230" stroke="var(--ink-muted)" stroke-width="1"/>
+          <text x="392" y="152" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--accent-4)">planning</text>
+          <line x1="428" y1="60" x2="358" y2="66" stroke="var(--accent)" stroke-width="1.2"/>
+          <text x="400" y="52" text-anchor="middle" font-family="IBM Plex Sans" font-size="10.5" fill="var(--accent)">perception</text>
+          <line x1="358" y1="245" x2="428" y2="252" stroke="var(--accent-2)" stroke-width="1.2"/>
+          <text x="398" y="270" text-anchor="middle" font-family="IBM Plex Sans" font-size="10.5" fill="var(--accent-2)">action</text>
+        </svg>
+        <div class="caption">Perception comes in through sensors; knowledge feeds each stage; the decision goes out through effectors as an action.</div>
+      </div>
+      <!-- ===== KNOWLEDGE ===== -->
+      <h2 id="ai-knowledge">Two ways of encoding knowledge</h2>
+      <p>The knowledge box on the left — <em>how the world evolves</em>, <em>effects of my actions</em>, <em>goals</em> — can be filled in two very different ways. <strong>This is the split that divides the whole field.</strong></p>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">Model-based</h4>
+          <p style="font-size:12px; font-family:'IBM Plex Mono',monospace; margin:0 0 10px 0; color:var(--ink-muted);">explicit knowledge → Symbolic / Classical AI</p>
+          <ul style="font-size:13.5px;">
+            <li><strong>Define an encoding</strong> of what the world looks like.</li>
+            <li><strong>Define how we can change</strong> that world.</li>
+            <li><strong>Search for good strategies</strong> on how to change the world the way we want to.</li>
+            <li>Pretends to <strong>think</strong> like a human.</li>
+          </ul>
+        </div>
+        <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
+          <h4 style="color:var(--accent-3);">Data-driven</h4>
+          <p style="font-size:12px; font-family:'IBM Plex Mono',monospace; margin:0 0 10px 0; color:var(--ink-muted);">tacit knowledge → Machine Learning</p>
+          <ul style="font-size:13.5px;">
+            <li><strong>Reads in coarse data</strong> from a specific problem.</li>
+            <li><strong>Is told the problem</strong> it's trying to solve.</li>
+            <li><strong>Changes the model</strong> such that it gets the correct output.</li>
+            <li>Pretends to <strong>learn</strong> like a human.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Note the third bullet on the left — that's this whole module</div>
+        "<em>Search for good strategies on how to change the world the way we want to</em>" is a one-line description of <strong>search</strong>, which is Part 2. Classical AI encodes the world explicitly and then <em>searches</em>; machine learning fits a model to data instead. Also note the deliberate parallel in the last bullets: one <strong>pretends to think</strong> like a human, the other <strong>pretends to learn</strong> like one.
+      </div>
+      <!-- ===== DIMENSIONS ===== -->
+      <h2 id="ai-dimensions">The dimensions a problem can vary along</h2>
+      <p>Each part of the agent diagram comes with a choice. These are the axes you use to <strong>characterise a problem</strong> before choosing a technique:</p>
+      <table>
+        <tr><th>Where it sits</th><th>The choice</th><th>What it means</th></tr>
+        <tr><td rowspan="2"><strong>Knowledge</strong></td><td>explicit vs <strong>tacit</strong></td><td>written down in a form we can inspect, vs implicit in a learned model</td></tr>
+        <tr><td>model-based vs <strong>data-driven</strong></td><td>the two columns above</td></tr>
+        <tr><td><strong>Perception</strong></td><td>perfect vs <strong>imperfect</strong></td><td>do the sensors tell the truth?</td></tr>
+        <tr><td rowspan="2"><strong>Environment</strong></td><td>fully vs <strong>partially observable</strong></td><td>can the agent see the whole state, or only part of it?</td></tr>
+        <tr><td>static vs <strong>dynamic</strong></td><td>does the world change while the agent is deciding?</td></tr>
+        <tr><td rowspan="2"><strong>Actions</strong></td><td>instantaneous vs <strong>durative</strong></td><td>does an action take time to complete?</td></tr>
+        <tr><td>deterministic vs <strong>stochastic</strong></td><td>does an action always have the same effect?</td></tr>
+      </table>
+      <div class="callout exam">
+        <div class="callout-label">Why this table matters more than it looks</div>
+        Every technique in the module assumes a particular set of answers. The search algorithms in Parts 2 and 3 all assume the <em>easy</em> end of every axis: <strong>perfect perception, a fully observable static environment, and instantaneous deterministic actions</strong>. If a question describes a problem that breaks one of those assumptions, that's the hint that plain search won't do.
+      </div>
+      <!-- ===== HISTORY ===== -->
+      <h2 id="ai-history">A short history</h2>
+      <table>
+        <tr><th>Year</th><th>Event</th></tr>
+        <tr><td><strong>1950</strong></td><td>Alan Turing proposes the <strong>Turing test</strong></td></tr>
+        <tr><td><strong>1956</strong></td><td>John McCarthy's definition of AI</td></tr>
+        <tr><td><strong>1958</strong></td><td><strong>Herbert A. Simon:</strong> "within 10 years a digital computer will be the world's chess champion"</td></tr>
+        <tr><td><strong>1967</strong></td><td><strong>Marvin Minsky:</strong> "within a generation, the problem of creating 'artificial intelligence' will substantially be solved"</td></tr>
+        <tr><td><strong>1997</strong></td><td>IBM's <strong>Deep Blue</strong> beats Gary Kasparov</td></tr>
+        <tr><td><strong>2016</strong></td><td>DeepMind's <strong>AlphaGo</strong> defeats Lee Sedol</td></tr>
+        <tr><td><strong>2017</strong></td><td>DeepMind's <strong>AlphaZero</strong> becomes one of the strongest chess players of all time</td></tr>
+        <tr><td><strong>2019</strong></td><td>DeepMind's <strong>AlphaStar</strong> achieves grandmaster status in StarCraft II</td></tr>
+      </table>
+      <div class="callout warn">
+        <div class="callout-label">The point of the two quotes</div>
+        Simon said chess in ten years; it took <strong>39</strong>. Minsky said the whole problem in a generation; the lecture's own summary is that <strong>many open challenges still exist</strong> and <strong>true general intelligence is still a long way off</strong>. The pairing is there to show how badly the field has historically mis-estimated difficulty.
+      </div>
+      <!-- ===== VALUES ===== -->
+      <h2 id="ai-values">The value alignment problem</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>How to <strong>align the values of your system</strong> with those of the humans who use, and are impacted by, the system?</li>
+          <li>How to <strong>exactly specify</strong> what a "good" song recommendation / conversation / game experience is?</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Connect it back to the agent diagram</div>
+        Look at the knowledge box: one of the three things in it is <strong>goals</strong>. A rational agent "always takes the best action" — but <em>best according to what?</em> The value alignment problem is precisely the difficulty of filling in that one box correctly. The agent will optimise exactly what you specify, which is only useful if what you specified is what you meant.
+      </div>
+      <h2>Human vs artificial intelligence</h2>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">Human</h4>
+          <ul style="font-size:13.5px;">
+            <li>Self-directed goals</li>
+            <li>Common sense</li>
+            <li>Learn from few examples</li>
+            <li>Adapt to similar but different tasks</li>
+            <li>Emotional intelligence</li>
+            <li><strong>Humans ask questions!</strong></li>
+          </ul>
+        </div>
+        <div class="mode-box" style="background:var(--tint-b); border-color:var(--accent-2);">
+          <h4 style="color:var(--accent-2);">Artificial</h4>
+          <ul style="font-size:13.5px;">
+            <li>Statistical reasoning</li>
+            <li>Large-scale maths</li>
+            <li>Huge state-space exploration</li>
+            <li>Computational power (at scale)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">"Huge state-space exploration"</div>
+        That's the entry in the right-hand column that Parts 2 and 3 are about. The machine's advantage isn't insight — it's the ability to <strong>examine enormous numbers of possibilities systematically</strong>. Search is how that advantage gets used.
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="ai-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 1</div>
+        <ol>
+          <li><strong>The two senses of AI</strong> — a kind of intelligence (a property, not a countable object — "no such thing as <em>an</em> AI") and a field of research aiming to create intelligent systems.</li>
+          <li><strong>McCarthy's 1956 definition</strong>, especially the closing clause: AI <em>does not have to confine itself to biologically observable methods</em>.</li>
+          <li><strong>The four approaches</strong> — think/act × like humans/rationally. Know that "like humans" means cognitive models and "rationally" means laws from logic and probability.</li>
+          <li><strong>Turing test</strong> (1950, question-and-answer) vs <strong>total Turing test</strong> (a robot, including physical behaviour).</li>
+          <li><strong>Agent / autonomous agent / rational agent</strong> — be able to give all three definitions, including that an agent's decision is limited by the knowledge and the actions available <em>at that point in time</em>.</li>
+          <li><strong>Draw the agent loop</strong> — sensors → what the world is like now → what it will be like if I do A → what action to do now → effectors, with knowledge (how the world evolves, effects of my actions, goals) feeding in.</li>
+          <li><strong>Model-based vs data-driven</strong> — explicit/symbolic/classical vs tacit/machine learning, four bullets each, and the "pretends to think" / "pretends to learn" contrast.</li>
+          <li><strong>The seven dimensions</strong> — explicit/tacit, model-based/data-driven, perfect/imperfect perception, fully/partially observable, static/dynamic, instantaneous/durative, deterministic/stochastic.</li>
+          <li><strong>The history dates</strong> — 1950 Turing, 1956 McCarthy, 1958 Simon's prediction, 1967 Minsky's prediction, 1997 Deep Blue, 2016 AlphaGo, 2017 AlphaZero, 2019 AlphaStar.</li>
+          <li><strong>Value alignment</strong> — aligning system values with human ones, and the difficulty of exactly specifying what "good" means.</li>
+          <li><strong>Human vs AI strengths</strong> — the two lists, and note humans ask questions.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Part 1. Next: search — how a model-based agent actually finds a plan.</p>
+    </section>

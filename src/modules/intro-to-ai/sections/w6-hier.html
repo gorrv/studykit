@@ -1,0 +1,239 @@
+<section id="w6-hier" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 06 · Part 2 · Unsupervised Learning</div>
+        <h1>Hierarchical Clustering</h1>
+        <div class="week-subtitle">every K at once, from n clusters down to one</div>
+      </div>
+      <!-- ===== IDEA ===== -->
+      <h2 id="h-idea">The idea</h2>
+      <div class="callout exam">
+        <div class="callout-label">The motivation</div>
+        Instead of finding a fixed number of clusters, we create <strong>a process in which the number of clusters progressively changes as steps go by</strong>. We can then <strong>stop when we reach the desired number of clusters</strong>.
+        <p style="margin:10px 0 0 0;">The process is simple: at step 1 there are <strong>K = n</strong> clusters — <strong>each point is its own cluster</strong>. At each time-step, we <strong>select the closest pair of clusters and merge them into one</strong>.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">Informally, the algorithm</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>At the start, <strong>assign each point to their own cluster</strong>.</li>
+          <li><strong>Merge the two closest clusters</strong> according to a given criterion.</li>
+          <li>If all points are in one cluster, <strong>stop</strong>. Otherwise, go back to step 2.</li>
+        </ol>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Two things to pin down before you can run it</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Linkage criterion</strong> — how do we define distance between two <em>clusters</em>?</li>
+          <li><strong>Metric</strong> — which metric do we use to define distance between two <em>points</em>?</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">These are related, since both reason about distances. But — and this is the point to remember — <strong>the criterion for cluster distance is independent of the choice of metric</strong>. Any of the three linkages combines with any metric, giving the six dendograms at the end of this page.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The trade against K-means, in one line each</div>
+        <strong>K-means:</strong> you must choose K up front, it can land in a bad local minimum, and the answer depends on the initialisation. <strong>Hierarchical:</strong> no K needed, no initialisation, and it is <em>deterministic</em> — but it is greedy, so an early merge can never be undone, and it is far more expensive (you recompute a whole distance table every step).
+      </div>
+      <!-- ===== METRICS ===== -->
+      <h2 id="h-metric">The two metrics</h2>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">Definition 6.5 — Manhattan, L₁</h4>
+          <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:10px 0;">
+            ‖p₁ − p₂‖₁ := Σ<sub>i=1</sub><sup>D</sup> |p<sub>1i</sub> − p<sub>2i</sub>|</div>
+          <p style="font-size:13px; margin:0;">The sum of the absolute coordinate differences, where |x| is the usual modulus. Also called the <strong>L₁ norm</strong> — hence the subscript 1.</p>
+        </div>
+        <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
+          <h4 style="color:var(--accent-3);">Definition 6.6 — Euclidean, L₂</h4>
+          <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:10px 0;">
+            ‖p₁ − p₂‖₂ := ( Σ<sub>i=1</sub><sup>D</sup> (p<sub>1i</sub> − p<sub>2i</sub>)² )<sup>½</sup></div>
+          <p style="font-size:13px; margin:0;">Straight-line distance. Also called the <strong>L₂ norm</strong>.</p>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Note the square root is back</div>
+        Part 1's V(C<sub>k</sub>) used <strong>squared</strong> Euclidean distance with no root. These definitions are the genuine norms, root and all. Hierarchical clustering compares distances rather than summing them into an objective, so there is no reason to drop the root — and dropping it would change nothing about the <em>order</em> of merges anyway.
+      </div>
+      <!-- ===== LINKAGE ===== -->
+      <h2 id="h-link">The three linkage criteria</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definitions 6.7, 6.8 and 6.9</div>
+        Let C₁ and C₂ be two clusters and ‖·‖ a norm (L₁ or L₂, say).
+        <table style="margin:12px 0 0 0;">
+          <tr><th>Criterion</th><th>Definition</th><th>In words</th></tr>
+          <tr><td><strong>Single-linkage</strong></td>
+              <td style="font-family:'IBM Plex Mono',monospace; font-size:13px;">dist<sub>SL</sub>(C₁,C₂) := min<sub>p∈C₁, q∈C₂</sub> ‖p − q‖</td>
+              <td>the <strong>shortest</strong> distance between points from one cluster to the other</td></tr>
+          <tr><td><strong>Complete-linkage</strong></td>
+              <td style="font-family:'IBM Plex Mono',monospace; font-size:13px;">dist<sub>CL</sub>(C₁,C₂) := max<sub>p∈C₁, q∈C₂</sub> ‖p − q‖</td>
+              <td>the <strong>longest</strong> distance between points from one cluster to the other</td></tr>
+          <tr><td><strong>Average-linkage</strong></td>
+              <td style="font-family:'IBM Plex Mono',monospace; font-size:13px;">dist<sub>AL</sub>(C₁,C₂) := (1/mn) Σ<sub>i=1</sub><sup>n</sup> Σ<sub>j=1</sub><sup>m</sup> ‖p<sub>i</sub> − q<sub>j</sub>‖</td>
+              <td>the <strong>average</strong> distance between points from one cluster to the other</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0; font-size:13.5px;">Note that <strong>mn is the number of pairs of points between clusters</strong> — every point of C₁ against every point of C₂.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">What each one actually does to the shape of your clusters</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Single-linkage</strong> only needs <em>one</em> close pair, so clusters can grow along a chain of near-neighbours — long, straggly shapes. Good at finding elongated structure, notoriously prone to "chaining" two blobs together through a bridge of stray points.</li>
+          <li><strong>Complete-linkage</strong> requires <em>every</em> pair to be close before it merges, so it produces tight, compact, roughly equal-sized clusters — and refuses to merge anything with an outlier hanging off it.</li>
+          <li><strong>Average-linkage</strong> sits between the two and is the usual compromise.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">This is <strong>not cosmetic</strong>. On the notes' own six points, single and complete linkage produce genuinely different clusterings at K = 3, which is <a href="#x-6" onclick="showWeek('w6-ex')">Exercise 6</a>. And the difference is exactly what <a href="#x-7" onclick="showWeek('w6-ex')">Exercise 7</a>'s helicopter question turns on.</p>
+      </div>
+      <!-- ===== EXAMPLE ===== -->
+      <h2 id="h-example">The worked example</h2>
+      <p>Six points, <strong>single-linkage</strong> and <strong>Manhattan (L₁)</strong> distance:</p>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1.9; margin:10px 0 0 8px;">
+        p₁ = (−10, 8) &nbsp; p₂ = (7, −6) &nbsp; p₃ = (8, −10)<br>
+        p₄ = (−6, −4) &nbsp; p₅ = (−8, 6) &nbsp; p₆ = (2, −4)</div>
+      <p style="margin-top:16px;">At iteration 0 every point is its own cluster, so the cluster distance table is just the point distance table:</p>
+      <table class="dmx">
+        <tr><th></th><th>{1}</th><th>{2}</th><th>{3}</th><th>{4}</th><th>{5}</th></tr>
+        <tr><th>{2}</th><td>31</td><td class="empty"></td><td class="empty"></td><td class="empty"></td><td class="empty"></td></tr>
+        <tr><th>{3}</th><td>36</td><td>5</td><td class="empty"></td><td class="empty"></td><td class="empty"></td></tr>
+        <tr><th>{4}</th><td>16</td><td>15</td><td>20</td><td class="empty"></td><td class="empty"></td></tr>
+        <tr><th>{5}</th><td class="min">4</td><td>27</td><td>32</td><td>12</td><td class="empty"></td></tr>
+        <tr><th>{6}</th><td>24</td><td>7</td><td>12</td><td>8</td><td>20</td></tr>
+      </table>
+      <p style="font-size:13.5px; color:var(--ink-muted);">Check one: d₁(p₁,p₅) = |−10 − (−8)| + |8 − 6| = 2 + 2 = <strong>4</strong>, the smallest entry — so {1} and {5} merge first.</p>
+      <div class="callout">
+        <div class="callout-label">Where single-linkage first bites</div>
+        At iteration 1 we need the distance from <strong>{1,5}</strong> to <strong>{4}</strong>. Should that be d(p₁,p₄) = 16 or d(p₅,p₄) = 12? <em>"The former is worse, the latter is better, so what is the correct one? Well, that is where the criterion comes in."</em>
+        <p style="margin:10px 0 0 0;">Single-linkage takes <strong>the shortest distance between any two points, one in each cluster</strong> — so <strong>12</strong>.</p>
+      </div>
+      <p>The full run, with the threshold at each step:</p>
+      <table>
+        <tr><th>t</th><th>Threshold</th><th>Merge</th><th>Resulting clusters</th><th>K</th></tr>
+        <tr><td>0</td><td>—</td><td>—</td><td>{1} {2} {3} {4} {5} {6}</td><td>6</td></tr>
+        <tr><td>1</td><td><strong>4</strong></td><td>{1} + {5}</td><td>{1,5} {2} {3} {4} {6}</td><td>5</td></tr>
+        <tr><td>2</td><td><strong>5</strong></td><td>{2} + {3}</td><td>{1,5} {2,3} {4} {6}</td><td>4</td></tr>
+        <tr><td>3</td><td><strong>7</strong></td><td>{2,3} + {6}</td><td>{1,5} {2,3,6} {4}</td><td>3</td></tr>
+        <tr><td>4</td><td><strong>8</strong></td><td>{2,3,6} + {4}</td><td>{1,5} {2,3,4,6}</td><td>2</td></tr>
+        <tr><td>5</td><td><strong>12</strong></td><td>everything</td><td>{1,2,3,4,5,6}</td><td>1</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">The thresholds are the merge distances — and they only ever increase</div>
+        4, 5, 7, 8, 12. That monotone sequence is what gets plotted as the heights of a dendogram, and it is also why "a big jump" is meaningful: it means the next two things to join were much further apart than anything joined so far.
+        <p style="margin:10px 0 0 0;">The notes observe that <strong>a threshold of 12 is enough to amalgamate all points into a single cluster</strong> — i.e. reading the final threshold tells you the diameter of the whole data set under this linkage.</p>
+      </div>
+      <!-- ===== ALGORITHM ===== -->
+      <h2 id="h-algo">The formal algorithm, and what happens on ties</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition 6.10 — Hierarchical Clustering Algorithm</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Create n clusters</strong>, one per data point. At t = 0, C₁ = {p₁} … C<sub>n</sub> = {p<sub>n</sub>}. Move time to t = 1.</li>
+          <li>At time t, <strong>merge clusters that have the smallest distance</strong> between each other, according to the given criterion. Evaluate, over every distinct pair:
+            <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
+              threshold(t) := min<sub>C<sub>i</sub>,C<sub>j</sub></sub> dist(C<sub>i</sub><sup>(t)</sup>, C<sub>j</sub><sup>(t)</sup>) &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(6.11)</span></div>
+            If only one pair achieves it, merge them (assuming i &lt; j): <code>C<sub>i</sub><sup>(t+1)</sup> = C<sub>i</sub><sup>(t)</sup> ∪ C<sub>j</sub><sup>(t)</sup></code>.
+            <strong>In case of ties, merge <em>all</em> clusters that are a distance of threshold(t) away from each other.</strong></li>
+          <li><strong>Stop if there is only one cluster</strong> containing all points. Otherwise go back to step 2 with t + 1.</li>
+        </ol>
+        <p style="margin:12px 0 0 0; font-size:13.5px;">Naming convention: <strong>the lower index at time t is used when naming the merged cluster</strong> at t + 1.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Remark 6.11 — the two tie scenarios</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Two separate pairs.</strong> C₁ and C₂ are 10 apart, and C₃ and C₄ are also 10 apart, and 10 is the smallest distance overall. Then <strong>perform two merges</strong>: C₁∪C₂ and C₃∪C₄. K drops by <strong>2</strong> in one step.</li>
+          <li><strong>A chain.</strong> C₁ and C₂ are 10 apart and C₂ and C₃ are also 10 apart. Then <strong>merge all three into one big cluster</strong>. K drops by 2 here too, but into a single cluster rather than two.</li>
+        </ol>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The honest caveat, and the consequence</div>
+        The notes are explicit that <em>"there are no correct answers for the points we raised… there are often arguments both ways"</em>. Merging every pair at the threshold has a real cost:
+        <p style="margin:10px 0 0 0;"><strong>it makes it impossible to have all values of K</strong> — you can "jump" from x clusters to x − 2 or fewer, so some K simply never occurs. On the other hand, it <strong>ties really nicely into dendograms</strong>, because everything at the same height merges at the same height.</p>
+        <p style="margin:10px 0 0 0;">If an exam asks you to justify the tie rule, that is the trade: <strong>lose some values of K, gain a clean dendogram.</strong></p>
+      </div>
+      <!-- ===== DENDOGRAMS ===== -->
+      <h2 id="h-dendro">Dendograms</h2>
+      <div class="callout">
+        <div class="callout-label">The figure</div>
+        <div class="ix-canvas"><svg width="100%" viewBox="0 0 660 280" role="img" xmlns="http://www.w3.org/2000/svg"><title>A dendogram</title><desc>Complete-linkage dendogram of six points, with merge heights and a suggested cut.</desc><line x1="80" y1="240.0" x2="590" y2="240.0" stroke="var(--rule)" stroke-width="0.6"/><text x="72.0" y="243.5" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">0</text><line x1="80" y1="191.2" x2="590" y2="191.2" stroke="var(--rule)" stroke-width="0.6"/><text x="72.0" y="194.7" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">2</text><line x1="80" y1="142.4" x2="590" y2="142.4" stroke="var(--rule)" stroke-width="0.6"/><text x="72.0" y="145.9" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">4</text><line x1="80" y1="93.7" x2="590" y2="93.7" stroke="var(--rule)" stroke-width="0.6"/><text x="72.0" y="97.2" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">6</text><line x1="80" y1="44.9" x2="590" y2="44.9" stroke="var(--rule)" stroke-width="0.6"/><text x="72.0" y="48.4" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">8</text><path d="M 131.7 240.0 L 131.7 205.5 L 215.0 205.5 L 215.0 240.0" fill="none" stroke="var(--accent)" stroke-width="1.8"/><text x="173.3" y="200.5" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--accent)">1.41</text><path d="M 465.0 240.0 L 465.0 205.5 L 548.3 205.5 L 548.3 240.0" fill="none" stroke="var(--accent)" stroke-width="1.8"/><text x="506.7" y="200.5" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--accent)">1.41</text><path d="M 298.3 240.0 L 298.3 162.9 L 173.3 162.9 L 173.3 205.5" fill="none" stroke="var(--accent)" stroke-width="1.8"/><text x="235.8" y="157.9" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--accent)">3.16</text><path d="M 381.7 240.0 L 381.7 152.0 L 506.7 152.0 L 506.7 205.5" fill="none" stroke="var(--accent)" stroke-width="1.8"/><text x="444.2" y="147.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--accent)">3.61</text><path d="M 235.8 162.9 L 235.8 54.2 L 444.2 54.2 L 444.2 152.0" fill="none" stroke="var(--accent)" stroke-width="1.8"/><text x="340.0" y="49.2" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--accent)">7.62</text><text x="131.7" y="256.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink)">p1</text><text x="215.0" y="256.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink)">p2</text><text x="298.3" y="256.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink)">p3</text><text x="381.7" y="256.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink)">p4</text><text x="465.0" y="256.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink)">p5</text><text x="548.3" y="256.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink)">p6</text><line x1="80" y1="105.9" x2="590" y2="105.9" stroke="var(--accent-2)" stroke-width="1.6" stroke-dasharray="6 4"/><text x="588.0" y="99.9" text-anchor="end" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-2)">cut here &#8594; K = 2</text><text x="38.0" y="140.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--ink-muted)">height</text></svg></div>
+        <p style="margin:12px 0 0 0;">Complete linkage, L&#8322;, on the six points from Part 1. <strong>The height of each bar is the distance at which that merge happened.</strong> Read it bottom-up: p1+p2 and p5+p6 join cheaply at 1.41, then p3 joins at 3.16, then p4 joins p5p6 at 3.61 &mdash; and the last merge costs <strong>7.62</strong>. <strong>That big jump is where to cut</strong>, and cutting there gives K = 2.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">What they are for</div>
+        A dendogram <strong>visualises the entire hierarchical clustering process at once</strong>. Leaves are points; each horizontal join is a merge; the <strong>height of a join is the threshold at which it happened</strong>.
+        <p style="margin:10px 0 0 0;"><strong>They also help decide a suitable K.</strong> If we need to <strong>increase the threshold a lot before the next pair merges</strong>, that indicates the clusters were 'far away'. <strong>Long vertical parts of the dendogram</strong> mark those points.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The notes' worked reading — Figure 6.9, complete linkage with L₁</div>
+        <em>"It looks like <strong>K = 2 may be a good choice</strong>, since one needs to increase the threshold from <strong>around 20 to around 35</strong> to go from 2 clusters to 1 cluster."</em>
+        <p style="margin:10px 0 0 0;">Running that combination gives merge thresholds <strong>4, 5, 8, 20, 36</strong>. The jump from 20 to 36 is the long vertical bar at the top — by far the biggest gap in the sequence — so cutting just below it, at K = 2, is the natural choice.</p>
+      </div>
+      <p>All six combinations, as merge-threshold sequences (the heights you would draw):</p>
+      <table>
+        <tr><th>Linkage</th><th>Metric</th><th>Merge thresholds (t = 1 … 5)</th><th>Final clustering at K = 2</th></tr>
+        <tr><td><strong>Single</strong></td><td>L₁</td><td><code>4, 5, 7, 8, 12</code></td><td>{1,5} · {2,3,4,6}</td></tr>
+        <tr><td><strong>Complete</strong></td><td>L₁</td><td><code>4, 5, 8, 20, 36</code></td><td>{1,5} · {2,3,4,6}</td></tr>
+        <tr><td><strong>Average</strong></td><td>L₁</td><td><code>4, 5, 8, 13.5, 24.75</code></td><td>{1,5} · {2,3,4,6}</td></tr>
+        <tr><td><strong>Single</strong></td><td>L₂</td><td><code>2.83, 4.12, 5.39, 8, 10.20</code></td><td>{1,5} · {2,3,4,6}</td></tr>
+        <tr><td><strong>Complete</strong></td><td>L₂</td><td><code>2.83, 4.12, 8, 15.23, 25.46</code></td><td>{1,5} · {2,3,4,6}</td></tr>
+        <tr><td><strong>Average</strong></td><td>L₂</td><td><code>2.83, 4.12, 6.94, 11.42, 17.42</code></td><td><strong style="color:var(--accent-2);">{1,4,5} · {2,3,6}</strong></td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">Read the last column — the notes say "clustering changes significantly", and here is where</div>
+        Five of the six agree at K = 2. <strong>Average linkage with L₂ is the odd one out</strong>: it puts p₄ with {1,5} instead of with {2,3,6}, giving {1,4,5} · {2,3,6}. That is why Figure 6.12 has a completely different leaf order (6 2 3 4 1 5) from the other five.
+        <p style="margin:10px 0 0 0;">And note the axis maxima match the figures: single L₁ tops out at 12 (Fig 6.7), single L₂ at ~10 (6.8), complete L₁ at ~36 (6.9), complete L₂ at ~25 (6.10), average L₁ at ~25 (6.11), average L₂ at ~17.5 (6.12). <strong>The final threshold is the height of the dendogram.</strong></p>
+      </div>
+      <!-- ===== TOOL ===== -->
+      <h2 id="h-tool">Tool · Hierarchical tracer &amp; dendogram</h2>
+      <div class="tool" data-run="runHC">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Distance tables at every step, plus the dendogram</h3></div>
+        <p class="tool-desc"><strong>Drag the points, step through the merges, and drag the cut line on the dendogram to choose K.</strong> Runs Definition 6.10 including the "merge everything at the threshold" tie rule, showing the cluster-distance table for the next merge with the minimum highlighted. Defaults to the notes' six points; the two dropdowns re-cluster instantly, so you can flip between all six figures.</p>
+        <div class="tool-controls">
+          <div class="tool-field"><label for="hc-link">Linkage</label>
+            <select id="hc-link" onchange="hcOpt()">
+              <option value="single" selected>single — min</option>
+              <option value="complete">complete — max</option>
+              <option value="average">average — mean</option>
+            </select></div>
+          <div class="tool-field"><label for="hc-metric">Metric</label>
+            <select id="hc-metric" onchange="hcOpt()">
+              <option value="l1" selected>Manhattan L₁</option>
+              <option value="l2">Euclidean L₂</option>
+            </select></div>
+          <button class="tool-btn" onclick="runHC()">Load from the box below</button>
+        </div>
+        <div class="tool-field" style="width:100%; margin-top:12px;">
+          <label for="hc-pts">Points — <code>name: x y …</code>, one per line</label>
+          <textarea id="hc-pts" rows="6" spellcheck="false">p1: -10 8
+p2: 7 -6
+p3: 8 -10
+p4: -6 -4
+p5: -8 6
+p6: 2 -4</textarea>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="hc-output" class="tool-output"></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Things worth trying in it</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Press ▶ play</strong> and watch the clusters swallow each other one merge at a time, with the dashed line showing which pair is about to join and the dendogram colouring in behind it.</li>
+          <li><strong>Drag the cut line up and down the dendogram.</strong> The plot on the left recolours instantly — that is what "choosing K from a dendogram" actually means, and you can feel the long vertical gaps as the K that the cut sits in for the longest.</li>
+          <li>The default reproduces Figures 6.3–6.6 exactly: thresholds <strong>4, 5, 7, 8, 12</strong> and the distance table for each merge.</li>
+          <li>Switch to <strong>complete</strong> linkage, keep L₁, and compare the K = 3 row against single linkage. They differ — <strong>that is <a href="#x-6" onclick="showWeek('w6-ex')">Exercise 6</a></strong>, and the tool marks the highest K at which the two disagree. The dropdowns re-cluster instantly, so you can flip back and forth.</li>
+          <li><strong>Drag a point into the gap between two clusters</strong>, then switch between single and complete linkage. Single-linkage will chain the two groups together through your new point; complete-linkage will refuse. That is <a href="#x-7" onclick="showWeek('w6-ex')">Exercise 7</a>'s helicopter argument, drawn.</li>
+          <li>Run all six linkage × metric combinations and check the threshold sequences against the table above. <strong>Average + L₂ is the one that splits differently at K = 2.</strong></li>
+          <li>Look for the <strong>biggest gap</strong> in each dendogram — that is the K the notes would recommend. With complete + L₁ the jump is 20 → 36, pointing at K = 2.</li>
+
+        </ul>
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="h-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 2</div>
+        <ol>
+          <li><strong>Start with n singleton clusters; repeatedly merge the closest pair; stop at one cluster.</strong></li>
+          <li><strong>Two independent choices</strong> — the <em>linkage criterion</em> (cluster-to-cluster) and the <em>metric</em> (point-to-point). Any combination is legal.</li>
+          <li><strong>L₁ (Manhattan)</strong> = Σ|p₁ᵢ − p₂ᵢ|. <strong>L₂ (Euclidean)</strong> = (Σ(p₁ᵢ − p₂ᵢ)²)<sup>½</sup>. Write both.</li>
+          <li><strong>Single = min, complete = max, average = mean</strong> over all cross-cluster pairs; average divides by <strong>mn</strong>, the number of such pairs.</li>
+          <li><strong>Be able to build the distance table and run the merges by hand.</strong> On the notes' points with single + L₁: thresholds <strong>4, 5, 7, 8, 12</strong>, merging {1,5}, then {2,3}, then {2,3,6}, then {2,3,4,6}, then everything.</li>
+          <li><strong>Ties (Remark 6.11)</strong> — merge <em>all</em> clusters at the threshold; two separate pairs give two merges, a chain gives one big cluster. The cost is that <strong>some values of K become unreachable</strong>.</li>
+          <li><strong>Dendograms</strong> — leaves are points, join height is the merge threshold; <strong>a long vertical gap indicates a good place to cut</strong>, i.e. a good K.</li>
+          <li><strong>The maximum number of steps is n − 1</strong> (Exercise 5) — each merge reduces the cluster count by at least one.</li>
+          <li><strong>Single-linkage chains; complete-linkage keeps clusters compact.</strong> This is the reasoning Exercise 7 wants.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Part 2. Next: the seven exercises, worked out.</p>
+    </section>

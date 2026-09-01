@@ -1,0 +1,541 @@
+    <div class="brand">Intro to <span class="accent">AI</span></div>
+    <div class="brand-sub">Introduction to Artificial<br>Intelligence · KCL</div>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Switch between light and dark theme">
+      <span class="tt-dot" aria-hidden="true"></span><span class="tt-label" id="tt-label">Light</span>
+    </button>
+    <div class="search-box" id="ns-box">
+      <span class="s-ico" aria-hidden="true">&#9906;</span>
+      <input type="search" id="ns-input" placeholder="Search these notes…" autocomplete="off"
+             spellcheck="false" aria-label="Search these notes"
+             oninput="nsInput()" onkeydown="nsKey(event)" onfocus="nsInput()">
+      <button class="s-clr" onclick="nsClear()" title="Clear search" aria-label="Clear search">&times;</button>
+    </div>
+    <div class="search-results" id="ns-results" hidden></div>
+    <nav>
+      <ul>
+        <li class="week">
+          <div class="week-label">Start</div>
+          <a class="week-title" href="#" onclick="showWeek('start'); return false;">How to use this file</a>
+        </li>
+        <li class="week">
+          <div class="week-label">★ If a formula blocks you</div>
+          <a class="week-title" href="#" onclick="showWeek('notation'); return false;" style="color:var(--accent-4);">Reading the Notation</a>
+          <ul class="subsection">
+            <li><a href="#nt-rules" onclick="showWeek('notation')">Three rules</a></li>
+            <li><a href="#nt-sums" onclick="showWeek('notation')">Σ — adding up</a></li>
+            <li><a href="#nt-sets" onclick="showWeek('notation')">∈, |C|, ‖p−q‖</a></li>
+            <li><a href="#nt-choose" onclick="showWeek('notation')">min, max, arg max</a></li>
+            <li><a href="#nt-prob" onclick="showWeek('notation')">P(A|B), E[X]</a></li>
+            <li><a href="#nt-marks" onclick="showWeek('notation')">hats, stars, primes</a></li>
+            <li><a href="#nt-greek" onclick="showWeek('notation')">the Greek letters</a></li>
+            <li><a href="#nt-misc" onclick="showWeek('notation')">everything else</a></li>
+            <li><a href="#nt-decoded" onclick="showWeek('notation')">★ 5 formulas decoded</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 01 · Part 1</div>
+          <a class="week-title" href="#" onclick="showWeek('w1-intro'); return false;">What is Artificial Intelligence?</a>
+          <ul class="subsection">
+            <li><a href="#ai-two" onclick="showWeek('w1-intro')">Two senses of "AI"</a></li>
+            <li><a href="#ai-approaches" onclick="showWeek('w1-intro')">Four approaches</a></li>
+            <li><a href="#ai-turing" onclick="showWeek('w1-intro')">Acting like humans</a></li>
+            <li><a href="#ai-agents" onclick="showWeek('w1-intro')">Rational agents</a></li>
+            <li><a href="#ai-knowledge" onclick="showWeek('w1-intro')">Model-based vs data-driven</a></li>
+            <li><a href="#ai-dimensions" onclick="showWeek('w1-intro')">Problem dimensions</a></li>
+            <li><a href="#ai-history" onclick="showWeek('w1-intro')">History</a></li>
+            <li><a href="#ai-values" onclick="showWeek('w1-intro')">Value alignment</a></li>
+            <li><a href="#ai-exam" onclick="showWeek('w1-intro')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 01 · Part 2</div>
+          <a class="week-title" href="#" onclick="showWeek('w1-search'); return false;">Search: BFS, DFS, UCS</a>
+          <ul class="subsection">
+            <li><a href="#s-problem" onclick="showWeek('w1-search')">The search problem</a></li>
+            <li><a href="#s-examples" onclick="showWeek('w1-search')">Three examples</a></li>
+            <li><a href="#s-trees" onclick="showWeek('w1-search')">Search trees</a></li>
+            <li><a href="#s-bfs" onclick="showWeek('w1-search')">Breadth-first search</a></li>
+            <li><a href="#s-dfs" onclick="showWeek('w1-search')">Depth-first search</a></li>
+            <li><a href="#s-best" onclick="showWeek('w1-search')">Best-first search</a></li>
+            <li><a href="#s-ucs" onclick="showWeek('w1-search')">Uniform cost search</a></li>
+            <li><a href="#s-tool" onclick="showWeek('w1-search')">🛠️ Search explorer</a></li>
+            <li><a href="#s-exam" onclick="showWeek('w1-search')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 01 · Part 3</div>
+          <a class="week-title" href="#" onclick="showWeek('w1-astar'); return false;">A* &amp; Heuristics</a>
+          <ul class="subsection">
+            <li><a href="#a-backwards" onclick="showWeek('w1-astar')">Looking backwards</a></li>
+            <li><a href="#a-greedy" onclick="showWeek('w1-astar')">Greedy best-first</a></li>
+            <li><a href="#a-astar" onclick="showWeek('w1-astar')">A* search</a></li>
+            <li><a href="#a-worked" onclick="showWeek('w1-astar')">Worked example</a></li>
+            <li><a href="#a-where" onclick="showWeek('w1-astar')">Where h comes from</a></li>
+            <li><a href="#a-lab" onclick="showWeek('w1-astar')">🛠️ The A* lab</a></li>
+            <li><a href="#a-admissible" onclick="showWeek('w1-astar')">Admissibility</a></li>
+            <li><a href="#a-cmptool" onclick="showWeek('w1-astar')">🛠️ Compare all five</a></li>
+            <li><a href="#a-admtool" onclick="showWeek('w1-astar')">🛠️ Admissibility checker</a></li>
+            <li><a href="#a-exam" onclick="showWeek('w1-astar')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 02 · Part 1</div>
+          <a class="week-title" href="#" onclick="showWeek('w2-minimax'); return false;">Adversarial Search: Minimax</a>
+          <ul class="subsection">
+            <li><a href="#m-two" onclick="showWeek('w2-minimax')">Two-player games</a></li>
+            <li><a href="#m-trees" onclick="showWeek('w2-minimax')">Game trees</a></li>
+            <li><a href="#m-states" onclick="showWeek('w2-minimax')">Managing state spaces</a></li>
+            <li><a href="#m-minimax" onclick="showWeek('w2-minimax')">The minimax value</a></li>
+            <li><a href="#m-worked" onclick="showWeek('w2-minimax')">Worked example</a></li>
+            <li><a href="#m-props" onclick="showWeek('w2-minimax')">Properties</a></li>
+            <li><a href="#m-exam" onclick="showWeek('w2-minimax')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 02 · Part 2</div>
+          <a class="week-title" href="#" onclick="showWeek('w2-alphabeta'); return false;">Alpha-Beta Pruning</a>
+          <ul class="subsection">
+            <li><a href="#ab-obs" onclick="showWeek('w2-alphabeta')">The two observations</a></li>
+            <li><a href="#ab-rule" onclick="showWeek('w2-alphabeta')">α, β and the cut rule</a></li>
+            <li><a href="#ab-worked" onclick="showWeek('w2-alphabeta')">Worked example</a></li>
+            <li><a href="#ab-tool" onclick="showWeek('w2-alphabeta')">🛠️ Game tree solver</a></li>
+            <li><a href="#ab-order" onclick="showWeek('w2-alphabeta')">Move ordering</a></li>
+            <li><a href="#ab-exam" onclick="showWeek('w2-alphabeta')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 02 · Part 3</div>
+          <a class="week-title" href="#" onclick="showWeek('w2-csp1'); return false;">CSPs: Introduction</a>
+          <ul class="subsection">
+            <li><a href="#cs-goal" onclick="showWeek('w2-csp1')">The goal, not the journey</a></li>
+            <li><a href="#cs-def" onclick="showWeek('w2-csp1')">What a CSP is</a></li>
+            <li><a href="#cs-map" onclick="showWeek('w2-csp1')">Map colouring</a></li>
+            <li><a href="#cs-graph" onclick="showWeek('w2-csp1')">Constraint graph</a></li>
+            <li><a href="#cs-queens" onclick="showWeek('w2-csp1')"><em>n</em>-Queens</a></li>
+            <li><a href="#cs-exam" onclick="showWeek('w2-csp1')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 02 · Part 4</div>
+          <a class="week-title" href="#" onclick="showWeek('w2-csp2'); return false;">Solving a CSP</a>
+          <ul class="subsection">
+            <li><a href="#sc-search" onclick="showWeek('w2-csp2')">CSP as a search problem</a></li>
+            <li><a href="#sc-back" onclick="showWeek('w2-csp2')">Backtracking search</a></li>
+            <li><a href="#sc-varh" onclick="showWeek('w2-csp2')">Which variable next?</a></li>
+            <li><a href="#sc-valh" onclick="showWeek('w2-csp2')">Which value first?</a></li>
+            <li><a href="#sc-fc" onclick="showWeek('w2-csp2')">Forward checking</a></li>
+            <li><a href="#sc-arc" onclick="showWeek('w2-csp2')">Arc consistency &amp; AC-3</a></li>
+            <li><a href="#sc-tool" onclick="showWeek('w2-csp2')">🛠️ CSP solver</a></li>
+            <li><a href="#sc-actool" onclick="showWeek('w2-csp2')">🛠️ FC vs AC-3</a></li>
+            <li><a href="#sc-value" onclick="showWeek('w2-csp2')">Why it pays off</a></li>
+            <li><a href="#sc-exam" onclick="showWeek('w2-csp2')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 03 · Part 1</div>
+          <a class="week-title" href="#" onclick="showWeek('w3-plan'); return false;">Classical Planning</a>
+          <ul class="subsection">
+            <li><a href="#p-what" onclick="showWeek('w3-plan')">What AI planning is</a></li>
+            <li><a href="#p-log" onclick="showWeek('w3-plan')">The logistics domain</a></li>
+            <li><a href="#p-obj" onclick="showWeek('w3-plan')">Objects and relations</a></li>
+            <li><a href="#p-cwa" onclick="showWeek('w3-plan')">Closed-world assumption</a></li>
+            <li><a href="#p-act" onclick="showWeek('w3-plan')">Actions: pre and effects</a></li>
+            <li><a href="#p-plan" onclick="showWeek('w3-plan')">A plan</a></li>
+            <li><a href="#p-exam" onclick="showWeek('w3-plan')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 03 · Part 2</div>
+          <a class="week-title" href="#" onclick="showWeek('w3-pddl'); return false;">PDDL Basics</a>
+          <ul class="subsection">
+            <li><a href="#d-why" onclick="showWeek('w3-pddl')">Language + algorithm</a></li>
+            <li><a href="#d-vers" onclick="showWeek('w3-pddl')">Versions of PDDL</a></li>
+            <li><a href="#d-files" onclick="showWeek('w3-pddl')">Domain and problem files</a></li>
+            <li><a href="#d-grip" onclick="showWeek('w3-pddl')">The Gripper domain</a></li>
+            <li><a href="#d-full" onclick="showWeek('w3-pddl')">The full domain file</a></li>
+            <li><a href="#d-blocks" onclick="showWeek('w3-pddl')">Blocks World (appendix)</a></li>
+            <li><a href="#d-exam" onclick="showWeek('w3-pddl')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 03 · Part 3</div>
+          <a class="week-title" href="#" onclick="showWeek('w3-pddl21'); return false;">PDDL 2.1: Fluents &amp; Time</a>
+          <ul class="subsection">
+            <li><a href="#f-limits" onclick="showWeek('w3-pddl21')">Limits of classical PDDL</a></li>
+            <li><a href="#f-fluents" onclick="showWeek('w3-pddl21')">Fluents</a></li>
+            <li><a href="#f-metric" onclick="showWeek('w3-pddl21')">The metric vehicle domain</a></li>
+            <li><a href="#f-dur" onclick="showWeek('w3-pddl21')">Durative actions</a></li>
+            <li><a href="#f-board" onclick="showWeek('w3-pddl21')">over all conditions</a></li>
+            <li><a href="#f-exam" onclick="showWeek('w3-pddl21')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 03 · Part 4</div>
+          <a class="week-title" href="#" onclick="showWeek('w3-rpg'); return false;">Forward Chaining &amp; RPG</a>
+          <ul class="subsection">
+            <li><a href="#r-fwd" onclick="showWeek('w3-rpg')">Forward-chain planning</a></li>
+            <li><a href="#r-blocks" onclick="showWeek('w3-rpg')">Blocks World action</a></li>
+            <li><a href="#r-need" onclick="showWeek('w3-rpg')">Which state is best?</a></li>
+            <li><a href="#r-rpg" onclick="showWeek('w3-rpg')">The Relaxed Planning Graph</a></li>
+            <li><a href="#r-layers" onclick="showWeek('w3-rpg')">Fact and action layers</a></li>
+            <li><a href="#r-extract" onclick="showWeek('w3-rpg')">Extracting the relaxed plan</a></li>
+            <li><a href="#r-tool" onclick="showWeek('w3-rpg')">🛠️ RPG builder</a></li>
+            <li><a href="#r-ptool" onclick="showWeek('w3-rpg')">🛠️ Forward-chain planner</a></li>
+            <li><a href="#r-exam" onclick="showWeek('w3-rpg')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 04 · Start here</div>
+          <a class="week-title" href="#" onclick="showWeek('w4-start'); return false;" style="color:var(--accent-4);">MDPs, Slowly</a>
+          <ul class="subsection">
+            <li><a href="#s4-why" onclick="showWeek('w4-start')">1 · What changed</a></li>
+            <li><a href="#s4-u" onclick="showWeek('w4-start')">2 · What U(s) means</a></li>
+            <li><a href="#s4-circle" onclick="showWeek('w4-start')">3 · The circle</a></li>
+            <li><a href="#s4-spread" onclick="showWeek('w4-start')">4 · 🛠️ Watch it spread</a></li>
+            <li><a href="#s4-one" onclick="showWeek('w4-start')">5 · One number, slowly</a></li>
+            <li><a href="#s4-read" onclick="showWeek('w4-start')">6 · The equation, aloud</a></li>
+            <li><a href="#s4-after" onclick="showWeek('w4-start')">7 · Stopping &amp; the policy</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 04 · Part 1</div>
+          <a class="week-title" href="#" onclick="showWeek('w4-uncert'); return false;">Uncertainty in AI</a>
+          <ul class="subsection">
+            <li><a href="#q-search" onclick="showWeek('w4-uncert')">Uncertainty in search</a></li>
+            <li><a href="#q-ml" onclick="showWeek('w4-uncert')">Uncertainty in learning</a></li>
+            <li><a href="#q-dims" onclick="showWeek('w4-uncert')">Back to the dimensions</a></li>
+            <li><a href="#q-exam" onclick="showWeek('w4-uncert')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 04 · Part 2</div>
+          <a class="week-title" href="#" onclick="showWeek('w4-mdp'); return false;">Markov Decision Processes</a>
+          <ul class="subsection">
+            <li><a href="#k-maze" onclick="showWeek('w4-mdp')">The maze example</a></li>
+            <li><a href="#k-nondet" onclick="showWeek('w4-mdp')">Non-deterministic actions</a></li>
+            <li><a href="#k-chain" onclick="showWeek('w4-mdp')">Markov chains</a></li>
+            <li><a href="#k-def" onclick="showWeek('w4-mdp')">What an MDP is</a></li>
+            <li><a href="#k-trans" onclick="showWeek('w4-mdp')">The transition model</a></li>
+            <li><a href="#k-reward" onclick="showWeek('w4-mdp')">Rewards and utility</a></li>
+            <li><a href="#k-policy" onclick="showWeek('w4-mdp')">Policies</a></li>
+            <li><a href="#k-regimes" onclick="showWeek('w4-mdp')">How R(s) changes everything</a></li>
+            <li><a href="#k-exam" onclick="showWeek('w4-mdp')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 04 · Part 3</div>
+          <a class="week-title" href="#" onclick="showWeek('w4-prob'); return false;">Expected Utility</a>
+          <ul class="subsection">
+            <li><a href="#e-value" onclick="showWeek('w4-prob')">Expected value</a></li>
+            <li><a href="#e-prob" onclick="showWeek('w4-prob')">Probability basics</a></li>
+            <li><a href="#e-util" onclick="showWeek('w4-prob')">Expected utility in MDPs</a></li>
+            <li><a href="#e-exam" onclick="showWeek('w4-prob')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 04 · Part 4</div>
+          <a class="week-title" href="#" onclick="showWeek('w4-vi'); return false;">Value Iteration</a>
+          <ul class="subsection">
+            <li><a href="#v-bellman" onclick="showWeek('w4-vi')">The Bellman update</a></li>
+            <li><a href="#v-algo" onclick="showWeek('w4-vi')">The algorithm</a></li>
+            <li><a href="#v-worked" onclick="showWeek('w4-vi')">U₀, U₁, … U<sub>t</sub></a></li>
+            <li><a href="#v-conv" onclick="showWeek('w4-vi')">Convergence</a></li>
+            <li><a href="#v-policy" onclick="showWeek('w4-vi')">Obtaining the policy</a></li>
+            <li><a href="#v-tool" onclick="showWeek('w4-vi')">🛠️ Grid-world solver</a></li>
+            <li><a href="#v-eu" onclick="showWeek('w4-vi')">🛠️ Bellman calculator</a></li>
+            <li><a href="#v-sweep" onclick="showWeek('w4-vi')">🛠️ Reward sweep</a></li>
+            <li><a href="#v-exam" onclick="showWeek('w4-vi')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 05 · Part 1</div>
+          <a class="week-title" href="#" onclick="showWeek('w5-overview'); return false;">Machine Learning: Overview</a>
+          <ul class="subsection">
+            <li><a href="#o-what" onclick="showWeek('w5-overview')">What machine learning is</a></li>
+            <li><a href="#o-defs" onclick="showWeek('w5-overview')">Four definitions</a></li>
+            <li><a href="#o-proofs" onclick="showWeek('w5-overview')">No proofs that it works</a></li>
+            <li><a href="#o-types" onclick="showWeek('w5-overview')">Three types of learning</a></li>
+            <li><a href="#o-classes" onclick="showWeek('w5-overview')">Four classes of problem</a></li>
+            <li><a href="#o-exam" onclick="showWeek('w5-overview')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 05 · Part 2</div>
+          <a class="week-title" href="#" onclick="showWeek('w5-metrics'); return false;">Is My Algorithm Any Good?</a>
+          <ul class="subsection">
+            <li><a href="#n-split" onclick="showWeek('w5-metrics')">Training and test sets</a></li>
+            <li><a href="#n-acc" onclick="showWeek('w5-metrics')">Accuracy, and its trap</a></li>
+            <li><a href="#n-prf" onclick="showWeek('w5-metrics')">Precision, recall, F1</a></li>
+            <li><a href="#n-quiz" onclick="showWeek('w5-metrics')">The slide's question</a></li>
+            <li><a href="#n-tool" onclick="showWeek('w5-metrics')">🛠️ Confusion matrix</a></li>
+            <li><a href="#n-reg" onclick="showWeek('w5-metrics')">MAE, MSE, RMSE</a></li>
+            <li><a href="#n-regtool" onclick="showWeek('w5-metrics')">🛠️ Regression metrics</a></li>
+            <li><a href="#n-exam" onclick="showWeek('w5-metrics')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 05 · Part 3</div>
+          <a class="week-title" href="#" onclick="showWeek('w5-fitting'); return false;">Underfitting &amp; Overfitting</a>
+          <ul class="subsection">
+            <li><a href="#g-gen" onclick="showWeek('w5-fitting')">Generalisation error</a></li>
+            <li><a href="#g-under" onclick="showWeek('w5-fitting')">Underfitting</a></li>
+            <li><a href="#g-over" onclick="showWeek('w5-fitting')">Overfitting</a></li>
+            <li><a href="#g-three" onclick="showWeek('w5-fitting')">The three plots</a></li>
+            <li><a href="#g-complex" onclick="showWeek('w5-fitting')">Model complexity</a></li>
+            <li><a href="#g-val" onclick="showWeek('w5-fitting')">Why validation, not test</a></li>
+            <li><a href="#g-tool" onclick="showWeek('w5-fitting')">🛠️ Fitting explorer</a></li>
+            <li><a href="#g-exam" onclick="showWeek('w5-fitting')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 06 · Part 1</div>
+          <a class="week-title" href="#" onclick="showWeek('w6-kmeans'); return false;">K-Means Clustering</a>
+          <ul class="subsection">
+            <li><a href="#c-intro" onclick="showWeek('w6-kmeans')">Unsupervised learning</a></li>
+            <li><a href="#c-motiv" onclick="showWeek('w6-kmeans')">Where should p₄ go?</a></li>
+            <li><a href="#c-var" onclick="showWeek('w6-kmeans')">Within-cluster variance</a></li>
+            <li><a href="#c-vtool" onclick="showWeek('w6-kmeans')">🛠️ Variance calculator</a></li>
+            <li><a href="#c-algo" onclick="showWeek('w6-kmeans')">The algorithm</a></li>
+            <li><a href="#c-example" onclick="showWeek('w6-kmeans')">The worked example</a></li>
+            <li><a href="#c-tool" onclick="showWeek('w6-kmeans')">🛠️ K-means tracer</a></li>
+            <li><a href="#c-init" onclick="showWeek('w6-kmeans')">Initialisation</a></li>
+            <li><a href="#c-prop" onclick="showWeek('w6-kmeans')">Why centres are enough</a></li>
+            <li><a href="#c-exam" onclick="showWeek('w6-kmeans')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 06 · Part 2</div>
+          <a class="week-title" href="#" onclick="showWeek('w6-hier'); return false;">Hierarchical Clustering</a>
+          <ul class="subsection">
+            <li><a href="#h-idea" onclick="showWeek('w6-hier')">The idea</a></li>
+            <li><a href="#h-metric" onclick="showWeek('w6-hier')">L1 and L2 metrics</a></li>
+            <li><a href="#h-link" onclick="showWeek('w6-hier')">Linkage criteria</a></li>
+            <li><a href="#h-example" onclick="showWeek('w6-hier')">The worked example</a></li>
+            <li><a href="#h-algo" onclick="showWeek('w6-hier')">The algorithm &amp; ties</a></li>
+            <li><a href="#h-dendro" onclick="showWeek('w6-hier')">Dendograms</a></li>
+            <li><a href="#h-tool" onclick="showWeek('w6-hier')">🛠️ Hierarchical tracer</a></li>
+            <li><a href="#h-exam" onclick="showWeek('w6-hier')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 06 · Part 3</div>
+          <a class="week-title" href="#" onclick="showWeek('w6-ex'); return false;" style="color:var(--accent-4);">The Seven Exercises, Worked</a>
+          <ul class="subsection">
+            <li><a href="#x-1" onclick="showWeek('w6-ex')">1 · Which clustering is better?</a></li>
+            <li><a href="#x-2" onclick="showWeek('w6-ex')">2 · K-means from (1,2) and (6,7)</a></li>
+            <li><a href="#x-3" onclick="showWeek('w6-ex')">3 · The same run, swapped</a></li>
+            <li><a href="#x-4" onclick="showWeek('w6-ex')">4 · Manhattan distance</a></li>
+            <li><a href="#x-5" onclick="showWeek('w6-ex')">5 · Maximum number of steps</a></li>
+            <li><a href="#x-6" onclick="showWeek('w6-ex')">6 · Single vs complete linkage</a></li>
+            <li><a href="#x-7" onclick="showWeek('w6-ex')">7 · The helicopter problem</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 07 · Part 1</div>
+          <a class="week-title" href="#" onclick="showWeek('w7-linreg'); return false;">Linear Regression</a>
+          <ul class="subsection">
+            <li><a href="#r-super" onclick="showWeek('w7-linreg')">Supervised learning</a></li>
+            <li><a href="#r-model" onclick="showWeek('w7-linreg')">A line plus noise</a></li>
+            <li><a href="#r-normal" onclick="showWeek('w7-linreg')">The normal distribution</a></li>
+            <li><a href="#r-ntool" onclick="showWeek('w7-linreg')">🛠️ Normal curve</a></li>
+            <li><a href="#r-example" onclick="showWeek('w7-linreg')">The worked example</a></li>
+            <li><a href="#r-hand" onclick="showWeek('w7-linreg')">Minimising without calculus</a></li>
+            <li><a href="#r-lsq" onclick="showWeek('w7-linreg')">🛠️ Least-squares lab</a></li>
+            <li><a href="#r-formal" onclick="showWeek('w7-linreg')">Definitions 7.1 &amp; 7.2</a></li>
+            <li><a href="#r-theorem" onclick="showWeek('w7-linreg')">Theorem 7.3</a></li>
+            <li><a href="#r-key" onclick="showWeek('w7-linreg')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 07 · Part 2</div>
+          <a class="week-title" href="#" onclick="showWeek('w7-trees'); return false;">Decision Trees</a>
+          <ul class="subsection">
+            <li><a href="#d-use" onclick="showWeek('w7-trees')">Using a tree</a></li>
+            <li><a href="#d-data" onclick="showWeek('w7-trees')">Table 7.3</a></li>
+            <li><a href="#d-gini" onclick="showWeek('w7-trees')">The Gini index</a></li>
+            <li><a href="#d-gtool" onclick="showWeek('w7-trees')">🛠️ Gini calculator</a></li>
+            <li><a href="#d-err" onclick="showWeek('w7-trees')">⚠ Figure 7.5's labels</a></li>
+            <li><a href="#d-split" onclick="showWeek('w7-trees')">Gini-Split</a></li>
+            <li><a href="#d-build" onclick="showWeek('w7-trees')">Building the tree</a></li>
+            <li><a href="#d-ttool" onclick="showWeek('w7-trees')">🛠️ Tree builder</a></li>
+            <li><a href="#d-nn" onclick="showWeek('w7-trees')">A note on neural nets</a></li>
+            <li><a href="#d-key" onclick="showWeek('w7-trees')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 07 · Part 3</div>
+          <a class="week-title" href="#" onclick="showWeek('w7-ex'); return false;" style="color:var(--accent-4);">The Five Exercises, Worked</a>
+          <ul class="subsection">
+            <li><a href="#y-1" onclick="showWeek('w7-ex')">1 · Predict at x = 5</a></li>
+            <li><a href="#y-2" onclick="showWeek('w7-ex')">2 · Refit with (2, 1)</a></li>
+            <li><a href="#y-3" onclick="showWeek('w7-ex')">3 · Four points, Table 7.2</a></li>
+            <li><a href="#y-4" onclick="showWeek('w7-ex')">4 · Maximum Gini for k = 2</a></li>
+            <li><a href="#y-5" onclick="showWeek('w7-ex')">5 · Which feature splits first?</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 08 · Part 1</div>
+          <a class="week-title" href="#" onclick="showWeek('w8-bandit'); return false;">k-Armed Bandits</a>
+          <ul class="subsection">
+            <li><a href="#bd-intro" onclick="showWeek('w8-bandit')">What RL is</a></li>
+            <li><a href="#bd-armed" onclick="showWeek('w8-bandit')">The k-armed bandit</a></li>
+            <li><a href="#bd-tool" onclick="showWeek('w8-bandit')">🛠️ Play a bandit</a></li>
+            <li><a href="#bd-value" onclick="showWeek('w8-bandit')">q⋆(a) — Definition 8.2</a></li>
+            <li><a href="#bd-est" onclick="showWeek('w8-bandit')">Q<sub>t</sub>(a) — Definition 8.3</a></li>
+            <li><a href="#bd-qtool" onclick="showWeek('w8-bandit')">🛠️ Q<sub>t</sub> tracer</a></li>
+            <li><a href="#bd-ee" onclick="showWeek('w8-bandit')">Exploration vs exploitation</a></li>
+            <li><a href="#bd-key" onclick="showWeek('w8-bandit')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 08 · Part 2</div>
+          <a class="week-title" href="#" onclick="showWeek('w8-eps'); return false;">Random, Greedy &amp; ε-Greedy</a>
+          <ul class="subsection">
+            <li><a href="#eg-testbed" onclick="showWeek('w8-eps')">The 10-armed testbed</a></li>
+            <li><a href="#eg-random" onclick="showWeek('w8-eps')">Random — Definition 8.4</a></li>
+            <li><a href="#eg-greedy" onclick="showWeek('w8-eps')">Greedy — Definition 8.5</a></li>
+            <li><a href="#eg-eps" onclick="showWeek('w8-eps')">ε-Greedy — Definition 8.6</a></li>
+            <li><a href="#eg-exp" onclick="showWeek('w8-eps')">Reading Figure 8.4</a></li>
+            <li><a href="#eg-tool" onclick="showWeek('w8-eps')">🛠️ Testbed simulator</a></li>
+            <li><a href="#eg-key" onclick="showWeek('w8-eps')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 08 · Part 3</div>
+          <a class="week-title" href="#" onclick="showWeek('w8-ucb'); return false;">Upper Confidence Bound</a>
+          <ul class="subsection">
+            <li><a href="#uc-why" onclick="showWeek('w8-ucb')">The complaint about ε-greedy</a></li>
+            <li><a href="#uc-def" onclick="showWeek('w8-ucb')">Definition 8.7 &amp; Remark 8.8</a></li>
+            <li><a href="#uc-terms" onclick="showWeek('w8-ucb')">The three named terms</a></li>
+            <li><a href="#uc-tool" onclick="showWeek('w8-ucb')">🛠️ UCB tracer</a></li>
+            <li><a href="#uc-mdp" onclick="showWeek('w8-ucb')">Summary &amp; MDPs</a></li>
+            <li><a href="#uc-key" onclick="showWeek('w8-ucb')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 08 · Part 4</div>
+          <a class="week-title" href="#" onclick="showWeek('w8-ex'); return false;" style="color:var(--accent-4);">The Eight Exercises, Worked</a>
+          <ul class="subsection">
+            <li><a href="#z-1" onclick="showWeek('w8-ex')">1 · q⋆(A) and q⋆(B)</a></li>
+            <li><a href="#z-2" onclick="showWeek('w8-ex')">2 · Q<sub>t</sub> from Table 8.1</a></li>
+            <li><a href="#z-3" onclick="showWeek('w8-ex')">3 · Greedy vs random</a></li>
+            <li><a href="#z-4" onclick="showWeek('w8-ex')">4 · 50 arms at random</a></li>
+            <li><a href="#z-5" onclick="showWeek('w8-ex')">5 · Three ε-greedy probabilities</a></li>
+            <li><a href="#z-6" onclick="showWeek('w8-ex')">6 · ε for greedy and random</a></li>
+            <li><a href="#z-7" onclick="showWeek('w8-ex')">7 · Where does ε = 0.75 land?</a></li>
+            <li><a href="#z-8" onclick="showWeek('w8-ex')">8 · A UCB trace, c = 2</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 09 · Part 1</div>
+          <a class="week-title" href="#" onclick="showWeek('w9-apply'); return false;">AI Ethics: Application &amp; Access</a>
+          <ul class="subsection">
+            <li><a href="#ap-frame" onclick="showWeek('w9-apply')">The five key questions</a></li>
+            <li><a href="#ap-how" onclick="showWeek('w9-apply')">How is AI applied?</a></li>
+            <li><a href="#ap-police" onclick="showWeek('w9-apply')">Policing</a></li>
+            <li><a href="#ap-mil" onclick="showWeek('w9-apply')">Military</a></li>
+            <li><a href="#ap-pol" onclick="showWeek('w9-apply')">Political control</a></li>
+            <li><a href="#ap-phren" onclick="showWeek('w9-apply')">Revival of phrenology</a></li>
+            <li><a href="#ap-access" onclick="showWeek('w9-apply')">Who has access?</a></li>
+            <li><a href="#ap-key" onclick="showWeek('w9-apply')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 09 · Part 2</div>
+          <a class="week-title" href="#" onclick="showWeek('w9-harms'); return false;">The Seven Harms</a>
+          <ul class="subsection">
+            <li><a href="#hm-list" onclick="showWeek('w9-harms')">The seven categories</a></li>
+            <li><a href="#hm-agency" onclick="showWeek('w9-harms')">1 · Human agency</a></li>
+            <li><a href="#hm-account" onclick="showWeek('w9-harms')">2 · Accountability</a></li>
+            <li><a href="#hm-safety" onclick="showWeek('w9-harms')">3 · Safety &amp; wellbeing</a></li>
+            <li><a href="#hm-priv" onclick="showWeek('w9-harms')">4 · Privacy</a></li>
+            <li><a href="#hm-fair" onclick="showWeek('w9-harms')">5 · Fairness &amp; dignity</a></li>
+            <li><a href="#hm-soc" onclick="showWeek('w9-harms')">6 · Societal</a></li>
+            <li><a href="#hm-env" onclick="showWeek('w9-harms')">7 · Environmental</a></li>
+            <li><a href="#hm-tool" onclick="showWeek('w9-harms')">🛠️ Harm map &amp; drill</a></li>
+            <li><a href="#hm-rep" onclick="showWeek('w9-harms')">Reparation</a></li>
+            <li><a href="#hm-antic" onclick="showWeek('w9-harms')">Anticipation methods</a></li>
+            <li><a href="#hm-key" onclick="showWeek('w9-harms')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 09 · Part 3</div>
+          <a class="week-title" href="#" onclick="showWeek('w9-bias'); return false;">Discrimination &amp; Bias</a>
+          <ul class="subsection">
+            <li><a href="#bi-def" onclick="showWeek('w9-bias')">Direct vs indirect</a></li>
+            <li><a href="#bi-ex" onclick="showWeek('w9-bias')">Four documented examples</a></li>
+            <li><a href="#bi-cause" onclick="showWeek('w9-bias')">The five causes</a></li>
+            <li><a href="#bi-tool" onclick="showWeek('w9-bias')">🛠️ Where bias enters</a></li>
+            <li><a href="#bi-who" onclick="showWeek('w9-bias')">Who discovers these</a></li>
+            <li><a href="#bi-key" onclick="showWeek('w9-bias')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 09 · Part 4</div>
+          <a class="week-title" href="#" onclick="showWeek('w9-mitig'); return false;">Mitigation &amp; Responsibility</a>
+          <ul class="subsection">
+            <li><a href="#mt-prin" onclick="showWeek('w9-mitig')">The seven principles</a></li>
+            <li><a href="#mt-gov" onclick="showWeek('w9-mitig')">Governance</a></li>
+            <li><a href="#mt-val" onclick="showWeek('w9-mitig')">Value alignment</a></li>
+            <li><a href="#mt-bias" onclick="showWeek('w9-mitig')">Bias mitigation</a></li>
+            <li><a href="#mt-ftool" onclick="showWeek('w9-mitig')">🛠️ Fairness functions</a></li>
+            <li><a href="#mt-priv" onclick="showWeek('w9-mitig')">Privacy mitigation</a></li>
+            <li><a href="#mt-env" onclick="showWeek('w9-mitig')">Environmental mitigation</a></li>
+            <li><a href="#mt-ptool" onclick="showWeek('w9-mitig')">🛠️ Principles reference</a></li>
+            <li><a href="#mt-resp" onclick="showWeek('w9-mitig')">Who is responsible</a></li>
+            <li><a href="#mt-min" onclick="showWeek('w9-mitig')">Minimising harms</a></li>
+            <li><a href="#mt-concl" onclick="showWeek('w9-mitig')">The conclusion slide</a></li>
+            <li><a href="#mt-key" onclick="showWeek('w9-mitig')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">★ Practice</div>
+          <a class="week-title" href="#" onclick="showWeek('practice'); return false;" style="color:var(--accent-3);">Past-Exam Practice</a>
+        </li>
+        <li class="week">
+          <div class="week-label">★ Revision</div>
+          <a class="week-title" href="#" onclick="showWeek('cram'); return false;" style="color:var(--accent-2);">Exam Cram Sheet</a>
+        </li>
+        <li class="week">
+          <div class="week-label">★ Final revision</div>
+          <a class="week-title" href="#" onclick="showWeek('concepts'); return false;" style="color:var(--accent-4);">The Theory, Condensed</a>
+          <ul class="subsection">
+            <li><a href="#cx-acro" onclick="showWeek('concepts')">Every acronym</a></li>
+            <li><a href="#cx-agents" onclick="showWeek('concepts')">Agents &amp; approaches</a></li>
+            <li><a href="#cx-search" onclick="showWeek('concepts')">Search &amp; A*</a></li>
+            <li><a href="#cx-adv" onclick="showWeek('concepts')">Adversarial</a></li>
+            <li><a href="#cx-csp" onclick="showWeek('concepts')">CSP</a></li>
+            <li><a href="#cx-plan" onclick="showWeek('concepts')">Planning</a></li>
+            <li><a href="#cx-mdp" onclick="showWeek('concepts')">MDPs</a></li>
+            <li><a href="#cx-ml" onclick="showWeek('concepts')">ML &amp; metrics</a></li>
+            <li><a href="#cx-clu" onclick="showWeek('concepts')">Clustering</a></li>
+            <li><a href="#cx-sup" onclick="showWeek('concepts')">Regression &amp; trees</a></li>
+            <li><a href="#cx-rl" onclick="showWeek('concepts')">Reinforcement learning</a></li>
+            <li><a href="#cx-eth" onclick="showWeek('concepts')">Ethics</a></li>
+            <li><a href="#cx-cross" onclick="showWeek('concepts')">Look-alike pairs</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">★ Final revision</div>
+          <a class="week-title" href="#" onclick="showWeek('howto'); return false;" style="color:var(--accent-4);">How To Compute It</a>
+          <ul class="subsection">
+            <li><a href="#hw-search" onclick="showWeek('howto')">Run a search</a></li>
+            <li><a href="#hw-minimax" onclick="showWeek('howto')">Minimax &amp; alpha-beta</a></li>
+            <li><a href="#hw-csp" onclick="showWeek('howto')">Solve a CSP</a></li>
+            <li><a href="#hw-plan" onclick="showWeek('howto')">Planning &amp; RPG</a></li>
+            <li><a href="#hw-mdp" onclick="showWeek('howto')">A Bellman update</a></li>
+            <li><a href="#hw-metrics" onclick="showWeek('howto')">Metrics</a></li>
+            <li><a href="#hw-clu" onclick="showWeek('howto')">Clustering</a></li>
+            <li><a href="#hw-reg" onclick="showWeek('howto')">Fit a line</a></li>
+            <li><a href="#hw-tree" onclick="showWeek('howto')">Gini &amp; trees</a></li>
+            <li><a href="#hw-rl" onclick="showWeek('howto')">Q, ε-greedy, UCB</a></li>
+            <li><a href="#hw-order" onclick="showWeek('howto')">★ min or max?</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">★ Test yourself</div>
+          <a class="week-title" href="#" onclick="showWeek('exam'); return false;" style="color:var(--accent-3);">Mock Exam</a>
+        </li>
+      </ul>
+    </nav>
+  

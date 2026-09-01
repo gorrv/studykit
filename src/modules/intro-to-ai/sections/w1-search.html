@@ -1,0 +1,228 @@
+<section id="w1-search" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 01 · Part 2 · Search</div>
+        <h1>Search: BFS, DFS, UCS</h1>
+        <div class="week-subtitle">turning "what should I do?" into "find me a path"</div>
+      </div>
+      <!-- ===== PROBLEM ===== -->
+      <h2 id="s-problem">What search is</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition — learn this sentence</div>
+        Search is the <strong>process of computing a sequence of actions that form a path to a goal</strong>.
+      </div>
+      <p>Recall the model-based agent from Part 1: it defines an encoding of the world, defines how the world can change, and then <em>searches for good strategies</em>. Search is that third step, made precise.</p>
+      <h3>The five components of a search problem</h3>
+      <table>
+        <tr><th>Component</th><th>What it is</th><th>Romania example</th></tr>
+        <tr><td><strong>State space</strong></td><td>the set of all states the world can be in</td><td>the set of cities</td></tr>
+        <tr><td><strong>Initial state</strong> + <strong>goal test</strong></td><td>where we start, and a test telling us whether a state is a goal</td><td>start at Arad; is this city Bucharest?</td></tr>
+        <tr><td><strong>Actions</strong></td><td>what the agent can do in a state</td><td>drive along a road leaving this city</td></tr>
+        <tr><td><strong>Transition model</strong></td><td>the state that results from doing an action in a state</td><td>driving Arad→Sibiu leaves you in Sibiu</td></tr>
+        <tr><td><strong>Action costs</strong></td><td>the cost of applying an action in a state</td><td>the length of the road</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">Note what a "goal" is</div>
+        The goal is a <strong>test</strong>, not necessarily a single named state. "Any state where all tiles are in order" or "any city with a hospital" are perfectly good goals. That matters later: an algorithm stops when the test passes, whichever state triggered it.
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">A search problem does <em>not</em> come with the answer</div>
+        The five components describe a world. They don't say which sequence of actions is good — finding that is the algorithm's job. Different algorithms explore the same problem in different orders and give different answers, and that's the whole content of the rest of this week.
+      </div>
+      <!-- ===== EXAMPLES ===== -->
+      <h2 id="s-examples">Three example problems</h2>
+      <div class="callout">
+        <div class="callout-label">1 · Sliding tiles</div>
+        <p style="margin:6px 0 0 0;"><strong>State space:</strong> every arrangement of the tiles. <strong>Initial state:</strong> the scrambled board. <strong>Goal test:</strong> are the tiles in order? <strong>Actions:</strong> slide a tile adjacent to the gap into the gap. <strong>Transition model:</strong> the board with that tile and the gap swapped. <strong>Costs:</strong> 1 per move — so cheapest path = fewest moves.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">2 · Navigation (Romania)</div>
+        <p style="margin:6px 0 0 0;">The running example for the rest of the week. <strong>States</strong> = cities, <strong>actions</strong> = roads, <strong>costs</strong> = distances. Here the costs are <em>not</em> all equal, which is exactly what separates the algorithms below.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">3 · Self-service checkout — giving change</div>
+        <p style="margin:6px 0 0 0;">A state is a <strong>vector of coin counts</strong>, e.g. <code>(3, 3, 0, 1, 3, 0, 3, 1)</code> — how many of each denomination the machine holds. <strong>Actions</strong> = dispense one coin of some denomination. <strong>Goal test</strong> = the dispensed amount equals the change owed. <strong>Costs</strong> = 1 per coin, so the cheapest path uses the fewest coins.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The pattern across all three</div>
+        None of these look like "navigation", yet all three fit the same five slots. That's the point of the formalism: <strong>once you can write a problem as ⟨states, initial, goal test, actions, transitions, costs⟩, every algorithm in this module applies to it unchanged.</strong> In an exam, "formulate this as a search problem" means: fill in those five slots.
+      </div>
+      <!-- ===== TREES ===== -->
+      <h2 id="s-trees">Search trees</h2>
+      <div class="callout exam">
+        <div class="callout-label">Search tree</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>A <strong>node</strong> is a state.</li>
+          <li>An <strong>edge</strong> is an action taking you from one state to another.</li>
+          <li>The <strong>root</strong> is the initial state; a path from root to a node is a candidate plan.</li>
+        </ul>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Redundant paths make the tree infinite</div>
+        <p style="margin:6px 0 0 0;">A graph with a cycle (drive A→B, then B→A, then A→B…) unrolls into an <strong>infinite</strong> search tree, even though the state space is tiny. Two fixes:</p>
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Check the path back to the root</strong> — refuse to expand into a state already on the current branch. Cheap, only kills cycles on this path.</li>
+          <li><strong>Track visited states</strong> (a <em>reached</em> set) — refuse to expand any state seen before anywhere. Stronger, costs memory.</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Tree vs graph — why the distinction keeps showing up</div>
+        The <em>graph</em> is the map, and it's finite. The <em>tree</em> is the set of all paths through that map, and it can be infinite. Algorithms walk the tree; the reached set is what keeps them from re-walking the same part of the graph forever. Whenever a slide says "complete <em>if redundant paths are prevented</em>", this is what it means.
+      </div>
+      <!-- ===== BFS ===== -->
+      <h2 id="s-bfs">Breadth-first search</h2>
+      <div class="callout">
+        <div class="callout-label">Idea</div>
+        Explore the tree in <strong>slices of the same depth</strong>: all nodes 1 action away, then all nodes 2 actions away, and so on. Implemented with a <strong>queue</strong> (first in, first out) plus a <strong>reached</strong> set.
+      </div>
+      <table>
+        <tr><th>Property</th><th>BFS</th></tr>
+        <tr><td><strong>Complete?</strong> (finds a solution if one exists)</td><td><strong>Yes</strong></td></tr>
+        <tr><td><strong>Optimal?</strong> (finds the best solution)</td><td><strong>Yes — if all action costs are equal</strong></td></tr>
+        <tr><td><strong>Time</strong></td><td><code>b + b² + … + b^d</code></td></tr>
+        <tr><td><strong>Space</strong></td><td><code>b + b² + … + b^d</code></td></tr>
+      </table>
+      <p style="font-size:14px; color:var(--ink-muted);"><code>b</code> = branching factor (actions per state), <code>d</code> = depth of the shallowest solution, <code>m</code> = maximum depth of the tree.</p>
+      <div class="callout tip">
+        <div class="callout-label">Why "optimal only if costs are equal"</div>
+        BFS returns the solution with the <strong>fewest actions</strong>. If every action costs the same, fewest actions = cheapest. If they don't — as on a road map — BFS will happily return a 2-hop route of length 310 while a 3-hop route of length 278 exists. That exact example appears under UCS below.
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The space cost is the killer</div>
+        BFS's memory is the same order as its time, because it must hold an entire depth slice at once. With <code>b = 10</code> and <code>d = 10</code> that's about ten billion nodes. Time you can wait for; memory you cannot buy.
+      </div>
+      <!-- ===== DFS ===== -->
+      <h2 id="s-dfs">Depth-first search</h2>
+      <div class="callout">
+        <div class="callout-label">Idea</div>
+        Always expand the <strong>deepest</strong> node first — dive down one branch to the bottom, then back up and try the next. Implemented with a <strong>stack</strong> (last in, first out).
+      </div>
+      <table>
+        <tr><th>Property</th><th>DFS</th></tr>
+        <tr><td><strong>Complete?</strong></td><td><strong>Yes — if redundant paths are prevented</strong> (otherwise it can fall down an infinite branch)</td></tr>
+        <tr><td><strong>Optimal?</strong></td><td><strong>No</strong> — it finds the <em>left-most</em> solution, not the best one</td></tr>
+        <tr><td><strong>Time</strong></td><td><code>b^m</code></td></tr>
+        <tr><td><strong>Space</strong></td><td><code>b · m</code></td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">The trade in one line</div>
+        <strong>DFS trades solution quality for memory.</strong> It only ever stores the current branch plus its siblings — <code>b·m</code> instead of <code>b^d</code> — which is the difference between a few thousand nodes and a few billion. In exchange it can return an absurdly long path, and its time bound depends on <code>m</code> (how deep the tree goes) rather than <code>d</code> (how deep the answer is), so a shallow solution hidden on the right can take exponentially long to reach.
+      </div>
+      <!-- ===== BEST FIRST ===== -->
+      <h2 id="s-best">Best-first search — the general framework</h2>
+      <div class="callout exam">
+        <div class="callout-label">The idea that unifies everything</div>
+        Keep the frontier in a <strong>priority queue</strong> ordered by an <strong>evaluation function <code>f(n)</code></strong>. Always expand the node with the <strong>lowest <code>f</code></strong>. Every algorithm this week is just a different choice of <code>f</code>.
+      </div>
+      <table>
+        <tr><th>Algorithm</th><th><code>f(n)</code></th><th>Effect</th></tr>
+        <tr><td><strong>BFS</strong></td><td><code>depth(n)</code></td><td>shallowest first</td></tr>
+        <tr><td><strong>DFS</strong></td><td><code>−depth(n)</code></td><td>deepest first</td></tr>
+        <tr><td><strong>UCS</strong></td><td><code>g(n)</code> — cost so far</td><td>cheapest-so-far first</td></tr>
+        <tr><td><strong>Greedy</strong> <span style="color:var(--ink-muted);">(Part 3)</span></td><td><code>h(n)</code> — estimate to goal</td><td>closest-looking first</td></tr>
+        <tr><td><strong>A*</strong> <span style="color:var(--ink-muted);">(Part 3)</span></td><td><code>g(n) + h(n)</code></td><td>best total estimate first</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">This is the single most useful fact in the topic</div>
+        You don't have five algorithms to memorise — you have <strong>one algorithm and five values of <code>f</code></strong>. If you can write best-first search, you can write all of them. It also explains the exam favourite "what happens to A* when <code>h ≡ 0</code>?": <code>f = g + 0 = g</code>, which is literally the UCS row.
+      </div>
+      <!-- ===== UCS ===== -->
+      <h2 id="s-ucs">Uniform-cost search</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        <code>f(n)</code> = <strong>the sum of the action costs from the start state to <code>n</code></strong> — usually written <code>g(n)</code>. Expand the node with the smallest accumulated cost.
+        <p style="margin:10px 0 0 0;">UCS finds the <strong>minimum-cost</strong> plan, <em>not</em> the minimum-<em>action</em> plan.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The slide's worked contrast</div>
+        On the same map, from <strong>D</strong> to <strong>BUCHAREST</strong>:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>BFS</strong> — D → F → BUCHAREST: <strong>2 actions</strong>, total cost 99 + 211 = <strong>310</strong></li>
+          <li><strong>UCS</strong> — D → E → G → BUCHAREST: <strong>3 actions</strong>, total cost 80 + 97 + 101 = <strong>278</strong></li>
+        </ul>
+        <p style="margin:10px 0 0 0;">BFS wins on hop count, UCS wins on distance. Neither is "wrong" — they optimise different things. <strong>310 vs 278 is the number to remember.</strong></p>
+      </div>
+      <table>
+        <tr><th>Property</th><th>UCS</th></tr>
+        <tr><td><strong>Complete?</strong></td><td><strong>Yes</strong></td></tr>
+        <tr><td><strong>Optimal?</strong></td><td><strong>Yes</strong> (for non-negative costs)</td></tr>
+        <tr><td><strong>Time</strong></td><td>proportional to the number of nodes with cost <strong>less than the cost of the goal</strong></td></tr>
+        <tr><td><strong>Space</strong></td><td>same</td></tr>
+      </table>
+      <div class="callout warn">
+        <div class="callout-label">Read that complexity carefully</div>
+        UCS's cost is measured in <em>cost contours</em>, not depth: it expands every node cheaper than the optimal goal before it stops. If lots of cheap actions surround the start, that's a lot of nodes. And note that <strong>UCS uses no information about where the goal is</strong> — it expands outward in all directions equally. Fixing that is exactly what Part 3 does.
+      </div>
+      <!-- ===== TOOL ===== -->
+      <h2 id="s-tool">Tool · Search explorer</h2>
+      <div class="tool" data-run="runSearch">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Search explorer</h3></div>
+        <p class="tool-desc"><strong>The graph is drawn for you — drag the nodes apart, shift-click to move the start or goal, and step through the expansions one pop at a time</strong> watching the frontier light up. Switch between BFS, DFS, UCS, Greedy and A* with one click. Defaults to the Romania map from the slides.</p>
+        <div class="tool-field" style="width:100%;">
+          <label for="sx-graph">Graph — one edge per line: <code>FROM - TO : COST</code> (undirected)</label>
+          <textarea id="sx-graph" rows="9" spellcheck="false">ARAD - A : 118
+ARAD - B : 75
+ARAD - D : 140
+B - C : 71
+D - C : 151
+D - E : 80
+D - F : 99
+A - I : 111
+I - L : 70
+L - M : 75
+M - H : 120
+H - E : 146
+H - G : 138
+E - G : 97
+G - BUCHAREST : 101
+F - BUCHAREST : 211</textarea>
+        </div>
+        <div class="tool-field" style="width:100%; margin-top:12px;">
+          <label for="sx-heur">Heuristics — <code>NODE : h</code> (straight-line distance to Bucharest). Only used by Greedy and A*.</label>
+          <textarea id="sx-heur" rows="4" spellcheck="false">ARAD:366  A:329  B:374  C:380  D:253  E:193  F:176
+G:100  H:160  I:244  L:241  M:242  BUCHAREST:0</textarea>
+        </div>
+        <div class="tool-controls" style="margin-top:14px;">
+          <div class="tool-field"><label for="sx-start">Start</label><input type="text" id="sx-start" value="ARAD" size="10"></div>
+          <div class="tool-field"><label for="sx-goal">Goal</label><input type="text" id="sx-goal" value="BUCHAREST" size="12"></div>
+          <div class="tool-field"><label for="sx-alg">Algorithm</label>
+            <select id="sx-alg">
+              <option value="bfs">Breadth-first (BFS)</option>
+              <option value="dfs">Depth-first (DFS)</option>
+              <option value="ucs" selected>Uniform-cost (UCS)</option>
+              <option value="greedy">Greedy best-first</option>
+              <option value="astar">A*</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runSearch()">Load from the boxes</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="sx-output" class="tool-output"></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Things worth trying in it</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Press ▶ play</strong> on UCS and watch the frontier creep outwards in cost order. Then switch to <strong>A*</strong> and play it again — the heuristic drives it almost straight at the goal.</li>
+          <li>Shift-click <strong>D</strong> to make it the start, then compare <strong>BFS</strong> and <strong>UCS</strong> — 2 actions / cost <strong>310</strong> versus 3 actions / cost <strong>278</strong>, exactly the slide.</li>
+          <li>Run <strong>DFS</strong> and notice the path it returns is neither shortest nor cheapest — it's simply the first branch it fell down.</li>
+          <li>Blank out the heuristics and run <strong>A*</strong>: with <code>h ≡ 0</code> it expands exactly like UCS.</li>
+          <li>Compare the <em>nodes expanded</em> count for UCS and A* from ARAD — <strong>13 against 6</strong>. Step both and watch <em>where</em> the six saved expansions were: UCS wastes them going the wrong way.</li>
+          <li>Drag the nodes into the shape of the real map (ARAD top-left, BUCHAREST bottom-right) and the greedy failure becomes obvious — it heads straight for F because F <em>looks</em> close.</li>
+        </ul>
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="s-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 2</div>
+        <ol>
+          <li><strong>The definition</strong> — search computes a sequence of actions that form a path to a goal.</li>
+          <li><strong>The five components</strong> — state space; initial state + goal test; actions; transition model; action costs. Be able to fill them in for an unfamiliar problem (tiles, navigation, coins).</li>
+          <li><strong>Search tree</strong> — node = state, edge = action; redundant paths make it infinite; prevent by checking parents up to the root, or by tracking visited states.</li>
+          <li><strong>BFS</strong> — queue + reached; complete <em>yes</em>; optimal <em>yes if equal costs</em>; time and space <code>b + b² + … + b^d</code>.</li>
+          <li><strong>DFS</strong> — deepest first; complete <em>yes if redundant paths prevented</em>; optimal <em>no</em>, returns the left-most solution; time <code>b^m</code>; space <code>b·m</code>.</li>
+          <li><strong>Best-first</strong> — priority queue on <code>f(n)</code>; BFS is <code>f = depth</code>, DFS is <code>f = −depth</code>. Everything else is a choice of <code>f</code>.</li>
+          <li><strong>UCS</strong> — <code>f(n) = g(n)</code>, the summed cost from the start; finds minimum-<em>cost</em>, not minimum-<em>action</em> plans; complete and optimal; time and space proportional to the number of nodes cheaper than the goal.</li>
+          <li><strong>The 310 vs 278 contrast</strong> — BFS's 2-action route costs more than UCS's 3-action route. It's the cleanest way to show you understand what "optimal" is relative to.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Part 2. Next: adding a heuristic — Greedy and A*.</p>
+    </section>

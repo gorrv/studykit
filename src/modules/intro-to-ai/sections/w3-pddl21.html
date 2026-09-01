@@ -1,0 +1,191 @@
+<section id="w3-pddl21" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 03 · Part 3 · Automated planning</div>
+        <h1>PDDL 2.1: Fluents &amp; Time</h1>
+        <div class="week-subtitle">resources that run out, actions that take a while</div>
+      </div>
+      <!-- ===== LIMITS ===== -->
+      <h2 id="f-limits">What classical planning cannot say</h2>
+      <div class="callout exam">
+        <div class="callout-label">The four limitations</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Actions are instantaneous.</strong></li>
+          <li>The planner has to decide <strong>which actions to apply and in what order</strong>.</li>
+          <li><strong>Plans are sequential.</strong></li>
+          <li><strong>Actions don't define quantity or resource</strong>, and <strong>goals cannot define resource constraints</strong>.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">All actions take uniform time and have no costs.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The fix</div>
+        <em>"PDDL 2.1: An Extension to PDDL for Expressing Temporal Planning Domains"</em> adds:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Numbers, resources, costs</strong> ("metrics")</li>
+          <li><strong>Time</strong></li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why you can't fake numbers with predicates</div>
+        You could in principle write <code>fuel-30</code>, <code>fuel-29</code>, … as separate facts, but the state space explodes and nothing can express "<em>enough</em> fuel" or "minimise total fuel". <strong>Fluents make quantity first-class</strong>: you can compare it in a precondition and change it by an amount in an effect.
+      </div>
+      <!-- ===== FLUENTS ===== -->
+      <h2 id="f-fluents">Fluents</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>PDDL 2.1 introduces the ability to <strong>model numeric values through fluents</strong>.</li>
+          <li>We identify a particular <strong>resource</strong> within the domain by having action effects <strong>increase</strong> or <strong>decrease</strong> the value of that resource.</li>
+          <li>This helps maintain an understanding of the <strong>costs of actions</strong>.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The new syntax</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><code>(:requirements :typing :fluents)</code> — declare what the domain uses.</li>
+          <li><code>(:types vehicle location)</code> — real types, so <code>?v - vehicle</code> replaces type predicates.</li>
+          <li><code>(:functions …)</code> — declares the numeric fluents, exactly as <code>:predicates</code> declares the boolean ones.</li>
+          <li>In preconditions: <strong>comparisons</strong> — <code>(&gt;= (fuel-level ?v) (fuel-required ?from ?to))</code>.</li>
+          <li>In effects: <strong>updates</strong> — <code>(decrease …)</code>, <code>(increase …)</code>, also <code>(assign …)</code>.</li>
+          <li>In the problem file: <strong>assignments</strong> — <code>(= (fuel-level truck) 100)</code>.</li>
+          <li>In the problem file: <strong><code>(:metric minimize …)</code></strong> — what "optimal" means for this problem.</li>
+        </ul>
+      </div>
+      <!-- ===== METRIC VEHICLE ===== -->
+      <h2 id="f-metric">The metric vehicle domain</h2>
+      <pre><code>(<span class="kw">define</span> (<span class="kw">domain</span> metricVehicle)
+(<span class="kw">:requirements</span> :typing :fluents)
+(<span class="kw">:types</span> vehicle location)
+(<span class="kw">:predicates</span> (<span class="ty">at</span> ?v - vehicle ?p - location)
+             (<span class="ty">accessible</span> ?v - vehicle ?p1 ?p2 - location))
+
+(<span class="kw">:functions</span> (<span class="ty">fuel-level</span> ?v - vehicle) (<span class="ty">fuel-used</span> ?v - vehicle)
+            (<span class="ty">fuel-required</span> ?p1 ?p2 - location) (<span class="ty">total-fuel-used</span>))
+
+(<span class="kw">:action</span> drive
+ <span class="kw">:parameters</span> (?v - vehicle ?from ?to - location)
+ <span class="kw">:precondition</span> (<span class="kw">and</span> (<span class="ty">at</span> ?v ?from) (<span class="ty">accessible</span> ?v ?from ?to)
+                    (<span class="kw">&gt;=</span> (<span class="ty">fuel-level</span> ?v) (<span class="ty">fuel-required</span> ?from ?to)))
+ <span class="kw">:effect</span> (<span class="kw">and</span> (<span class="kw">not</span> (<span class="ty">at</span> ?v ?from)) (<span class="ty">at</span> ?v ?to)
+              (<span class="kw">decrease</span> (<span class="ty">fuel-level</span> ?v) (<span class="ty">fuel-required</span> ?from ?to))
+              (<span class="kw">increase</span> (<span class="ty">total-fuel-used</span>) (<span class="ty">fuel-required</span> ?from ?to))
+              (<span class="kw">increase</span> (<span class="ty">fuel-used</span> ?v) (<span class="ty">fuel-required</span> ?from ?to)))))</code></pre>
+      <div class="callout tip">
+        <div class="callout-label">Three kinds of fluent in one action</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><code>fuel-level ?v</code> — a <strong>consumable resource</strong>: guarded by a precondition, decreased by the effect. This is what makes plans <em>fail</em> when you run dry.</li>
+          <li><code>fuel-used ?v</code> and <code>total-fuel-used</code> — <strong>accumulators</strong>: never tested, only increased. They exist purely so the metric has something to minimise.</li>
+          <li><code>fuel-required ?p1 ?p2</code> — a <strong>static table</strong>: set in the problem file, never modified. It's a numeric fact about the map, not a resource.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">Notice <code>total-fuel-used</code> has <strong>no parameters</strong> — a single global number. That's the standard way to write a plan metric.</p>
+      </div>
+      <p><strong>The problem file:</strong></p>
+      <pre><code>(<span class="kw">define</span> (<span class="kw">problem</span> metricVehicle-example)
+(<span class="kw">:domain</span> metricVehicle)
+(<span class="kw">:objects</span> truck car - vehicle
+          Paris Berlin Rome Madrid - location)
+(<span class="kw">:init</span>
+  (<span class="ty">at</span> truck Rome)
+  (<span class="ty">at</span> car Paris)
+  (<span class="kw">=</span> (<span class="ty">fuel-level</span> truck) 100)      (<span class="kw">=</span> (<span class="ty">fuel-level</span> car) 100)
+  (<span class="ty">accessible</span> car Paris Berlin)     (<span class="ty">accessible</span> car Berlin Rome)
+  (<span class="ty">accessible</span> car Rome Madrid)      (<span class="ty">accessible</span> truck Rome Paris)
+  (<span class="ty">accessible</span> truck Rome Berlin)    (<span class="ty">accessible</span> truck Berlin Paris)
+  (<span class="kw">=</span> (<span class="ty">fuel-required</span> Paris Berlin) 40)   (<span class="kw">=</span> (<span class="ty">fuel-required</span> Berlin Rome) 30)
+  (<span class="kw">=</span> (<span class="ty">fuel-required</span> Rome Madrid) 50)    (<span class="kw">=</span> (<span class="ty">fuel-required</span> Rome Paris) 35)
+  (<span class="kw">=</span> (<span class="ty">fuel-required</span> Rome Berlin) 40)    (<span class="kw">=</span> (<span class="ty">fuel-required</span> Berlin Paris) 40)
+  (<span class="kw">=</span> (<span class="ty">total-fuel-used</span>) 0) (<span class="kw">=</span> (<span class="ty">fuel-used</span> car) 0) (<span class="kw">=</span> (<span class="ty">fuel-used</span> truck) 0))
+
+(<span class="kw">:goal</span> (<span class="kw">and</span> (<span class="ty">at</span> truck Paris) (<span class="ty">at</span> car Rome)))
+(<span class="kw">:metric</span> <span class="kw">minimize</span> (<span class="ty">total-fuel-used</span>)))</code></pre>
+      <div class="callout tip">
+        <div class="callout-label">Work the example out — it rewards a close look</div>
+        <strong>Truck: Rome → Paris.</strong> Two options: direct (35) or via Berlin (40 + 40 = 80). Direct wins.<br>
+        <strong>Car: Paris → Rome.</strong> Only route is Paris → Berlin → Rome (40 + 30 = 70). Note the car <em>cannot</em> use Rome → Paris — <code>accessible</code> takes the vehicle as an argument, so the two have different road networks.<br>
+        <strong>Total = 35 + 70 = 105</strong>, and both start with 100 units, so both stay in range.
+        <p style="margin:10px 0 0 0;">Also notice <code>accessible</code> and <code>fuel-required</code> are <strong>directed</strong> — <code>(accessible car Paris Berlin)</code> does not give you Berlin → Paris. Missing reverse edges are a classic modelling bug.</p>
+      </div>
+      <!-- ===== DURATIVE ===== -->
+      <h2 id="f-dur">Durative actions (temporal planning)</h2>
+      <div class="callout exam">
+        <div class="callout-label">Why time is a separate problem from resources</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>Fluents handle <strong>resources</strong> and how they change during execution — but we still need to handle the <strong>passage of time</strong>. How long does an action take?</li>
+          <li>This influences <strong>conditions as well as effects</strong>: conditions might hold true at different times, and effects can occur at different times.</li>
+        </ul>
+      </div>
+      <pre><code>(<span class="kw">:durative-action</span> move-up-slow
+  <span class="kw">:parameters</span> (?lift - slow-elevator ?f1 - floor ?f2 - floor)
+  <span class="kw">:duration</span> (<span class="kw">=</span> ?duration (<span class="ty">travel-slow</span> ?f1 ?f2))
+  <span class="kw">:condition</span> (<span class="kw">and</span> (<span class="kw">at start</span> (<span class="ty">lift-at</span> ?lift ?f1))
+                  (<span class="kw">at start</span> (<span class="ty">above</span> ?f1 ?f2))
+                  (<span class="kw">at start</span> (<span class="ty">reachable-floor</span> ?lift ?f2)))
+  <span class="kw">:effect</span> (<span class="kw">and</span> (<span class="kw">at start</span> (<span class="kw">not</span> (<span class="ty">lift-at</span> ?lift ?f1)))
+               (<span class="kw">at end</span> (<span class="ty">lift-at</span> ?lift ?f2))))
+
+<span class="cm">; problem file</span>
+(<span class="ty">above</span> f0 f1)
+(<span class="ty">reachable-floor</span> slow1 f1)
+(<span class="kw">=</span> (<span class="ty">travel-slow</span> f0 f1) 12)</code></pre>
+      <div class="callout exam">
+        <div class="callout-label">The four slots — this is the diagram to be able to draw</div>
+        <table style="margin:8px 0 0 0;">
+          <tr><th></th><th>at start</th><th>over all</th><th>at end</th></tr>
+          <tr><td><strong>Conditions</strong></td><td>must hold when the action begins</td><td>must hold <em>throughout</em></td><td>must hold when it finishes</td></tr>
+          <tr><td><strong>Effects</strong></td><td>applied when it begins</td><td>—</td><td>applied when it finishes</td></tr>
+        </table>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Read the lift action as a story</div>
+        At the start, the lift is at f1, f1 is above f2, and f2 is reachable. <strong>The instant it starts moving, <code>lift-at f1</code> is deleted</strong> — the lift is now between floors and nowhere in particular. Only <strong>at the end</strong> does <code>lift-at f2</code> become true, 12 time units later.
+        <p style="margin:10px 0 0 0;">That gap is the whole point. Splitting one action into a start effect and an end effect means <strong>another action can be happening in the interval</strong> — which is how temporal plans get genuine parallelism, unlike the sequential plans of Part 1.</p>
+      </div>
+      <!-- ===== BOARD ===== -->
+      <h2 id="f-board">The board action — and <code>over all</code></h2>
+      <pre><code>(<span class="kw">:durative-action</span> board
+  <span class="kw">:parameters</span> (?p - passenger ?lift - elevator ?f - floor)
+  <span class="kw">:duration</span> (<span class="kw">=</span> ?duration 3)
+  <span class="kw">:condition</span> (<span class="kw">and</span> (<span class="kw">over all</span> (<span class="ty">lift-at</span> ?lift ?f))
+                  (<span class="kw">at start</span> (<span class="ty">passenger-at</span> ?p ?f))
+                  (<span class="kw">at start</span> (<span class="kw">&lt;</span> (<span class="ty">passengers</span> ?lift) (<span class="ty">capacity</span> ?lift))))
+  <span class="kw">:effect</span> (<span class="kw">and</span> (<span class="kw">at start</span> (<span class="kw">not</span> (<span class="ty">passenger-at</span> ?p ?f)))
+               (<span class="kw">at end</span> (<span class="ty">boarded</span> ?p ?lift))
+               (<span class="kw">at start</span> (<span class="kw">increase</span> (<span class="ty">passengers</span> ?lift) 1))))
+
+<span class="cm">; problem file</span>
+(<span class="ty">above</span> f0 f1)   (<span class="ty">reachable-floor</span> slow1 f1)   (<span class="kw">=</span> (<span class="ty">travel-slow</span> f0 f1) 12)
+(<span class="ty">passenger-at</span> p0 f1)   (<span class="kw">=</span> (<span class="ty">passengers</span> slow1) 0)   (<span class="kw">=</span> (<span class="ty">capacity</span> slow1) 4)</code></pre>
+      <div class="callout tip">
+        <div class="callout-label">Everything worth noticing here</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong><code>over all (lift-at ?lift ?f)</code></strong> — the lift must stay at that floor for the whole three seconds. Not just at the start: the doors must not close mid-boarding. <em>This is the condition type the previous action didn't have.</em></li>
+          <li><strong>Fixed duration</strong> — <code>(= ?duration 3)</code>, a constant rather than a fluent lookup. Both forms are legal.</li>
+          <li><strong>Fluent + durative combined</strong> — the capacity check <code>(&lt; (passengers ?lift) (capacity ?lift))</code> is exactly the Part-3-fluents machinery inside a temporal action. <em>This</em> is how you say "capacity 4" rather than the gripper's one-ball-per-<code>free</code> trick.</li>
+          <li><strong>The counter increases <em>at start</em>, not at end</strong> — deliberately. It reserves the seat the moment boarding begins, so a second passenger deciding at the same instant sees the space already taken. Putting it <code>at end</code> would let five people board a lift with capacity 4.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <div class="callout-label">Summary of the decks</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>PDDL 2.1 handles more complex <strong>temporal and resource-heavy</strong> problems.</li>
+          <li><strong>Fluents</strong> allow management of resources — check a resource is within a limit, increase/decrease it.</li>
+          <li><strong>Temporal planning</strong> considers how planning must execute within fixed time frames: the overall <strong>duration</strong>; conditions that must hold <strong>at the start</strong>, <strong>until the end</strong>, or <strong>throughout</strong>; effects applied <strong>at the start</strong> or <strong>upon completion</strong>.</li>
+        </ul>
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="f-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 3</div>
+        <ol>
+          <li><strong>Classical PDDL's limits</strong> — instantaneous actions, sequential plans, no quantities or resources, goals cannot express resource constraints.</li>
+          <li><strong>PDDL 2.1 adds numbers, resources, costs (metrics) and time.</strong></li>
+          <li><strong>Fluents</strong> = numeric values; effects <code>increase</code>/<code>decrease</code> them; preconditions compare them.</li>
+          <li><strong>Know the sections</strong> — <code>:requirements</code>, <code>:types</code>, <code>:predicates</code>, <code>:functions</code>, <code>:action</code>; and in the problem <code>:objects</code>, <code>:init</code> with <code>(= (f x) n)</code>, <code>:goal</code>, <code>:metric minimize …</code>.</li>
+          <li><strong>Be able to write a fluent action</strong> — the <code>drive</code> action is the model answer: a <code>&gt;=</code> guard plus a <code>decrease</code> and matching <code>increase</code>es.</li>
+          <li><strong>Durative actions</strong> — <code>:durative-action</code> with <code>:duration</code>, <code>:condition</code> and <code>:effect</code>.</li>
+          <li><strong>The three condition types</strong>: <code>at start</code>, <code>over all</code>, <code>at end</code>. <strong>The two effect types</strong>: <code>at start</code>, <code>at end</code>. Be able to draw the timeline.</li>
+          <li><strong>What <code>over all</code> is for</strong> — something that must remain true for the whole duration, e.g. the lift staying at the floor while a passenger boards.</li>
+          <li><strong>Why the delete happens <code>at start</code></strong> — the object leaves its old state immediately; the new state only becomes true at the end. That interval is what lets other actions run concurrently.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Part 3. Next: how a planner actually searches, and where its heuristic comes from.</p>
+    </section>

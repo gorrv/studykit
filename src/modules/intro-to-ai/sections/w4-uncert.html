@@ -1,0 +1,81 @@
+<section id="w4-uncert" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 04 · Part 1 · Uncertainty in AI</div>
+        <h1>Uncertainty in AI</h1>
+        <div class="week-subtitle">everything so far assumed the world does what it's told</div>
+      </div>
+      <!-- ===== SEARCH ===== -->
+      <h2 id="q-search">Uncertainty in search</h2>
+      <div class="callout exam">
+        <div class="callout-label">The two assumptions we have been making all along</div>
+        Search algorithms — <strong>BFS, DFS, A*</strong> — typically assume:
+        <ul style="margin:8px 0 0 0;">
+          <li>The <strong>current state is known</strong> → "<strong>fully observable</strong>"</li>
+          <li><strong>Actions always execute as intended</strong> → "<strong>deterministic</strong>"</li>
+        </ul>
+        <p style="margin:12px 0 0 0;"><strong>These don't apply in many real-world applications:</strong></p>
+        <ul style="margin:8px 0 0 0;">
+          <li>Current state uncertain → "<strong>partially observable</strong>"</li>
+          <li>Results of actions uncertain → "<strong>stochastic</strong>"</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">You have seen these four words before</div>
+        They are two of the seven <strong>dimensions</strong> from Week 1. Every algorithm in Weeks 1–3 quietly sat at the easy end of both. This week we drop <em>one</em> of them — <strong>actions become stochastic</strong> — and keep full observability. Dropping the other gives you a POMDP, which is a much harder object and not on this course.
+      </div>
+      <!-- ===== ML ===== -->
+      <h2 id="q-ml">Uncertainty in supervised learning</h2>
+      <div class="callout">
+        <div class="callout-label">The setup</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Training set:</strong> examples of input data (images, features) and output labels.</li>
+          <li><strong>Models</strong> then predict labels in new examples.</li>
+        </ul>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Four places uncertainty enters</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Training labels uncertain</strong> — was the human annotation done correctly?</li>
+          <li><strong>Input data noisy</strong> — is this the real distance from the pedestrian to the car?</li>
+          <li><strong>Model predictions uncertain</strong> — how confident are we in the model's prediction? Is this a cat or a dog? Will that pedestrian try to cross?</li>
+          <li><strong>The world is uncertain</strong> — some things are stochastic and can <em>never</em> be predicted 100% accurately:
+            <ul style="margin:6px 0 0 0;">
+              <li>pedestrian movement prediction for autonomous vehicles;</li>
+              <li>text generation with language models — many different ways of completing <em>"Mary crossed the road and then ______"</em>.</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The fourth one is different in kind from the first three</div>
+        Noisy labels, noisy inputs and an unconfident model are all <strong>problems you could in principle fix</strong> — annotate more carefully, buy a better sensor, train a bigger model. <strong>The world being stochastic is not fixable.</strong> No amount of data tells you which way a pedestrian will step, because they have not decided yet.
+        <p style="margin:10px 0 0 0;">That is the kind of uncertainty MDPs are for. You do not try to eliminate it — you <strong>build it into the model</strong> as a probability distribution and then optimise the <em>expected</em> outcome.</p>
+      </div>
+      <!-- ===== DIMENSIONS ===== -->
+      <h2 id="q-dims">Where this sits</h2>
+      <table>
+        <tr><th>Dimension</th><th>Weeks 1–3</th><th>Week 4 (MDPs)</th></tr>
+        <tr><td>Environment observability</td><td>fully observable</td><td><strong>fully observable</strong> — unchanged</td></tr>
+        <tr><td>Action outcomes</td><td>deterministic</td><td><strong>stochastic</strong> ← the change</td></tr>
+        <tr><td>What a solution is</td><td>a <strong>sequence</strong> of actions (a plan)</td><td>a <strong>policy</strong> — an action for <em>every</em> state</td></tr>
+        <tr><td>What we optimise</td><td>path cost / plan length</td><td><strong>expected</strong> sum of discounted rewards</td></tr>
+      </table>
+      <div class="callout warn">
+        <div class="callout-label">The row that matters most</div>
+        <strong>A plan is no longer a useful answer.</strong> If your actions can go wrong, a fixed sequence stops being valid the moment one of them does — and you would have to replan. A <strong>policy</strong> says what to do in <em>every</em> state, so it is still valid no matter where you end up. That single shift is what the rest of the week is about.
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="q-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 1</div>
+        <ol>
+          <li><strong>Search's two assumptions</strong> — current state known (<em>fully observable</em>) and actions execute as intended (<em>deterministic</em>).</li>
+          <li><strong>When they break</strong> — uncertain current state gives a <em>partially observable</em> problem; uncertain action results give a <em>stochastic</em> one.</li>
+          <li><strong>MDPs relax exactly one</strong>: fully observable but <strong>stochastic</strong>.</li>
+          <li><strong>Four sources of uncertainty in supervised learning</strong> — uncertain training labels, noisy input data, uncertain model predictions, and a genuinely stochastic world.</li>
+          <li><strong>Be able to give the examples</strong> — annotation quality, sensor distance to a pedestrian, cat-or-dog confidence, pedestrian movement for AVs, language-model text completion.</li>
+          <li><strong>Irreducible vs reducible uncertainty</strong> — the first three could be improved with better data or models; a stochastic world cannot be, which is why it has to be modelled rather than removed.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Part 1. Next: what a search problem becomes when actions can go wrong.</p>
+    </section>

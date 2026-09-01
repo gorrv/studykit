@@ -1,0 +1,253 @@
+<section id="w3-rpg" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 03 · Part 4 · Automated planning</div>
+        <h1>Forward Chaining &amp; RPG</h1>
+        <div class="week-subtitle">where a domain-independent heuristic comes from</div>
+      </div>
+      <!-- ===== FORWARD ===== -->
+      <h2 id="r-fwd">Forward-chain planning</h2>
+      <div class="callout exam">
+        <div class="callout-label">The algorithm</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>Choose a state <strong>s</strong> and expand it, beginning with the initial state <strong>S<sub>init</sub></strong>.</li>
+          <li>Consider the <strong>actions applicable in s</strong> — those whose preconditions are satisfied in s.</li>
+          <li>One successor state <strong>s′</strong> is generated for each applicable action <em>a</em>:
+            <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
+              S′ = S − {delete effects of a} + {add effects of a}</div>
+          </li>
+          <li>Create a plan for S′ by <strong>chaining a to the end of the plan for s</strong>.</li>
+          <li>A <strong>goal state</strong> is a state containing the goal conditions. If the state does not satisfy them, loop and expand more states.</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">This is Week 1's search, with the graph generated on the fly</div>
+        Node = a set of facts. Edge = a ground action. "Expand" means: find every action whose preconditions are in this fact set, and apply the delete-then-add rule.
+        <p style="margin:10px 0 0 0;"><strong>Delete first, then add</strong> — the order matters when an action both deletes and adds the same fact. And note the <em>goal test is a subset test</em>, not equality: a goal state is any state <em>containing</em> the goal conditions, so many different full states can be goals.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">What a planner is</div>
+        A planner takes the domain, the initial state and the goal, and generates a <strong>plan</strong> — a sequence of actions from A which transforms S<sub>init</sub> into S<sub>goal</sub>. It <strong>performs search</strong> to consider the different possible plans available until S<sub>goal</sub> is found.
+      </div>
+      <!-- ===== BLOCKS ===== -->
+      <h2 id="r-blocks">The Blocks World, simplified to one action</h2>
+      <div class="callout exam">
+        <div class="callout-label">Put X on Y from Z</div>
+        <table style="margin:8px 0 0 0;">
+          <tr><th>Preconditions</th><th>Add</th><th>Delete</th></tr>
+          <tr><td><code>clear X</code><br><code>on X Z</code><br><code>clear Y</code></td>
+              <td><code style="color:var(--accent-3);">clear Z</code><br><code style="color:var(--accent-3);">on X Y</code></td>
+              <td><code style="color:var(--accent-2);">on X Z</code><br><code style="color:var(--accent-2);">clear Y</code></td></tr>
+        </table>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">One action instead of four</div>
+        Part 2's Blocks World needed <code>pick-up</code>, <code>put-down</code>, <code>stack</code> and <code>unstack</code> because the hand was modelled. Here the move is <strong>atomic</strong> — X goes straight from Z to Y — so <code>handempty</code> and <code>holding</code> disappear entirely, and the <strong>table T behaves as a block that is always clear</strong> (it never appears in a delete list because infinitely many things fit on it).
+        <p style="margin:10px 0 0 0;">Read the effects as a swap: <strong>X vacates Z (so Z becomes clear) and occupies Y (so Y stops being clear)</strong>. Fewer actions means a smaller branching factor, which is exactly what you want when demonstrating a search by hand.</p>
+      </div>
+      <p>The state the rest of this page works with — <strong>C on A, A and B on the table</strong>, goal <strong>A on B, B on C</strong>:</p>
+      <div class="diagram">
+        <div class="stack-row" style="justify-content:center; gap:60px;">
+          <div style="text-align:center;">
+            <div class="blocks"><div class="blk">C</div><div class="blk">A</div></div><div class="blocks"><div class="blk">B</div></div>
+            <div class="tbl" style="margin:2px auto 0 auto;"></div>
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-muted); margin-top:6px;">initial state</div>
+          </div>
+          <div style="text-align:center;">
+            <div class="blocks"><div class="blk">A</div><div class="blk">B</div><div class="blk">C</div></div>
+            <div class="tbl" style="margin:2px auto 0 auto;"></div>
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-muted); margin-top:6px;">goal</div>
+          </div>
+        </div>
+        <div class="caption">Initial facts: <code>onCA, onAT, onBT, clearB, clearC</code> · Goal: <code>onAB, onBC</code></div>
+      </div>
+      <!-- ===== NEED ===== -->
+      <h2 id="r-need">"How do we know this is the best state?"</h2>
+      <div class="callout warn">
+        <div class="callout-label">The question the lecture leaves hanging</div>
+        Forward chaining generates a tree of states. Fine — but which one should you expand next? Week 1's answer was <strong>A*</strong>, which needs <code>h(n)</code>. So: <strong>is it possible to define heuristics that work for <em>any</em> PDDL domain?</strong>
+        <p style="margin:10px 0 0 0;"><strong>Yes — domain-independent heuristics.</strong> No knowledge about the specific problem is used.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why this is harder than the Romania map</div>
+        In Week 1 you had straight-line distance handed to you — a <em>human</em> looked at the map and supplied it. A planner is given an arbitrary PDDL file it has never seen and must <strong>invent its own heuristic from the domain description alone</strong>. The recipe is the one from Week 1: <strong>relax the problem</strong>. The only question is which constraint to drop.
+      </div>
+      <!-- ===== RPG ===== -->
+      <h2 id="r-rpg">The Relaxed Planning Graph</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        The <strong>Relaxed Planning Graph (RPG)</strong> is a domain-independent heuristic used in actual planners (e.g. the <strong>FF</strong> planner).
+        <ul style="margin:8px 0 0 0;">
+          <li>It involves <strong>finding a plan from the current state S which achieves the goals G but ignores the delete effects of each action</strong>.</li>
+          <li><strong>The length of this plan is used as the heuristic value for the state S.</strong></li>
+        </ul>
+        <p style="margin:10px 0 0 0; font-size:13px; color:var(--ink-muted);">J. Hoffmann and B. Nebel, 2001, "The FF Planning System: Fast Plan Generation through Heuristic Search", <em>Journal of AI Research</em> vol. 14.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Ignoring deletes is the relaxation — and it's the perfect one</div>
+        Drop the delete lists and <strong>facts can only ever become true, never false</strong>. Nothing you do can undo anything, so there is no such thing as a wrong move and no need to backtrack. The relaxed problem is solvable in polynomial time.
+        <p style="margin:10px 0 0 0;">And because the relaxed problem is <em>easier</em> — every real plan is still a valid relaxed plan — its optimal length can never exceed the real one. <strong>That's admissibility, straight from Week 1.</strong> (The relaxed plan that FF actually extracts isn't guaranteed optimal, so <em>h<sup>FF</sup></em> is not strictly admissible — but the idea is the same, and it works extremely well in practice.)</p>
+      </div>
+      <!-- ===== LAYERS ===== -->
+      <h2 id="r-layers">Fact layers and action layers</h2>
+      <div class="callout exam">
+        <div class="callout-label">The construction rules</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>The RPG is made of <strong>alternating fact layers and action layers</strong>.</li>
+          <li><strong>The first fact layer f(0) is the initial state of the problem.</strong></li>
+          <li>Fact layer <strong>f(n)</strong> determines which actions can appear in action layer <strong>a(n+1)</strong> — those whose <strong>preconditions are satisfied in f(n)</strong>.</li>
+          <li><strong>f(n+1) = f(n) plus all the add effects of the actions in a(n+1)</strong> — remember we ignore delete effects!</li>
+          <li>Hence <strong>fact layers get bigger and bigger</strong> as more actions become applicable.</li>
+        </ul>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Two consequences of "fact layers only grow"</div>
+        <strong>It always terminates.</strong> There are finitely many ground facts, so eventually a layer adds nothing new — a fixpoint. If the goals aren't in that fixpoint, <strong>no relaxed plan exists</strong>, so no real plan exists either, and the state can be discarded outright. That's a free dead-end detector.
+        <p style="margin:10px 0 0 0;">And <strong>the layer at which a fact first appears is a measure of how hard it is to achieve</strong> — that number is what the extraction phase turns into a heuristic.</p>
+      </div>
+      <p>For our state, the graph builds like this:</p>
+      <table>
+        <tr><th>Layer</th><th>Contents</th></tr>
+        <tr><td><strong>f(0)</strong></td><td><code>onAT, onBT, onCA, clearB, clearC</code> — the initial state</td></tr>
+        <tr><td><strong>a(1)</strong></td><td><code>C to T from A</code> · <code>C to B from A</code> · <code>B to C from T</code></td></tr>
+        <tr><td><strong>f(1)</strong></td><td>f(0) + <code>clearA, onCT, onCB, onBC</code></td></tr>
+        <tr><td><strong>a(2)</strong></td><td><code>A to B from T</code> · <code>A to C from T</code> · <code>B to A from T</code> · <code>B to A from C</code> · <code>B to T from C</code> · <code>C to A from T</code> · <code>C to A from B</code> · <code>C to B from T</code> · <code>C to T from B</code></td></tr>
+        <tr><td><strong>f(2)</strong></td><td>everything — including <code>onAB</code>, the last goal to appear</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">Why nothing involving A appears in a(1)</div>
+        A has C sitting on it, so <code>clearA</code> is false in f(0) and no action can move A. Once <em>any</em> action in a(1) shifts C off A, <code>clearA</code> enters f(1) — and a pile of actions become applicable at once. <strong>Watch <code>clearA</code>: it is the fact that unlocks the layer.</strong>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">a(2) is bigger than it looks — and that's the relaxation showing through</div>
+        The slide lists six actions in a(2); the true count is <strong>nine</strong>. The extra three are <code>B to A from C</code>, <code>C to A from B</code> and <code>C to T from B</code>, and they are applicable for a revealing reason.
+        <p style="margin:10px 0 0 0;">f(1) contains <strong>both <code>onBT</code> and <code>onBC</code></strong> — B is on the table <em>and</em> on C at the same time. That is physically impossible, and it happens precisely because we deleted nothing. So the relaxed graph offers moves the real world never would.</p>
+        <p style="margin:10px 0 0 0;">This is exactly why the RPG <strong>under</strong>-estimates: the relaxed world is more permissive than the real one. It doesn't affect the answer here — the extraction still picks the same three actions and h = 3 — but if you're listing a(2) by hand, don't stop at six. The <strong>RPG builder tool</strong> below shows all nine.</p>
+      </div>
+      <!-- ===== EXTRACT ===== -->
+      <h2 id="r-extract">Extracting the relaxed plan</h2>
+      <div class="callout exam">
+        <div class="callout-label">The backwards pass</div>
+        To get a solution, <strong>work backwards through the RPG</strong>. At each fact layer f(n) we have goals to achieve, g(n). Start with g(n) containing the problem goals. For each fact in g(n):
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>If it was already in f(n−1)</strong>, add it to g(n−1).</li>
+          <li><strong>Otherwise</strong>, choose an action from a(n) that achieves it, and add <strong>its preconditions</strong> to g(n−1).</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">Stop when you are at g(0).</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The worked extraction</div>
+        <p style="margin:0 0 6px 0;"><strong>g(2) = {onAB, onBC}</strong> — the problem goals.</p>
+        <ul style="margin:0 0 12px 0;">
+          <li><code>onAB</code> was <strong>not</strong> in f(1) → need the action <strong>"A to B from T"</strong>, whose preconditions are <code>clearA, onAT, clearB</code>.</li>
+          <li><code>onBC</code> <strong>was</strong> already in f(1) → carry it straight down.</li>
+        </ul>
+        <p style="margin:0 0 6px 0;"><strong>g(1) = {clearA, clearB, onAT, onBC}</strong></p>
+        <ul style="margin:0 0 12px 0;">
+          <li><code>clearB</code> and <code>onAT</code> were in f(0) → carry down.</li>
+          <li><code>onBC</code> was <strong>not</strong> in f(0) → need <strong>"B to C from T"</strong> (preconditions <code>clearB, onBT, clearC</code>).</li>
+          <li><code>clearA</code> was <strong>not</strong> in f(0) → need <strong>"C to T from A"</strong> (preconditions <code>clearC, onCA</code>).</li>
+        </ul>
+        <p style="margin:0;"><strong>g(0) = {clearB, onAT, clearC, onBT, onCA}</strong> — all in the initial state. Done.</p>
+      </div>
+      <div class="planline">
+        <strong>Final relaxed plan:</strong><br>
+        O₀ = { Put C on T from A , Put B on C from T }<br>
+        O₁ = { Put A on B from T }<br>
+        <strong>h(s) = |O₀| + |O₁| = 2 + 1 = 3</strong>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Constructing the RPG value — the formal statement</div>
+        For each state S reached during forward search, the length of the relaxed plan P′ which achieves the goals G starting from S is computed. <strong>This is an estimate of the goal distance.</strong>
+        <p style="margin:10px 0 0 0;">P′ = ⟨O₀, O₁, …, O<sub>m−1</sub>⟩, where each <strong>O<sub>i</sub> is the set of actions selected in parallel at time step i</strong>, and <strong>m is the number of the first fact layer containing all goals</strong>.</p>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:16px; margin:12px 0;"><strong>h(s) := Σ |O<sub>i</sub>|</strong></div>
+        <p style="margin:0;">i.e. the heuristic is an estimate of the <strong>sequential</strong> solution length.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">h is the number of <em>actions</em>, not the number of layers</div>
+        Here m = 2 layers but <strong>h = 3</strong>, because O₀ contains two actions. Summing <code>|O_i|</code> rather than counting layers is what makes it an estimate of the <em>sequential</em> plan length — you still have to execute those two actions one after another. Confusing the two is the standard mistake.
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Sanity-check it against the real plan</div>
+        The genuine plan here is also three moves: C→table, B→C, A→B. So <strong>h = 3 is exact for this state</strong> — the relaxation cost nothing, because no action needed to undo another. RPG becomes an <em>under</em>-estimate precisely in the states where you must dismantle something you built, since the relaxed version never has to take it apart again.
+      </div>
+      <!-- ===== TOOLS ===== -->
+      <h2 id="r-tool">Tool · RPG builder</h2>
+      <div class="tool" data-run="runRPG">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Build the graph, extract the plan, get h</h3></div>
+        <p class="tool-desc"><strong>Click the blocks to rearrange the towers and the whole graph rebuilds; step through the layers one at a time</strong> to see exactly which fact unlocks the next set of actions. Defaults to the state from the demo — you should get <strong>h = 3</strong>.</p>
+        <div class="tool-controls">
+          <div class="tool-field"><label for="rp-blocks">Blocks</label><input type="text" id="rp-blocks" value="A B C" size="12"></div>
+          <div class="tool-field" style="flex:1; min-width:220px;"><label for="rp-init">Initial state — <code>onXY</code> / <code>clearX</code>, T = table</label>
+            <input type="text" id="rp-init" value="onCA onAT onBT clearB clearC" style="width:100%;"></div>
+          <div class="tool-field" style="flex:1; min-width:160px;"><label for="rp-goal">Goal facts</label>
+            <input type="text" id="rp-goal" value="onAB onBC" style="width:100%;"></div>
+          <button class="tool-btn" onclick="runRPG()">Build RPG</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="rp-output" class="tool-output"></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Things worth trying in it</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Press ▶ play</strong> and watch the graph grow one layer at a time. Stop on <em>action layer 1</em> and note that nothing involving A is there — then step to <em>fact layer 1</em> and see <code>clearA</code> arrive and unlock six more actions.</li>
+          <li>The default — reproduce the demo exactly: a(1) has three actions, <code>onAB</code> first appears in f(2), and <strong>h = 3</strong>.</li>
+          <li><strong>Click C, then click the table.</strong> A is now clear from the start, the graph reshapes, and h drops — you have just made the problem easier with two clicks.</li>
+          <li>Set the goal to <code>onBC</code> alone. It's in f(1), so h drops to 1 — the graph stops a layer earlier.</li>
+          <li>Set the goal to something already true, e.g. <code>onCA</code>: <strong>h = 0</strong>, which is the definition of a goal state.</li>
+          <li>Use four blocks (<code>A B C D</code>) and watch the layers grow — this is why real planners rebuild the RPG for <em>every</em> node they evaluate.</li>
+        </ul>
+      </div>
+      <h2 id="r-ptool">Tool · Forward-chain planner</h2>
+      <div class="tool" data-run="runPlanner">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Search the state space, with or without the heuristic</h3></div>
+        <p class="tool-desc"><strong>Rearrange the blocks by clicking, then walk the plan action by action and watch the towers rebuild themselves.</strong> Expand the initial state one step, or solve with breadth-first search versus A* using the RPG heuristic and compare the expansion counts.</p>
+        <div class="tool-controls">
+          <div class="tool-field"><label for="pl-blocks">Blocks</label><input type="text" id="pl-blocks" value="A B C" size="12"></div>
+          <div class="tool-field" style="flex:1; min-width:210px;"><label for="pl-init">Initial state</label>
+            <input type="text" id="pl-init" value="onCA onAT onBT clearB clearC" style="width:100%;"></div>
+          <div class="tool-field" style="flex:1; min-width:150px;"><label for="pl-goal">Goal</label>
+            <input type="text" id="pl-goal" value="onAB onBC" style="width:100%;"></div>
+          <div class="tool-field"><label for="pl-mode">Mode</label>
+            <select id="pl-mode">
+              <option value="expand">expand the initial state</option>
+              <option value="bfs">solve — breadth-first</option>
+              <option value="astar" selected>solve — A* with RPG h</option>
+              <option value="both">solve — compare BFS vs A*</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runPlanner()">Run</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="pl-output" class="tool-output"></div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">How the RPG is used in a planner</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>RPG provides a heuristic <strong>automatically</strong> — no domain knowledge.</li>
+          <li>Use it in <strong>heuristic search (e.g. A*) where h comes from the RPG</strong>.</li>
+          <li><strong>Every time we want to add a new node to the open list, we solve a simplified version of the problem (the RPG) to find out h.</strong></li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Read that last bullet twice</div>
+        The heuristic is not a lookup — it is <strong>an entire sub-problem solved from scratch for every single node</strong>. That is enormously more expensive per node than Week 1's straight-line distance. It pays off anyway, because the reduction in nodes expanded is far larger than the extra cost per node — and it is the reason FF beat the field in 2000.
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="r-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 4</div>
+        <ol>
+          <li><strong>Forward-chain planning</strong> — expand a state, find the applicable actions, and for each one produce <strong>S′ = S − {delete effects} + {add effects}</strong>, chaining the action onto the plan.</li>
+          <li><strong>A goal state is a state <em>containing</em> the goal conditions</strong> — a subset test, not equality.</li>
+          <li><strong>Put X on Y from Z</strong> — pre: <code>clear X, on X Z, clear Y</code>; add: <code>clear Z, on X Y</code>; del: <code>on X Z, clear Y</code>.</li>
+          <li><strong>Domain-independent heuristics</strong> work for any PDDL domain using no problem-specific knowledge.</li>
+          <li><strong>RPG</strong> — find a plan from S achieving G that <strong>ignores the delete effects</strong>; the length of that plan is h(S). Used in FF (Hoffmann &amp; Nebel 2001).</li>
+          <li><strong>Construction</strong> — f(0) is the initial state; a(n+1) holds the actions whose preconditions are satisfied in f(n); <strong>f(n+1) = f(n) + the add effects of a(n+1)</strong>; layers only grow.</li>
+          <li><strong>Extraction</strong> — start with g(m) = the goals; a fact already in f(n−1) drops straight down, otherwise pick an action from a(n) and add its preconditions to g(n−1); stop at g(0).</li>
+          <li><strong>h(s) := Σ |O<sub>i</sub>|</strong>, where O<sub>i</sub> is the set of actions chosen at step i and m is the first fact layer containing all goals. It estimates the <strong>sequential</strong> plan length.</li>
+          <li><strong>Be able to run the demo by hand</strong> — from <code>onCA, onAT, onBT, clearB, clearC</code> to <code>onAB, onBC</code>: a(1) = {C to T from A, C to B from A, B to C from T}; the plan is Put C on T from A, Put B on C from T, Put A on B from T; <strong>h = 3</strong> over 2 layers.</li>
+          <li><strong>Using it</strong> — A* with h from the RPG, recomputing the RPG for every node added to the open list.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 3.</p>
+    </section>

@@ -1,0 +1,357 @@
+<section id="concepts" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">★ Final Revision · Weeks 1–9</div>
+        <h1>The Theory, Condensed</h1>
+        <div class="week-subtitle">every definition, acronym and distinction, in one place</div>
+      </div>
+      <div class="callout">
+        <div class="callout-label">How to use this page</div>
+        This is the <strong>state-it-back</strong> material — the things an exam asks you to define, name, or tell apart, with no working required. The cram sheet is per-week facts; <strong>this page is organised by the <em>kind</em> of question</strong> instead, because that is how it comes at you under time.
+        <p style="margin:10px 0 0 0;">Cover the right column of any table and see whether you can produce it. If you can do that for every table here, the definition marks are safe.</p>
+      </div>
+
+      <!-- ===== ACRONYMS ===== -->
+      <h2 id="cx-acro">Every acronym in the module</h2>
+      <div class="callout exam">
+        <div class="callout-label">Say what the letters stand for, then what it does</div>
+        <table class="cmp-table">
+          <tr><th>Acronym</th><th>Expands to</th><th>In one line</th></tr>
+          <tr><td><strong>BFS</strong></td><td>Breadth-first search</td><td>expand shallowest first; optimal only if all step costs are equal</td></tr>
+          <tr><td><strong>DFS</strong></td><td>Depth-first search</td><td>expand deepest first; linear memory, not optimal, not complete on infinite branches</td></tr>
+          <tr><td><strong>UCS</strong></td><td>Uniform-cost search</td><td>expand lowest <em>g</em>; optimal for non-negative costs</td></tr>
+          <tr><td><strong>A*</strong></td><td>— (not an acronym)</td><td>expand lowest <em>f = g + h</em>; optimal when <em>h</em> is admissible</td></tr>
+          <tr><td><strong>CSP</strong></td><td>Constraint satisfaction problem</td><td>variables, domains, constraints; only the final assignment matters</td></tr>
+          <tr><td><strong>MRV</strong></td><td>Minimum remaining values</td><td>pick the variable with fewest legal values left — the <em>most constrained</em></td></tr>
+          <tr><td><strong>LCV</strong></td><td>Least constraining value</td><td>try the value that rules out fewest options for neighbours</td></tr>
+          <tr><td><strong>AC-3</strong></td><td>Arc consistency algorithm #3</td><td>propagate domain pruning across every arc until nothing changes</td></tr>
+          <tr><td><strong>PDDL</strong></td><td>Planning Domain Definition Language</td><td>the language for writing domains and problems in planning</td></tr>
+          <tr><td><strong>RPG</strong></td><td>Relaxed planning graph</td><td>heuristic from the delete-free relaxation; <em>h</em> = Σ|O<sub>i</sub>|</td></tr>
+          <tr><td><strong>MDP</strong></td><td>Markov decision process</td><td>states, actions, stochastic transitions, rewards; solved by value iteration</td></tr>
+          <tr><td><strong>MEU</strong></td><td>Maximum expected utility</td><td>the principle that a rational agent picks the action with highest expected value</td></tr>
+          <tr><td><strong>MAE / MSE / RMSE</strong></td><td>Mean absolute / squared / root-mean-squared error</td><td>regression metrics; MSE punishes outliers hardest</td></tr>
+          <tr><td><strong>SSE</strong></td><td>Sum of squared errors</td><td>what linear regression minimises</td></tr>
+          <tr><td><strong>K-means</strong></td><td>— (K = number of clusters)</td><td>assign to nearest centre, recompute centres, repeat</td></tr>
+          <tr><td><strong>UCB</strong></td><td>Upper confidence bound</td><td>pick arg max of <em>Q + c√(ln t / N)</em></td></tr>
+          <tr><td><strong>RL</strong></td><td>Reinforcement learning</td><td>learn by doing; the reward function is unknown</td></tr>
+          <tr><td><strong>AI</strong></td><td>Artificial intelligence</td><td>two senses: a property of behaviour, and a field of research</td></tr>
+        </table>
+      </div>
+
+      <!-- ===== W1 DEFINITIONS ===== -->
+      <h2 id="cx-agents">Agents and the four approaches</h2>
+      <div class="callout exam">
+        <div class="callout-label">Three neighbours that are easy to confuse</div>
+        <table class="cmp-table">
+          <tr><th>Term</th><th>Definition</th></tr>
+          <tr><td><strong>Agent</strong></td><td>makes an intelligent decision when given the opportunity, using the knowledge and actions available <em>at that time</em></td></tr>
+          <tr><td><strong>Autonomous agent</strong></td><td>decides <strong>without human input</strong> — about <em>who supplies the decision</em></td></tr>
+          <tr><td><strong>Rational agent</strong></td><td>always takes the <strong>best</strong> action — about <em>how good the decision is</em></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Four approaches</strong> = think / act × like humans / rationally. “Like humans” gives cognitive models and the Turing test; “rationally” gives the laws of logic and probability.</p>
+        <p style="margin:10px 0 0 0;"><strong>Turing test</strong> (1950) judges behaviour only, by question and answer — so it tests <em>acting like humans</em>. The <strong>total Turing test</strong> adds a robot and physical behaviour.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Model-based vs data-driven</div>
+        <table class="cmp-table">
+          <tr><th></th><th>Model-based</th><th>Data-driven</th></tr>
+          <tr><td><strong>Also called</strong></td><td>Symbolic AI, Classical AI</td><td>Machine learning</td></tr>
+          <tr><td><strong>Knowledge</strong></td><td><strong>explicit</strong> — you encode the world</td><td><strong>tacit</strong> — it comes out of the data</td></tr>
+          <tr><td><strong>Method</strong></td><td>encode the world, encode how it changes, then <strong>search</strong></td><td>read coarse data, be told the problem, adjust the model</td></tr>
+          <tr><td><strong>Slogan</strong></td><td>“pretends to think”</td><td>“pretends to learn”</td></tr>
+          <tr><td><strong>Weeks</strong></td><td>1–4</td><td>5–8</td></tr>
+        </table>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Problem dimensions — six words, three pairs</div>
+        <table class="cmp-table">
+          <tr><th>Pair</th><th>What it is about</th></tr>
+          <tr><td>instantaneous vs <strong>durative</strong></td><td>an action takes time</td></tr>
+          <tr><td>deterministic vs <strong>stochastic</strong></td><td>an action's <em>effect</em> varies</td></tr>
+          <tr><td>fully vs <strong>partially observable</strong></td><td>how much the agent can see</td></tr>
+          <tr><td>static vs <strong>dynamic</strong></td><td>the <em>environment</em> changes on its own</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">The trap: <em>stochastic</em> is about the action, <em>dynamic</em> is about the world.</p>
+      </div>
+
+      <!-- ===== SEARCH ===== -->
+      <h2 id="cx-search">Search: one engine, five values of f</h2>
+      <div class="callout exam">
+        <div class="callout-label">Every algorithm is “expand the frontier node with smallest f”</div>
+        <table class="cmp-table">
+          <tr><th>Algorithm</th><th>f(n)</th><th>Complete?</th><th>Optimal?</th><th>Memory</th></tr>
+          <tr><td>Breadth-first</td><td>depth(n)</td><td>yes</td><td>only if all step costs equal</td><td>exponential</td></tr>
+          <tr><td>Depth-first</td><td>−depth(n)</td><td>no (infinite depth)</td><td>no</td><td><strong>linear</strong></td></tr>
+          <tr><td>Uniform-cost</td><td>g(n)</td><td>yes</td><td><strong>yes</strong></td><td>exponential</td></tr>
+          <tr><td>Greedy best-first</td><td>h(n)</td><td>no</td><td>no</td><td>exponential</td></tr>
+          <tr><td>A*</td><td>g(n) + h(n)</td><td>yes</td><td><strong>yes, if h admissible</strong></td><td>exponential</td></tr>
+        </table>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">g, h, f — and where h comes from</div>
+        <table class="cmp-table">
+          <tr><th></th><th>g(n)</th><th>h(n)</th></tr>
+          <tr><td><strong>Means</strong></td><td>cost of the path <em>already travelled</em></td><td>estimated cost <em>still to go</em></td></tr>
+          <tr><td><strong>Exact?</strong></td><td>exact — you went that way</td><td>an estimate, from outside the search</td></tr>
+          <tr><td><strong>Source</strong></td><td>summing edges as you search</td><td>straight-line distance, or a <strong>relaxation</strong> of the problem</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Admissible</strong> = never overestimates the true remaining cost, i.e. <code>h(n) ≤ h*(n)</code> for every n. A straight line can never be longer than a road, which is why the ruler heuristic is admissible by construction. <strong>Admissibility is what makes A* optimal</strong> — lose it and A* can return a worse path.</p>
+        <p style="margin:10px 0 0 0;"><strong>h = 0 everywhere is admissible</strong> (and turns A* into UCS). A <em>more informed</em> heuristic is one that is larger while still admissible — it expands fewer nodes.</p>
+      </div>
+
+      <!-- ===== ADVERSARIAL ===== -->
+      <h2 id="cx-adv">Adversarial search</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definitions</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Minimax value</strong> — the value of a node assuming <em>both</em> players play optimally: MAX takes the max of its children, MIN the min.</li>
+          <li><strong>Ply</strong> — one move by one player. A “two-ply” lookahead is one move each.</li>
+          <li><strong>Evaluation function</strong> — a heuristic estimate of a state's value, used when you cut off before a terminal state.</li>
+          <li><strong>α</strong> — the best value MAX can already guarantee on the path so far. Only ever <em>increases</em>.</li>
+          <li><strong>β</strong> — the best value MIN can already guarantee. Only ever <em>decreases</em>.</li>
+          <li><strong>The cut rule</strong> — prune when <strong>β ≤ α</strong>.</li>
+        </ul>
+        <p style="margin:12px 0 0 0;"><strong>Alpha-beta returns exactly the same value as minimax</strong> — it is a pruning optimisation, never an approximation. With perfect move ordering it can search roughly twice as deep in the same time.</p>
+      </div>
+
+      <!-- ===== CSP ===== -->
+      <h2 id="cx-csp">Constraint satisfaction</h2>
+      <div class="callout exam">
+        <div class="callout-label">The definitions</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>CSP</strong> — a set of <strong>variables</strong>, a <strong>domain</strong> of values for each, and <strong>constraints</strong>.</li>
+          <li><strong>A constraint</strong> = a <strong>scope</strong> (which variables it involves) + a <strong>relation</strong> (which combinations are legal).</li>
+          <li><strong>Solution</strong> — a <em>complete</em> and <em>consistent</em> assignment.</li>
+          <li><strong>Constraint graph</strong> — variables are nodes, constraints are edges.</li>
+          <li><strong>Arc consistency</strong> — X→Y is consistent when <em>every</em> value in X's domain has <em>some</em> legal partner in Y's.</li>
+        </ul>
+        <p style="margin:12px 0 0 0;">Unlike Week 1 search, <strong>the path is irrelevant</strong> — only the final assignment is the answer.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The pair of names one letter apart</div>
+        <table class="cmp-table">
+          <tr><th></th><th>Most constrain<em>ed</em> variable</th><th>Most constrain<em>ing</em> variable</th></tr>
+          <tr><td><strong>Name</strong></td><td><strong>MRV</strong></td><td><strong>degree heuristic</strong></td></tr>
+          <tr><td><strong>Looks at</strong></td><td>its own domain — fewest values left</td><td>its neighbours — most constraints on <em>unassigned</em> variables</td></tr>
+          <tr><td><strong>Role</strong></td><td>the primary rule</td><td>the <strong>tie-breaker</strong> for MRV</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">On Australia every region starts with 3 colours, so MRV ties seven ways and <strong>degree picks SA, which touches 5 others</strong>.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Forward checking vs AC-3</div>
+        <table class="cmp-table">
+          <tr><th></th><th>Forward checking</th><th>AC-3</th></tr>
+          <tr><td><strong>How far it looks</strong></td><td>one step — the assigned variable's immediate neighbours</td><td>the whole graph, propagating repeatedly to a fixpoint</td></tr>
+          <tr><td><strong>Detects failure</strong></td><td>when a neighbour's domain empties</td><td>earlier — catches dead ends forward checking misses</td></tr>
+          <tr><td><strong>Cost</strong></td><td>cheap</td><td>more work per step</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">Neither changes the set of solutions. <strong>All the CSP heuristics are pure accelerators</strong> — turn them all off and backtracking still finds the same answers, only slower.</p>
+      </div>
+
+      <!-- ===== PLANNING ===== -->
+      <h2 id="cx-plan">Planning</h2>
+      <div class="callout exam">
+        <div class="callout-label">The vocabulary</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Closed-world assumption</strong> — anything not stated in the state is <strong>false</strong>. This is why you only list what is true.</li>
+          <li><strong>Action schema</strong> — parameters, <strong>precondition</strong>, <strong>effect</strong> (add list and delete list).</li>
+          <li><strong>Fluent</strong> — a numeric quantity that actions change, as opposed to a boolean predicate.</li>
+          <li><strong>Durative action</strong> — has a duration, with conditions <em>at start</em>, <em>over all</em>, <em>at end</em>.</li>
+          <li><strong>Forward chaining</strong> — search forward from the initial state, applying applicable actions. It is A* with a planning heuristic.</li>
+          <li><strong>Relaxation</strong> — solve an easier problem and use its cost as <em>h</em>. The RPG's relaxation is <strong>ignore all delete effects</strong>.</li>
+        </ul>
+        <p style="margin:12px 0 0 0;">The RPG heuristic is <strong>h = Σ|O<sub>i</sub>|</strong>, the total number of actions in the extracted relaxed plan. Because deletes are ignored, fact layers only ever grow, so the graph reaches a fixpoint.</p>
+      </div>
+
+      <!-- ===== MDP ===== -->
+      <h2 id="cx-mdp">MDPs and value iteration</h2>
+      <div class="callout exam">
+        <div class="callout-label">The pieces</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Transition model</strong> <code>P(s′ | s, a)</code> — where you actually end up. <strong>Markov</strong> = it depends only on the current state, not the history.</li>
+          <li><strong>Policy π(s)</strong> — an action for <em>every</em> state. Stochastic worlds need a policy, not a plan.</li>
+          <li><strong>Discount factor γ</strong> — how much a future reward is worth now. γ &lt; 1 keeps infinite sums finite.</li>
+          <li><strong>Bellman update</strong> — <code>U(s) ← R(s) + γ·max<sub>a</sub> Σ<sub>s′</sub> P(s′|s,a)·U(s′)</code>.</li>
+          <li><strong>Value iteration</strong> — apply the Bellman update to every state, repeatedly, until it stops changing.</li>
+          <li><strong>Policy extraction</strong> — once U has converged, π(s) = the arg max of that same expression.</li>
+        </ul>
+        <p style="margin:12px 0 0 0;">Stopping rule: iterate until the largest change δ satisfies <strong>δ &lt; ε(1 − γ)/γ</strong>.</p>
+        <p style="margin:10px 0 0 0;"><strong>The reward function is the specification.</strong> Week 1's value alignment problem, in numbers — set R too negative and the optimal policy is to die quickly.</p>
+      </div>
+
+      <!-- ===== ML ===== -->
+      <h2 id="cx-ml">Machine learning: the setting and the metrics</h2>
+      <div class="callout exam">
+        <div class="callout-label">Supervised vs unsupervised vs reinforcement</div>
+        <table class="cmp-table">
+          <tr><th></th><th>Supervised</th><th>Unsupervised</th><th>Reinforcement</th></tr>
+          <tr><td><strong>Given</strong></td><td>data <em>with labels</em></td><td>data, <em>no labels</em></td><td>no data — you act and collect rewards</td></tr>
+          <tr><td><strong>Goal</strong></td><td>predict labels for new points</td><td>find structure</td><td>maximise long-run reward</td></tr>
+          <tr><td><strong>Weeks</strong></td><td>5, 7</td><td>6</td><td>8</td></tr>
+        </table>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Train / validation / test — and why validation exists</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Training set</strong> — fits the parameters.</li>
+          <li><strong>Validation set</strong> — chooses between models (degree, K, hyperparameters).</li>
+          <li><strong>Test set</strong> — used <strong>once</strong>, to report performance.</li>
+        </ul>
+        <p style="margin:12px 0 0 0;">Selecting on the test set makes it a training set, and the number you report stops meaning anything. That is the whole reason there are three.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Classification metrics</div>
+        <table class="cmp-table">
+          <tr><th>Metric</th><th>Formula</th><th>Answers</th></tr>
+          <tr><td><strong>Accuracy</strong></td><td>(TP + TN) / all</td><td>how often am I right? — useless on imbalanced data</td></tr>
+          <tr><td><strong>Precision</strong></td><td>TP / (TP + FP)</td><td>when I say yes, how often am I right?</td></tr>
+          <tr><td><strong>Recall</strong></td><td>TP / (TP + FN)</td><td>of the real yeses, how many did I catch?</td></tr>
+          <tr><td><strong>F1</strong></td><td>2·P·R / (P + R)</td><td>harmonic mean — punishes a bad one of the pair</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>The accuracy trap:</strong> a disease affecting 1 in 1000, always predicting “no”, scores 99.9% accuracy with recall 0.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Under- and overfitting</div>
+        <table class="cmp-table">
+          <tr><th></th><th>Underfitting</th><th>Overfitting</th></tr>
+          <tr><td><strong>Training error</strong></td><td>high</td><td><strong>low</strong></td></tr>
+          <tr><td><strong>Validation error</strong></td><td>high</td><td><strong>high</strong></td></tr>
+          <tr><td><strong>Cause</strong></td><td>model too simple</td><td>model too complex, memorising noise</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">The tell for overfitting is the <strong>gap</strong>, not the level.</p>
+      </div>
+
+      <!-- ===== CLUSTERING ===== -->
+      <h2 id="cx-clu">Clustering</h2>
+      <div class="callout exam">
+        <div class="callout-label">K-means and hierarchical</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>K-means</strong> — pick K initial centres; assign each point to the nearest centre (<strong>ties to the lowest index</strong>); recompute each centre as the mean of its points; repeat until the clusters stop changing.</li>
+          <li><strong>Within-cluster variance</strong> — the quality measure; lower total is better.</li>
+          <li><strong>K-means finds a local optimum only</strong> — a different initialisation can give a different, worse answer.</li>
+          <li><strong>Hierarchical</strong> — start with every point its own cluster, repeatedly merge the two closest, until one remains.</li>
+          <li><strong>Dendogram</strong> — the merge tree; cut it at a height to choose K. A tall vertical gap is a good place to cut.</li>
+        </ul>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Linkage — the distinction that gets examined</div>
+        <table class="cmp-table">
+          <tr><th>Linkage</th><th>Distance between clusters</th><th>Guarantees</th></tr>
+          <tr><td><strong>Single</strong></td><td>the <strong>closest</strong> pair</td><td>connectivity — chains of short hops; prone to <em>chaining</em></td></tr>
+          <tr><td><strong>Complete</strong></td><td>the <strong>furthest</strong> pair</td><td>bounds the cluster's <strong>diameter</strong> — every pair is within the threshold</td></tr>
+          <tr><td><strong>Average</strong></td><td>the mean over all cross pairs</td><td>compromise; guarantees nothing about the worst pair</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>L1</strong> (Manhattan) = Σ|differences|; <strong>L2</strong> (Euclidean) = √(Σ differences²). <strong>L2 ≤ L1 always</strong> — a free sanity check.</p>
+      </div>
+
+      <!-- ===== REGRESSION / TREES ===== -->
+      <h2 id="cx-sup">Regression and decision trees</h2>
+      <div class="callout exam">
+        <div class="callout-label">Linear regression</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>ŷ = β₀ + β₁x</strong>; the <strong>residual</strong> is <code>ε = y − ŷ</code>; we minimise <strong>SSE = Σε²</strong>.</li>
+          <li><strong>“Linear” refers to the parameters β, not the variables x</strong> — so polynomial regression is a special case of linear regression.</li>
+          <li><strong>Theorem 7.3</strong> gives a closed form from five numbers: n, Σx, Σy, Σx², Σxy. Rare in ML — most methods cannot be proved optimal.</li>
+          <li><strong>Normality of the errors is not used</strong> in that proof, only for further properties of the estimators.</li>
+          <li>At the optimum the <strong>residuals sum to zero</strong> — the cheapest possible check on an answer.</li>
+        </ul>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Decision trees</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Gini(v) = Σ pᵢ(1 − pᵢ)</strong>, equivalently <strong>1 − Σpᵢ²</strong>. Zero ⟺ pure; maximum <strong>1 − 1/k</strong> when all classes are equal.</li>
+          <li><strong>Gini-Split(A) = Σⱼ (nⱼ/n)·Gini(vⱼ)</strong> — a <strong>weighted</strong> average over the children.</li>
+          <li>Choose by <strong>arg min</strong>, at <em>every</em> node, not just the root. Different branches may split on different features.</li>
+          <li>Node label = <strong>majority class</strong>, ties to the lowest index; class order is alphabetical.</li>
+          <li><strong>Left branch = True</strong> in a binary tree; label the arrows in a non-binary one.</li>
+        </ul>
+      </div>
+
+      <!-- ===== RL ===== -->
+      <h2 id="cx-rl">Reinforcement learning</h2>
+      <div class="callout exam">
+        <div class="callout-label">The two quantities</div>
+        <table class="cmp-table">
+          <tr><th></th><th>q⋆(a)</th><th>Q<sub>t</sub>(a)</th></tr>
+          <tr><td><strong>Is</strong></td><td>the <strong>true</strong> expected reward, <code>E[R<sub>t</sub> | A<sub>t</sub> = a]</code></td><td>your <strong>estimate</strong> of it</td></tr>
+          <tr><td><strong>Known to the agent?</strong></td><td>never</td><td>yes — it is built from experience</td></tr>
+          <tr><td><strong>Changes over time?</strong></td><td>no (stationary assumption)</td><td>yes, that is the point</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Q<sub>t</sub>(a)</strong> averages the rewards a paid on steps <strong>strictly before t</strong>. Q₁(a) = 0, and 0 whenever the action has never been taken.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The three selection methods</div>
+        <table class="cmp-table">
+          <tr><th>Method</th><th>Rule</th><th>Tie-break</th></tr>
+          <tr><td><strong>Random</strong></td><td>Pr(A<sub>t</sub> = aᵢ) = 1/k</td><td>—</td></tr>
+          <tr><td><strong>Greedy</strong></td><td>arg max<sub>a</sub> Q<sub>t</sub>(a), with Q₁ = 0</td><td><strong>randomise</strong> among the maxima</td></tr>
+          <tr><td><strong>ε-greedy</strong></td><td>random with probability ε, greedy with probability 1 − ε</td><td>as greedy</td></tr>
+          <tr><td><strong>UCB</strong></td><td>arg max<sub>a</sub> [ Q<sub>t</sub>(a) + c√(ln t / N<sub>t</sub>(a)) ]</td><td><strong>lowest index</strong></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>The two tie rules are different</strong> — greedy randomises, UCB takes the lowest index. And <strong>Pr(greedy action) = 1 − ε + ε/k</strong>, not 1 − ε, because the random branch can reach it too.</p>
+        <p style="margin:10px 0 0 0;"><strong>ε = 0 gives greedy; ε = 1 gives random.</strong> In UCB, <strong>N = 0 counts as +∞</strong>, so the first k steps are forced, and <strong>c = 0 collapses UCB into greedy</strong>.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Bandits vs MDPs — the two differences</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>The reward function is unknown</strong> and must be estimated.</li>
+          <li><strong>There is only one state</strong> — whichever action you take you return to the same choice. Richer RL estimates <strong>q⋆(s, a)</strong> per state-action pair.</li>
+        </ul>
+      </div>
+
+      <!-- ===== ETHICS ===== -->
+      <h2 id="cx-eth">Ethics: the lists that get asked</h2>
+      <div class="callout exam">
+        <div class="callout-label">The five key questions — use them as headings</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>How is AI applied? Who has access? Who benefits?</li>
+          <li>What are the harms? Who is harmed?</li>
+          <li>How does bias manifest, and why does it arise?</li>
+          <li>Who is responsible?</li>
+          <li>How do we minimise the harms?</li>
+        </ol>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The two taxonomies to have by heart</div>
+        <table class="cmp-table">
+          <tr><th>Seven harms</th><th>Five causes of bias</th></tr>
+          <tr><td>
+            human agency · accountability · safety and wellbeing · privacy · fairness and dignity · societal · environmental
+          </td><td>
+            <strong>world</strong> (not the developer's fault) · representation ★ · measurement ★ · algorithm ★ · evaluation ★
+          </td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Allocative</strong> harms are about who <em>gets</em> things (opportunities, resources, quality-of-service); <strong>representational</strong> harms are about how people are <em>portrayed</em> (stereotyping, demeaning, erasing, alienating, loss of self-identification, essentialist categories).</p>
+        <p style="margin:10px 0 0 0;"><strong>Direct discrimination = disparate treatment</strong> (because of an attribute); <strong>indirect = disparate impact</strong> (despite the attribute not being used). Removing the attribute stops the first and not the second.</p>
+      </div>
+
+      <!-- ===== CROSS ===== -->
+      <h2 id="cx-cross">The distinctions most likely to be tested</h2>
+      <div class="callout warn">
+        <div class="callout-label">Pairs that look alike and are not</div>
+        <table class="cmp-table">
+          <tr><th>This</th><th>Not this</th><th>The difference</th></tr>
+          <tr><td>most constrain<em>ed</em> (MRV)</td><td>most constrain<em>ing</em> (degree)</td><td>own domain vs effect on neighbours</td></tr>
+          <tr><td>stochastic</td><td>dynamic</td><td>the action's effect vs the environment changing</td></tr>
+          <tr><td>greedy tie → randomise</td><td>UCB tie → lowest index</td><td>two different rules, one module</td></tr>
+          <tr><td>over-delegation (agency)</td><td>deskilling (societal)</td><td>this decision now vs the profession's capability</td></tr>
+          <tr><td>precision</td><td>recall</td><td>of my yeses vs of the real yeses</td></tr>
+          <tr><td>reweighting</td><td>resampling</td><td>weight in the loss vs how often it is drawn</td></tr>
+          <tr><td>single linkage</td><td>complete linkage</td><td>closest pair vs furthest pair</td></tr>
+          <tr><td>allocative harm</td><td>representational harm</td><td>who gets things vs how people are shown</td></tr>
+          <tr><td>anonymization</td><td>differential privacy</td><td>hides content vs hides <em>membership</em></td></tr>
+          <tr><td>h in Week 1</td><td>heuristics in Week 2</td><td>an estimate that can change the answer vs an ordering rule that cannot</td></tr>
+        </table>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Threads that run through the whole module</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Everything is search.</strong> Minimax is a DFS. Backtracking is a DFS. Forward chaining is A*. Only the state and the successor rule change.</li>
+          <li><strong>Relaxation is the general recipe for a heuristic.</strong> Straight-line distance (W1) and “ignore delete effects” (W3) are the same trick.</li>
+          <li><strong>Fail first, cheaply.</strong> Alpha-beta's β ≤ α, forward checking's empty domain and MRV are all the same move.</li>
+          <li><strong>When the world stops cooperating the answer changes shape.</strong> Deterministic ⇒ a plan. Stochastic ⇒ a policy. Adversarial ⇒ a strategy assuming the worst. Unknown rewards ⇒ exploration.</li>
+          <li><strong>Guarantees give way to measurement.</strong> A*, alpha-beta, AC-3 and value iteration come with proofs; machine learning substitutes held-out evaluation.</li>
+          <li><strong>The objective is the specification.</strong> The MDP reward function, the regression loss, the fairness function — each one is somebody deciding what “good” means.</li>
+        </ul>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Now go and be tested on it.</p>
+    </section>

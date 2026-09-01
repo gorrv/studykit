@@ -1,0 +1,27 @@
+<section id="mock" class="week-section">
+
+      <div class="week-header">
+        <div class="week-eyebrow">Practice · Auto-marked</div>
+        <h1>Mock Exam</h1>
+        <div class="week-subtitle">10 questions in the real quiz style — select-one and select-all-that-apply</div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">How this works</div>
+        These questions mimic the real quiz format: mostly <strong>"select one or more"</strong> (tick <em>all</em> correct — and only the correct — options), with some <strong>"select one"</strong>. Each is worth 5 marks. Click options to select, then <strong>Check</strong> to mark and reveal a full explanation. There's a bank of <strong>120+ questions</strong> spanning every week — each attempt draws a <strong>random 10</strong>, and the button below gives you a fresh random set. The distractors are deliberately tricky, just like the real thing!
+      </div>
+
+      <div class="mock-controls">
+        <div>
+          <div class="mock-score" id="mock-score">0 / 50</div>
+          <div class="mock-score-detail" id="mock-detail">0 of 10 answered</div>
+        </div>
+        <div class="mock-progress-bar"><div class="mock-progress-fill" id="mock-progress"></div></div>
+        <button class="tool-btn" onclick="resetMock()">↻ New random questions</button>
+      </div>
+
+      <div id="mock-container"></div>
+
+      <p style="margin-top:40px; padding-top:20px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Scoring note: for "select all that apply", you get the 5 marks only if you tick <em>every</em> correct option and <em>no</em> incorrect ones — the same all-or-nothing rule most quiz engines use. Re-attempt anything you miss!</p>
+
+    </section>

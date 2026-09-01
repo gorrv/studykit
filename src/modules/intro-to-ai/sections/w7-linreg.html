@@ -1,0 +1,237 @@
+<section id="w7-linreg" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 07 · Part 1 · Supervised Learning</div>
+        <h1>Linear Regression</h1>
+        <div class="week-subtitle">the one algorithm in this course whose optimum you can prove</div>
+      </div>
+      <!-- ===== SUPERVISED ===== -->
+      <h2 id="r-super">Supervised learning, and the two tasks inside it</h2>
+      <div class="callout exam">
+        <div class="callout-label">The setting</div>
+        In <strong>supervised</strong> learning we <strong>capture the patterns of a set of training data <em>with labels</em>, in order to predict new samples</strong>.
+        <p style="margin:10px 0 0 0;">Take predicting the value of a house. We have data on several houses — size, number of bedrooms, and so on — <strong>together with their market value</strong>. The challenge is an algorithm that learns how these features should be combined to predict the value of a given, often <em>unseen</em>, house.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">Regression vs classification — the split that decides which algorithm you reach for</div>
+        <table class="cmp-table">
+          <tr><th></th><th>Regression</th><th>Classification</th></tr>
+          <tr><td><strong>What you predict</strong></td><td>a <strong>continuous number</strong></td><td>which of a fixed set of <strong>classes</strong> C a point belongs to</td></tr>
+          <tr><td><strong>Example in this chapter</strong></td><td>the value of a house; y at x = 5</td><td>credit risk ∈ {High, Low, Medium}</td></tr>
+          <tr><td><strong>Algorithm covered</strong></td><td><strong>Linear Regression</strong></td><td><strong>Decision Trees</strong></td></tr>
+          <tr><td><strong>Error measured by</strong></td><td>SSE / MSE / MAE (Week 5)</td><td>accuracy, precision, recall, F1 (Week 5)</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">Both are <em>supervised</em>: both need labels. The contrast with Week 6 is that clustering had none.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Where the boundary is not where you expect</div>
+        A decision <em>tree</em> can predict continuous values too — that is <strong>Decision Tree Regression</strong>, and it is <strong>outside the scope of this course</strong>. What <em>is</em> in scope is the reverse direction: <strong>continuous values can appear as attributes</strong> of the data points in a classification problem. Salary, for instance, is a perfectly good feature for predicting credit risk; you split on it with a test like <code>Salary ≤ 30000</code>. That is why every node in the course's figures is labelled with a <code>≤</code> test rather than a bare feature name.
+      </div>
+      <!-- ===== MODELLING THE DATA ===== -->
+      <h2 id="r-model">Modelling the data: a line plus noise</h2>
+      <div class="callout">
+        <div class="callout-label">Equation (7.1)</div>
+        Before fitting anything, we say where the data <em>came from</em>. Figure 7.1 shows samples drawn from a function but with some error:
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:16px; margin:12px 0;">y = ½x + ε &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(7.1)</span></div>
+        <p style="margin:0;">Here <strong>ε has a normal distribution</strong>, ε ∼ N(0, 0.09). The blue points are not on the grey line, and the green dotted segments between point and line are the <strong>error</strong>, or the <strong>residual</strong>.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The regression problem, stated exactly</div>
+        <strong>Given the blue points, but <em>not</em> the grey line, how would I estimate the line?</strong>
+        <p style="margin:10px 0 0 0;">Defining a line is nothing more than defining two parameters:</p>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:16px; margin:10px 0;">ŷ = β₀ + β₁x</div>
+        <p style="margin:0;">We write <strong>ŷ</strong> rather than y to signal that these are <strong>predictions</strong>, not observed values. β₀ is the intercept; β₁ is the slope.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Three symbols that get mixed up in exam answers</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>y</strong> — the value actually observed in the data.</li>
+          <li><strong>ŷ</strong> — what the fitted line says y should be at that x.</li>
+          <li><strong>ε</strong> — the gap, <code>ε = y − ŷ</code>. Called the <em>error</em> when you are talking about the true generating process, and the <em>residual</em> when you are talking about a fitted line. The notes use both words for the same green segments.</li>
+        </ul>
+      </div>
+      <!-- ===== NORMAL ===== -->
+      <h2 id="r-normal">The normal distribution, recapped</h2>
+      <div class="callout">
+        <div class="callout-label">The two figures</div>
+        <div class="ix-canvas"><svg width="100%" viewBox="0 0 680 300" role="img" xmlns="http://www.w3.org/2000/svg"><title>Figure 7.1 and Figure 7.2</title><desc>Left: points scattered around the line y equals half x, with x equals 5 marked. Right: the bell curve of the noise at that point, centred on 2.5, with 68 percent of the area shaded between 2.2 and 2.8.</desc><defs><clipPath id="nbp"><rect x="400" y="50" width="250" height="190"/></clipPath></defs><text x="190" y="30" text-anchor="middle" font-family="IBM Plex Sans" font-size="12.5" font-weight="600" fill="var(--ink)">Figure 7.1 — the data</text><rect x="50" y="50" width="280" height="190" rx="4" fill="var(--surface-2)" stroke="var(--rule)" stroke-width="0.7"/><line x1="50" y1="240" x2="330" y2="240" stroke="var(--ink-muted)"/><line x1="50" y1="50" x2="50" y2="240" stroke="var(--ink-muted)"/><line x1="50" y1="240" x2="330" y2="67" stroke="var(--ink-muted)" stroke-width="1.5" stroke-dasharray="5 4"/><text x="300" y="80" text-anchor="end" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-muted)">y = &#189;x</text><circle cx="64.0" cy="227.9" r="3.5" fill="var(--accent)"/><circle cx="78.0" cy="218.6" r="3.5" fill="var(--accent)"/><circle cx="92.0" cy="208.9" r="3.5" fill="var(--accent)"/><circle cx="106.0" cy="210.6" r="3.5" fill="var(--accent)"/><circle cx="120.0" cy="191.6" r="3.5" fill="var(--accent)"/><circle cx="134.0" cy="184.7" r="3.5" fill="var(--accent)"/><circle cx="148.0" cy="184.7" r="3.5" fill="var(--accent)"/><circle cx="162.0" cy="165.7" r="3.5" fill="var(--accent)"/><circle cx="176.0" cy="157.1" r="3.5" fill="var(--accent)"/><circle cx="190.0" cy="158.8" r="3.5" fill="var(--accent)"/><circle cx="204.0" cy="139.8" r="3.5" fill="var(--accent)"/><circle cx="218.0" cy="141.5" r="3.5" fill="var(--accent)"/><circle cx="232.0" cy="122.5" r="3.5" fill="var(--accent)"/><circle cx="246.0" cy="124.3" r="3.5" fill="var(--accent)"/><circle cx="260.0" cy="105.3" r="3.5" fill="var(--accent)"/><circle cx="274.0" cy="98.4" r="3.5" fill="var(--accent)"/><circle cx="288.0" cy="96.6" r="3.5" fill="var(--accent)"/><circle cx="302.0" cy="81.1" r="3.5" fill="var(--accent)"/><circle cx="316.0" cy="70.7" r="3.5" fill="var(--accent)"/><line x1="190" y1="240" x2="190" y2="152" stroke="var(--accent-2)" stroke-width="1.5" stroke-dasharray="3 3"/><text x="190" y="256" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--accent-2)">x = 5</text><text x="196" y="150" font-family="IBM Plex Mono" font-size="11" fill="var(--accent-2)">y &#8776; 2.5</text><text x="525" y="30" text-anchor="middle" font-family="IBM Plex Sans" font-size="12.5" font-weight="600" fill="var(--ink)">Figure 7.2 — the noise at x = 5</text><rect x="400" y="50" width="250" height="190" rx="4" fill="var(--surface-2)" stroke="var(--rule)" stroke-width="0.7"/><path d="M 483.3 240 L 483.3 130.8 L 485.4 125.4 L 487.5 119.9 L 489.6 114.6 L 491.7 109.3 L 493.8 104.1 L 495.8 99.1 L 497.9 94.3 L 500.0 89.7 L 502.1 85.3 L 504.2 81.2 L 506.2 77.3 L 508.3 73.8 L 510.4 70.7 L 512.5 67.9 L 514.6 65.5 L 516.7 63.6 L 518.8 62.0 L 520.8 60.9 L 522.9 60.2 L 525.0 60.0 L 527.1 60.2 L 529.2 60.9 L 531.2 62.0 L 533.3 63.6 L 535.4 65.5 L 537.5 67.9 L 539.6 70.7 L 541.7 73.8 L 543.8 77.3 L 545.8 81.2 L 547.9 85.3 L 550.0 89.7 L 552.1 94.3 L 554.2 99.1 L 556.2 104.1 L 558.3 109.3 L 560.4 114.6 L 562.5 119.9 L 564.6 125.4 L 566.7 130.8 L 566.7 240 Z" fill="var(--accent)" opacity="0.24"/><path d="M 400.0 238.0 L 402.1 237.7 L 404.2 237.3 L 406.2 236.9 L 408.3 236.4 L 410.4 235.9 L 412.5 235.3 L 414.6 234.6 L 416.7 233.9 L 418.8 233.0 L 420.8 232.1 L 422.9 231.0 L 425.0 229.9 L 427.1 228.6 L 429.2 227.2 L 431.2 225.7 L 433.3 224.0 L 435.4 222.2 L 437.5 220.2 L 439.6 218.0 L 441.7 215.6 L 443.8 213.1 L 445.8 210.4 L 447.9 207.5 L 450.0 204.4 L 452.1 201.1 L 454.2 197.6 L 456.2 193.9 L 458.3 190.0 L 460.4 185.9 L 462.5 181.6 L 464.6 177.1 L 466.7 172.4 L 468.8 167.6 L 470.8 162.7 L 472.9 157.6 L 475.0 152.4 L 477.1 147.1 L 479.2 141.7 L 481.2 136.3 L 483.3 130.8 L 485.4 125.4 L 487.5 119.9 L 489.6 114.6 L 491.7 109.3 L 493.8 104.1 L 495.8 99.1 L 497.9 94.3 L 500.0 89.7 L 502.1 85.3 L 504.2 81.2 L 506.2 77.3 L 508.3 73.8 L 510.4 70.7 L 512.5 67.9 L 514.6 65.5 L 516.7 63.6 L 518.8 62.0 L 520.8 60.9 L 522.9 60.2 L 525.0 60.0 L 527.1 60.2 L 529.2 60.9 L 531.2 62.0 L 533.3 63.6 L 535.4 65.5 L 537.5 67.9 L 539.6 70.7 L 541.7 73.8 L 543.8 77.3 L 545.8 81.2 L 547.9 85.3 L 550.0 89.7 L 552.1 94.3 L 554.2 99.1 L 556.2 104.1 L 558.3 109.3 L 560.4 114.6 L 562.5 119.9 L 564.6 125.4 L 566.7 130.8 L 568.8 136.3 L 570.8 141.7 L 572.9 147.1 L 575.0 152.4 L 577.1 157.6 L 579.2 162.7 L 581.2 167.6 L 583.3 172.4 L 585.4 177.1 L 587.5 181.6 L 589.6 185.9 L 591.7 190.0 L 593.8 193.9 L 595.8 197.6 L 597.9 201.1 L 600.0 204.4 L 602.1 207.5 L 604.2 210.4 L 606.2 213.1 L 608.3 215.6 L 610.4 218.0 L 612.5 220.2 L 614.6 222.2 L 616.7 224.0 L 618.8 225.7 L 620.8 227.2 L 622.9 228.6 L 625.0 229.9 L 627.1 231.0 L 629.2 232.1 L 631.2 233.0 L 633.3 233.9 L 635.4 234.6 L 637.5 235.3 L 639.6 235.9 L 641.7 236.4 L 643.8 236.9 L 645.8 237.3 L 647.9 237.7 L 650.0 238.0" fill="none" stroke="var(--accent)" stroke-width="2.4" clip-path="url(#nbp)"/><line x1="525.0" y1="240" x2="525.0" y2="60.0" stroke="var(--accent-2)" stroke-width="1.5" stroke-dasharray="4 3"/><text x="525.0" y="52.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="var(--accent-2)">&#181; = 2.5</text><line x1="483.3" y1="240" x2="483.3" y2="130.8" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3"/><line x1="566.7" y1="240" x2="566.7" y2="130.8" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3"/><text x="483.3" y="256" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-muted)">2.2</text><text x="566.7" y="256" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-muted)">2.8</text><text x="525.0" y="200" text-anchor="middle" font-family="IBM Plex Sans" font-size="14" font-weight="600" fill="var(--accent)">68%</text><text x="525.0" y="218" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent)">&#181; &#177; &#963;</text><line x1="400" y1="240" x2="650" y2="240" stroke="var(--ink-muted)"/></svg></div>
+        <p style="margin:12px 0 0 0;"><strong>Left</strong> is the data: dots scattered around the line <code>y = &#189;x</code>. <strong>Right</strong> is a close-up of the scatter at one x value — at <code>x = 5</code> the line gives 2.5, and the noise spreads y around it in a bell shape.</p>
+        <p style="margin:10px 0 0 0;"><strong>&#181; = 2.5</strong> is where the bell is centred. <strong>&#963; = 0.3</strong> is how wide it is. The shaded band is <strong>&#181; &#177; &#963;</strong>, which always holds about <strong>68%</strong> of the area &mdash; whatever &#181; and &#963; happen to be.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">Figure 7.2, in words</div>
+        The curve in Figure 7.2 has <strong>mean µ = 2.5</strong> and <strong>standard deviation σ = 0.3</strong>, so by definition the <strong>variance is σ² = 0.09</strong>. We write normal distributions as <strong>N(µ, σ²)</strong> — the second argument is the <em>variance</em>, not the standard deviation. Therefore
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:10px 0;">f(5) ∼ N(2.5, 0.09)</div>
+        <p style="margin:0;">where f(5) denotes <strong>the distribution of y when x = 5</strong>. That is Figure 7.2 matching the middle bell of Figure 7.1 on purpose: at x = 5 the line y = ½x gives 2.5, and the noise spreads y around it.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Two facts that get asked</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Normal distributions are continuous</strong>, so <strong>the chance of getting any one specific value is always zero.</strong> You can only talk about <em>intervals</em>, and the probability of landing in one is <strong>the area under the curve</strong> over that interval.</li>
+          <li>The probability of a value between <strong>µ − σ and µ + σ</strong> — here 2.2 to 2.8 — is <strong>approximately 68%</strong>. That number does not depend on µ or σ, which is exactly why σ is worth quoting.</li>
+        </ul>
+      </div>
+      <!-- ===== NORMAL TOOL ===== -->
+      <h2 id="r-ntool">Tool · The normal curve behind ε</h2>
+      <div class="tool" data-run="runNorm">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>µ, σ, and the area you are actually allowed to ask about</h3></div>
+        <p class="tool-desc"><strong>Drag µ and σ and watch the ±1σ figure refuse to move off 68%.</strong> The second pair of sliders sets an arbitrary interval in units of σ, and the panel gives you its exact area — the only kind of probability a continuous distribution has to offer.</p>
+        <div class="tool-controls"><button class="tool-btn" onclick="runNorm()">Draw</button></div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="nm-output" class="tool-output"></div>
+      </div>
+      <!-- ===== THE EXAMPLE ===== -->
+      <h2 id="r-example">The worked example — Table 7.1</h2>
+      <div class="callout">
+        <div class="callout-label">The data</div>
+        <table class="cmp-table" style="max-width:220px;">
+          <tr><th>x</th><th>y</th></tr>
+          <tr><td>−1</td><td>2</td></tr>
+          <tr><td>0</td><td>0</td></tr>
+          <tr><td>2</td><td>0</td></tr>
+          <tr><td>5</td><td><strong>?</strong></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">Three points, and we want the line that best approximates them — and then the best value at <strong>x = 5</strong>. The notes stress the point of the exercise: <strong>we want to be able to find it “by hand”.</strong></p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Step 1 — one residual per point</div>
+        We minimise the <strong>sum of the squares</strong> of the residuals. For x = −1, y = 2 we have <code>2 = β₀ + β₁·(−1) + ε₁</code>, so:
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; line-height:2.1; margin:10px 0 0 14px;">
+          ε₁² = (2 − β₀ + β₁)²<br>
+          ε₂² = (0 − β₀)²<br>
+          ε₃² = (0 − β₀ − 2β₁)²
+        </div>
+        <p style="margin:10px 0 0 0;">Notice the <strong>sign flip on the first line</strong>: <code>−β₁xᵢ</code> with xᵢ = −1 becomes <code>+β₁</code>. This is where most by-hand attempts go wrong.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Step 2 — add them up and collect</div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; line-height:2; margin:4px 0 0 14px;">
+          SSE = (2 − β₀ + β₁)² + (0 − β₀)² + (0 − β₀ − 2β₁)²<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong>4 − 4β₀ + 4β₁ + 3β₀² + 5β₁² + 2β₀β₁</strong>
+        </div>
+        <p style="margin:12px 0 0 0;">There are two routes from here to the minimum, and which one you take is “down to how much calculus you have seen in school”:</p>
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Option 1 — partial derivatives.</strong> Take ∂SSE/∂β₀ and ∂SSE/∂β₁, set both to zero. (If you go this way you can jump straight to the answers.)</li>
+          <li><strong>Option 2 — parabola vertices.</strong> No calculus needed. This is the route the notes take, and it is the one worth being able to reproduce.</li>
+        </ul>
+      </div>
+      <!-- ===== BY HAND ===== -->
+      <h2 id="r-hand">Option 2 in full — minimising without calculus</h2>
+      <div class="callout">
+        <div class="callout-label">Step 3 — freeze one β and you are left with a parabola</div>
+        <strong>If we make β₁ constant, SSE is a function of β₀ that happens to be a parabola</strong> — call it g(β₀). Same in the other direction for h(β₁). Written in the shape <code>f(x) = ax² + bx + c</code>, they are the same six terms sorted differently:
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; line-height:2.2; margin:10px 0 0 14px;">
+          g(β₀) = 3β₀² + (−4 + 2β₁)β₀ + (4 + 4β₁ + 5β₁²)<br>
+          h(β₁) = 5β₁² + (4 + 2β₀)β₁ + (4 − 4β₀ + 3β₀²)
+        </div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Step 4 — a parabola is lowest at x = −b/2a</div>
+        For each β₁ there is a parabola g(β₀) whose minimum we can write down, and vice versa:
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:14.5px; line-height:2.4; margin:10px 0 0 14px;">
+          β̂₀ = (4 − 2β₁) / 6 &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(7.2)</span><br>
+          β̂₁ = (−4 − 2β₀) / 10 &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(7.3)</span>
+        </div>
+        <p style="margin:12px 0 0 0;"><strong>Both β² terms have vanished</strong>, so this is now an ordinary pair of simultaneous linear equations.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Step 5 — solve the system</div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:2; margin:0 0 0 14px;">
+          6β₀ = 4 − 2β₁ &nbsp;and&nbsp; 5β₁ = −2 − β₀<br>
+          6β₀ = 4 − 2(−2 − β₀)/5 &nbsp;⟹&nbsp; 30β₀ = 24 + 2β₀ &nbsp;⟹&nbsp; 28β₀ = 24
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:15px; line-height:2.3; margin:12px 0 0 14px;">
+          β̂₀ = <strong>6/7</strong> ≈ 0.86 &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(7.4)</span><br>
+          β̂₁ = <strong>−4/7</strong> ≈ −0.57 &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(7.5)</span>
+        </div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:17px; margin:16px 0 0 0; color:var(--accent-3);">ŷ = −(4/7)x + 6/7 &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(7.6)</span></div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Two small slips in the printed notes — worth knowing so they do not confuse you</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>Equation (7.6) is introduced as “the best fit line in <strong>Figure 7.1</strong>”. It is the best fit line of <strong>Figure 7.3</strong> — Figure 7.1 is the y = ½x sampling picture, whose line has a <em>positive</em> slope.</li>
+          <li>Equation (7.2) is written with a tilde, β̃₀, in the line above and a hat, β̂₀, in the equation itself. They mean the same thing: <strong>the minimising value</strong>.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">The mathematics is right; only the cross-reference is off. β̂₀ = 6/7 and β̂₁ = −4/7 check out exactly, and the resulting SSE is <strong>8/7 ≈ 1.1429</strong>.</p>
+      </div>
+      <!-- ===== TOOL ===== -->
+      <h2 id="r-lsq">Tool · Least squares, by hand and by formula</h2>
+      <div class="tool" data-run="runLSQ">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Drag the data, watch the derivation rewrite itself</h3></div>
+        <p class="tool-desc"><strong>Drag any point; click empty space to add one; shift-click to delete.</strong> The six-step derivation underneath is the notes' Option 2 carried out on <em>your</em> points — residuals, the collected SSE, the two parabolas, the two vertex equations, the solve, and the prediction. Step through it with ▶, or turn on <em>compare my own line</em> and try to beat the least-squares SSE by hand. (You cannot. That is the point of Theorem 7.3.)</p>
+        <div class="tool-field"><label for="ls-pts">Points — one per line, <code>x y</code></label>
+          <textarea id="ls-pts" rows="4" spellcheck="false">-1 2
+0 0
+2 0</textarea></div>
+        <div class="tool-controls" style="margin-top:12px;"><button class="tool-btn" onclick="runLSQ()">Fit</button></div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="ls-output" class="tool-output"></div>
+      </div>
+      <!-- ===== FORMAL ===== -->
+      <h2 id="r-formal">The formal definitions</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition 7.1 — Linear Regression</div>
+        Let <strong>x₁, …, x<sub>n</sub> ∈ ℝ<sup>D</sup></strong> be a set of points in D dimensions and y₁, …, y<sub>n</sub> the values associated with them. In a linear regression we look for values β₀, …, β<sub>D</sub> such that
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:12px 0;">ŷ<sub>j</sub> = h(x<sub>j</sub>) = β₀ + β₁x<sub>j,1</sub> + β₂x<sub>j,2</sub> + ⋯ + β<sub>D</sub>x<sub>j,D</sub> &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(7.7)</span></div>
+        <p style="margin:0;">and that best approximate the set of points — in other words, <strong>minimise SSE (or MSE) between y₁ … y<sub>n</sub> and ŷ₁ … ŷ<sub>n</sub></strong>. This is also known as <strong>multiple linear regression</strong>.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Definition 7.2 — Simple Linear Regression</div>
+        <strong>The same, with D = 1.</strong> One feature, two parameters, and everything above applies.
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The trap in the word “linear” — this is exam material</div>
+        <strong>“Linear” refers to the parameters β<sub>i</sub>, not to the variables x<sub>i</sub>.</strong> So <strong>polynomial regression</strong>,
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">ŷ<sub>j</sub> = h(x<sub>j</sub>) = β₀ + β₁x<sub>j</sub> + β₂x<sub>j</sub>² + ⋯ + β<sub>D</sub>x<sub>j</sub><sup>D</sup></div>
+        <p style="margin:0;">— a curve, obviously — <strong>is a special case of linear regression.</strong> Treat x, x², x³ as D separate features and Definition 7.1 applies unchanged. This is also the honest answer to “why did the degree-9 curve in Week 5 still count as a <em>linear</em> model”.</p>
+      </div>
+      <!-- ===== THEOREM ===== -->
+      <h2 id="r-theorem">Theorem 7.3 — and why it is remarkable</h2>
+      <div class="callout">
+        <div class="callout-label">Why squared error at all?</div>
+        <strong>It is not set in stone.</strong> Other algorithms minimise the <em>absolute</em> error — look up <strong>Least Absolute Deviations</strong>. What is nice about SSE is that <strong>we can compute a formula that gives us the solution</strong>.
+        <p style="margin:10px 0 0 0;"><strong>This is very rare in machine learning.</strong> Not often can we actually <em>prove</em> that a method gives the best solution possible; most algorithms are useful because they work well in practice. K-means, for one, only converges to a local optimum. Linear regression hands you the global one in closed form.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Theorem 7.3 — Solution for Simple Linear Regression</div>
+        For a simple linear regression <code>yᵢ = β₁xᵢ + β₀ + εᵢ</code>, the least-squares estimates are
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; line-height:2.6; margin:12px 0;">
+          β̂₁ = ( n·Σxᵢyᵢ − (Σxᵢ)(Σyᵢ) ) / ( n·Σxᵢ² − (Σxᵢ)² )<br>
+          β̂₀ = ( (Σxᵢ²)(Σyᵢ) − (Σxᵢ)(Σxᵢyᵢ) ) / ( n·Σxᵢ² − (Σxᵢ)² )
+        </div>
+        <p style="margin:0;">Four sums and a count. Σxᵢ, Σyᵢ, Σxᵢ², Σxᵢyᵢ, and n — <strong>the entire dataset reduces to these five numbers</strong> as far as the fit is concerned.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The proof, in three lines (explicitly non-examinable)</div>
+        Differentiate SSE and set both derivatives to zero:
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:2; margin:10px 0 0 14px;">
+          ∂SSE/∂β₀ = −2 Σ (yᵢ − β₀ − β₁xᵢ) = 0<br>
+          ∂SSE/∂β₁ = −2 Σ xᵢ(yᵢ − β₀ − β₁xᵢ) = 0
+        </div>
+        <p style="margin:10px 0 0 0;">which rearrange into the two <strong>normal equations</strong></p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:2; margin:6px 0 0 14px;">
+          n·β̂₀ + β̂₁·Σxᵢ = Σyᵢ<br>
+          β̂₀·Σxᵢ + β̂₁·Σxᵢ² = Σxᵢyᵢ
+        </div>
+        <p style="margin:10px 0 0 0;">and solving that 2×2 system gives the theorem. <strong>Note what is <em>not</em> used: the normality of the errors.</strong> You need that assumption only to prove further properties of the estimators, such as unbiasedness.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">A free check on any answer you write</div>
+        The first normal equation says <code>Σyᵢ = n·β̂₀ + β̂₁Σxᵢ</code>, which is exactly the statement that <strong>the residuals sum to zero</strong> at the optimum — equivalently, that the fitted line passes through the point of means <code>(x̄, ȳ)</code>. Add your residuals up. If they do not cancel, your βs are wrong, and it takes ten seconds to find out.
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="r-key">Exam takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">What to have ready</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Supervised = labelled.</strong> Regression predicts a number; classification picks a class. Decision Tree <em>Regression</em> is out of scope, but continuous <em>features</em> in a classification tree are in.</li>
+          <li><strong>N(µ, σ²) carries the variance.</strong> σ = 0.3 ⟹ N(µ, 0.09). µ ± σ ≈ 68%. P(exactly one value) = 0 for any continuous distribution.</li>
+          <li><strong>ŷ = β₀ + β₁x</strong>; residual εᵢ = yᵢ − ŷᵢ; we minimise <strong>Σεᵢ²</strong>.</li>
+          <li><strong>Know both routes to the minimum.</strong> Partial derivatives, or freeze one β and use the vertex of a parabola at <code>−b/2a</code>. The by-hand route is the one the notes work, so it is the one likely to be asked for.</li>
+          <li><strong>Theorem 7.3 is five numbers:</strong> n, Σx, Σy, Σx², Σxy. Memorise the shape <code>β̂₁ = (nΣxy − ΣxΣy) / (nΣx² − (Σx)²)</code> and note that β̂₀ reuses the same denominator.</li>
+          <li><strong>“Linear” is about the βs.</strong> Polynomial regression is a special case of linear regression.</li>
+          <li><strong>Normality of ε is not used in the proof</strong> — only for further properties of the estimators. This is a favourite “state whether the following is true” item.</li>
+          <li><strong>Check your answer</strong> by summing the residuals; they must come to zero.</li>
+        </ul>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Part 2 turns to classification — and to trees.</p>
+    </section>

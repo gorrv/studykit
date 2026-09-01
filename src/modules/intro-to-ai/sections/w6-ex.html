@@ -1,0 +1,175 @@
+<section id="w6-ex" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 06 · Part 3 · Unsupervised Learning</div>
+      <div class="callout">
+        <div class="callout-label">Figure 6.1 &mdash; the two candidate clusterings</div>
+        <div class="ix-canvas"><svg width="100%" viewBox="0 0 680 290" role="img" xmlns="http://www.w3.org/2000/svg"><title>Figure 6.1</title><desc>Six points under two candidate clusterings; the question is which cluster p4 belongs to.</desc><rect x="50" y="50" width="270" height="190" rx="4" fill="var(--surface-2)" stroke="var(--rule)" stroke-width="0.7"/><line x1="97.2" y1="183.5" x2="126.5" y2="164.2" stroke="var(--accent)" stroke-width="1.1" opacity="0.4"/><line x1="97.2" y1="183.5" x2="155.8" y2="222.0" stroke="var(--accent)" stroke-width="1.1" opacity="0.4"/><line x1="97.2" y1="183.5" x2="185.0" y2="145.0" stroke="var(--accent)" stroke-width="1.1" opacity="0.4"/><line x1="126.5" y1="164.2" x2="155.8" y2="222.0" stroke="var(--accent)" stroke-width="1.1" opacity="0.4"/><line x1="126.5" y1="164.2" x2="185.0" y2="145.0" stroke="var(--accent)" stroke-width="1.1" opacity="0.4"/><line x1="155.8" y1="222.0" x2="185.0" y2="145.0" stroke="var(--accent)" stroke-width="1.1" opacity="0.4"/><circle cx="97.2" cy="183.5" r="6" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.4"/><text x="108.2" y="176.5" text-anchor="start" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">p1</text><circle cx="126.5" cy="164.2" r="6" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.4"/><text x="137.5" y="157.2" text-anchor="start" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">p2</text><circle cx="155.8" cy="222.0" r="6" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.4"/><text x="166.8" y="215.0" text-anchor="start" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">p3</text><circle cx="185.0" cy="145.0" r="6" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.4"/><text x="196.0" y="138.0" text-anchor="start" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">p4</text><line x1="243.5" y1="87.2" x2="272.8" y2="106.5" stroke="var(--accent-3)" stroke-width="1.1" opacity="0.4"/><circle cx="243.5" cy="87.2" r="6" fill="var(--accent-3)" stroke="var(--surface)" stroke-width="1.4"/><text x="254.5" y="80.2" text-anchor="start" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">p5</text><circle cx="272.8" cy="106.5" r="6" fill="var(--accent-3)" stroke="var(--surface)" stroke-width="1.4"/><text x="283.8" y="99.5" text-anchor="start" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">p6</text><text x="185.0" y="36.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="var(--ink)" font-weight="600">C&#771;&#8321; = {p1,p2,p3,p4}   C&#771;&#8322; = {p5,p6}</text><rect x="360" y="50" width="270" height="190" rx="4" fill="var(--surface-2)" stroke="var(--rule)" stroke-width="0.7"/><line x1="407.2" y1="183.5" x2="436.5" y2="164.2" stroke="var(--accent)" stroke-width="1.1" opacity="0.4"/><line x1="407.2" y1="183.5" x2="465.8" y2="222.0" stroke="var(--accent)" stroke-width="1.1" opacity="0.4"/><line x1="436.5" y1="164.2" x2="465.8" y2="222.0" stroke="var(--accent)" stroke-width="1.1" opacity="0.4"/><circle cx="407.2" cy="183.5" r="6" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.4"/><text x="418.2" y="176.5" text-anchor="start" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">p1</text><circle cx="436.5" cy="164.2" r="6" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.4"/><text x="447.5" y="157.2" text-anchor="start" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">p2</text><circle cx="465.8" cy="222.0" r="6" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.4"/><text x="476.8" y="215.0" text-anchor="start" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">p3</text><line x1="495.0" y1="145.0" x2="553.5" y2="87.2" stroke="var(--accent-3)" stroke-width="1.1" opacity="0.4"/><line x1="495.0" y1="145.0" x2="582.8" y2="106.5" stroke="var(--accent-3)" stroke-width="1.1" opacity="0.4"/><line x1="553.5" y1="87.2" x2="582.8" y2="106.5" stroke="var(--accent-3)" stroke-width="1.1" opacity="0.4"/><circle cx="495.0" cy="145.0" r="6" fill="var(--accent-3)" stroke="var(--surface)" stroke-width="1.4"/><text x="506.0" y="138.0" text-anchor="start" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">p4</text><circle cx="553.5" cy="87.2" r="6" fill="var(--accent-3)" stroke="var(--surface)" stroke-width="1.4"/><text x="564.5" y="80.2" text-anchor="start" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">p5</text><circle cx="582.8" cy="106.5" r="6" fill="var(--accent-3)" stroke="var(--surface)" stroke-width="1.4"/><text x="593.8" y="99.5" text-anchor="start" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-muted)">p6</text><text x="495.0" y="36.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="var(--ink)" font-weight="600">C&#770;&#8321; = {p1,p2,p3}   C&#770;&#8322; = {p4,p5,p6}</text><text x="185.0" y="268.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--accent-3)">total V = 14.75  &#8592; wins</text><text x="495.0" y="268.0" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-muted)">total V = 16.00</text></svg></div>
+        <p style="margin:12px 0 0 0;">Exercise 1 asks which of these is better. Compute V for each cluster, add them up, and the lower total wins &mdash; which settles where <strong>p4</strong> belongs.</p>
+      </div>
+        <h1>The Seven Exercises, Worked</h1>
+        <div class="week-subtitle">the notes' "Solution to Exercise N" buttons don't contain the answers — so here they are</div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Read this first</div>
+        Every answer below is <strong>worked from scratch and verified numerically</strong> against the definitions in the notes. They are not the official solutions, so if the module publishes its own, trust those — but the arithmetic here has been checked term by term, and the runs reproduce every figure in the chapter.
+        <p style="margin:10px 0 0 0;"><strong>Attempt each one before reading.</strong> The three tools in Parts 1 and 2 will mark your working: the variance calculator for Exercise 1, the K-means tracer for 2 and 3, and the hierarchical tracer for 6.</p>
+      </div>
+      <!-- ===== EX 1 ===== -->
+      <div class="exbox" id="x-1">
+        <div class="extag">Exercise 1 · within-cluster variance</div>
+        <p class="q">Recall the cluster options from Example 6.1. Either C̃₁ = {p₁,p₂,p₃,p₄} and C̃₂ = {p₅,p₆}, or Ĉ₁ = {p₁,p₂,p₃} and Ĉ₂ = {p₄,p₅,p₆}. Calculate V(C̃₁), V(C̃₂) and V(Ĉ₁). Then use V(Ĉ₂) too, to determine which of the two cluster assignments has the lower within-cluster variance.</p>
+        <p><strong>V(C̃₁), where C̃₁ = {p₁,p₂,p₃,p₄}</strong> — four points, so <strong>6 pairs</strong>, divided by <strong>4</strong>:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.95; margin-left:10px;">
+          d(p₁,p₂)² = (1−2)² + (2−3)² = 1 + 1 = &nbsp;2<br>
+          d(p₁,p₃)² = (1−3)² + (2−0)² = 4 + 4 = &nbsp;8<br>
+          d(p₁,p₄)² = (1−4)² + (2−4)² = 9 + 4 = 13<br>
+          d(p₂,p₃)² = (2−3)² + (3−0)² = 1 + 9 = 10<br>
+          d(p₂,p₄)² = (2−4)² + (3−4)² = 4 + 1 = &nbsp;5<br>
+          d(p₃,p₄)² = (3−4)² + (0−4)² = 1 + 16 = 17<br>
+          <span style="color:var(--accent);">sum = 55&nbsp;&nbsp;→&nbsp;&nbsp;V(C̃₁) = 55 / 4 = <strong>13.75</strong></span></div>
+        <p style="margin-top:14px;"><strong>V(C̃₂), where C̃₂ = {p₅,p₆}</strong> — one pair, divided by 2:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.95; margin-left:10px;">
+          d(p₅,p₆)² = (6−7)² + (7−6)² = 1 + 1 = 2<br>
+          <span style="color:var(--accent);">V(C̃₂) = 2 / 2 = <strong>1.00</strong></span></div>
+        <p style="margin-top:14px;"><strong>V(Ĉ₁), where Ĉ₁ = {p₁,p₂,p₃}</strong> — three pairs, divided by 3:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.95; margin-left:10px;">
+          2 + 8 + 10 = 20&nbsp;&nbsp;→&nbsp;&nbsp;<span style="color:var(--accent);">V(Ĉ₁) = 20 / 3 ≈ <strong>6.67</strong></span></div>
+        <p style="margin-top:14px;">And <strong>V(Ĉ₂) ≈ 9.33</strong> is given in the notes.</p>
+        <div class="ans"><span class="lbl">Answer</span>
+          <table style="margin:0 0 10px 0;">
+            <tr><th>Assignment</th><th>V of cluster 1</th><th>V of cluster 2</th><th>Total</th></tr>
+            <tr><td><strong>C̃</strong> — {p₁,p₂,p₃,p₄} / {p₅,p₆}</td><td>13.75</td><td>1.00</td><td><strong style="color:var(--accent-3);">14.75</strong></td></tr>
+            <tr><td><strong>Ĉ</strong> — {p₁,p₂,p₃} / {p₄,p₅,p₆}</td><td>6.67</td><td>9.33</td><td>16.00</td></tr>
+          </table>
+          <strong>C̃ has the lower total within-cluster variance (14.75 &lt; 16.00), so p₄ should join {p₁,p₂,p₃}.</strong>
+        </div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">Why the answer is counter-intuitive, and worth a sentence in an exam</div>
+          Look at the picture: p₄ = (4,4) is <em>closer to the centre</em> of {p₅,p₆} than to the centre of {p₁,p₂,p₃}. Ĉ₁ on its own is also far tighter than C̃₁ (6.67 vs 13.75). Yet Ĉ loses.
+          <p style="margin:10px 0 0 0;">The reason is the <strong>1/|C<sub>k</sub>| normalisation</strong>. Adding p₄ to the trio adds three new pair-terms (13 + 5 + 17 = 35) but also raises the divisor from 3 to 4. Adding it to the pair adds two terms (13 + 13 = 26) and raises the divisor only from 2 to 3, which is proportionally much worse. <strong>Dividing by the number of points, not the number of pairs, systematically favours putting the awkward point in the bigger cluster.</strong></p>
+        </div>
+      </div>
+      <!-- ===== EX 2 ===== -->
+      <div class="exbox" id="x-2">
+        <div class="extag">Exercise 2 · running K-means</div>
+        <p class="q">Consider the data points of Figure 6.1. Define K = 2 and µ₁<sup>(0)</sup> = (1,2), µ₂<sup>(0)</sup> = (6,7). What are C₁<sup>(1)</sup>, C₂<sup>(1)</sup>, µ₁<sup>(1)</sup> and µ₂<sup>(1)</sup>? What about C₁<sup>(2)</sup>, C₂<sup>(2)</sup>, µ₁<sup>(2)</sup> and µ₂<sup>(2)</sup>?</p>
+        <p><strong>Iteration 1 — squared distances to each centre</strong> (comparing squares is the same as comparing distances, and avoids square roots):</p>
+        <table style="margin:8px 0;">
+          <tr><th>Point</th><th>to µ₁ = (1,2)</th><th>to µ₂ = (6,7)</th><th>Goes to</th></tr>
+          <tr><td>p₁ = (1,2)</td><td>0</td><td>25 + 25 = 50</td><td>C₁</td></tr>
+          <tr><td>p₂ = (2,3)</td><td>1 + 1 = 2</td><td>16 + 16 = 32</td><td>C₁</td></tr>
+          <tr><td>p₃ = (3,0)</td><td>4 + 4 = 8</td><td>9 + 49 = 58</td><td>C₁</td></tr>
+          <tr style="background:var(--tint-b2);"><td><strong>p₄ = (4,4)</strong></td><td><strong>9 + 4 = 13</strong></td><td><strong>4 + 9 = 13</strong></td><td><strong>TIE → C₁</strong> (lowest index)</td></tr>
+          <tr><td>p₅ = (6,7)</td><td>25 + 25 = 50</td><td>0</td><td>C₂</td></tr>
+          <tr><td>p₆ = (7,6)</td><td>36 + 16 = 52</td><td>1 + 1 = 2</td><td>C₂</td></tr>
+        </table>
+        <div class="ans"><span class="lbl">Answer — iteration 1</span>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1.9;">
+            C₁<sup>(1)</sup> = {p₁, p₂, p₃, p₄} &nbsp;&nbsp; C₂<sup>(1)</sup> = {p₅, p₆}<br>
+            µ₁<sup>(1)</sup> = ((1+2+3+4)/4, (2+3+0+4)/4) = <strong>(2.5, 2.25)</strong><br>
+            µ₂<sup>(1)</sup> = ((6+7)/2, (7+6)/2) = <strong>(6.5, 6.5)</strong></div>
+        </div>
+        <p style="margin-top:14px;"><strong>Iteration 2</strong> — reassign against the new centres. p₄ is now 5.31 (squared) from µ₁ and 12.5 from µ₂, so it stays in C₁; nothing else is close. <strong>No point changes cluster.</strong></p>
+        <div class="ans"><span class="lbl">Answer — iteration 2</span>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1.9;">
+            C₁<sup>(2)</sup> = {p₁, p₂, p₃, p₄} &nbsp;&nbsp; C₂<sup>(2)</sup> = {p₅, p₆}<br>
+            µ₁<sup>(2)</sup> = <strong>(2.5, 2.25)</strong> &nbsp;&nbsp; µ₂<sup>(2)</sup> = <strong>(6.5, 6.5)</strong> &nbsp;— unchanged</div>
+          <p style="margin:10px 0 0 0;">The clusters did not change, so the algorithm <strong>terminates</strong>. Total within-cluster variance = <strong>14.75</strong> — the good clustering from Exercise 1.</p>
+        </div>
+      </div>
+      <!-- ===== EX 3 ===== -->
+      <div class="exbox" id="x-3">
+        <div class="extag">Exercise 3 · the same run with the indices swapped</div>
+        <p class="q">Same data points, K = 2, but now invert the cluster indexes: µ₁<sup>(0)</sup> = (6,7) and µ₂<sup>(0)</sup> = (1,2). What are C₁<sup>(1)</sup>, C₂<sup>(1)</sup>, µ₁<sup>(1)</sup>, µ₂<sup>(1)</sup>? What about iteration 2?</p>
+        <p>Every distance is identical to Exercise 2 — the two centres are the same two points, just labelled the other way round. So p₁, p₂, p₃ go to <strong>C₂</strong> and p₅, p₆ go to <strong>C₁</strong>.</p>
+        <div class="callout warn" style="margin:12px 0;">
+          <div class="callout-label">And p₄ is still exactly tied — 13 from both</div>
+          But now the <strong>lowest index is C₁, which is the (6,7) centre</strong>. The same tie-breaking rule that sent p₄ down-left in Exercise 2 sends it <strong>up-right</strong> here. <strong>This single line is the entire exercise.</strong>
+        </div>
+        <div class="ans"><span class="lbl">Answer — iteration 1</span>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1.9;">
+            C₁<sup>(1)</sup> = {p₄, p₅, p₆} &nbsp;&nbsp; C₂<sup>(1)</sup> = {p₁, p₂, p₃}<br>
+            µ₁<sup>(1)</sup> = ((4+6+7)/3, (4+7+6)/3) = (17/3, 17/3) ≈ <strong>(5.67, 5.67)</strong><br>
+            µ₂<sup>(1)</sup> = ((1+2+3)/3, (2+3+0)/3) = (2, 5/3) ≈ <strong>(2.00, 1.67)</strong></div>
+        </div>
+        <p style="margin-top:14px;"><strong>Iteration 2</strong> — check p₄ = (4,4) again: squared distance to µ₁ is 2.78 + 2.78 = 5.56, to µ₂ is 4 + 5.44 = 9.44. It stays in C₁. Nothing moves.</p>
+        <div class="ans"><span class="lbl">Answer — iteration 2</span>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1.9;">
+            C₁<sup>(2)</sup> = {p₄, p₅, p₆} &nbsp;&nbsp; C₂<sup>(2)</sup> = {p₁, p₂, p₃}<br>
+            µ₁<sup>(2)</sup> ≈ <strong>(5.67, 5.67)</strong> &nbsp;&nbsp; µ₂<sup>(2)</sup> ≈ <strong>(2.00, 1.67)</strong> &nbsp;— unchanged, so it terminates.</div>
+        </div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">The point of the exercise</div>
+          Same data, same K, same algorithm, <strong>the only difference is which centre got called number 1</strong> — and K-means converges to a different answer, with total within-cluster variance <strong>16.00</strong> instead of <strong>14.75</strong>.
+          <p style="margin:10px 0 0 0;">Both runs are <em>stable</em>: neither can improve by moving a single point, so both are genuine local minima. Exercise 1 already told us 14.75 is the better of the two, so <strong>Exercise 3's run has landed on a local minimum that is not global</strong> — which is exactly what Section 6.2.4 then goes on to discuss, and why <code>n_init</code> and <code>k-means++</code> exist.</p>
+        </div>
+      </div>
+      <!-- ===== EX 4 ===== -->
+      <div class="exbox" id="x-4">
+        <div class="extag">Exercise 4 · Manhattan distance</div>
+        <p class="q">Compute the Manhattan distance between p₁ = (3, 6, 1, −1) and p₂ = (−3, 6, 2, 5).</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1.95; margin-left:10px;">
+          ‖p₁ − p₂‖₁ = |3 − (−3)| + |6 − 6| + |1 − 2| + |−1 − 5|<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = &nbsp;&nbsp;&nbsp;6 &nbsp;&nbsp;+ &nbsp;&nbsp;0 &nbsp;&nbsp;+ &nbsp;1 &nbsp;&nbsp;+ &nbsp;&nbsp;6</div>
+        <div class="ans"><span class="lbl">Answer</span><strong>13</strong></div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">Two easy marks to lose</div>
+          The <strong>second coordinate contributes 0</strong> — it is the same in both points, and it is easy to skip a term when one vanishes. And <strong>|−1 − 5| = |−6| = 6</strong>, not 4: subtract first, then take the modulus.
+          <p style="margin:10px 0 0 0;">For comparison, the Euclidean distance here is √(36 + 0 + 1 + 36) = √73 ≈ 8.54 — <strong>always ≤ the Manhattan distance</strong>, which is a useful sanity check.</p>
+        </div>
+      </div>
+      <!-- ===== EX 5 ===== -->
+      <div class="exbox" id="x-5">
+        <div class="extag">Exercise 5 · how long does it run?</div>
+        <p class="q">If n &gt; 1 is the number of initial points in a hierarchical clustering algorithm, what is the maximum time t until the algorithm ends?</p>
+        <p>We start at t = 0 with <strong>n clusters</strong> and stop when there is <strong>1</strong>. Step 2 always merges at least two clusters, so <strong>every step reduces the cluster count by at least one</strong>. To get from n down to 1 therefore takes at most n − 1 steps.</p>
+        <div class="ans"><span class="lbl">Answer</span><strong>t = n − 1</strong></div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">Why the question says <em>maximum</em></div>
+          Because of the tie rule in Remark 6.11. If several pairs sit at the threshold, one step can remove <strong>two or more</strong> clusters at once, and the run finishes early. So n − 1 is the <strong>upper bound</strong>, achieved exactly when every step merges a single pair — which is what happens in the chapter's example: n = 6 and it takes <strong>5</strong> steps.
+          <p style="margin:10px 0 0 0;">This is also the reason a dendogram of n points has <strong>at most n − 1 join heights</strong>, and why some values of K may be skipped.</p>
+        </div>
+      </div>
+      <!-- ===== EX 6 ===== -->
+      <div class="exbox" id="x-6">
+        <div class="extag">Exercise 6 · single vs complete linkage</div>
+        <p class="q">The example in this section used single-linkage and L₁. The clustering process differs if we use complete-linkage instead (keeping Manhattan distance). What is the highest value of K for which the algorithms differ? For K = 6 the clustering is the same; for K = 5, although the distances change, the actual cluster assignment is the same. What is the highest K for which it isn't?</p>
+        <p>Run both from the same distance table. The first two merges agree, because at that stage the clusters involved are singletons or their nearest pair is unambiguous:</p>
+        <table style="margin:8px 0;">
+          <tr><th>K</th><th>Single-linkage (L₁)</th><th>Complete-linkage (L₁)</th><th></th></tr>
+          <tr><td>6</td><td>{1}{2}{3}{4}{5}{6}</td><td>{1}{2}{3}{4}{5}{6}</td><td>same</td></tr>
+          <tr><td>5</td><td>{1,5}{2}{3}{4}{6} <span style="color:var(--ink-muted);">@4</span></td><td>{1,5}{2}{3}{4}{6} <span style="color:var(--ink-muted);">@4</span></td><td>same</td></tr>
+          <tr><td>4</td><td>{1,5}{2,3}{4}{6} <span style="color:var(--ink-muted);">@5</span></td><td>{1,5}{2,3}{4}{6} <span style="color:var(--ink-muted);">@5</span></td><td>same</td></tr>
+          <tr style="background:var(--tint-b2);"><td><strong>3</strong></td><td><strong>{1,5} {2,3,6} {4}</strong> <span style="color:var(--ink-muted);">@7</span></td><td><strong>{1,5} {2,3} {4,6}</strong> <span style="color:var(--ink-muted);">@8</span></td><td><strong>DIFFER</strong></td></tr>
+          <tr><td>2</td><td>{1,5}{2,3,4,6} <span style="color:var(--ink-muted);">@8</span></td><td>{1,5}{2,3,4,6} <span style="color:var(--ink-muted);">@20</span></td><td>same again</td></tr>
+          <tr><td>1</td><td>all <span style="color:var(--ink-muted);">@12</span></td><td>all <span style="color:var(--ink-muted);">@36</span></td><td>same</td></tr>
+        </table>
+        <div class="ans"><span class="lbl">Answer</span><strong>K = 3</strong></div>
+        <p style="margin-top:14px;"><strong>Where they part company.</strong> At K = 4 the clusters are {1,5}, {2,3}, {4}, {6}. Now compare the two candidate merges:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.95; margin-left:10px;">
+          <span style="color:var(--accent);">single:</span>&nbsp;&nbsp; dist({2,3},{6}) = min(7, 12) = <strong>7</strong> &nbsp;·&nbsp; dist({4},{6}) = <strong>8</strong> &nbsp;→ merge {2,3} with {6}<br>
+          <span style="color:var(--accent-2);">complete:</span> dist({2,3},{6}) = max(7, 12) = <strong>12</strong> &nbsp;·&nbsp; dist({4},{6}) = <strong>8</strong> &nbsp;→ merge {4} with {6}</div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">The one number that does it</div>
+          <strong>d(p₃, p₆) = 12.</strong> Single-linkage ignores it — {2,3} is only 7 from {6} because p₂ is close — so {6} joins the pair. Complete-linkage is forced to use it, which pushes {2,3} out to 12 and lets {4} win at 8 instead.
+          <p style="margin:10px 0 0 0;">Note the two then <strong>re-converge at K = 2</strong>. Different intermediate structures can lead to the same final split, so "the algorithms differ" has to be checked at every K, not just the end.</p>
+        </div>
+      </div>
+      <!-- ===== EX 7 ===== -->
+      <div class="exbox" id="x-7">
+        <div class="extag">Exercise 7 · the helicopter problem</div>
+        <p class="q">Cities are points, with Euclidean distances. Your helicopters have limited fuel and can travel non-stop between cities at most 100 miles apart. You want to cluster cities so that a helicopter can go <strong>from any city to any other city within the same cluster</strong> without stopping for fuel. You set the threshold to 100. Which criterion should you use?</p>
+        <div class="ans"><span class="lbl">Answer</span><strong>Complete-linkage.</strong></div>
+        <p style="margin-top:14px;"><strong>Why.</strong> The requirement is about <strong>every pair</strong> of cities in a cluster, not some pair. Complete-linkage defines the distance between two clusters as the <strong>maximum</strong> over cross-cluster pairs, so it only merges when <em>the furthest apart pair</em> is within the threshold. Merging at threshold 100 therefore guarantees <strong>every</strong> pair inside a cluster is at most 100 miles apart — precisely the guarantee the helicopters need.</p>
+        <div class="callout warn" style="margin:14px 0 0 0;">
+          <div class="callout-label">Why single-linkage would strand a helicopter</div>
+          Single-linkage merges when the <em>closest</em> pair is within 100. So take three cities in a line: A is 90 from B, B is 90 from C, and <strong>A is 180 from C</strong>. Both of those 90s are the joint-smallest distance, so under the tie rule single-linkage merges <strong>all three in one step at threshold 90</strong> — comfortably under your limit of 100. A helicopter then asked to fly A → C runs out of fuel halfway. That is chaining, and here it is not a stylistic quirk but a crash.
+          <p style="margin:10px 0 0 0;">Average-linkage fails for the same reason, more subtly: an average below 100 says nothing about the worst pair.</p>
+        </div>
+        <div class="callout tip" style="margin:14px 0 0 0;">
+          <div class="callout-label">The general principle worth stating in an answer</div>
+          <strong>Match the linkage to the guarantee you need.</strong> Complete-linkage gives you a bound on the <em>diameter</em> of every cluster; single-linkage gives you a bound on <em>connectivity</em> — that you can get between any two members via a chain of short hops. If refuelling <em>were</em> allowed at intermediate cities, single-linkage would be the right answer.
+        </div>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 6.</p>
+    </section>

@@ -1,0 +1,532 @@
+<section id="week2" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 02 · Imperative Languages — Informal Description</div>
+        <h1>Variables &amp; Flow of Control</h1>
+        <div class="week-subtitle">the informal pass, before SIMP makes it formal</div>
+      </div>
+      <p>Week 1 ended with a promise: describe the constructs of imperative languages <em>informally</em> first, then give a <em>formal</em> specification using transition systems. <strong>This lecture is the informal half.</strong> Everything here gets a precise operational semantics in the lectures that follow, using the language <strong>SIMP</strong>.</p>
+      <div class="callout">
+        <div class="callout-label">The three aims of the lecture</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Distinguish the main <strong>components</strong> of an imperative language.</li>
+          <li>Identify the main <strong>attributes of variables</strong>, and the <em>advantages and disadvantages</em> of different design choices.</li>
+          <li>Identify the main <strong>control structures</strong>, and the differences between <em>apparently similar constructs</em> used in different languages.</li>
+        </ol>
+        <p style="margin:10px 0 0 0;">Aims 2 and 3 both say the same thing in different words: this lecture is a catalogue of <strong>design trade-offs</strong>. Exam questions here are rarely "what is X" — they're "what are the advantages and disadvantages of X", or "these two constructs look the same; how do they differ?"</p>
+      </div>
+      <!-- ===== Von Neumann ===== -->
+      <h2 id="w2-vonneumann">Imperative languages and the Von Neumann architecture</h2>
+      <div class="callout exam">
+        <div class="callout-label">The founding sentence</div>
+        <strong>Imperative languages are abstractions of the underlying Von Neumann computer architecture.</strong>
+        <p style="margin:10px 0 0 0;">One of the main components of the computer is its <strong>memory</strong>, storing instructions and data. In imperative languages, <strong>variables represent memory cells</strong>.</p>
+      </div>
+      <p>That one correspondence explains the shape of the whole paradigm. If a variable <em>is</em> a memory cell, then a program is a sequence of instructions that change the contents of cells — which is exactly the definition of "imperative" from Week 1 (<em>programs decomposed into computation steps, reflecting the computer architecture</em>).</p>
+      <p>So to understand the behaviour of programs we need to know two things — and they are the two halves of this lecture:</p>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">Part 1 · Variables</h4>
+          <p style="font-size:14px; margin:0;">The <strong>properties of variables</strong> — what they are, where they live, how long they live, and where they can be seen.</p>
+        </div>
+        <div class="mode-box" style="background:var(--tint-b); border-color:var(--accent-2);">
+          <h4 style="color:var(--accent-2);">Part 2 · Flow of control</h4>
+          <p style="font-size:14px; margin:0;">The <strong>flow of control among instructions</strong> — selection, iteration, branching, and how programs are structured.</p>
+        </div>
+      </div>
+      <!-- ===== Properties ===== -->
+      <h2 id="w2-properties">Variables: the four main properties</h2>
+      <div class="concept-grid">
+        <div class="concept-card" data-num="1">
+          <h3>Name</h3>
+          <p>Usually a <strong>string of characters</strong> with some constraints — e.g. maximal length, allowed characters.</p>
+        </div>
+        <div class="concept-card" data-num="2">
+          <h3>Type</h3>
+          <p>Indicates the <strong>range of values</strong> that are allowed, as well as <strong>the operations that are available</strong>. Some languages are <em>untyped</em>; others are <strong>statically typed</strong> (Java, Haskell, ML, Scala) or <strong>dynamically typed</strong> (Python, Ruby).</p>
+        </div>
+        <div class="concept-card" data-num="3">
+          <h3>Address — the <em>l-value</em></h3>
+          <p>The memory address to which the variable is associated. <strong>This association is not simple:</strong> the same name may be associated with different addresses in different parts of the program; and in some languages more than one name can be associated with the same address — e.g. <em>variant records</em> in Pascal, the <em>EQUIVALENCE</em> statement in Fortran.</p>
+        </div>
+        <div class="concept-card" data-num="4">
+          <h3>Value — the <em>r-value</em></h3>
+          <p>The <strong>contents of the memory</strong> associated with the variable.</p>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Type does two jobs, not one</div>
+        Students routinely write "the type is the kind of value". The slide says <em>two</em> things: the range of <strong>values</strong> allowed <em>and</em> the <strong>operations</strong> that are available. Both halves earn marks. (It also explains Week 1's <code>1 + 'a'</code>: <code>+</code> is not among the operations available on characters.)
+      </div>
+      <!-- ===== l-value/r-value ===== -->
+      <h2 id="w2-lvalue">l-value vs r-value — the distinction that explains assignment</h2>
+      <p>The names come from the two sides of an assignment. In <code>x = y</code>:</p>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-d); border-color:var(--accent-4);">
+          <h4 style="color:var(--accent-4);">l-value · the <em>address</em></h4>
+          <p style="font-size:13.5px; margin:0;">What appears on the <strong>left</strong>. We need to know <em>where</em> to put something — the memory address associated with the variable.</p>
+        </div>
+        <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
+          <h4 style="color:var(--accent-3);">r-value · the <em>value</em></h4>
+          <p style="font-size:13.5px; margin:0;">What appears on the <strong>right</strong>. We need to know <em>what</em> is stored there — the contents of that memory.</p>
+        </div>
+      </div>
+      <p>So <code>x = y</code> means: <em>take the <strong>r-value</strong> of <code>y</code> and store it at the <strong>l-value</strong> of <code>x</code></em>. The same variable name denotes a different thing depending on which side of the <code>=</code> it appears.</p>
+      <div class="memcells">
+        <div class="memcell head"><div>name</div><div>address (l-value)</div><div>contents (r-value)</div></div>
+        <div class="memcell hl"><div class="mc-name">x</div><div class="mc-addr">0x1000</div><div class="mc-val">7 &nbsp;<span style="color:var(--ink-muted); font-size:11px;">← was 3, overwritten</span></div></div>
+        <div class="memcell"><div class="mc-name">y</div><div class="mc-addr">0x1004</div><div class="mc-val">7</div></div>
+        <div class="memcell"><div class="mc-name">z</div><div class="mc-addr">0x1008</div><div class="mc-val">42</div></div>
+      </div>
+      <p style="text-align:center; font-style:italic; color:var(--ink-muted); font-size:13px;">After <code>x = y</code>: the r-value of y (7) is written to the l-value of x (0x1000).</p>
+      <div class="callout">
+        <div class="callout-label">Why "this association is not simple" matters</div>
+        Because the name→address link is <em>not</em> one-to-one in either direction, two of the hardest topics in the lecture follow directly from it:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>One name → many addresses</strong> (over the program, or over time): this is why we need <strong>lifetime</strong> and <strong>scope</strong>. Each recursive call of a procedure gives its local <code>x</code> a fresh address.</li>
+          <li><strong>Many names → one address</strong> (aliasing): Pascal variant records, Fortran EQUIVALENCE — and, in modern terms, two references to the same object. Writing through one name silently changes the other.</li>
+        </ul>
+      </div>
+      <!-- ===== Lifetime ===== -->
+      <h2 id="w2-lifetime">Lifetime: the four classes of variable</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        <strong>Lifetime</strong> = the time during which the variable is <em>allocated a specific memory location</em> — between <strong>allocation</strong> and <strong>deallocation</strong>.
+        <p style="margin:10px 0 0 0;">We distinguish <strong>four classes</strong> of variables according to their lifetime: <em>static</em>, <em>stack dynamic</em>, <em>explicit heap-dynamic</em>, and <em>implicit heap-dynamic</em>. Learn the list, and learn one advantage/disadvantage pair for each.</p>
+      </div>
+      <h3>1 · Static variables</h3>
+      <p>Bound to a memory location <strong>before program execution begins</strong>, and until it ends.</p>
+      <table class="scorecard">
+        <tr><th>Advantage</th><th>Disadvantage</th></tr>
+        <tr>
+          <td class="good">✓ <strong>Efficiency</strong> — all addressing can be resolved at <em>compile time</em>; there is no allocation/deallocation at run time.</td>
+          <td class="bad">✗ <strong>Storage cannot be reused</strong>, and <em>recursive programs need dynamic variables</em>.</td>
+        </tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">Why recursion forces the issue</div>
+        A recursive procedure is active several times at once, and each activation needs its <em>own</em> copy of its local variables. One statically-fixed address per name simply cannot hold them all — hence the next class.
+      </div>
+      <h3>2 · Stack dynamic variables</h3>
+      <p><strong>Allocated when the declaration of the variable is processed at run time.</strong> The canonical example: <em>local variables of recursive procedures</em>.</p>
+      <h3>3 · Explicit heap-dynamic variables</h3>
+      <p><strong>Nameless memory cells</strong> that are allocated and deallocated <em>by program instructions</em>, using <strong>pointers</strong>.</p>
+      <div class="code-block">
+<span class="cm" style="color:var(--code-cm);">// C++</span>
+int *intnode;
+...
+intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="color:var(--code-cm);">/* allocates an int cell */</span>
+...
+<span style="color:var(--code-kw);">delete</span> intnode;    <span style="color:var(--code-cm);">/* deallocates the cell to which intnode points */</span>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The Java variant — worth quoting</div>
+        In Java, <strong>objects are explicit heap dynamic</strong> and are accessed through <strong>reference variables</strong>, but <em>there is no way to destroy them explicitly</em>: <strong>implicit garbage collection</strong> is used.
+        <p style="margin:8px 0 0 0; font-size:13px; color:var(--ink-soft);">Footnote from the slides: <em>garbage collection was first introduced in Lisp.</em></p>
+      </div>
+      <p style="font-size:14px;">Note the subtlety: the <em>cells</em> are nameless — <code>intnode</code> is not the heap cell, it's a pointer variable (itself typically stack dynamic) whose r-value is the address of the nameless cell. This is the l-value/r-value distinction doing real work.</p>
+      <h3>4 · Implicit heap-dynamic variables</h3>
+      <p>Bound to storage <strong>only when they are assigned values</strong>. E.g. <strong>strings and arrays in Perl and JavaScript</strong>.</p>
+      <table class="scorecard">
+        <tr><th>Advantage</th><th>Disadvantage</th></tr>
+        <tr>
+          <td class="good">✓ <strong>Flexibility</strong></td>
+          <td class="bad">✗ <strong>Difficult error detection</strong></td>
+        </tr>
+      </table>
+      <h3>All four, side by side</h3>
+      <table>
+        <tr><th>Class</th><th>Bound to storage…</th><th>Example</th><th>✓ / ✗</th></tr>
+        <tr>
+          <td><strong>Static</strong></td>
+          <td>before execution begins, until it ends</td>
+          <td>—</td>
+          <td>✓ efficient (compile-time addressing)<br>✗ no reuse; no recursion</td>
+        </tr>
+        <tr>
+          <td><strong>Stack dynamic</strong></td>
+          <td>when the declaration is processed at run time</td>
+          <td>locals of recursive procedures</td>
+          <td>✓ supports recursion</td>
+        </tr>
+        <tr>
+          <td><strong>Explicit heap-dynamic</strong></td>
+          <td>by explicit program instructions, via pointers</td>
+          <td>C++ <code>new</code>/<code>delete</code>; Java objects (no explicit destroy → GC)</td>
+          <td>✓ full programmer control<br>✗ manual deallocation is error-prone</td>
+        </tr>
+        <tr>
+          <td><strong>Implicit heap-dynamic</strong></td>
+          <td>only when they are assigned values</td>
+          <td>strings &amp; arrays in Perl, JavaScript</td>
+          <td>✓ flexibility<br>✗ difficult error detection</td>
+        </tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">📘 The pattern running down the table (background)</div>
+        Read the four classes in order and you are watching a single dial being turned: <strong>binding time moves later and later</strong> — from before execution, to declaration-time, to explicit instruction, to first assignment. And with each step you trade the same two things: <strong>efficiency and checkability go down, flexibility goes up</strong>. If you can state that sentence you can answer almost any "advantages and disadvantages" question on this topic.
+      </div>
+      <!-- ===== Scope ===== -->
+      <h2 id="w2-scope">Scope: static vs dynamic</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definitions</div>
+        <strong>Scope</strong> = the <em>range of instructions in which the variable is visible</em> (can be used).
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Local</strong> variables are those declared in the block of program that is executed.</li>
+          <li>The variables that are <em>visible but are not local</em> are called <strong>global</strong>.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">Some languages have <strong>static</strong> scoping rules, others have <strong>dynamic</strong> scoping rules.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Don't confuse scope with lifetime</div>
+        They are different questions about the same variable. <strong>Lifetime</strong> is about <em>time</em>: when does this variable have memory allocated? <strong>Scope</strong> is about <em>place in the program text</em>: where can this name be used? A variable can be alive but invisible (a caller's local while a callee runs), which is exactly the situation dynamic scoping exploits.
+      </div>
+      <h3>Static scope</h3>
+      <p>Can be determined <strong>before the execution of the program</strong> (at compile time). The rule:</p>
+      <div class="diagram">
+        When a variable is referenced, the compiler looks for its declaration <strong>in the same block</strong>;<br>
+        if there is no declaration, it looks in the <strong>parent block</strong>;<br>
+        …and so on outwards.<br><br>
+        If <strong>no declaration is found</strong>, the compiler detects an <strong>error</strong>.
+        <div class="caption">Static (lexical) scope resolution — it follows the nesting of the program text.</div>
+      </div>
+      <p>The example from the slides, in Pascal:</p>
+      <div class="code-block">
+<span style="color:var(--code-kw);">program</span> main;
+<span style="color:var(--code-kw);">var</span> x : real;                <span style="color:var(--code-cm);">// main's x</span>
+
+<span style="color:var(--code-kw);">procedure</span> P1;
+<span style="color:var(--code-kw);">var</span> x : integer;             <span style="color:var(--code-cm);">// local variable (P1's own x)</span>
+<span style="color:var(--code-kw);">begin</span>
+    ... x ...                 <span style="color:var(--code-cm);">// LOCAL variable  → P1's integer x</span>
+<span style="color:var(--code-kw);">end</span>;
+
+<span style="color:var(--code-kw);">procedure</span> P2;
+<span style="color:var(--code-kw);">begin</span>
+    ... x ...                 <span style="color:var(--code-cm);">// GLOBAL variable → main's real x</span>
+<span style="color:var(--code-kw);">end</span>;
+
+<span style="color:var(--code-kw);">begin</span> main
+    ... x ...                 <span style="color:var(--code-cm);">// GLOBAL variable → main's real x</span>
+<span style="color:var(--code-kw);">end</span>.
+      </div>
+      <p>P1 declares its own <code>x</code>, so the reference inside P1 is <strong>local</strong>. P2 declares nothing, so its <code>x</code> resolves outwards to <code>main</code>'s — it is <strong>global</strong>. Crucially, <em>this is true no matter who calls P2</em>.</p>
+      <h3>Dynamic scope</h3>
+      <div class="callout exam">
+        <div class="callout-label">The definition, and the exam's favourite sentence</div>
+        Dynamic scope <strong>depends on the calling sequence of subprograms</strong> instead of their declaration.
+        <p style="margin:10px 0 0 0;">In the example above, with dynamic scope, <strong>the reference to <code>x</code> in P2 may refer to the variable in P1 or in <code>main</code> depending on who called P2.</strong></p>
+      </div>
+      <table class="scorecard">
+        <tr><th>Dynamic scoping — problems</th></tr>
+        <tr><td class="bad">✗ It is <strong>not possible to do static type-checking</strong></td></tr>
+        <tr><td class="bad">✗ Programs are <strong>very difficult to understand</strong></td></tr>
+      </table>
+      <p>Why no static type-checking? Look at the example: under dynamic scope the <code>x</code> in P2 is an <strong>integer</strong> if P1 called it, and a <strong>real</strong> if <code>main</code> called it. The compiler cannot know which — the type of a reference depends on run-time control flow.</p>
+      <div class="callout">
+        <div class="callout-label">Who actually uses it</div>
+        Some <strong>simple languages</strong> use dynamic scoping. Scripting languages such as <strong>Perl</strong> let the programmer <em>choose</em> static or dynamic scoping when defining a variable. <strong>Common Lisp</strong> did too — but later versions of Lisp (e.g. <strong>Scheme</strong>) are <em>statically</em> scoped.
+      </div>
+      <!-- ===== SCOPE TOOL ===== -->
+      <h3 id="w2-scopetool">🛠️ Interactive: Static vs Dynamic Scope Resolver</h3>
+      <p>This is the mechanic most likely to appear as a worked exam question. Build a call sequence and watch the <em>same</em> reference to <code>x</code> resolve to different declarations under the two disciplines. Note that static resolution never changes — only dynamic does.</p>
+      <div class="tool" data-run="scReset">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Scope Resolution Explorer</h3>
+        </div>
+        <div class="tool-desc">Uses the Pascal program from the slides: <code>main</code> declares <code>x : real</code>, <code>P1</code> declares <code>x : integer</code>, <code>P2</code> declares nothing. Build a call chain and resolve the reference to <code>x</code> in the <em>currently executing</em> procedure.</div>
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="scCall('P1')">call P1</button>
+          <button class="tool-btn" onclick="scCall('P2')">call P2</button>
+          <button class="tool-btn secondary" onclick="scReturn()">return</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="sc-output" class="tool-output"></div>
+      </div>
+      <!-- ===== Assignment ===== -->
+      <h2 id="w2-assignment">Changing the values of variables: assignment</h2>
+      <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:17px; margin:20px 0; color:var(--accent);">
+        variable-name &nbsp;=&nbsp; expression
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The warning</div>
+        The <code>=</code> sign <strong>should not be confused with equivalence in the mathematical sense</strong>. Sometimes <code>:=</code> is used instead (Pascal, Algol, and — later in this course — SIMP).
+        <p style="margin:10px 0 0 0;">The value of the expression is <strong>stored in the variable, until a new value is given</strong> — either with another assignment or <em>by a side-effect</em>.</p>
+      </div>
+      <p>In <strong>typed languages</strong>, the expression and the variable must have <strong>compatible types</strong>.</p>
+      <h3>Combining assignment with increment/decrement</h3>
+      <p>The language <strong>C</strong> has a notation for combining assignment and increment. Both forms change the value of <code>i</code> to the current value plus 1 — <em>but they return different things</em>:</p>
+      <table>
+        <tr><th>Expression</th><th>Effect on <code>i</code></th><th>Value returned</th></tr>
+        <tr><td><code>i++</code> <span style="font-size:11px; color:var(--ink-muted);">(post-increment)</span></td><td>i becomes i + 1</td><td>returns the value of <strong>i</strong> (the old value)</td></tr>
+        <tr><td><code>++i</code> <span style="font-size:11px; color:var(--ink-muted);">(pre-increment)</span></td><td>i becomes i + 1</td><td>returns the value of <strong>i + 1</strong> (the new value)</td></tr>
+      </table>
+      <p>There are also instructions combining assignment and <strong>decrement</strong>, written <code>i--</code> and <code>--i</code>.</p>
+      <div class="callout tip">
+        <div class="callout-label">Why this belongs in a languages course</div>
+        <code>i++</code> is the cleanest small example of a <strong>side-effect</strong>: it is an <em>expression</em> (it has a value) that also <em>changes the state</em>. That dual nature is precisely what makes imperative semantics harder than functional semantics — and it's why, when we formalise SIMP, expressions and commands get treated separately.
+      </div>
+      <!-- ===== FLOW OF CONTROL ===== -->
+      <h2 id="w2-control">Flow of control: control statements</h2>
+      <p><strong>Programs in imperative languages are sequences of instructions.</strong> The next instruction that will be executed is the one that <em>follows in the text of the program</em> — <strong>unless a control statement is used</strong>.</p>
+      <p>The main control statements are three:</p>
+      <div class="compare-3">
+        <div class="paradigm imp"><h4>Selection</h4><span class="p-tag">choose a path</span><p>if-then-else, switch</p></div>
+        <div class="paradigm fun"><h4>Looping</h4><span class="p-tag">repeat</span><p>for, while, do, repeat</p></div>
+        <div class="paradigm log"><h4>Branching</h4><span class="p-tag">jump</span><p>go-to</p></div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The theoretical claim — a very quotable line</div>
+        <strong>Any sequential algorithm can be coded with just selection (if-then-else) and logically controlled iteration (while). Branching instructions (go-to) are superfluous.</strong>
+        <p style="margin:10px 0 0 0;">All languages nevertheless contain more constructs <em>to facilitate the writing of programs</em>. Moreover, several statements can be grouped together to form a <strong>compound statement</strong>.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">📘 Where that result comes from (background)</div>
+        This is the <strong>structured program theorem</strong> (Böhm–Jacopini, 1966) and it is the reason "goto considered harmful" was a winnable argument — the construct wasn't just ugly, it was provably unnecessary. Note the shape of the claim: it's about <em>expressive power</em>, not convenience. Everything beyond <code>if</code> and <code>while</code> is <em>syntactic sugar</em> — which is also why, when we come to define SIMP formally, the language can be tiny and still be interesting.
+      </div>
+      <!-- ===== SELECTION ===== -->
+      <h2 id="w2-selection">Selection statements</h2>
+      <p>Used to choose between <strong>two or more execution paths</strong>. We distinguish <strong>two-way selectors</strong> and <strong>multiple selectors</strong>.</p>
+      <h3>Two-way selectors (if-then-else) — and the dangling else</h3>
+      <p><strong>Depending on the language, the semantics of nested selectors vary.</strong> The classic case, in Java:</p>
+      <div class="code-block">
+<span style="color:var(--code-kw);">if</span> (sum == 0)
+    <span style="color:var(--code-kw);">if</span> (count == 0)
+    (result = 0);
+<span style="color:var(--code-kw);">else</span>
+    result = 1;
+      </div>
+      <p style="text-align:center; font-family:'Fraunces',serif; font-size:20px; font-style:italic; margin:20px 0;">Is the <code style="font-size:0.8em;">else</code> paired with the outer or the inner <code style="font-size:0.8em;">if</code>?</p>
+      <div class="callout exam">
+        <div class="callout-label">The rule</div>
+        <strong>The semantics of Java specifies that the <code>else</code> is matched with the most recent unpaired <code>then</code> clause</strong> — the <em>inner</em> one in this example.
+        <p style="margin:10px 0 0 0;">Note that the <strong>indentation lies</strong>: it suggests the <code>else</code> belongs to the outer <code>if</code>, but the language rule says otherwise. Since this implicit association may be confusing, <strong>some languages require the use of specific syntax for nesting selectors</strong>.</p>
+      </div>
+      <p>Algol 60 uses <code>begin</code>/<code>end</code> to make the association explicit. Both readings become expressible:</p>
+      <div class="compare-2">
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:4px;">else with the INNER if</div>
+          <div class="code-block" style="margin-top:0;">
+<span style="color:var(--code-kw);">if</span> sum = 0 <span style="color:var(--code-kw);">then</span>
+<span style="color:var(--code-kw);">begin</span>
+     <span style="color:var(--code-kw);">if</span> count = 0 <span style="color:var(--code-kw);">then</span>
+     result := 0
+     <span style="color:var(--code-kw);">else</span>
+     result := 1
+<span style="color:var(--code-kw);">end</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent-2); margin-bottom:4px;">else with the OUTER if</div>
+          <div class="code-block" style="margin-top:0;">
+<span style="color:var(--code-kw);">if</span> sum = 0 <span style="color:var(--code-kw);">then</span>
+<span style="color:var(--code-kw);">begin</span>
+     <span style="color:var(--code-kw);">if</span> count = 0 <span style="color:var(--code-kw);">then</span>
+       result := 0
+<span style="color:var(--code-kw);">end</span>
+<span style="color:var(--code-kw);">else</span>
+     result := 1
+          </div>
+        </div>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The point the slide closes on</div>
+        <strong>To obtain the latter semantics in Java we need to use extra syntax too</strong> — braces. Neither language escapes the problem; they differ only in what the <em>default</em> is when you don't disambiguate.
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">📘 This is Week 1 coming back (background)</div>
+        The dangling else is <strong>an ambiguous grammar</strong> — exactly the <code>1 - 2 - 3</code> problem, in a real language. One string of characters, two parse trees, two different meanings. Java resolves it by <em>fiat</em> ("most recent unpaired then"), which is a disambiguation rule bolted onto the concrete syntax. In <em>abstract</em> syntax the problem cannot arise: <code>if(b₁, if(b₂, c₁, c₂), skip)</code> and <code>if(b₁, if(b₂, c₁, skip), c₂)</code> are simply different trees.
+      </div>
+      <!-- ===== DANGLING ELSE TOOL ===== -->
+      <h3 id="w2-elsetool">🛠️ Interactive: Dangling Else</h3>
+      <p>Set <code>sum</code> and <code>count</code>, and see what <code>result</code> becomes under each pairing. The two readings genuinely disagree — and there are inputs where one leaves <code>result</code> untouched entirely.</p>
+      <div class="tool" data-run="runDangling">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Nested Selector Associator</h3>
+        </div>
+        <div class="tool-desc">The Java fragment from the slides. Reading A = Java's rule (else with the <em>inner</em> if). Reading B = what the indentation suggests (else with the <em>outer</em> if).</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>sum</label>
+            <input type="number" id="de-sum" value="0" style="width:90px;">
+          </div>
+          <div class="tool-field">
+            <label>count</label>
+            <input type="number" id="de-count" value="1" style="width:90px;">
+          </div>
+          <button class="tool-btn" onclick="runDangling()">Evaluate ▶</button>
+          <button class="tool-btn secondary" onclick="document.getElementById('de-sum').value=1;document.getElementById('de-count').value=0;runDangling();">Try sum=1, count=0</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="de-output" class="tool-output"></div>
+      </div>
+      <!-- ===== MULTIPLE SELECTORS ===== -->
+      <h2 id="w2-multiple">Multiple selectors</h2>
+      <p>Multiple selectors are a <strong>generalisation of two-way selectors</strong>. In Java (and C, C++):</p>
+      <div class="code-block">
+<span style="color:var(--code-kw);">switch</span> (expression) {
+<span style="color:var(--code-kw);">case</span> constant-expr-1 : statement-1;
+...
+<span style="color:var(--code-kw);">case</span> constant-expr-n : statement-n;
+[<span style="color:var(--code-kw);">default</span> : statement-n+1]
+}
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The design difference to remember</div>
+        <strong>In some languages, at the end of a branch the control goes to the instruction after the selector; in others we need an explicit <code>break</code> or <code>return</code>.</strong>
+        <p style="margin:10px 0 0 0;">C/C++/Java are the second kind — omit the <code>break</code> and control <em>falls through</em> into the next branch. This is a textbook example of the lecture's third aim: <em>apparently similar constructs that differ in meaning between languages</em>.</p>
+      </div>
+      <!-- ===== LOOPS ===== -->
+      <h2 id="w2-loops">Iterative statements (loops)</h2>
+      <p>Iterative constructs cause a statement or sequence of statements — the <strong>body of the loop</strong> — to be repeated. There are <strong>two independent classifications</strong>, and the exam likes both:</p>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">By <em>when</em> the test happens</h4>
+          <ul style="font-size:13.5px;">
+            <li><strong>Pre-test loop</strong> — the test for loop completion is done <em>before</em> the execution of the body.</li>
+            <li><strong>Post-test loop</strong> — it occurs <em>after</em> the body is executed.</li>
+          </ul>
+        </div>
+        <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
+          <h4 style="color:var(--accent-3);">By <em>what</em> controls it</h4>
+          <ul style="font-size:13.5px;">
+            <li><strong>Counter-controlled</strong> loops</li>
+            <li><strong>Logically-controlled</strong> loops</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The consequence to state out loud</div>
+        A <strong>post-test loop always executes its body at least once</strong>; a pre-test loop may execute it <strong>zero</strong> times. That single sentence answers most exam questions comparing <code>while</code> with <code>do</code>.
+      </div>
+      <h3>Counter-controlled loops</h3>
+      <p>The <code>for</code> statement of C and Java:</p>
+      <div class="code-block">
+<span style="color:var(--code-kw);">for</span> (expr-1; expr-2; expr-3)
+    loop-body
+      </div>
+      <table>
+        <tr><th>Part</th><th>Role</th></tr>
+        <tr><td><code>expr-1</code></td><td><strong>Initialises the counter</strong></td></tr>
+        <tr><td><code>expr-2</code></td><td>The <strong>loop control</strong>, evaluated <em>before each execution</em> of the loop-body</td></tr>
+        <tr><td><code>expr-3</code></td><td>Executed <strong>after each execution</strong> of the loop-body</td></tr>
+      </table>
+      <div class="code-block">
+<span style="color:var(--code-kw);">for</span> (index = 0; index &le; 10; index++)
+    sum = sum + list[index];
+      </div>
+      <p style="font-size:14px;">Because <code>expr-2</code> is evaluated <em>before</em> each execution of the body, the <code>for</code> loop is a <strong>pre-test</strong> loop.</p>
+      <h3>Logically-controlled loops</h3>
+      <p><strong>Most imperative languages have pre- and post-test loop constructs.</strong> In C++ and Java there is a <code>while</code> loop and a <code>do</code> loop:</p>
+      <div class="compare-2">
+        <div class="loop-card">
+          <div class="lc-kind">pre-test</div>
+          <h5>while</h5>
+          <div class="lc-code">while (expression)<br>&nbsp;&nbsp;&nbsp;&nbsp;loop-body</div>
+          <p style="font-size:13px; margin:6px 0 0 0;">The loop-body is executed <strong>as long as the expression evaluates to True</strong>.</p>
+        </div>
+        <div class="loop-card post">
+          <div class="lc-kind">post-test</div>
+          <h5>do</h5>
+          <div class="lc-code">do<br>&nbsp;&nbsp;&nbsp;&nbsp;loop-body<br>while (expression)</div>
+          <p style="font-size:13px; margin:6px 0 0 0;">The loop-body is executed <strong>until the expression evaluates to False</strong>.</p>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The variant that catches people out</div>
+        <strong>Pascal's <code>repeat</code> loop executes the body <em>until the expression evaluates to True</em>.</strong>
+        <div class="code-block" style="margin:10px 0 0 0;">
+<span style="color:var(--code-kw);">repeat</span>
+    loop-body
+<span style="color:var(--code-kw);">until</span> (expression)
+        </div>
+        <p style="margin:10px 0 0 0;">So <code>do…while(e)</code> and <code>repeat…until(e)</code> are <em>both</em> post-test, but they are <strong>opposites</strong>: one continues while <em>e</em> is true, the other stops when <em>e</em> is true. Same shape, inverted meaning — precisely the "apparently similar constructs" the lecture warned about in its aims.</p>
+      </div>
+      <!-- ===== LOOP TOOL ===== -->
+      <h3 id="w2-looptool">🛠️ Interactive: Loop Tracer</h3>
+      <p>Run the same condition and body through four loop constructs at once. Watch the iteration counts diverge — especially when the condition is <em>false at the start</em>, which is where pre-test and post-test part company.</p>
+      <div class="tool" data-run="runLoops">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Pre-test vs Post-test Comparison</h3>
+        </div>
+        <div class="tool-desc">Body is always <code>i = i + 1</code>. Set the starting value and the limit N, then compare <code>while</code>, <code>for</code>, <code>do…while</code> and Pascal's <code>repeat…until</code>.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>initial i</label>
+            <input type="number" id="lp-init" value="0" style="width:90px;">
+          </div>
+          <div class="tool-field">
+            <label>limit N</label>
+            <input type="number" id="lp-n" value="3" style="width:90px;">
+          </div>
+          <button class="tool-btn" onclick="runLoops()">Trace ▶</button>
+          <button class="tool-btn danger" onclick="document.getElementById('lp-init').value=5;document.getElementById('lp-n').value=3;runLoops();">Try i=5, N=3 (condition false at start)</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="lp-output" class="tool-output"></div>
+      </div>
+      <!-- ===== STRUCTURING ===== -->
+      <h2 id="w2-structure">Structuring the program: blocks &amp; subprograms</h2>
+      <h3>Blocks</h3>
+      <div class="callout">
+        <div class="callout-label">Definition</div>
+        A <strong>block</strong> is a group of statements, delimited by <strong>keywords</strong> such as <code>begin</code> and <code>end</code>, or by <strong>separators</strong>, like <code>{</code> and <code>}</code>.
+        <p style="margin:10px 0 0 0;">A block may contain <strong>not only commands, but also declarations</strong> (of constants, variables or types). <strong>If the language has static scope, these will only be visible inside the block</strong> — they are <em>local</em>.</p>
+      </div>
+      <p>Note how neatly this closes the loop with the first half of the lecture: <em>blocks are the units that static scoping searches outwards through</em>. And it's blocks that resolved the dangling else in Algol 60.</p>
+      <h3>Subprograms</h3>
+      <div class="callout">
+        <div class="callout-label">Definition</div>
+        <strong>Subprogram</strong> is a generic name for a <strong>named block that can be invoked explicitly</strong>. The block of statements is executed upon invocation, and <strong>the control returns to the calling point</strong> after the execution of the subprogram.
+        <p style="margin:10px 0 0 0;"><strong>Examples:</strong> <em>procedures</em> in Pascal, <em>functions</em> in C, <em>methods</em> in Java.</p>
+      </div>
+      <h3>Formal vs actual parameters</h3>
+      <p>When a subprogram is <em>declared</em>, together with the name we can associate parameters:</p>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-d); border-color:var(--accent-4);">
+          <h4 style="color:var(--accent-4);">Formal parameters</h4>
+          <p style="font-size:13.5px; margin:0;">The ones in the <strong>declaration</strong> of the subprogram.</p>
+        </div>
+        <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
+          <h4 style="color:var(--accent-3);">Actual parameters</h4>
+          <p style="font-size:13.5px; margin:0;">The ones <strong>provided when the subprogram is invoked</strong>.</p>
+        </div>
+      </div>
+      <p><strong>The values of the actual parameters will be replaced for the formal parameters when the subprogram is invoked.</strong></p>
+      <div class="callout tip">
+        <div class="callout-label">A forward pointer</div>
+        <strong>Different languages use different parameter passing mechanisms.</strong> The lecture explicitly defers this: <em>we will study these in more detail for functional languages.</em> So if a question asks about call-by-value vs call-by-name here, the expected answer is only the formal/actual distinction — the mechanisms come later.
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="w2-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 2</div>
+        <ol>
+          <li><strong>The founding claim</strong> — imperative languages are abstractions of the Von Neumann architecture; <em>variables represent memory cells</em>. To understand programs we need the properties of variables + the flow of control.</li>
+          <li><strong>The four properties of a variable</strong> — name, type (<em>range of values <strong>and</strong> available operations</em>), address (<em>l-value</em>), value (<em>r-value</em>).</li>
+          <li><strong>Why name→address is "not simple"</strong> — one name may map to different addresses in different parts of the program; several names may share one address (Pascal variant records, Fortran EQUIVALENCE).</li>
+          <li><strong>Static vs dynamic typing</strong> — statically typed: Java, Haskell, ML, Scala. Dynamically typed: Python, Ruby. Some languages untyped.</li>
+          <li><strong>Lifetime</strong> — the time between allocation and deallocation. Name all <strong>four classes</strong>.</li>
+          <li><strong>Static variables</strong> — bound before execution begins until it ends. ✓ efficiency (addressing resolved at compile time, no run-time allocation). ✗ storage cannot be reused; recursive programs need dynamic variables.</li>
+          <li><strong>Stack dynamic</strong> — allocated when the declaration is processed at run time; e.g. locals of recursive procedures.</li>
+          <li><strong>Explicit heap-dynamic</strong> — nameless cells allocated/deallocated by instructions via pointers (C++ <code>new</code>/<code>delete</code>). Java: objects are explicit heap dynamic, accessed via reference variables, <em>no way to destroy them explicitly</em> → implicit garbage collection (first introduced in Lisp).</li>
+          <li><strong>Implicit heap-dynamic</strong> — bound to storage only when assigned values (strings/arrays in Perl, JavaScript). ✓ flexibility ✗ difficult error detection.</li>
+          <li><strong>Scope</strong> — the range of instructions in which the variable is visible. <em>Local</em> = declared in the executing block; <em>global</em> = visible but not local.</li>
+          <li><strong>Static scope</strong> — determined at compile time; look in the same block, then the parent block, etc.; if no declaration is found the compiler <em>detects an error</em>. Be able to annotate the Pascal example (P1's x local; P2's and main's x global).</li>
+          <li><strong>Dynamic scope</strong> — depends on the <em>calling sequence</em> of subprograms, not their declaration. In the example, x in P2 may be P1's or main's <em>depending on who called P2</em>. Problems: no static type-checking; programs very hard to understand. Perl lets you choose; Common Lisp had it, Scheme is static.</li>
+          <li><strong>Assignment</strong> — <code>=</code> is not mathematical equivalence (<code>:=</code> is sometimes used); value stored until a new value is given by another assignment <em>or a side-effect</em>; typed languages require compatible types.</li>
+          <li><strong>i++ vs ++i</strong> — both add 1 to i; <code>i++</code> returns the value of <em>i</em>, <code>++i</code> returns the value of <em>i+1</em>. Same for <code>i--</code> / <code>--i</code>.</li>
+          <li><strong>Three kinds of control statement</strong> — selection, looping, branching. <strong>Any sequential algorithm can be coded with just if-then-else and while; go-to is superfluous.</strong> Other constructs exist to facilitate writing programs; statements group into <em>compound statements</em>.</li>
+          <li><strong>Dangling else</strong> — Java matches <code>else</code> with <em>the most recent unpaired then clause</em>. Be able to show both Algol 60 <code>begin/end</code> versions, and note Java needs extra syntax (braces) for the outer reading too.</li>
+          <li><strong>Multiple selectors</strong> — <code>switch</code> generalises two-way selection; some languages leave the selector at the end of a branch, others need an explicit <code>break</code> or <code>return</code>.</li>
+          <li><strong>Loop classifications</strong> — pre-test (test before body) vs post-test (test after body); counter-controlled vs logically-controlled. A post-test loop runs the body <em>at least once</em>.</li>
+          <li><strong>The <code>for</code> statement</strong> — expr-1 initialises the counter; expr-2 is the loop control evaluated <em>before each</em> execution of the body; expr-3 is executed <em>after each</em> execution of the body.</li>
+          <li><strong>while vs do vs repeat</strong> — <code>while</code> is pre-test, body runs as long as the expression is <strong>True</strong>; <code>do</code> is post-test, body runs until the expression is <strong>False</strong>; Pascal's <code>repeat</code> runs the body until the expression is <strong>True</strong>. Know that <code>do…while</code> and <code>repeat…until</code> are opposites.</li>
+          <li><strong>Blocks</strong> — groups of statements delimited by keywords (<code>begin</code>/<code>end</code>) or separators (<code>{</code>/<code>}</code>); may contain declarations, which under static scope are visible only inside (local).</li>
+          <li><strong>Subprograms</strong> — named blocks invoked explicitly; control returns to the calling point. Procedures (Pascal), functions (C), methods (Java). <strong>Formal</strong> parameters in the declaration vs <strong>actual</strong> parameters at invocation; actual values replace formal ones on invocation.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 2 notes. Next: giving precise meaning to these constructs, using the language <strong>SIMP</strong>.</p>
+    </section>

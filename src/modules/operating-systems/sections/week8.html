@@ -1,0 +1,206 @@
+<section id="week8" class="week-section">
+
+      <div class="week-header">
+        <div class="week-eyebrow">Week 08 · Summary &amp; Advanced Topics</div>
+        <h1>Unix History &amp; Microkernels</h1>
+        <div class="week-subtitle">where operating systems came from — and where they didn't go</div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">⚠ Examinability note</div>
+        Most of this week is <strong>reinforcement and context</strong> — fascinating, but <em>non-examinable</em>. Only two things here are examinable: <strong>fork() and exec()</strong> (OSTEP ch.5) and <strong>microkernels</strong>. Those two are marked with a ★ below. The rest is for your interest (and makes you a better-rounded engineer).
+      </div>
+
+      <!-- ===== Why Unix ===== -->
+      <h2 id="w8-unix">Why Unix matters <span class="context-badge">context</span></h2>
+
+      <p>Unix was created at AT&amp;T Bell Labs in <strong>1969–71</strong> by Dennis Ritchie and Ken Thompson, as a deliberately simple reaction to the over-ambitious, delayed <strong>Multics</strong> project. Much of the technical vocabulary of OSes comes from Unix: <em>kernel, shell, inode, pipe, root</em>. It popularised concepts now taken for granted: hierarchical filesystem, byte-oriented files, shell commands as files, I/O redirection, forking processes. It became the basis of the <strong>POSIX</strong> standard.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Why so popular?</div>
+        Deliberate <strong>simplicity</strong>; written mostly in a high-level language (<strong>C</strong>, created by Ritchie for the 1973 rewrite — radically lowering the cost of porting); and early <strong>academic licensing</strong>. This enabled use in education, portability across machines, and a wave of clones/derivatives. In the 1990s, free clones (<strong>Linux + GNU</strong>) and derivatives (the BSDs) displaced commercial Unix. Today <em>almost all</em> widely-used OSes are Unix-like — only Windows isn't (it's more VMS-based, though Unix-influenced).
+      </div>
+
+      <!-- ===== fork/exec ===== -->
+      <h2 id="w8-fork">Big idea (1): fork() &amp; exec() <span class="examinable">★ examinable</span></h2>
+
+      <p>To create a new process in Unix, you don't build one from scratch — you <strong>fork()</strong> (duplicate) the current process, then optionally <strong>exec()</strong> (replace yourself with a different program).</p>
+
+      <div class="callout exam">
+        <div class="callout-label">The key fact about fork() — a classic exam point</div>
+        <code>fork()</code> is <strong>called once but returns twice</strong>:
+        <ul style="margin:8px 0 0 0;">
+          <li>In the <strong>parent</strong>: returns the <strong>child's PID</strong> (a positive number).</li>
+          <li>In the <strong>child</strong>: returns <strong>0</strong>.</li>
+          <li>On <strong>failure</strong>: returns negative (no child created).</li>
+        </ul>
+        <p style="margin:8px 0 0 0;">Both processes then continue from the <em>same point</em> (right after the fork), each with their <em>own copy</em> of memory — implemented efficiently with <strong>copy-on-write</strong> (Week 4!).</p>
+      </div>
+
+      <div class="code-block">
+int rc = fork();
+if (rc &lt; 0) {
+    <span style="color:#7eb892;">// fork failed</span>
+} else if (rc == 0) {
+    <span style="color:#7eb892;">// CHILD (new process) — rc is 0</span>
+    <span style="color:#7eb892;">// optionally set up fds/env, then exec() a new program</span>
+} else {
+    <span style="color:#7eb892;">// PARENT — rc is the child's PID</span>
+}
+      </div>
+
+      <div class="fork-tree">
+        <div class="fork-proc">parent process<br><span style="font-size:11px; color:var(--ink-muted);">calls fork()</span></div>
+        <div class="fork-conn"></div>
+        <div class="fork-branch">
+          <div class="fork-leg">
+            <div class="fork-conn"></div>
+            <div class="fork-ret">fork() returns child's PID</div>
+            <div class="fork-proc">parent continues<br><span style="font-size:11px;">maybe wait()s for child</span></div>
+          </div>
+          <div class="fork-leg">
+            <div class="fork-conn"></div>
+            <div class="fork-ret">fork() returns 0</div>
+            <div class="fork-proc child">child<br><span style="font-size:11px;">copy of parent</span></div>
+            <div class="fork-conn"></div>
+            <div class="fork-ret">exec("/usr/bin/curl")</div>
+            <div class="fork-proc execd">child replaced<br>by new program</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why is fork-then-exec a good design?</div>
+        Between the fork and the exec, the <strong>child can set itself up</strong> in code — hook up pipes/IPC channels, redirect file descriptors (e.g. <code>dup2</code> to make stdout a pipe), modify the environment. This avoids needing a giant "mega-API" that can specify every attribute of a new process up front. It also makes sharing (memory, fds, IPC channels) between parent and child easy, and was great for concurrent servers in the pre-thread days.
+      </div>
+
+      <!-- ===== FORK TOOL ===== -->
+      <h3 id="w8-forktool">🛠️ Interactive: fork() Return-Value Simulator</h3>
+      <p>The "called once, returns twice" behaviour confuses everyone at first. Step through a small program with fork() calls and watch the process tree branch — each fork doubles the processes, and you can see exactly what each one prints.</p>
+
+      <div class="tool">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>fork() Tree Explorer</h3>
+        </div>
+        <div class="tool-desc">Pick how many <code>fork()</code> calls run in sequence. See how many processes exist and why (2ⁿ processes after n forks).</div>
+
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>Number of fork() calls</label>
+            <select id="fork-n">
+              <option value="1">1 fork</option>
+              <option value="2" selected>2 forks</option>
+              <option value="3">3 forks</option>
+              <option value="4">4 forks</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runFork()">Run ▶</button>
+        </div>
+
+        <div id="fork-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== Everything is a file ===== -->
+      <h2 id="w8-everything">Big idea (2): "Everything is a file" <span class="context-badge">context</span></h2>
+
+      <p>Instead of separate categories (with separate interfaces) for system commands, devices, and files, Unix maximises use of the single <strong>file abstraction</strong>:</p>
+      <ul>
+        <li><strong>Devices</strong> appear as special files (e.g. <code>/dev/tty0</code>, <code>/dev/hd0</code>).</li>
+        <li><strong>Commands</strong> are just executable files.</li>
+        <li>Even non-file IPC (pipes) is accessed via file descriptors.</li>
+      </ul>
+
+      <div class="callout">
+        <div class="callout-label">Good and bad</div>
+        <strong>Good:</strong> avoids special interfaces, maximises compositionality (everything plugs together). <strong>Bad:</strong> not everything <em>is</em> conceptually a file! <code>seek()</code> makes sense for a file but not live audio/video; <code>ioctl()</code> is the catch-all for "any operation that doesn't fit." Unix gives no explicit way for files to express how they differ (operations, behaviour, formats). ("Use plain text; it is universal" was one optimistic rejoinder.)
+      </div>
+
+      <!-- ===== Microkernels ===== -->
+      <h2 id="w8-microkernel">Microkernels <span class="examinable">★ examinable</span></h2>
+
+      <p>A traditional Unix/Linux kernel is a <strong>monolith</strong>: filesystems, network stack, device drivers, scheduling, and memory management all run together in kernel mode. What's wrong with that?</p>
+
+      <div class="callout warn">
+        <div class="callout-label">Problems with the monolith</div>
+        <strong>No fault isolation:</strong> kernels contain bugs — especially in device drivers (the classic cause of Windows' "blue screen of death"). One faulty driver can crash the whole system. <strong>No least privilege:</strong> kernels contain security exploits (search "CVE Linux kernel") — and every component runs with full privilege.
+      </div>
+
+      <p>The <strong>microkernel</strong> idea: move as much as possible <em>out</em> of the kernel into ordinary, isolated <strong>server processes</strong>. The microkernel itself keeps only the bare minimum: interrupt handling and basic IPC primitives.</p>
+
+      <div class="kernel-compare">
+        <div class="kdiag">
+          <h4>Monolithic kernel</h4>
+          <div class="klayer kuser">user processes</div>
+          <div class="kboundary">— user/kernel boundary —</div>
+          <div class="klayer kkernel">filesystems · network stack<br>device drivers · paging<br>scheduling · IPC<br><strong>(all in kernel mode)</strong></div>
+          <p style="font-size:11px; color:var(--ink-muted); text-align:center; margin:8px 0 0 0;">One bug anywhere can crash everything.</p>
+        </div>
+        <div class="kdiag">
+          <h4>Microkernel</h4>
+          <div class="klayer kuser">user processes</div>
+          <div style="text-align:center; margin:6px 0;">
+            <span class="kserver">filesystem server</span>
+            <span class="kserver">network server</span>
+            <span class="kserver">device drivers</span>
+            <span class="kserver">paging</span>
+          </div>
+          <div class="kboundary">— each in its own isolated process —</div>
+          <div class="klayer kmicro">microkernel<br><strong>(interrupts + basic IPC only)</strong></div>
+          <p style="font-size:11px; color:var(--ink-muted); text-align:center; margin:8px 0 0 0;">A driver can fail without crashing the system.</p>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The catch: IPC overhead</div>
+        Moving components into separate processes means <em>far more crossing of protection boundaries</em> — every interaction that used to be a function call is now IPC. This overhead was microkernels' big problem. Liedtke's work on the <strong>L3/L4</strong> microkernels (1993+) showed that <strong>architecture-aware optimisation of IPC</strong> could hugely reduce these overheads.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The Tanenbaum–Torvalds debate (1992)</div>
+        Microkernels were such a big deal that in 1992, OS professor Andrew Tanenbaum posted "<em>LINUX is obsolete</em>", arguing monolithic kernels were "a giant step back into the 1970s" and that among OS designers "the debate is essentially over — microkernels have won." History had other plans: Linux (monolithic) went on to dominate. The lesson isn't that one side was simply right — it's that <strong>development model and pragmatism</strong> often beat architectural elegance.
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">What Linux actually did instead</div>
+        Linux kept the monolithic design (no driver fault isolation, no least privilege for kernel components) and the same old Unix user-space API. Its innovation was in the <em>development model</em>, not the architecture. To stay reliable without fault isolation, it relies on <strong>aggressive quality control</strong> (drivers merged into the kernel tree). For performance it moved from a single "big kernel lock" to fine-grained locking and <strong>lock-free techniques like RCU (Read-Copy-Update)</strong>, where writers make a copy and atomically swap it in, letting readers proceed without locks.
+      </div>
+
+      <!-- ===== Advanced ===== -->
+      <h2 id="w8-advanced">Advanced topics (interest only) <span class="context-badge">context</span></h2>
+
+      <p>Two big questions the course leaves you with:</p>
+
+      <h3>1. Why not "just" design a better system with capabilities everywhere?</h3>
+      <p>Much research has explored <strong>pervasive capabilities</strong> — the Cambridge CAP computer (1970s, where memory addresses <em>are</em> capabilities enforced by hardware), KeyKOS, and modern work like <strong>Capsicum</strong> (generalising file handles) and <strong>CHERI</strong> (where "pointers are capabilities on memory", carrying bounds + permissions, with new hardware to enforce unforgeability). The hard part isn't the clean-slate design — it's <strong>retrofitting</strong> capabilities onto the everyday Unix-like file/process abstractions everyone already uses.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Which identifiers are capabilities?</div>
+        A capability combines <em>access rights</em> + <em>identifier</em>. By that test: Unix <strong>file handles</strong> (fd) are <code>&lt;access, object&gt;</code> pairs — true capabilities! But process IDs, pointers, and filenames are just <code>&lt;object&gt;</code> — their permissions are implicit (in user IDs, the page table, or the file's ACL). Pervasive capabilities would mean baking access rights into <em>all</em> of these.
+      </div>
+
+      <h3>2. Do we even need an operating system at all?</h3>
+      <p>Microsoft Research's <strong>Singularity</strong> (2000s) asked: instead of <em>hardware</em>-isolated processes (MMUs, the basis of limited direct execution), why not <strong>software-isolated processes (SIPs)</strong> — use a memory-safe language (like C#/Java-style bytecode + JIT) and <em>verify</em> safety statically? A driver could fail without crashing the system, sharing could be finer-grained than page granularity, and hardware could be simpler. The catch: C/C++ have no memory-safe implementation, so porting existing code is hard.</p>
+
+      <div class="callout">
+        <div class="callout-label">A modern echo: WebAssembly</div>
+        "Compile to the browser" (first JavaScript, now <strong>WebAssembly</strong>) is the same idea reborn: run code over a software-emulated memory ("memory" is a JS array) with JIT compilation for speed. Ironically, people end up re-implementing a POSIX-like OS <em>in the browser</em> — "that virus again," as the slides put it. Unix-style primitives remain endemic.
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="w8-exam">Exam-style takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 8 (only ★ topics are examinable)</div>
+        <ol>
+          <li>★ <strong>fork()</strong> — called once, returns twice: child's PID in parent, 0 in child, negative on failure. Both continue from the same point with their own (copy-on-write) memory.</li>
+          <li>★ <strong>exec()</strong> — replaces the current process with a new program. The <strong>fork-then-exec</strong> pattern, and why it's good (child sets itself up: pipes, fds, env — no mega-API needed).</li>
+          <li>★ <strong>Microkernels</strong> — move drivers/filesystems/etc. into isolated server processes; microkernel keeps only interrupts + basic IPC. <strong>Benefit:</strong> fault isolation + least privilege. <strong>Cost:</strong> IPC overhead from crossing protection boundaries (mitigated by L4-style optimisation).</li>
+          <li>★ <strong>Monolithic vs microkernel</strong> — be able to contrast, and explain why Linux stayed monolithic (development model + quality control + performance, not architecture).</li>
+          <li><span class="context-badge">context</span> Everything else (Unix history, "everything is a file", RCU, capabilities, Singularity) is non-examinable but enriching.</li>
+        </ol>
+      </div>
+
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">🎓 End of Week 8 — the end of the OS half of the module. The concurrency mini-course continues in Week 9.</p>
+
+    </section>

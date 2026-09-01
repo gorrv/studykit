@@ -1,0 +1,606 @@
+<section id="week6" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 06 · Part 2 begins · Lectures 6.1 – 6.3</div>
+        <h1>Introduction to Functional Programming</h1>
+        <div class="week-subtitle">from <em>how</em> to <em>what</em></div>
+      </div>
+      <div class="callout">
+        <div class="callout-label">Where Part 2 goes</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Week 7:</strong> Introduction to Functional Programming <em>(this material)</em></li>
+          <li><strong>Week 8:</strong> Functional programming types and semantics</li>
+          <li><strong>Week 9:</strong> Introduction to Logic Programming</li>
+          <li><strong>Week 10:</strong> Semantics of Logic Programming</li>
+          <li><strong>Week 11:</strong> Revision of Part 2, and preparation for the exam</li>
+        </ul>
+        <p style="margin:10px 0 0 0; font-size:13px; color:var(--ink-soft);">Practicals use <strong>Haskell</strong> for the functional part and <strong>SWI-Prolog</strong> for the logic part. Part 2 is taught by Dr Odinaldo Rodrigues.</p>
+      </div>
+      <p>Week 1 defined the functional paradigm in one line: <em>based on the mathematical notion of function; the focus is on <strong>what</strong> should be computed, not <strong>how</strong></em>. Everything in this lecture is that sentence unpacked.</p>
+      <!-- ===== INTRO ===== -->
+      <h2 id="w6-intro">What "functional" actually means</h2>
+      <div class="callout exam">
+        <div class="callout-label">The three opening claims</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Functional programs consist entirely of functions.</strong></li>
+          <li>A function can be defined <strong>in terms of other functions</strong> — previously defined by the programmer, in the libraries, or language primitives.</li>
+          <li>The focus is on <strong>what</strong> is to be computed, <strong>not how</strong> it should be computed.</li>
+        </ul>
+      </div>
+      <p>Modern functional languages are <strong>strongly typed</strong> (no core dumps!) and have <strong>built-in memory management</strong>.</p>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
+          <h4 style="color:var(--accent-3);">Advantages</h4>
+          <ul style="font-size:14px;">
+            <li>Shorter programs</li>
+            <li>Easier to understand</li>
+            <li>Easier to design, verify and maintain than imperative programs</li>
+          </ul>
+        </div>
+        <div class="mode-box" style="background:var(--tint-b2); border-color:var(--accent-2);">
+          <h4 style="color:var(--accent-2);">Disadvantages</h4>
+          <ul style="font-size:14px;">
+            <li>Usually <strong>slower</strong> than imperative programs</li>
+            <li>Arguably <strong>less flexible</strong></li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Connect it back to Part 1</div>
+        Imperative languages were <em>abstractions of the Von Neumann architecture</em> (Week 2), so their strength is that they map onto the hardware — hence the speed. Functional languages abstract from <em>mathematics</em> instead, so they map onto reasoning — hence "easier to verify". <strong>The advantages and disadvantages are two sides of the same design decision.</strong>
+      </div>
+      <!-- ===== HASKELL ===== -->
+      <h2 id="w6-haskell">Haskell, and where functional languages are used</h2>
+      <h3>Examples of applications</h3>
+      <ul>
+        <li>Theorem provers and proof assistants</li>
+        <li>Natural language processing</li>
+        <li>Music composition</li>
+        <li>Graphical interfaces</li>
+        <li>Expert systems (Software A.G., Germany — "Natural Expert Language")</li>
+        <li>Telephony (Ericsson, <strong>Erlang</strong> programming language)</li>
+      </ul>
+      <div class="callout">
+        <div class="callout-label">The language we use</div>
+        <strong>Haskell</strong> — a modern functional programming language.
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>GHC</strong> is the Glasgow Haskell Compiler.</li>
+          <li><strong>GHCi</strong> is the GHC interactive environment (interpreter).</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">Haskell was named in honour of <strong>Haskell B. Curry</strong>, whose work forms the logical basis of the language. <em>(His surname supplies the other word you'll meet this week: <strong>currying</strong>.)</em></p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Week 1 callback: which implementation technique is this?</div>
+        Haskell ships with both a compiler (<code>ghc</code>) and an interpreter (<code>ghci</code>) — exactly the case Week 1 described: <em>"the interpreter is used to develop and debug programs which are later compiled to increase execution speed."</em>
+      </div>
+      <!-- ===== SYNTAX & EVALUATION ===== -->
+      <h2 id="w6-syntax">Syntax and evaluation</h2>
+      <p>The notation is <strong>inspired by the mathematical definition of functions, using equations</strong>. We compute the square of a number with:</p>
+      <div class="hs"><span class="fn">square</span> x = x * x</div>
+      <div class="callout exam">
+        <div class="callout-label">The role of the computer</div>
+        <strong>The role of the computer is to evaluate and display the results of the expressions that the programmer writes, using the available functions</strong> — like a sophisticated calculator.
+        <p style="margin:10px 0 0 0;">When we type <code>square 6</code>, the computer displays <code>36</code>. As in mathematics, <strong>expressions may contain numbers, variables or names of functions</strong>: <code>36</code>, <code>square 6</code> and <code>x * x</code> are all expressions.</p>
+      </div>
+      <p>To evaluate <code>square 6</code> the computer uses the definition of <code>square</code> and replaces the expression by <code>6 * 6</code>. Then, using the predefined <code>*</code> operation, it computes <code>36</code>.</p>
+      <div class="callout exam">
+        <div class="callout-label">The central definition — quote this</div>
+        The process of evaluating an expression is a <strong>simplification process</strong>, also called a <strong>reduction</strong> or <strong>evaluation</strong>, whose goal is to obtain the <strong>value</strong> or <strong>normal form</strong> associated with the expression, by a series of "reduction" steps.
+        <p style="margin:10px 0 0 0;">We write <strong>e → e′</strong> to denote a reduction from expression e to expression e′. <strong>The "meaning" of an expression is its value.</strong></p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Notice the notation is deliberately the same as Part 1</div>
+        <code>e → e′</code> is the transition relation of Weeks 1–4, reused. Functional evaluation <em>is</em> a small-step operational semantics — but with one enormous simplification: <strong>there is no store</strong>. A configuration is just an expression, not ⟨P, s⟩, because nothing can be assigned to. That absence is what buys you all the advantages listed above.
+      </div>
+      <h3>Examples of evaluation</h3>
+      <div class="red-seq">
+        <div class="red-step"><span class="rs-n">0</span><span class="rs-a"></span><span class="rs-e">square 6</span></div>
+        <div class="red-step"><span class="rs-n">1</span><span class="rs-a">→</span><span class="rs-e">6 * 6</span></div>
+        <div class="red-step nf"><span class="rs-n">2</span><span class="rs-a">→</span><span class="rs-e">36</span></div>
+      </div>
+      <p><strong>36 is the value or normal form</strong> of the expression <code>square 6</code>.</p>
+      <p><strong>There may be several reduction sequences for an expression.</strong> Both of these are correct:</p>
+      <div class="compare-2">
+        <div class="red-seq" style="margin:0;">
+          <div class="red-step"><span class="rs-n">0</span><span class="rs-a"></span><span class="rs-e">((3 + 1) + (2 + 1))</span></div>
+          <div class="red-step"><span class="rs-n">1</span><span class="rs-a">→</span><span class="rs-e">((3 + 1) + 3)</span></div>
+          <div class="red-step"><span class="rs-n">2</span><span class="rs-a">→</span><span class="rs-e">(4 + 3)</span></div>
+          <div class="red-step nf"><span class="rs-n">3</span><span class="rs-a">→</span><span class="rs-e">7</span></div>
+        </div>
+        <div class="red-seq" style="margin:0;">
+          <div class="red-step"><span class="rs-n">0</span><span class="rs-a"></span><span class="rs-e">((3 + 1) + (2 + 1))</span></div>
+          <div class="red-step"><span class="rs-n">1</span><span class="rs-a">→</span><span class="rs-e">(4 + (2 + 1))</span></div>
+          <div class="red-step"><span class="rs-n">2</span><span class="rs-a">→</span><span class="rs-e">(4 + 3)</span></div>
+          <div class="red-step nf"><span class="rs-n">3</span><span class="rs-a">→</span><span class="rs-e">7</span></div>
+        </div>
+      </div>
+      <p style="text-align:center; font-style:italic; color:var(--ink-muted); font-size:13px;">In both cases the value is the same.</p>
+      <!-- ===== PROPERTIES ===== -->
+      <h2 id="w6-properties">Two properties of evaluation</h2>
+      <div class="concept-grid">
+        <div class="concept-card" data-num="1">
+          <h3>Unicity of normal forms</h3>
+          <p>In (pure) functional languages the <strong>value of an expression is uniquely determined by its components</strong>, and is <strong>independent of the order of reduction</strong>.</p>
+        </div>
+        <div class="concept-card" data-num="2">
+          <h3>Non-termination</h3>
+          <p><strong>Not all reduction sequences lead to a value</strong> — some reduction sequences do not terminate.</p>
+        </div>
+      </div>
+      <p>The two properties interact in a way that is easy to state and easy to get wrong. Define:</p>
+      <div class="hs"><span class="cm">-- a constant function</span>
+<span class="fn">fortytwo</span> x = 42
+
+<span class="cm">-- and a non-terminating definition</span>
+<span class="fn">infinity</span> = infinity + 1</div>
+      <ul>
+        <li>The evaluation of <code>infinity</code> <strong>never reaches a normal form</strong>.</li>
+        <li>For the expression <code>fortytwo infinity</code>, <strong>some reduction sequences do not terminate</strong>, but <strong>those which terminate give the value 42</strong> — unicity of normal forms.</li>
+      </ul>
+      <div class="callout exam">
+        <div class="callout-label">Read that carefully — it's the crux of the whole topic</div>
+        Unicity says: <em>if</em> you reach a normal form, it is <strong>the</strong> normal form. It does <strong>not</strong> say every sequence reaches one. So an expression can have a value that a badly-chosen reduction order will never find.
+        <p style="margin:10px 0 0 0;">That gap between "a value exists" and "this strategy finds it" is exactly why the next topic exists.</p>
+      </div>
+      <!-- ===== STRATEGIES ===== -->
+      <h2 id="w6-strategies">Reduction strategies</h2>
+      <p><strong>Although the normal form is unique, the order of reductions is important.</strong> The <strong>strategy of evaluation</strong> defines the reduction sequence that the language implements. The two most popular:</p>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">Call-by-name <span style="font-weight:400; font-size:14px;">(normal order)</span></h4>
+          <p style="font-size:13.5px; margin:0;">Reduce <strong>first the application</strong> using the definition of the function, <strong>and then the argument</strong>.</p>
+        </div>
+        <div class="mode-box" style="background:var(--tint-b2); border-color:var(--accent-2);">
+          <h4 style="color:var(--accent-2);">Call-by-value <span style="font-weight:400; font-size:14px;">(applicative order)</span></h4>
+          <p style="font-size:13.5px; margin:0;">Evaluate <strong>first the argument</strong> and then the application using the definition of the function.</p>
+        </div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The four facts to memorise</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>Different strategies require a <strong>different number of reduction steps</strong> (efficiency).</li>
+          <li><strong>Call-by-name always finds the value, if there is one.</strong></li>
+          <li><strong>Call-by-value is in general more efficient, but may fail to find a value.</strong></li>
+          <li>Haskell uses <strong>lazy evaluation</strong>, which guarantees that <em>if an expression has a normal form, the evaluator will find it</em>.</li>
+        </ul>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:14px 0; color:var(--accent-3); font-weight:600;">
+          lazy evaluation &nbsp;=&nbsp; call-by-name &nbsp;+&nbsp; sharing
+        </div>
+        <p style="margin:0;"><strong>Lazy evaluation defers the evaluation of expressions until their results are needed for other computations.</strong></p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">What "+ sharing" buys you — the bit the slides state but don't demonstrate</div>
+        Plain call-by-name substitutes an <em>unevaluated</em> argument everywhere the parameter appears. If the parameter occurs twice, the argument gets evaluated <strong>twice</strong> — that's why CBV is "in general more efficient".
+        <p style="margin:10px 0 0 0;"><strong>Sharing</strong> fixes this: the copies are the <em>same object</em>, so reducing one reduces all of them. Lazy evaluation therefore gets call-by-name's guarantee <em>and</em> call-by-value's efficiency. You can watch this happen in the tool below with <code>square (3 + 1)</code>.</p>
+      </div>
+      <!-- ===== REDUCTION TOOL ===== -->
+      <h3 id="w6-redtool">🛠️ Interactive: Reduction Strategy Explorer</h3>
+      <p>Run one expression under all three strategies side by side. The highlighted sub-expression is the redex about to be reduced. Use the presets to reproduce the slides' examples — especially <code>fortytwo infinity</code>, where call-by-value fails and call-by-name succeeds.</p>
+      <div class="tool" data-run="runReduce">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Call-by-name vs call-by-value vs lazy</h3>
+        </div>
+        <div class="tool-desc">A miniature functional language: equations, <code>if … then … else</code>, arithmetic and comparisons. Pattern matching on numeric literals is supported (so <code>fact 0 = 1</code> works).</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1; min-width:250px;">
+            <label>definitions (one equation per line)</label>
+            <textarea id="fp-defs" rows="5" style="width:100%;">square x = x * x
+fortytwo x = 42
+infinity = infinity + 1
+fact 0 = 1
+fact n = n * fact (n - 1)</textarea>
+          </div>
+          <div class="tool-field" style="flex:1; min-width:190px;">
+            <label>expression to evaluate</label>
+            <input type="text" id="fp-expr" value="square (3 + 1)" style="width:100%;">
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="runReduce()">Reduce ▶</button>
+          <button class="tool-btn secondary" onclick="fpPreset('square6')">square 6</button>
+          <button class="tool-btn secondary" onclick="fpPreset('sharing')">square (3+1)</button>
+          <button class="tool-btn secondary" onclick="fpPreset('plus')">(3+1)+(2+1)</button>
+          <button class="tool-btn danger" onclick="fpPreset('inf')">fortytwo infinity</button>
+          <button class="tool-btn secondary" onclick="fpPreset('fact')">fact 3</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="fp-output" class="tool-output"></div>
+      </div>
+      <!-- ===== FUNCTIONAL VALUES ===== -->
+      <h2 id="w6-types">Functional values and types</h2>
+      <div class="callout">
+        <div class="callout-label">Functions are values</div>
+        <strong>Functions are also values</strong>, even though we cannot display or print them. As in mathematics, a function is a <strong>mapping</strong> that associates to each element of a given type A — called the <strong>domain</strong> — an element of type B, the <strong>codomain</strong>:
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:16px; margin:12px 0;">f : A → B</div>
+        <p style="margin:0;">If a function <em>f</em> of type A → B is applied to an argument <em>x</em> of type A, it gives a result <strong>(f x)</strong> of type B.</p>
+      </div>
+      <div class="hs"><span class="fn">square</span>   :: <span class="ty">Integer</span> → <span class="ty">Integer</span>
+<span class="fn">fortytwo</span> :: <span class="ty">Integer</span> → <span class="ty">Integer</span></div>
+      <!-- ===== DEFINITIONS ===== -->
+      <h2 id="w6-defs">Function definitions: equations and guards</h2>
+      <p><strong>Functions are defined in terms of equations.</strong></p>
+      <div class="hs"><span class="fn">square</span> x = x * x
+<span class="fn">min</span> x y = <span class="kw">if</span> x ≤ y <span class="kw">then</span> x <span class="kw">else</span> y</div>
+      <p>We can also use <strong>conditional equations</strong> (or <strong>guarded equations</strong>):</p>
+      <div class="hs"><span class="fn">sign</span> x
+    | x <  0  = -1
+    | x == 0  =  0
+    | x >  0  =  1</div>
+      <p>The latter is <strong>equivalent to, but clearer than</strong>:</p>
+      <div class="hs"><span class="kw">if</span> x < 0 <span class="kw">then</span> -1 <span class="kw">else</span> <span class="kw">if</span> x == 0 <span class="kw">then</span> 0 <span class="kw">else</span> 1</div>
+      <!-- ===== APPLICATION ===== -->
+      <h2 id="w6-application">Function application and its conventions</h2>
+      <p><strong>Application is denoted by juxtaposition:</strong> <code>(f x)</code>. Examples: <code>(square 3)</code>, <code>(sign (-5))</code>, <code>(min 3 (-5))</code>.</p>
+      <div class="callout exam">
+        <div class="callout-label">Three conventions to avoid too many brackets</div>
+        <table style="margin:8px 0 0 0;">
+          <tr><th>Convention</th><th>Meaning</th></tr>
+          <tr><td><strong>Application has precedence over other operations</strong></td><td><code>square 3 + 1</code> means <code>(square 3) + 1</code></td></tr>
+          <tr><td><strong>Application associates to the left</strong></td><td><code>square square 3</code> means <code>(square square) 3</code></td></tr>
+          <tr><td><strong>We will not write the outermost brackets</strong></td><td><code>square 3</code> instead of <code>(square 3)</code></td></tr>
+        </table>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The second one is a trap, not a convenience</div>
+        <code>square square 3</code> does <em>not</em> mean "square of square of 3". Left association makes it <code>(square square) 3</code> — applying <code>square</code> to <code>square</code>, which is a type error. If you want the nesting you must write <code>square (square 3)</code>. This is a favourite exam trick, and it's also <em>why</em> function composition (below) is worth having.
+      </div>
+      <!-- ===== RECURSION ===== -->
+      <h2 id="w6-recursive">Recursive definitions</h2>
+      <p><strong>In the definition of a function f we can use the function f itself.</strong></p>
+      <div class="hs"><span class="fn">fact</span> :: <span class="ty">Integer</span> → <span class="ty">Integer</span>
+<span class="fn">fact</span> n = <span class="kw">if</span> n == 0 <span class="kw">then</span> 1 <span class="kw">else</span> n * (fact (n - 1))</div>
+      <p><strong>Recursive definitions are evaluated by simplification, as any other expression:</strong></p>
+      <div class="red-seq">
+        <div class="red-step"><span class="rs-n">0</span><span class="rs-a"></span><span class="rs-e">fact 0</span></div>
+        <div class="red-step"><span class="rs-n">1</span><span class="rs-a">→</span><span class="rs-e">if 0 == 0 then 1 else 0 * (fact (0 - 1))</span></div>
+        <div class="red-step"><span class="rs-n">2</span><span class="rs-a">→</span><span class="rs-e">if True then 1 else 0 * (fact (0 - 1))</span></div>
+        <div class="red-step nf"><span class="rs-n">3</span><span class="rs-a">→</span><span class="rs-e">1</span></div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The operational semantics of the conditional</div>
+        First <strong>evaluate the condition</strong>. If the result is:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>True</strong> → evaluate <em>only</em> the expression in the left branch (<code>then</code>).</li>
+          <li><strong>False</strong> → evaluate <em>only</em> the expression in the right branch (<code>else</code>).</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">This is why <code>fact 0</code> terminates: the <code>else</code> branch containing the recursive call is <strong>never evaluated</strong>. If the conditional evaluated both branches, every recursive function would diverge.</p>
+      </div>
+      <p>Therefore the reduction sequence above is <strong>the only one</strong> for <code>fact 0</code>, and this program terminates. <strong>However, if we start with <code>fact (-1)</code>, the reduction sequence does not terminate.</strong> To avoid this problem we should write:</p>
+      <div class="hs"><span class="fn">fact</span> :: <span class="ty">Integer</span> → <span class="ty">Integer</span>
+<span class="fn">fact</span> n
+    | n >  0 = n * (fact (n - 1))
+    | n == 0 = 1
+    | n <  0 = <span class="fn">error</span> <span class="st">"negative argument"</span></div>
+      <div class="callout">
+        <div class="callout-label">error</div>
+        <strong>error</strong> is a predefined function that takes a <em>string</em> as argument. When evaluated it causes <strong>immediate termination of the evaluator</strong> and displays the string.
+      </div>
+      <!-- ===== PATTERN MATCHING ===== -->
+      <h2 id="w6-patterns">Function definitions by pattern matching</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition, and the rule that decides which equation is used</div>
+        Functions may also be defined using <strong>pattern matching on their arguments</strong>. <em>This is an important feature of functional languages.</em>
+        <p style="margin:10px 0 0 0;">Upon evaluation the argument of a function is <strong>compared against those of the possible definitions, in the order they are provided</strong>, until either a match is found or the patterns are exhausted.</p>
+      </div>
+      <div class="hs"><span class="fn">fact</span> :: <span class="ty">Integer</span> → <span class="ty">Integer</span>
+<span class="fn">fact</span> 0 = 1
+<span class="fn">fact</span> n = n * (fact (n - 1))</div>
+      <div class="callout warn">
+        <div class="callout-label">"in the order they are provided" is load-bearing</div>
+        The pattern <code>n</code> is a variable, so it matches <em>anything</em> — including 0. If you wrote the two equations the other way round, <code>fact 0</code> would match <code>fact n</code> first and recurse forever. <strong>Specific patterns must come before general ones.</strong>
+      </div>
+      <!-- ===== FIB EXERCISE ===== -->
+      <h2 id="w6-fib">Exercise: <code>fib</code>, four ways</h2>
+      <p>The exercise: write definitions for <code>fib n</code> giving the n-th value of the Fibonacci sequence <strong>1, 1, 2, 3, 5, 8, 13, 21, …</strong> — one using a <em>conditional</em>, one using <em>guarded equations</em>, one using <em>pattern matching</em>.</p>
+      <div class="callout tip">
+        <div class="callout-label">Solutions below are worked out here, not taken from the slide deck</div>
+        The slides pose this as a pause-and-try exercise and give the sample solution in the video. The three straightforward versions are written out below; <strong>the fourth version is the one the slides then go on to unravel</strong>, so it is the one to study closely.
+      </div>
+      <div class="compare-2">
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:4px;">1 · conditional</div>
+          <div class="hs" style="margin-top:0;"><span class="fn">fib</span> :: <span class="ty">Int</span> → <span class="ty">Int</span>
+<span class="fn">fib</span> n = <span class="kw">if</span> n == 1 <span class="kw">then</span> 1
+        <span class="kw">else</span> <span class="kw">if</span> n == 2 <span class="kw">then</span> 1
+        <span class="kw">else</span> fib (n-1) + fib (n-2)</div>
+        </div>
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent-2); margin-bottom:4px;">2 · guarded equations</div>
+          <div class="hs" style="margin-top:0;"><span class="fn">fib</span> :: <span class="ty">Int</span> → <span class="ty">Int</span>
+<span class="fn">fib</span> n
+    | n == 1    = 1
+    | n == 2    = 1
+    | n >  2    = fib (n-1) + fib (n-2)
+    | otherwise = <span class="fn">error</span> <span class="st">"out of range"</span></div>
+        </div>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent-3); margin-bottom:4px;">3 · pattern matching</div>
+      <div class="hs" style="margin-top:0;"><span class="fn">fib</span> :: <span class="ty">Int</span> → <span class="ty">Int</span>
+<span class="fn">fib</span> 1 = 1
+<span class="fn">fib</span> 2 = 1
+<span class="fn">fib</span> n = fib (n-1) + fib (n-2)</div>
+      <h3>4 · The lazy one-liner — and how it works</h3>
+      <div class="hs"><span class="fn">fib</span> n = xs !! (n - 1)
+   <span class="kw">where</span> xs = 1 : 1 : <span class="fn">zipWith</span> (+) xs (<span class="fn">tail</span> xs)</div>
+      <p>Three pieces of notation are needed to read it:</p>
+      <table>
+        <tr><th>Notation</th><th>Meaning</th><th>Example</th></tr>
+        <tr><td><code>!!</code></td><td>The <strong>indexing</strong> operator — returns the n-th element of a list (<em>the first position is 0</em>)</td><td><code>[3,5,2,1] !! 0 = 3</code><br><code>[3,5,2,1] !! 2 = 2</code></td></tr>
+        <tr><td><code>:</code></td><td>The <strong>"cons"</strong> operator for lists — takes an element and a list, returns a list with the element added at the front</td><td><code>[3,1,2] == 3 : [1,2] == 3 : 1 : [2] == 3:1:2:[]</code></td></tr>
+        <tr><td><code>zipWith f l1 l2</code></td><td>Applies <em>f</em> to the elements <strong>at the same position</strong> in l1 and l2, returning a new list of the results</td><td><code>zipWith (+) [1,3,4] [3,2,5] = [4,5,9]</code></td></tr>
+      </table>
+      <p>So <code>xs</code> is a list that starts with <code>[1,1]</code>, and <strong>the rest of the list is the result of applying <code>zipWith (+)</code> to itself and its tail</strong>:</p>
+      <table>
+        <tr><th></th><th>list</th></tr>
+        <tr><td><code>xs</code></td><td><code>[1, 1, 2, 3, …]</code></td></tr>
+        <tr><td><code>tail xs</code></td><td><code>[1, 2, 3, …]</code></td></tr>
+        <tr><td><code>zipWith (+) xs (tail xs)</code></td><td><code>[2, 3, 5, …]</code></td></tr>
+      </table>
+      <div class="callout exam">
+        <div class="callout-label">Why this definition is not circular nonsense</div>
+        <code>xs</code> is defined <em>in terms of itself</em> — which would be impossible under call-by-value, because computing <code>xs</code> would require computing <code>xs</code>. It works because Haskell is <strong>lazy</strong>: <code>zipWith</code> only demands as many elements of <code>xs</code> as it has already produced. Each new element is computed from elements already known.
+        <p style="margin:10px 0 0 0;">This is the single best illustration of "<strong>lazy evaluation defers the evaluation of expressions until their results are needed</strong>" — an <em>infinite</em> list, defined in one line, that terminates whenever you only ask for a finite part of it. Sharing matters too: without it each element would be recomputed exponentially often.</p>
+      </div>
+      <!-- ===== LOCAL DEFINITIONS ===== -->
+      <h2 id="w6-local">Local definitions: <code>where</code> and <code>let … in</code></h2>
+      <p>As in mathematics, we can write:</p>
+      <div class="compare-2">
+        <div class="hs" style="margin:0;"><span class="fn">f</span> x = a + 1 <span class="kw">where</span> a = x / 2</div>
+        <div class="hs" style="margin:0;"><span class="fn">f</span> x = <span class="kw">let</span> a = x / 2 <span class="kw">in</span> a + 1</div>
+      </div>
+      <p>The syntax <strong><code>let … in</code></strong> and <strong><code>where</code></strong> is used to introduce <strong>local definitions</strong>, <em>available just on the right-hand side of the equation that we are writing</em>. We can write several local definitions:</p>
+      <div class="hs"><span class="fn">f</span> x = square (successor x)
+         <span class="kw">where</span> square z = z * z ; successor x = x + 1</div>
+      <div class="callout exam">
+        <div class="callout-label">Evaluation of local definitions — the three steps</div>
+        For <code>e[a] where a = e′</code>:
+        <ol style="margin:8px 0 0 0;">
+          <li>Evaluate <strong>e′</strong>, obtaining a result <strong>r</strong></li>
+          <li>Replace <strong>a</strong> by <strong>r</strong> in <strong>e</strong></li>
+          <li>Evaluate <strong>e{a ↦ r}</strong></li>
+        </ol>
+      </div>
+      <p>The worked example:</p>
+      <div class="hs"><span class="fn">magnitude</span> a b = sqrt (asq + bsq) <span class="kw">where</span> asq = a * a ; bsq = b * b</div>
+      <div class="red-seq">
+        <div class="red-step"><span class="rs-n">0</span><span class="rs-a"></span><span class="rs-e">magnitude 3 4</span></div>
+        <div class="red-step"><span class="rs-n">1</span><span class="rs-a">→</span><span class="rs-e">sqrt (asq + bsq) where asq = 3 * 3 ; bsq = 4 * 4</span></div>
+        <div class="red-step"><span class="rs-n">2</span><span class="rs-a">→</span><span class="rs-e">sqrt (asq + bsq) where asq = 9 ; bsq = 4 * 4</span></div>
+        <div class="red-step"><span class="rs-n">3</span><span class="rs-a">→</span><span class="rs-e">sqrt (9 + bsq) where bsq = 4 * 4</span></div>
+        <div class="red-step"><span class="rs-n">4</span><span class="rs-a">→</span><span class="rs-e">sqrt (9 + bsq) where bsq = 16</span></div>
+        <div class="red-step"><span class="rs-n">5</span><span class="rs-a">→</span><span class="rs-e">sqrt (9 + 16)</span></div>
+        <div class="red-step"><span class="rs-n">6</span><span class="rs-a">→</span><span class="rs-e">sqrt 25</span></div>
+        <div class="red-step nf"><span class="rs-n">7</span><span class="rs-a">→</span><span class="rs-e">5</span></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Compare with Week 2's notion of scope</div>
+        "Available just on the right-hand side of the equation" is a <strong>scope</strong> rule — and a <em>static</em> one, in Week 2's terminology. It's the functional counterpart of the block from Week 4: a local name, visible in a delimited region, gone afterwards.
+      </div>
+      <!-- ===== ARITHMETIC ===== -->
+      <h2 id="w6-arith">Arithmetic functions, infix and prefix</h2>
+      <p><strong>Arithmetic operators are also functions (primitives)</strong>, used in <em>infix</em> notation, e.g. <code>3 + 4</code>. We can use them in <strong>prefix</strong> notation if we enclose them in brackets, e.g. <code>(+) 3 4</code>.</p>
+      <div class="callout exam">
+        <div class="callout-label">(+) denotes the <em>curryfied</em> version of +</div>
+        <div class="hs" style="margin:8px 0 0 0;">  +   :: (<span class="ty">Integer</span>, <span class="ty">Integer</span>) → <span class="ty">Integer</span>
+(+)   :: <span class="ty">Integer</span> → <span class="ty">Integer</span> → <span class="ty">Integer</span></div>
+        <p style="margin:10px 0 0 0;">One takes a <strong>pair</strong>; the other takes one argument and <em>returns a function</em>. That difference is the whole subject of §6.3 below.</p>
+      </div>
+      <p><strong>Standard functions use prefix syntax by default, but may be made infix by quoting them</strong>, e.g. <code>10 `div` 2</code>.</p>
+      <table>
+        <tr><th>Fact</th><th>Example</th></tr>
+        <tr><td><code>+ - * /</code> are <strong>left associative</strong></td><td><code>3 - 1 - 2</code> should be read as <code>(3 - 1) - 2</code></td></tr>
+        <tr><td><strong>Partial application of an operator</strong></td><td><code>(+) 1</code> is the <em>successor</em> function</td></tr>
+        <tr><td><strong>Partial application again</strong></td><td><code>(*) 2</code> is the function that <em>doubles</em> its argument</td></tr>
+        <tr><td><strong>Application has priority</strong></td><td><code>square 1 + 4 * 2</code> means <code>(square 1) + (4 * 2)</code></td></tr>
+      </table>
+      <!-- ===== COMPOSITION ===== -->
+      <h2 id="w6-composition">Functional composition</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        <strong>Functions are the building blocks of functional languages.</strong> One way of combining functions is by <strong>composition</strong>, written infix as <code>f · g</code>. <strong>Composition is itself a (pre-defined) function.</strong>
+        <div class="hs" style="margin:10px 0 0 0;">(·) :: (<span class="ty">b</span> → <span class="ty">c</span>) → (<span class="ty">a</span> → <span class="ty">b</span>) → (<span class="ty">a</span> → <span class="ty">c</span>)
+(f · g) x = f (g x)</div>
+        <p style="margin:10px 0 0 0;"><strong>We can only compose functions whose types match.</strong></p>
+      </div>
+      <p>The example:</p>
+      <div class="compare-2">
+        <div class="hs" style="margin:0;"><span class="fn">len</span> :: [<span class="ty">Int</span>] → <span class="ty">Int</span>
+<span class="fn">len</span> [] = 0
+<span class="fn">len</span> (x:xs) = 1 + (len xs)
+
+<span class="fn">double</span> :: <span class="ty">Int</span> → <span class="ty">Int</span>
+<span class="fn">double</span> x = 2 * x</div>
+        <div class="hs" style="margin:0;"><span class="fn">sample</span> = double · len      <span class="cm">-- valid</span>
+<span class="fn">tilt</span>   = len · double      <span class="cm">-- error</span>
+
+<span class="fn">sample</span> :: [<span class="ty">Int</span>] -> <span class="ty">Int</span>
+<span class="fn">sample</span> [1,2,3] = 6</div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why <code>len · double</code> fails — read the types right to left</div>
+        In <code>f · g</code>, <strong><em>g</em> runs first</strong>. So <code>len · double</code> would feed the <code>Int</code> produced by <code>double</code> into <code>len</code>, which wants a <code>[Int]</code>. The types don't meet in the middle. In the valid direction, <code>len</code> turns <code>[Int]</code> into <code>Int</code>, and <code>double</code> accepts exactly that.
+        <p style="margin:10px 0 0 0;">Note also that <code>sample = double · len</code> defines a function <em>without mentioning its argument at all</em> — the composition operator makes the parameter unnecessary.</p>
+      </div>
+      <!-- ===== COMPOSITION TOOL ===== -->
+      <h3 id="w6-comptool">🛠️ Interactive: Composition Type Checker</h3>
+      <p>Enter two function types and see whether <code>f · g</code> type-checks, which type it gets, and — if not — exactly where the mismatch is.</p>
+      <div class="tool" data-run="runCompose">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Does f · g type-check?</h3>
+        </div>
+        <div class="tool-desc">Write types with <code>-&gt;</code> (right-associative), lists as <code>[Int]</code>, tuples as <code>(Int,Int)</code>. Lower-case names are type variables.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>f ::</label>
+            <input type="text" id="cp-f" value="Int -> Int" style="width:190px;">
+          </div>
+          <div class="tool-field">
+            <label>g ::</label>
+            <input type="text" id="cp-g" value="[Int] -> Int" style="width:190px;">
+          </div>
+          <button class="tool-btn" onclick="runCompose()">Check f · g ▶</button>
+          <button class="tool-btn danger" onclick="document.getElementById('cp-f').value='[Int] -> Int';document.getElementById('cp-g').value='Int -> Int';runCompose();">Try the error case</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="cp-output" class="tool-output"></div>
+      </div>
+      <!-- ===== CURRYFICATION ===== -->
+      <h2 id="w6-curry">Curryfication and partial application</h2>
+      <div class="callout exam">
+        <div class="callout-label">The central fact</div>
+        <strong>Functions in Haskell take no more than one argument.</strong> Applying a function to <em>n &gt; 1</em> arguments <strong>yields another function with n − 1 arguments</strong>. This allows one to create new functions by <strong>partial application</strong>.
+      </div>
+      <div class="hs"><span class="fn">plus</span> :: <span class="ty">Int</span> → <span class="ty">Int</span> → <span class="ty">Int</span>
+<span class="fn">plus</span> x y = x + y
+
+plus 3       :: <span class="ty">Int</span> → <span class="ty">Int</span>
+(plus 3) 2   :: <span class="ty">Int</span>
+(plus 3) 2   = 5</div>
+      <div class="callout tip">
+        <div class="callout-label">Two conventions doing the work at once</div>
+        <code>Int → Int → Int</code> is read <strong>right</strong>-associatively as <code>Int → (Int → Int)</code>, while <em>application</em> associates to the <strong>left</strong>, so <code>plus 3 2</code> is <code>(plus 3) 2</code>. The two conventions are designed to fit together: feed one argument, get a function; feed the next, get the answer.
+      </div>
+      <p><strong>Multiple arguments can be passed as one in a tuple, but this does not allow partial application:</strong></p>
+      <div class="hs"><span class="fn">plusTuple</span> :: (<span class="ty">Int</span>, <span class="ty">Int</span>) → <span class="ty">Int</span>
+<span class="fn">plusTuple</span> (x,y) = x + y</div>
+      <p>We can convert between curried and uncurried functions using the primitive functions <strong><code>curry</code></strong> and <strong><code>uncurry</code></strong>:</p>
+      <div class="hs"><span class="fn">curry</span>   :: ((<span class="ty">a</span>,<span class="ty">b</span>) → <span class="ty">c</span>) → (<span class="ty">a</span> → <span class="ty">b</span> → <span class="ty">c</span>)
+<span class="fn">uncurry</span> :: (<span class="ty">a</span> → <span class="ty">b</span> → <span class="ty">c</span>) → ((<span class="ty">a</span>,<span class="ty">b</span>) → <span class="ty">c</span>)
+
+<span class="fn">plus</span> :: <span class="ty">Int</span> → <span class="ty">Int</span> → <span class="ty">Int</span>
+<span class="fn">plus</span> = curry plusTuple</div>
+      <div class="callout warn">
+        <div class="callout-label">Why the tuple version loses something</div>
+        <code>plusTuple</code> has <em>one</em> argument that happens to be a pair, so there is no intermediate stage to stop at — you cannot write <code>plusTuple 3</code>. The curried version has genuinely two stages, and <code>plus 3</code> is a perfectly good value: the "add 3" function. That's why <code>(+) 1</code> could be described as the successor function above.
+      </div>
+      <!-- ===== CURRY TOOL ===== -->
+      <h3 id="w6-currytool">🛠️ Interactive: Partial Application Stepper</h3>
+      <p>Apply arguments one at a time and watch the type shrink. Try the tuple version to see partial application refused.</p>
+      <div class="tool" data-run="runCurry">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Curried application, one argument at a time</h3>
+        </div>
+        <div class="tool-desc">Each row is one application. The type after the last argument is the result type; anything before it is still a function.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>function name</label>
+            <input type="text" id="cu-name" value="plus" style="width:110px;">
+          </div>
+          <div class="tool-field">
+            <label>its type</label>
+            <input type="text" id="cu-type" value="Int -> Int -> Int" style="width:210px;">
+          </div>
+          <div class="tool-field">
+            <label>arguments (space separated)</label>
+            <input type="text" id="cu-args" value="3 2" style="width:150px;">
+          </div>
+          <button class="tool-btn" onclick="runCurry()">Apply ▶</button>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="cuPreset('plus')">plus 3 2</button>
+          <button class="tool-btn secondary" onclick="cuPreset('partial')">plus 3 only</button>
+          <button class="tool-btn danger" onclick="cuPreset('tuple')">plusTuple (tuple)</button>
+          <button class="tool-btn secondary" onclick="cuPreset('over')">too many args</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="cu-output" class="tool-output"></div>
+      </div>
+      <!-- ===== EXERCISES ===== -->
+      <h2 id="w6-exercises">Exercises 1–5, worked</h2>
+      <div class="callout tip">
+        <div class="callout-label">These solutions are worked out here, not copied from the slides</div>
+        The deck states the five exercises and gives sample solutions in the video. Below is a solution for each, in the style the exercise asks for. Where the exercise names a technique (conditionals, guards), both versions are given.
+      </div>
+      <div class="exc">
+        <div class="exc-n">Exercise 1</div>
+        <h4>Sum of the naturals up to n</h4>
+        <div class="exc-sig">sumNat :: Int -&gt; Int</div>
+        <p style="font-size:14px;">So <code>sumNat 0 = 0</code>, <code>sumNat 1 = 1</code>, <code>sumNat 2 = 3</code>, and so forth. <em>Write one version with conditionals and one with guards.</em></p>
+        <div class="compare-2">
+          <div class="hs" style="margin:0;"><span class="cm">-- with a conditional</span>
+<span class="fn">sumNat</span> :: <span class="ty">Int</span> -> <span class="ty">Int</span>
+<span class="fn">sumNat</span> n = <span class="kw">if</span> n == 0
+             <span class="kw">then</span> 0
+             <span class="kw">else</span> n + sumNat (n - 1)</div>
+          <div class="hs" style="margin:0;"><span class="cm">-- with guards</span>
+<span class="fn">sumNat</span> :: <span class="ty">Int</span> -> <span class="ty">Int</span>
+<span class="fn">sumNat</span> n
+    | n <  0 = <span class="fn">error</span> <span class="st">"negative argument"</span>
+    | n == 0 = 0
+    | otherwise = n + sumNat (n - 1)</div>
+        </div>
+        <p style="font-size:13px; color:var(--ink-soft);">The guarded version also guards against <code>sumNat (-1)</code>, which would otherwise recurse forever — the same trap the slides pointed out for <code>fact</code>.</p>
+      </div>
+      <div class="exc">
+        <div class="exc-n">Exercise 2</div>
+        <h4>Does time t₁ come before time t₂?</h4>
+        <div class="exc-sig">before :: (Int,Int,Int) -&gt; (Int,Int,Int) -&gt; Bool</div>
+        <div class="hs"><span class="fn">before</span> :: (<span class="ty">Int</span>,<span class="ty">Int</span>,<span class="ty">Int</span>) -> (<span class="ty">Int</span>,<span class="ty">Int</span>,<span class="ty">Int</span>) -> <span class="ty">Bool</span>
+<span class="fn">before</span> (h1,m1,s1) (h2,m2,s2)
+    | h1 /= h2  = h1 < h2
+    | m1 /= m2  = m1 < m2
+    | otherwise = s1 < s2</div>
+        <p style="font-size:13px; color:var(--ink-soft);">Note the shape of the type: it takes <em>two</em> tuples, curried — so <code>before (9,0,0)</code> is itself a useful function. An alternative one-liner converts both to seconds: <code>3600*h + 60*m + s</code>, then compares.</p>
+      </div>
+      <div class="exc">
+        <div class="exc-n">Exercise 3</div>
+        <h4>Absolute value</h4>
+        <div class="exc-sig">abs_val :: Int -&gt; Int</div>
+        <div class="hs"><span class="fn">abs_val</span> :: <span class="ty">Int</span> -> <span class="ty">Int</span>
+<span class="fn">abs_val</span> n
+    | n < 0     = -n
+    | otherwise =  n</div>
+      </div>
+      <div class="exc">
+        <div class="exc-n">Exercise 4</div>
+        <h4>Euclidean distance between two coordinates</h4>
+        <div class="exc-sig">dist :: (Float,Float) -&gt; (Float,Float) -&gt; Float</div>
+        <div class="hs"><span class="fn">dist</span> :: (<span class="ty">Float</span>,<span class="ty">Float</span>) -> (<span class="ty">Float</span>,<span class="ty">Float</span>) -> <span class="ty">Float</span>
+<span class="fn">dist</span> (x1,y1) (x2,y2) = <span class="fn">sqrt</span> (dx*dx + dy*dy)
+    <span class="kw">where</span> dx = x2 - x1
+          dy = y2 - y1</div>
+        <p style="font-size:13px; color:var(--ink-soft);">A good place to use <code>where</code>: <code>dx</code> and <code>dy</code> are each needed twice, and naming them is clearer than repeating the subtraction.</p>
+      </div>
+      <div class="exc">
+        <div class="exc-n">Exercise 5</div>
+        <h4>Largest element of a non-empty list</h4>
+        <div class="exc-sig">largest :: [Int] -&gt; Int</div>
+        <div class="hs"><span class="fn">largest</span> :: [<span class="ty">Int</span>] -> <span class="ty">Int</span>
+<span class="fn">largest</span> []     = <span class="fn">error</span> <span class="st">"empty list"</span>
+<span class="fn">largest</span> [x]    = x
+<span class="fn">largest</span> (x:xs) = <span class="kw">if</span> x > rest <span class="kw">then</span> x <span class="kw">else</span> rest
+    <span class="kw">where</span> rest = largest xs</div>
+        <p style="font-size:13px; color:var(--ink-soft);">The hint given: <code>(x:xs)</code> matches <em>x</em> with the head and <em>xs</em> with the tail; <code>[]</code> matches the empty list; <code>null</code> checks whether a list is empty. Note the equation order — <code>[]</code> and <code>[x]</code> must come before <code>(x:xs)</code>, since <code>(x:xs)</code> would otherwise match a one-element list and recurse into the empty case.</p>
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="w6-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 6</div>
+        <ol>
+          <li><strong>What functional programming is</strong> — programs consist entirely of functions; functions defined in terms of other functions; focus on <em>what</em>, not <em>how</em>.</li>
+          <li><strong>Modern functional languages</strong> are strongly typed (no core dumps) with built-in memory management. <strong>Advantages:</strong> shorter programs, easier to understand, easier to design/verify/maintain. <strong>Disadvantages:</strong> usually slower, arguably less flexible.</li>
+          <li><strong>Applications</strong> — theorem provers, NLP, music composition, GUIs, expert systems, telephony (Erlang).</li>
+          <li><strong>Reduction</strong> — evaluation is a simplification process producing the <em>value</em> or <em>normal form</em>; notation e → e′; the meaning of an expression is its value.</li>
+          <li><strong>Unicity of normal forms</strong> — in pure functional languages the value is uniquely determined by the components and is <em>independent of the order of reduction</em>.</li>
+          <li><strong>Non-termination</strong> — not all reduction sequences lead to a value. Know the <code>fortytwo infinity</code> example: some sequences don't terminate, but those that do give 42.</li>
+          <li><strong>Call-by-name (normal order)</strong> — reduce the application first using the definition, then the argument. <strong>Always finds the value, if there is one.</strong></li>
+          <li><strong>Call-by-value (applicative order)</strong> — evaluate the argument first, then the application. <strong>More efficient in general, but may fail to find a value.</strong></li>
+          <li><strong>Lazy evaluation = call-by-name + sharing</strong>; Haskell uses it; it guarantees that if an expression has a normal form the evaluator will find it. It <em>defers evaluation until results are needed</em>.</li>
+          <li><strong>Functions are values</strong> — f : A → B with domain A and codomain B; applying f of type A→B to x of type A gives (f x) of type B.</li>
+          <li><strong>Three ways to define a function</strong> — plain equation, guarded (conditional) equations, and pattern matching. Be able to write the same function all three ways (the <code>fib</code> exercise).</li>
+          <li><strong>Pattern matching order</strong> — arguments are compared against the definitions <em>in the order they are provided</em>, until a match is found or the patterns are exhausted.</li>
+          <li><strong>The operational semantics of the conditional</strong> — evaluate the condition first; then evaluate <em>only</em> the then-branch or <em>only</em> the else-branch. This is why recursion terminates.</li>
+          <li><strong><code>error</code></strong> — a predefined function taking a string; causes immediate termination of the evaluator and displays the string.</li>
+          <li><strong>Application conventions</strong> — application has precedence over other operations; application associates to the left (<code>square square 3</code> = <code>(square square) 3</code>); outermost brackets omitted.</li>
+          <li><strong>Local definitions</strong> — <code>where</code> and <code>let … in</code>, available only on the right-hand side of the equation. Know the three evaluation steps and be able to run the <code>magnitude 3 4</code> reduction.</li>
+          <li><strong>Operators are functions</strong> — infix by default; prefix with brackets, <code>(+) 3 4</code>; <code>(+)</code> is the <em>curryfied</em> version of <code>+</code>. Standard functions are prefix but can be made infix by quoting: <code>10 `div` 2</code>. <code>+ - * /</code> are left associative.</li>
+          <li><strong>Composition</strong> — <code>(·) :: (b → c) → (a → b) → (a → c)</code> and <code>(f · g) x = f (g x)</code>. Composition is itself a function. Only functions whose types match can be composed — be ready to explain why <code>double · len</code> works and <code>len · double</code> doesn't.</li>
+          <li><strong>Curryfication</strong> — functions take no more than one argument; applying to n &gt; 1 arguments yields a function with n − 1 arguments; this enables partial application. <code>plus 3 :: Int → Int</code>.</li>
+          <li><strong>Tuples vs currying</strong> — passing multiple arguments in a tuple <em>does not allow partial application</em>; convert with <code>curry</code> and <code>uncurry</code>, and know both their types.</li>
+          <li><strong>List notation from the fib example</strong> — <code>!!</code> indexes from 0, <code>:</code> is cons, <code>zipWith f l1 l2</code> applies f pointwise. Be able to explain why the self-referential <code>xs</code> definition works under laziness.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 6 notes. Next: functional programming types and semantics.</p>
+    </section>

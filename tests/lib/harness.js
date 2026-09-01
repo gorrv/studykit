@@ -15,6 +15,12 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 
+/**
+ * Tests run against the built output, not the source tree, so that what is
+ * asserted is the artifact a student actually opens. `npm test` builds first.
+ */
+const DIST = path.join(ROOT, 'dist');
+
 /** Warnings we expect from jsdom and do not care about. */
 const IGNORED = /Could not parse CSS|Not implemented:/i;
 
@@ -27,8 +33,12 @@ const IGNORED = /Could not parse CSS|Not implemented:/i;
  * @returns {Promise<{window, doc, warnings, $, $$, text, html}>}
  */
 function loadModule(file, settle = 2500) {
-  const full = path.join(ROOT, 'modules', file);
-  if (!fs.existsSync(full)) throw new Error('no such module: ' + full);
+  const full = path.join(DIST, 'modules', file);
+  if (!fs.existsSync(full)) {
+    throw new Error(fs.existsSync(DIST)
+      ? 'no such module: ' + path.relative(ROOT, full)
+      : 'dist/ not found — run `node build.js` first (npm test does this for you)');
+  }
 
   const warnings = [];
   const vc = new VirtualConsole()
@@ -193,4 +203,4 @@ function checkQuestionBank(s, m, n = 2000) {
   s.ok('generator bank is non-trivial', GEN.length >= 5, `${GEN.length} generators`);
 }
 
-module.exports = { loadModule, Suite, checkStructure, checkQuestionBank, ROOT };
+module.exports = { loadModule, Suite, checkStructure, checkQuestionBank, ROOT, DIST };

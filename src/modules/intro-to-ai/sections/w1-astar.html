@@ -1,0 +1,223 @@
+<section id="w1-astar" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 01 · Part 3 · Heuristic search</div>
+        <h1>A* &amp; Heuristics</h1>
+        <div class="week-subtitle">using an estimate of what's ahead</div>
+      </div>
+      <!-- ===== BACKWARDS ===== -->
+      <h2 id="a-backwards">The problem with UCS: it looks backwards</h2>
+      <div class="callout exam">
+        <div class="callout-label">The observation the whole lecture turns on</div>
+        UCS orders the frontier by <code>g(n)</code> — the cost <strong>already spent</strong> getting to <code>n</code>. That is information about the <strong>past</strong>. It says nothing about whether <code>n</code> is in the right direction.
+        <p style="margin:10px 0 0 0;">So UCS is <strong>looking backwards, not forwards</strong>: it expands outward from the start in every direction equally, including directly away from the goal.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">Heuristic</div>
+        A <strong>rule of thumb</strong> — an estimate <code>h(n)</code> of the cost from <code>n</code> to the goal. It's a guess, computed cheaply, that lets the search look <em>forwards</em>.
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Where a heuristic actually comes from</div>
+        On a map, the obvious guess is the <strong>straight-line distance</strong> to the goal: easy to compute, and always less than or equal to the real road distance. For sliding tiles it might be the number of misplaced tiles. The pattern is the same — <em>solve an easier version of the problem and use its answer as the estimate</em>. That idea gets a name at the bottom of this page.
+      </div>
+      <!-- ===== GREEDY ===== -->
+      <h2 id="a-greedy">Greedy best-first search</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        <code>f(n) = h(n)</code> — expand whichever frontier node <em>looks</em> closest to the goal. Note <code>h(goal) = 0</code>, so the goal always wins once it's on the frontier.
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">What it costs you — the slide's number</div>
+        On the Romania map, greedy best-first returns
+        <div class="pathbox">ARAD → D → F → BUCHAREST &nbsp;=&nbsp; 140 + 99 + 211 = <strong>450</strong></div>
+        <p style="margin:10px 0 0 0;">The optimal route costs <strong>418</strong>. Greedy is fast and gets there, but it is <strong>not optimal</strong> — it walked into F because F <em>looked</em> close (h = 176), and only then discovered the last leg costs 211.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why it fails, in one sentence</div>
+        Greedy throws away <code>g</code> entirely, so it has <strong>no memory of what a route has already cost</strong>. UCS remembers the past and ignores the future; greedy predicts the future and ignores the past. Both are half-blind — which tells you exactly what to do next.
+      </div>
+      <!-- ===== ASTAR ===== -->
+      <h2 id="a-astar">A*</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:17px; margin:10px 0;"><strong>f(n) = g(n) + h(n)</strong></div>
+        <ul style="margin:6px 0 0 0;">
+          <li><code>g(n)</code> — the cost of the path <strong>from the start</strong> to <code>n</code> (backwards, known).</li>
+          <li><code>h(n)</code> — the <strong>estimated</strong> cost from <code>n</code> <strong>to the goal</strong> (forwards, guessed).</li>
+          <li><code>f(n)</code> — the estimated cost of the <strong>best route through <code>n</code></strong>.</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Read <code>f</code> as a question</div>
+        "<em>If the answer goes through this node, what would the whole trip cost?</em>" Expanding the smallest <code>f</code> means always working on the most promising complete plan, rather than the cheapest fragment (UCS) or the nicest-looking next stop (greedy).
+      </div>
+      <!-- ===== WORKED ===== -->
+      <h2 id="a-worked">The worked example</h2>
+      <p>Start ARAD, goal BUCHAREST. Straight-line heuristics to BUCHAREST:</p>
+      <div class="frontier">
+        <span class="chipq">ARAD<span class="f">366</span></span><span class="chipq">A<span class="f">329</span></span><span class="chipq">B<span class="f">374</span></span>
+        <span class="chipq">C<span class="f">380</span></span><span class="chipq">D<span class="f">253</span></span><span class="chipq">E<span class="f">193</span></span>
+        <span class="chipq">F<span class="f">176</span></span><span class="chipq">G<span class="f">100</span></span><span class="chipq">H<span class="f">160</span></span>
+        <span class="chipq">I<span class="f">244</span></span><span class="chipq">L<span class="f">241</span></span><span class="chipq">M<span class="f">242</span></span>
+        <span class="chipq goal">BUCHAREST<span class="f">0</span></span>
+      </div>
+      <p style="margin-top:20px;">Expanding ARAD gives three children — and <code>f</code> already picks the right one:</p>
+      <div style="margin:12px 0;">
+        <span class="fnode"><span class="nm">A</span> f = <span class="calc">118 + 329 =</span> <strong>447</strong></span>
+        <span class="fnode"><span class="nm">B</span> f = <span class="calc">75 + 374 =</span> <strong>449</strong></span>
+        <span class="fnode"><span class="nm">D</span> f = <span class="calc">140 + 253 =</span> <strong>393</strong></span>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Notice what just happened</div>
+        <strong>B is the cheapest child</strong> (g = 75) — UCS would expand it first. But B looks far from the goal (h = 374), so its <code>f</code> is the worst of the three. D costs nearly twice as much to reach, yet has the best <code>f</code>. <strong>This single step is the difference between UCS and A*.</strong>
+      </div>
+      <p style="margin-top:20px;">Continuing — expand D (f = 393), which gives:</p>
+      <div style="margin:12px 0;">
+        <span class="fnode"><span class="nm">C</span> f = <span class="calc">291 + 380 =</span> <strong>671</strong></span>
+        <span class="fnode"><span class="nm">E</span> f = <span class="calc">220 + 193 =</span> <strong>413</strong></span>
+        <span class="fnode"><span class="nm">F</span> f = <span class="calc">239 + 176 =</span> <strong>415</strong></span>
+      </div>
+      <p style="margin-top:16px;">E wins (413). Expanding E gives G with <code>f = 317 + 100 = <strong>417</strong></code> and H with <code>f = 366 + 160 = <strong>526</strong></code>. G (417) still beats F (415)? No — <strong>F at 415 is expanded first</strong>, offering BUCHAREST at <code>f = 450 + 0 = <strong>450</strong></code>. That's a goal node <em>on the frontier</em>, but A* does not stop: 450 is not the smallest <code>f</code>. G at 417 is. Expanding G offers BUCHAREST at <code>f = 418 + 0 = <strong>418</strong></code>, which is now the smallest — and <em>that</em> is the answer.</p>
+      <div class="pathbox">ARAD → D → E → G → BUCHAREST &nbsp;=&nbsp; 140 + 80 + 97 + 101 = <strong>418</strong></div>
+      <div class="callout warn">
+        <div class="callout-label">The single most common exam mistake</div>
+        <strong>A* does not stop when it generates the goal — only when it <em>expands</em> it.</strong> Had it stopped the moment BUCHAREST appeared via F, it would have returned 450, the greedy answer. The optimality guarantee lives entirely in that distinction.
+      </div>
+      <!-- ===== ADMISSIBLE ===== -->
+      <!-- ===== WHERE H COMES FROM ===== -->
+      <h2 id="a-where">Where do the heuristic numbers actually come from?</h2>
+      <div class="callout warn">
+        <div class="callout-label">The question the table never answers</div>
+        You are handed <code>h(D) = 253</code> before you have explored anything. <strong>If we do not yet know the route to Bucharest, how can we possibly know it is 253 away?</strong>
+        <p style="margin:12px 0 0 0;">Because <strong>253 is not the road distance. It is the straight-line distance</strong> — measured off the map with a ruler, or computed from the two towns' coordinates. <strong>No roads are involved.</strong></p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Two different pieces of knowledge</div>
+        <table class="cmp-table">
+          <tr><th></th><th>g(n)</th><th>h(n)</th></tr>
+          <tr><td><strong>What it is</strong></td><td>the cost of the road you have actually travelled</td><td>the straight-line distance still to go</td></tr>
+          <tr><td><strong>How you get it</strong></td><td>by adding up edges as you search</td><td>from the coordinates, before you search at all</td></tr>
+          <tr><td><strong>Exact or estimate?</strong></td><td><strong>exact</strong> — you drove it</td><td><strong>an estimate</strong>, and always an under-estimate</td></tr>
+          <tr><td><strong>Changes during search?</strong></td><td>yes, it grows as you go</td><td>no — it is a fixed property of the map</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>You know where Bucharest is. You do not know how to drive there.</strong> Those are separate facts, and A* uses the cheap one to find the expensive one.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The intuition, if the map is not helping</div>
+        You are lost in a city and you can see a cathedral spire about two kilometres away. <strong>You know it is two kilometres away.</strong> You have no idea how to walk there — one-way streets, a river, dead ends. The two kilometres is <strong>h</strong>. The distance you actually end up walking is <strong>g</strong>, and it will be more than two kilometres.
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Why the ruler is always wrong in the same direction</div>
+        <strong>A straight line is the shortest thing between two points, so no road can beat it.</strong> Check it on D:
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:2; margin:10px 0 0 12px;">
+          h(D) = 253 &nbsp;&nbsp;<span style="color:var(--ink-muted);">the ruler</span><br>
+          true road = D → E → G → BUCHAREST = 80 + 97 + 101 = <strong>278</strong><br>
+          253 ≤ 278 &nbsp;&nbsp;<span style="color:var(--accent-3);">the estimate is 25 too low, as it must be</span>
+        </div>
+        <p style="margin:12px 0 0 0;">Never too high. That one-sided error is exactly the <a href="#a-admissible" onclick="showWeek('w1-astar')">admissibility</a> condition, and it is the whole reason A* can be trusted to return the cheapest path.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Two things worth knowing for the exam</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>You never compute h yourself.</strong> It is given to you in a table, exactly as in the worked example above. Computing it is the map-maker's job, not the search algorithm's.</li>
+          <li><strong>When there are no coordinates to measure</strong> — an 8-puzzle, a planning problem — you get h by <strong>relaxing the problem</strong>: solve an easier version and use its cost as the estimate. Counting misplaced tiles is the relaxation "any tile may teleport". <a href="#r-rpg" onclick="showWeek('w3-rpg')">Week 3's RPG</a> is the relaxation "actions have no delete effects". Same trick, twice.</li>
+        </ul>
+      </div>
+      <!-- ===== A* LAB ===== -->
+      <h2 id="a-lab">Tool · The A* lab</h2>
+      <div class="tool" data-run="runALab">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Drag the heuristics, switch the ranking rule, watch B wait</h3></div>
+        <p class="tool-desc">The towns sit at their real map positions, so the <strong>dashed lines are literally what h measures</strong>. Switch the ranking rule between <code>g</code>, <code>h</code> and <code>g + h</code> and step through — with <code>g</code> the dashed lines vanish, because UCS has no idea where the goal is. <strong>Drag any h slider</strong> and the search re-runs; push one above its true remaining distance and it turns red, because A* has stopped being safe. <strong>Set every h to 0</strong> and A* collapses into UCS in front of you.</p>
+        <div class="tool-controls" style="margin-top:4px;"><button class="tool-btn" onclick="runALab()">Open the lab</button></div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="al-output" class="tool-output"></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Three things to actually try in it</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Run A* to the end and watch B.</strong> It enters the frontier at expansion 1 with the cheapest g of the three, and it is <em>still sitting there</em> when the search finishes. UCS would have expanded it first. A* never expands it at all.</li>
+          <li><strong>Switch to <code>f(n) = h(n)</code>.</strong> Greedy dives at whatever looks closest and stops caring what it has already spent — compare the final cost with A*'s.</li>
+          <li><strong>Drag h(D) up past its true remaining distance.</strong> D stops looking attractive, A* explores elsewhere, and the path it returns may no longer be the cheapest. That is what losing admissibility costs you.</li>
+        </ol>
+      </div>
+      <h2 id="a-admissible">Admissible heuristics</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        A heuristic is <strong>admissible</strong> if it <strong>never over-estimates</strong> the cost to the goal — that is, for every node,
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:10px 0;">actual cost to goal &nbsp;≥&nbsp; h(n)</div>
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Straight-line distance is admissible</strong> — no road is shorter than the straight line.</li>
+          <li><strong>A* with an admissible heuristic is optimal.</strong></li>
+          <li><strong><code>h ≡ 0</code> is admissible</strong> — but then <code>f = g</code> and A* degenerates into UCS.</li>
+        </ul>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Why over-estimating breaks it</div>
+        If <code>h</code> over-estimates at some node, <code>f</code> at that node is too high, so A* may leave it sitting on the frontier and expand a goal through a worse route instead. In the worked example, if <code>h(G)</code> were 150 instead of 100, then f(G) = 467 &gt; 450 and A* would have returned the 450 route. <strong>Over-estimating is exactly the failure that admissibility rules out.</strong>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The key challenge</div>
+        Find a heuristic that is <strong>admissible AND informative</strong>.
+        <ul style="margin:8px 0 0 0;">
+          <li><em>Admissible</em> alone is easy — <code>h ≡ 0</code> qualifies, and is useless.</li>
+          <li><em>Informative</em> means close to the true cost, so the search is strongly guided.</li>
+          <li>The higher <code>h</code> is <strong>without ever exceeding the truth</strong>, the fewer nodes A* expands.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;"><strong>How to get one:</strong> by <strong>relaxing the constraints of the problem</strong> — solve an easier version and use its cost as the estimate.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Relaxation, made concrete</div>
+        Straight-line distance <em>is</em> a relaxation: drop the constraint "you must follow roads" and you get flying, whose cost is the straight line. For sliding tiles, drop "a tile can only move into the gap" and you get "number of misplaced tiles"; drop only "the target square must be empty" and you get the sum of Manhattan distances — a stronger, still-admissible heuristic. <strong>Removing a constraint can only make things cheaper, which is precisely why a relaxed solution never over-estimates.</strong>
+      </div>
+      <!-- ===== TOOLS ===== -->
+      <h2 id="a-cmptool">Tool · Compare all five algorithms</h2>
+      <div class="tool" data-run="runCompareAlgos">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Algorithm comparison</h3></div>
+        <p class="tool-desc"><strong>Races all five algorithms side by side, one pop per step.</strong> Press play and watch A* march at the goal while UCS fans out in every direction. Uses the graph and heuristics from the <em>Search explorer</em> above.</p>
+        <div class="tool-controls">
+          <div class="tool-field"><label for="ca-start">Start</label><input type="text" id="ca-start" value="ARAD" size="10"></div>
+          <div class="tool-field"><label for="ca-goal">Goal</label><input type="text" id="ca-goal" value="BUCHAREST" size="12"></div>
+          <button class="tool-btn" onclick="runCompareAlgos()">Compare</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="ca-output" class="tool-output"></div>
+      </div>
+      <h2 id="a-admtool">Tool · Admissibility checker</h2>
+      <div class="tool" data-run="runAdmissible">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Admissibility checker</h3></div>
+        <p class="tool-desc"><strong>Every heuristic value is a slider — drag one above its true cost and watch A* break in real time.</strong> The true cheapest cost to the goal is computed exactly, and the verdict, the A* path and the optimality check all update as you drag.</p>
+        <div class="tool-field" style="width:100%;">
+          <label for="ad-heur">Heuristics to test — <code>NODE : h</code></label>
+          <textarea id="ad-heur" rows="4" spellcheck="false">ARAD:366  A:329  B:374  C:380  D:253  E:193  F:176
+G:100  H:160  I:244  L:241  M:242  BUCHAREST:0</textarea>
+        </div>
+        <div class="tool-controls" style="margin-top:12px;">
+          <div class="tool-field"><label for="ad-goal">Goal</label><input type="text" id="ad-goal" value="BUCHAREST" size="12"></div>
+          <button class="tool-btn" onclick="runAdmissible()">Check</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="ad-output" class="tool-output"></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Try breaking it</div>
+        <strong>Drag the slider for G upwards.</strong> Its true cost to BUCHAREST is 101, so the moment you pass it the row turns orange, the verdict flips to <em>not admissible</em> — and the line at the bottom shows A* returning <strong>450</strong> instead of <strong>418</strong>. That is the guarantee breaking, one pixel at a time.
+        <br><br>Then press <strong>0 (admissible, useless)</strong> and watch A* still find 418, but expand as many nodes as UCS. And press <strong>the true cost (perfect)</strong> to see A* walk straight to the goal with almost no wasted expansions.
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="a-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 3</div>
+        <ol>
+          <li><strong>UCS looks backwards</strong> — <code>g</code> is cost already spent, so UCS has no sense of direction.</li>
+          <li><strong>Heuristic</strong> = a rule of thumb estimating the cost from a node to the goal.</li>
+          <li><strong>Greedy best-first</strong> — <code>f(n) = h(n)</code>, <code>h(goal) = 0</code>; on the map it returns 140 + 99 + 211 = <strong>450</strong>, which is <em>not</em> optimal.</li>
+          <li><strong>A*</strong> — <code>f(n) = g(n) + h(n)</code>: cost so far plus estimated cost remaining = estimated cost of the best route through that node.</li>
+          <li><strong>Be able to compute f-values by hand</strong> — from ARAD: A 447 = 118 + 329, B 449 = 75 + 374, D <strong>393</strong> = 140 + 253; then C 671, E <strong>413</strong>, F 415; then G <strong>417</strong>, H 526; goal via F = 450, via G = <strong>418</strong>.</li>
+          <li><strong>The optimal path</strong> — ARAD → D → E → G → BUCHAREST = 140 + 80 + 97 + 101 = <strong>418</strong>.</li>
+          <li><strong>A* stops when it expands the goal, not when it generates it</strong> — otherwise it would return 450.</li>
+          <li><strong>Admissible</strong> = never over-estimates; actual cost ≥ h(n); straight-line distance is admissible; <strong>A* + admissible ⇒ optimal</strong>.</li>
+          <li><strong><code>h ≡ 0</code> is admissible but useless</strong> — A* becomes UCS.</li>
+          <li><strong>The key challenge</strong> — admissible <em>and</em> informative; obtained by <strong>relaxing the constraints of the problem</strong>.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 1.</p>
+    </section>

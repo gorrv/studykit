@@ -1,0 +1,209 @@
+<section id="w5-metrics" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 05 · Part 2 · Introduction to Machine Learning</div>
+        <h1>Is My Algorithm Any Good?</h1>
+        <div class="week-subtitle">measurement instead of proof</div>
+      </div>
+      <!-- ===== SPLIT ===== -->
+      <h2 id="n-split">Training and test sets</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definitions — supervised learning vocabulary</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Training set</strong> — the portion of the data used for the learning. We give our program <strong>both data and labels</strong> for a portion of the data.</li>
+          <li><strong>Test set</strong> — the <strong>untouched</strong> portion of data used to evaluate our model <em>after</em> it is trained. We <strong>'hide' the test labels</strong> from the algorithm in that phase.</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The word doing the work is "untouched"</div>
+        Measuring a model on the data it was trained on tells you nothing — a model that simply <em>memorises</em> every training example would score perfectly and be useless. The test set is a stand-in for <strong>data the model will meet in the real world</strong>, and it only works as a stand-in for as long as the model has never seen it.
+        <p style="margin:10px 0 0 0;">Hold on to that word. In Part 3 a <em>third</em> split appears — the validation set — for exactly this reason, and "untouched" is why.</p>
+      </div>
+      <!-- ===== ACCURACY ===== -->
+      <h2 id="n-acc">Accuracy, and its trap</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        Given a classification algorithm and a test set, the <strong>accuracy</strong> is the <strong>proportion of correct predictions</strong> done by the algorithm <strong>over all predictions</strong> in the test set.
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The slide's question: "an algorithm has 99% accuracy. Is it good?"</div>
+        <strong>Well, it depends.</strong>
+        <p style="margin:10px 0 0 0;"><strong>Example.</strong> An algorithm takes an X-ray image of a person's lungs and predicts a rare disease <em>D</em>. Assume <strong>1% of the population has disease D</strong>.</p>
+        <p style="margin:10px 0 0 0;">A very simple algorithm achieves 99% accuracy. Which one?</p>
+        <p style="margin:10px 0 0 0;"><strong>One that says "no" to every single input.</strong></p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Work the numbers — take 10,000 patients</div>
+        100 have the disease, 9,900 don't. The always-"no" model:
+        <ul style="margin:8px 0 0 0;">
+          <li>gets all <strong>9,900</strong> healthy people right,</li>
+          <li>gets all <strong>100</strong> sick people wrong,</li>
+          <li>accuracy = 9,900 / 10,000 = <strong>99%</strong>.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">It is <strong>99% accurate and catches zero cases of the disease.</strong> This is called the <em>class imbalance</em> problem, and the general lesson is: <strong>accuracy is only meaningful relative to the base rate</strong>. On a problem where 99% of answers are "no", 99% accuracy is what you get for doing nothing at all.</p>
+      </div>
+      <!-- ===== PRECISION RECALL ===== -->
+      <h2 id="n-prf">Precision, sensitivity, F1</h2>
+      <div class="callout exam">
+        <div class="callout-label">This example suggests accuracy alone may not be a sufficient metric</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Precision</strong> — proportion of <strong>true positives over true positives and false positives</strong>.
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; margin:6px 0 0 14px;">precision = TP / (TP + FP)</div></li>
+          <li><strong>Sensitivity (or recall)</strong> — proportion of <strong>true positives over true positives and false negatives</strong>.
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; margin:6px 0 0 14px;">recall = TP / (TP + FN)</div></li>
+          <li><strong>F1 score</strong> — <strong>harmonic mean between sensitivity and precision</strong>.
+            <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:10px 0;">
+              F1 = 2 / (recall<sup>−1</sup> + precision<sup>−1</sup>) &nbsp;=&nbsp; 2·P·R / (P + R)</div></li>
+        </ul>
+      </div>
+      <p>The four boxes everything is built from — <strong>the confusion matrix</strong>:</p>
+      <table class="cmx">
+        <tr><td class="corner"></td><th colspan="2">Actually</th></tr>
+        <tr><td class="corner"></td><th>positive</th><th>negative</th></tr>
+        <tr><th>predicted positive</th><td class="tp">TP<span class="lbl">true positive</span></td><td class="fp">FP<span class="lbl">false positive</span></td></tr>
+        <tr><th>predicted negative</th><td class="fn">FN<span class="lbl">false negative</span></td><td class="tn">TN<span class="lbl">true negative</span></td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">How to remember which is which, and never mix them up</div>
+        Both fractions have <strong>TP on top</strong>. Only the denominator differs, and each denominator is <em>a column or a row of the matrix</em>:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Precision = TP / (TP + FP)</strong> — the <em>predicted-positive row</em>. "Of everything I <strong>flagged</strong>, how much was real?" It punishes <strong>false alarms</strong>.</li>
+          <li><strong>Recall = TP / (TP + FN)</strong> — the <em>actually-positive column</em>. "Of everything that <strong>was</strong> real, how much did I catch?" It punishes <strong>misses</strong>.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">Note that <strong>neither uses TN</strong>. That is the whole point: in the rare-disease problem TN is the enormous number that lets accuracy hide the failure, and precision and recall simply refuse to look at it.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Why the harmonic mean, and not the ordinary average?</div>
+        Because the harmonic mean is <strong>dragged down by the smaller number</strong>, so you cannot score well by being brilliant at one and hopeless at the other.
+        <p style="margin:10px 0 0 0;">Take precision = 1.0 and recall = 0.02:</p>
+        <ul style="margin:8px 0 0 0;">
+          <li>ordinary mean = (1.0 + 0.02) / 2 = <strong>0.51</strong> — looks respectable;</li>
+          <li>F1 = 2(1.0)(0.02) / (1.02) = <strong>0.039</strong> — correctly awful.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">F1 is high <strong>only when both are high</strong>. Every classifier can trade one for the other (flag everything → recall 1, precision terrible; flag only the single most certain case → precision 1, recall terrible), so a single number that resists that trade is what you want.</p>
+      </div>
+      <!-- ===== THE QUESTION ===== -->
+      <h2 id="n-quiz">The slide's question, worked</h2>
+      <div class="callout exam">
+        <div class="callout-label">"Which of precision or sensitivity would have highlighted the weakness of the previous algorithm? Assume 0.01% of true positives."</div>
+        <strong>Sensitivity (recall).</strong>
+      </div>
+      <div class="callout">
+        <div class="callout-label">Why — on 10,000 patients with the always-"no" model</div>
+        <p style="margin:0 0 8px 0;">The model never predicts positive, so <strong>TP = 0</strong> and <strong>FP = 0</strong>, and all 100 sick patients are missed: <strong>FN = 100</strong>, <strong>TN = 9,900</strong>.</p>
+        <ul style="margin:0;">
+          <li><strong>Accuracy</strong> = (0 + 9900) / 10000 = <strong>0.99</strong> — hides everything.</li>
+          <li><strong>Recall</strong> = 0 / (0 + 100) = <strong>0</strong> — exposes it immediately.</li>
+          <li><strong>Precision</strong> = 0 / (0 + 0) = <strong>0/0, undefined</strong> — it cannot even be computed, so it tells you nothing.</li>
+        </ul>
+        <p style="margin:12px 0 0 0;">That is what the slide's "<em>assume 0.01% of true positives</em>" is for. Let the model be very slightly less useless, so it flags a handful of cases and gets them right: now <strong>FP = 0</strong> still, so <strong>precision = 1.0 — a perfect score</strong> — while <strong>recall stays near 0</strong>.</p>
+        <p style="margin:10px 0 0 0;"><strong>Precision would have looked perfect. Recall is the one that exposes the weakness.</strong></p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The general rule this illustrates</div>
+        <strong>Recall is the metric that catches "does nothing" models.</strong> Whenever the cost of a <em>miss</em> is much worse than the cost of a <em>false alarm</em> — disease screening, fraud detection, safety systems — recall is the metric to lead with.
+        <p style="margin:10px 0 0 0;">Flip it and precision leads: for spam filtering, a missed spam is a mild annoyance but a real email in the junk folder is a disaster, so <strong>false positives</strong> are what hurt.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The deck's closing note on balanced test sets</div>
+        <em>"What about a balanced test set, in which classes have equal number of samples? Accuracy not terrible, F1 score still interesting."</em>
+        <p style="margin:10px 0 0 0;">Balance the classes 50/50 and the always-"no" trick collapses — it now scores 50%, not 99% — so accuracy becomes informative again. But F1 is <strong>still</strong> worth reporting, because accuracy still treats a miss and a false alarm as equally bad, and in most real problems they are not.</p>
+      </div>
+      <!-- ===== TOOL ===== -->
+      <h2 id="n-tool">Tool · Confusion matrix &amp; classification metrics</h2>
+      <div class="tool" data-run="runCM">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Every metric, from four numbers</h3></div>
+        <p class="tool-desc">Two modes. <strong>Type the four counts</strong> for the slide's presets — or <strong>slide a decision threshold across two overlapping score distributions</strong> and watch precision and recall trade against each other in real time, with the precision–recall curve drawn underneath.</p>
+        <div class="tool-controls">
+          <div class="tool-field"><label for="cm-preset">Preset</label>
+            <select id="cm-preset" onchange="cmPreset()">
+              <option value="custom">custom</option>
+              <option value="none" selected>rare disease · always says "no"</option>
+              <option value="tiny">rare disease · flags 0.01% (all correct)</option>
+              <option value="all">rare disease · always says "yes"</option>
+              <option value="good">rare disease · a genuinely good model</option>
+              <option value="bal">balanced test set · same model</option>
+              <option value="spam">spam filter · over-eager</option>
+            </select>
+          </div>
+          <div class="tool-field"><label for="cm-tp">TP</label><input type="text" id="cm-tp" value="0" size="7"></div>
+          <div class="tool-field"><label for="cm-fp">FP</label><input type="text" id="cm-fp" value="0" size="7"></div>
+          <div class="tool-field"><label for="cm-fn">FN</label><input type="text" id="cm-fn" value="100" size="7"></div>
+          <div class="tool-field"><label for="cm-tn">TN</label><input type="text" id="cm-tn" value="9900" size="7"></div>
+          <button class="tool-btn" onclick="runCM()">Compute</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="cm-output" class="tool-output"></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Things worth trying in it</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>Switch to <strong>slide a decision threshold</strong>, set prevalence to about 1%, and drag the threshold slowly to the right. <strong>Accuracy barely moves off 99% the entire way while recall collapses to zero</strong> — the rare-disease argument, as one continuous motion.</li>
+          <li>In that mode, drag <strong>how good the model is</strong> to 0. The two distributions sit on top of each other and no threshold can separate them; the precision–recall curve flattens onto the prevalence line.</li>
+          <li>Step through the first four presets in order. Watch <strong>accuracy stay near 99% while recall swings from 0 to 1</strong> — the whole argument of this lecture in four clicks.</li>
+          <li>The <em>flags 0.01%</em> preset is the slide's question: <strong>precision 1.00, recall 0.01</strong>. Precision says the model is perfect.</li>
+          <li>Compare <em>rare disease</em> against <em>balanced test set</em> for the same model and see accuracy become informative again.</li>
+          <li>Set TP = 0, FP = 0 and see the tool report precision as <strong>undefined</strong> rather than quietly printing 0.</li>
+          <li>On the precision–recall curve, notice you <strong>cannot move right without moving down</strong>. That trade is why a single number never settles the question, and why F1 (the dashed line) peaks somewhere in the middle.</li>
+        </ul>
+      </div>
+      <!-- ===== REGRESSION ===== -->
+      <h2 id="n-reg">Metrics for regression problems</h2>
+      <div class="callout exam">
+        <div class="callout-label">The three definitions</div>
+        Assume our regression predicts real numbers. Call the predictions <strong>ŷ₁ … ŷₙ</strong> and the true values <strong>y₁ … yₙ</strong>. Then:
+        <table style="margin:12px 0 0 0;">
+          <tr><th>Metric</th><th>Formula</th></tr>
+          <tr><td><strong>MAE</strong><br>Mean Absolute Error</td>
+              <td style="font-family:'IBM Plex Mono',monospace; font-size:14px;">(1/n) Σ<sub>i=1</sub><sup>n</sup> |ŷ<sub>i</sub> − y<sub>i</sub>|</td></tr>
+          <tr><td><strong>MSE</strong><br>Mean Squared Error</td>
+              <td style="font-family:'IBM Plex Mono',monospace; font-size:14px;">(1/n) Σ<sub>i=1</sub><sup>n</sup> (ŷ<sub>i</sub> − y<sub>i</sub>)²</td></tr>
+          <tr><td><strong>RMSE</strong><br>Root-Mean-Squared Error</td>
+              <td style="font-family:'IBM Plex Mono',monospace; font-size:14px;">√[ (1/n) Σ<sub>i=1</sub><sup>n</sup> (ŷ<sub>i</sub> − y<sub>i</sub>)² ]</td></tr>
+        </table>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why three of them, when they measure the same thing</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>MAE</strong> treats every unit of error equally. Being wrong by 10 is exactly ten times as bad as being wrong by 1.</li>
+          <li><strong>MSE</strong> squares first, so being wrong by 10 is <strong>a hundred times</strong> as bad as being wrong by 1. It is dominated by the worst predictions, which makes it <strong>very sensitive to outliers</strong>.</li>
+          <li><strong>RMSE</strong> is MSE's square root, purely so the number is <strong>back in the original units</strong>. If you're predicting prices in pounds, MSE is in pounds-squared and means nothing to a human; RMSE is in pounds.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">Useful fact: <strong>RMSE ≥ MAE always</strong>, with equality only when every error has the same magnitude. The gap between them tells you how uneven your errors are.</p>
+      </div>
+      <h2 id="n-regtool">Tool · Regression metrics</h2>
+      <div class="tool" data-run="runReg">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>MAE, MSE and RMSE, term by term</h3></div>
+        <p class="tool-desc"><strong>Drag any prediction up or down</strong> and watch MAE crawl while MSE explodes. Every residual, its absolute value and its square are listed underneath; the dashed diagonal is a perfect prediction.</p>
+        <div class="compare-2" style="margin-top:4px;">
+          <div class="tool-field"><label for="rg-pred">Predictions ŷ — numbers, any separator</label>
+            <textarea id="rg-pred" rows="3" spellcheck="false">3.1  2.0  5.4  4.8  7.2  1.1</textarea></div>
+          <div class="tool-field"><label for="rg-true">True values y</label>
+            <textarea id="rg-true" rows="3" spellcheck="false">3.0  2.5  5.0  5.0  7.0  1.0</textarea></div>
+        </div>
+        <div class="tool-controls" style="margin-top:12px;"><button class="tool-btn" onclick="runReg()">Compute</button></div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="rg-output" class="tool-output"></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The experiment to run</div>
+        Note the metrics, then <strong>drag the last dot up to about 11</strong> — one bad outlier in six points. <strong>MAE rises by about 1.6; MSE rises by roughly 16.</strong> Same data, same single mistake, ten times the effect. Watch the "share of squared error" line: that one point ends up owning over 90% of MSE while contributing a fraction of MAE.
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="n-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 2</div>
+        <ol>
+          <li><strong>Training set</strong> = the portion used for learning, data <em>and</em> labels. <strong>Test set</strong> = the <em>untouched</em> portion used to evaluate after training, with the labels hidden.</li>
+          <li><strong>Accuracy</strong> = proportion of correct predictions over all predictions in the test set.</li>
+          <li><strong>Be able to tell the 99% story</strong> — with 1% prevalence, an algorithm that always says "no" scores 99% accuracy and catches nothing.</li>
+          <li><strong>Precision = TP / (TP + FP)</strong> — of what I flagged, how much was real. Punishes false alarms.</li>
+          <li><strong>Sensitivity / recall = TP / (TP + FN)</strong> — of what was real, how much I caught. Punishes misses.</li>
+          <li><strong>F1 = 2 / (recall<sup>−1</sup> + precision<sup>−1</sup>)</strong>, the harmonic mean — high only when <em>both</em> are high.</li>
+          <li><strong>Recall is the metric that exposes the always-"no" model</strong>; precision would report 1.00 or be undefined. This is the slide's question.</li>
+          <li><strong>Neither precision nor recall uses TN</strong> — which is exactly why they survive class imbalance.</li>
+          <li><strong>On a balanced test set</strong> accuracy is "not terrible", but F1 is still interesting.</li>
+          <li><strong>MAE, MSE, RMSE</strong> — write all three formulas. MSE punishes large errors quadratically; RMSE restores the original units; RMSE ≥ MAE.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Part 2. Next: the two ways a model goes wrong.</p>
+    </section>

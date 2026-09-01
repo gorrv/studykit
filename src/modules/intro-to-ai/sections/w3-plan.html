@@ -1,0 +1,170 @@
+<section id="w3-plan" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 03 · Part 1 · Automated planning</div>
+        <h1>Classical Planning</h1>
+        <div class="week-subtitle">describing a world well enough that a general solver can act in it</div>
+      </div>
+      <!-- ===== WHAT ===== -->
+      <h2 id="p-what">What AI planning is</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        <p style="margin:0 0 8px 0;"><strong>Given:</strong></p>
+        <ul style="margin:0;">
+          <li>An <strong>initial state I</strong></li>
+          <li>A <strong>goal state G</strong></li>
+          <li>A <strong>set of actions A</strong>, each with <strong>preconditions and effects</strong></li>
+        </ul>
+        <p style="margin:12px 0 8px 0;"><strong>Find:</strong></p>
+        <ul style="margin:0;">
+          <li>A <strong>plan</strong> — a sequence of actions that bring the system from I to G.</li>
+          <li>More interesting: an <strong>optimal plan</strong> — the best way to reach the goal state.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <div class="callout-label">Where it sits in the module</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Problem modelling</strong> — graph search, heuristic search, adversarial search</li>
+          <li><strong>Constraint satisfaction problems</strong></li>
+          <li><strong>Automated planning</strong> — in general, planning is <strong>more powerful than CSP</strong> (CSPs can be modelled as planning problems)</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">How this differs from everything so far</div>
+        In Week 1 you were handed a graph. In Week 2's CSPs you were handed variables and constraints. Here <strong>you are handed nothing but a description in a language</strong>, and the state space is generated from it — the graph is implicit and astronomically large.
+        <p style="margin:10px 0 0 0;">That's what "more powerful than CSP" means: a CSP has a fixed set of variables to fill in, whereas a planning problem has an unbounded sequence of actions to choose, and the same fact can be made true, destroyed and made true again.</p>
+      </div>
+      <!-- ===== LOGISTICS ===== -->
+      <h2 id="p-log">The logistics domain</h2>
+      <div class="callout">
+        <div class="callout-label">The running example</div>
+        Cargos, trucks and locations. <strong>Initial state:</strong> cargos scattered across locations. <strong>Goal:</strong> all cargos at a destination point. Constraints in the real version include fuel, truck capacity, number of drivers…
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Problem modelling — what we must define</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>The <strong>objects</strong> involved in the problem.</li>
+          <li>The <strong>relations</strong> between the objects.</li>
+          <li>The <strong>set of possible actions</strong>, with preconditions and effects.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">And so: <strong>we need a formalism (a language) to describe objects, relations and actions.</strong></p>
+      </div>
+      <!-- ===== OBJECTS ===== -->
+      <h2 id="p-obj">Objects and relations</h2>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">Objects</h4>
+          <ul style="font-size:13.5px;">
+            <li>The cargos <code>c1 … cn</code></li>
+            <li>The trucks <code>t1 … tm</code></li>
+            <li>The locations <code>l1 … lk</code></li>
+          </ul>
+        </div>
+        <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
+          <h4 style="color:var(--accent-3);">Relations</h4>
+          <ul style="font-size:13.5px;">
+            <li>Pairs of locations can be connected: <code>connected(li, lj)</code></li>
+            <li>Each truck is in a location: <code>at(ti, lj)</code></li>
+            <li>Each cargo can be in a location: <code>at(ci, lj)</code></li>
+            <li>Each cargo can be on a truck: <code>on(ci, tj)</code></li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Note what a "relation" really is</div>
+        These are <strong>predicates over objects</strong>, and a <em>state</em> is nothing more than the set of them that currently hold. <code>at</code> is used for both trucks and cargos — the same predicate, different object types — which is exactly the generality that lets one action definition cover every truck and every cargo at once.
+      </div>
+      <!-- ===== CWA ===== -->
+      <h2 id="p-cwa">From general description to specific problem</h2>
+      <div class="callout exam">
+        <div class="callout-label">Initial state, goal state, and the closed-world assumption</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Initial state</strong> — we have to list <em>all the objects</em> of our problem and <em>all the true relations</em> among the objects.</li>
+          <li><strong>Closed-world assumption: what is not listed is assumed to be false.</strong></li>
+          <li><strong>Goal state</strong> — we have to list all the relations we want to be true.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The slides' instance — 2 trucks, 3 cargos, 8 locations</div>
+        <pre><code>at(c1,l3)   at(c2,l4)   at(c3,l8)
+at(t1,l1)   at(t2,l5)
+connected(l1,l2)  connected(l2,l3)  connected(l3,l4)  connected(l3,l8)
+connected(l4,l7)  connected(l5,l6)  connected(l6,l7)  connected(l7,l8)</code></pre>
+        <p style="margin:10px 0 0 0;">From the closed-world assumption it follows that, for example: <strong>l1 and l6 are not connected, truck t1 is not at location l8, all trucks are empty</strong>, and so on.</p>
+        <p style="margin:8px 0 0 0;"><strong>Goal state:</strong> all cargos in location <code>l6</code>.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why the closed-world assumption matters so much</div>
+        Without it you would have to write down every <em>false</em> fact too — with 8 locations and 2 trucks that's already dozens of negative statements, and it grows quadratically. CWA lets the initial state be a short list of positives.
+        <p style="margin:10px 0 0 0;">The price: <strong>the model must be complete.</strong> If you forget to state <code>connected(l2,l3)</code>, the planner doesn't ask — it silently concludes the road doesn't exist and returns a worse plan, or none. Most "the planner gave a stupid answer" bugs are a missing fact in the initial state.</p>
+      </div>
+      <!-- ===== ACTIONS ===== -->
+      <h2 id="p-act">The actions</h2>
+      <div class="callout">
+        <div class="callout-label">Informally</div>
+        A truck can <strong>move</strong> from one location to another · a cargo can be <strong>loaded</strong> into a truck · a cargo can be <strong>unloaded</strong> from a truck.
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">More formally — for each action we define three things</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>The parameters</strong> — which objects are involved?</li>
+          <li><strong>The preconditions</strong> — what needs to be true for the action to be applied?</li>
+          <li><strong>The effects</strong> — how does the state change after execution?</li>
+        </ul>
+      </div>
+      <table>
+        <tr><th>Action</th><th>Parameters</th><th>Preconditions</th><th>Effects</th></tr>
+        <tr><td><strong>Move</strong></td><td>truck <em>t</em><br>location <em>from</em><br>location <em>to</em></td>
+            <td><code>at(t, from)</code><br><code>connected(from, to)</code></td>
+            <td><code style="color:var(--accent-3);">+ at(t, to)</code><br><code style="color:var(--accent-2);">− at(t, from)</code></td></tr>
+        <tr><td><strong>Load</strong></td><td>truck <em>t</em><br>cargo <em>c</em><br>location <em>l</em></td>
+            <td><code>at(t, l)</code><br><code>at(c, l)</code></td>
+            <td><code style="color:var(--accent-3);">+ on(c, t)</code><br><code style="color:var(--accent-2);">− at(c, l)</code></td></tr>
+        <tr><td><strong>Unload</strong></td><td>truck <em>t</em><br>cargo <em>c</em><br>location <em>l</em></td>
+            <td><code>at(t, l)</code><br><code>on(c, t)</code></td>
+            <td><code style="color:var(--accent-3);">+ at(c, l)</code><br><code style="color:var(--accent-2);">− on(c, t)</code></td></tr>
+      </table>
+      <div class="callout exam">
+        <div class="callout-label">The two sentences to memorise</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Preconditions</strong> are described through a set of relations <strong>that must be true in a state for the action to be applicable</strong>.</li>
+          <li><strong>Effects</strong> are described by <strong>adding or deleting relations</strong>.</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Read the delete effects carefully — they are where the meaning lives</div>
+        <strong>Load</strong> adds <code>on(c,t)</code> and <em>deletes</em> <code>at(c,l)</code>. Without the delete, the cargo would be on the truck <em>and</em> still lying at the location — the model would let you load one crate onto every truck in the country. The delete list is what stops the world from accumulating contradictions.
+        <p style="margin:10px 0 0 0;">Also note <strong>Move has no <code>connected(to, from)</code></strong>: roads are directed unless you list both ways. And <strong>Load and Unload are exact mirrors</strong> — one action's add list is the other's delete list, which is what makes the two undo each other.</p>
+      </div>
+      <!-- ===== PLAN ===== -->
+      <h2 id="p-plan">A plan</h2>
+      <div class="planline">
+        <strong>Truck1:</strong> l1, l2, l3, load(c1), l4, load(c2), l7, l6, unload(c1), unload(c2)<br>
+        <strong>Truck2:</strong> l5, l6, l7, l8, load(c3), l7, l6, unload(c3)
+      </div>
+      <p style="font-size:14px; color:var(--ink-muted);">Note that t1 and t2 <strong>can move in parallel</strong>.</p>
+      <div class="callout warn">
+        <div class="callout-label">And then the scaling question</div>
+        <strong>What if we have 75 locations, 40 cargos, 12 trucks + aeroplanes (or more)?</strong>
+        <p style="margin:10px 0 0 0;">You are not going to write that plan by hand. <strong>We need a planner.</strong></p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The parallelism remark is a hint about Part 3</div>
+        Classical planning produces a <em>sequence</em>, so it must arbitrarily interleave the two trucks even though nothing forces an order. Recovering the fact that independent actions can overlap is what <strong>durative actions and temporal planning</strong> are for.
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="p-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Part 1</div>
+        <ol>
+          <li><strong>Given I, G and A (each action with preconditions and effects); find a plan</strong> — a sequence of actions taking the system from I to G. Optimal = the best such sequence.</li>
+          <li><strong>Planning is more powerful than CSP</strong> — CSPs can be modelled as planning problems.</li>
+          <li><strong>To model a domain</strong> you define objects, relations between them, and actions with preconditions and effects — and you need a language to write it in.</li>
+          <li><strong>An action has three parts</strong>: parameters (which objects), preconditions (what must be true), effects (how the state changes).</li>
+          <li><strong>Preconditions are relations that must hold; effects add or delete relations.</strong></li>
+          <li><strong>Be able to fill in the Move / Load / Unload table</strong> from memory, delete effects included.</li>
+          <li><strong>Closed-world assumption</strong> — the initial state lists all objects and all <em>true</em> relations; anything not listed is <strong>assumed false</strong>.</li>
+          <li><strong>Domain vs problem</strong> — the domain formalises the space of all possible problems (relations and actions); a problem instance adds the initial state and the goal.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Part 1. Next: the actual language.</p>
+    </section>

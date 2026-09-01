@@ -1,0 +1,829 @@
+<section id="week4" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 04 · Imperative Languages — Structural Operational Semantics</div>
+        <h1>Induction, Small-Step &amp; Big-Step</h1>
+        <div class="week-subtitle">the answer to the abstract machine's disadvantage</div>
+      </div>
+      <p>Week 3 ended with a complaint: the abstract machine works, but <em>"many transitions are doing just phrase analysis; only a few really perform computations."</em> This lecture gives the alternative — <strong>an operational semantics where the execution of programs is defined by induction</strong>.</p>
+      <div class="callout">
+        <div class="callout-label">Aims &amp; structure</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Understand the use of <strong>induction</strong> to specify transition systems and prove properties of programs.</li>
+          <li>Give <strong>alternative definitions</strong> of SIMP's operational semantics using induction.</li>
+        </ol>
+        <p style="margin:10px 0 0 0;">Three parts: <strong>revision of induction</strong> → <strong>small-step</strong> semantics (a <em>reduction</em> relation) → <strong>big-step</strong> semantics (an <em>evaluation</em> relation).</p>
+      </div>
+      <!-- ===== PART 1: INDUCTION ===== -->
+      <h2 id="w4-induction">Part 1 · The principle of mathematical induction</h2>
+      <div class="callout exam">
+        <div class="callout-label">The principle</div>
+        For any property <strong>P(n)</strong> of natural numbers (n ∈ ℕ = {0, 1, 2, …}), to prove <strong>∀n ∈ ℕ. P(n)</strong> it is sufficient to show:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Base case:</strong> P(0)</li>
+          <li><strong>Induction step:</strong> ∀n ∈ ℕ. P(n) ⇒ P(n + 1)</li>
+        </ul>
+      </div>
+      <p>The worked example: for all natural numbers <em>n</em>, &nbsp;<strong>Σ<sub>i=1..n</sub> (2i − 1) = n²</strong>.</p>
+      <div class="proof">
+        <div class="pf-lbl">Base case</div>
+        <div class="pf-step">0 = 0²</div>
+        <div class="pf-lbl" style="margin-top:12px;">Induction step</div>
+        <div class="pf-step"><span class="pf-just">Assume</span> &nbsp;Σ<sub>i=1..n</sub> (2i − 1) = n²</div>
+        <div class="pf-step" style="margin-top:6px;">Σ<sub>i=1..n+1</sub> (2i − 1) &nbsp;=&nbsp; Σ<sub>i=1..n</sub> (2i − 1) + 2(n + 1) − 1 &nbsp;=&nbsp; n² + 2n + 1 &nbsp;=&nbsp; (n + 1)²</div>
+      </div>
+      <!-- ===== STRUCTURAL INDUCTION ===== -->
+      <h2 id="w4-structural">Structural induction</h2>
+      <p>Induction generalises from numbers to <em>structures</em>. First, lists. We denote an empty list by <strong>nil</strong>, and a non-empty list by <strong>cons(h, l)</strong> where <em>h</em> is the head element and <em>l</em> is the tail.</p>
+      <div class="callout exam">
+        <div class="callout-label">Structural induction on lists</div>
+        To prove that a property <strong>P</strong> holds for every list, it is sufficient to prove:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Base case:</strong> P(nil)</li>
+          <li><strong>Induction step:</strong> P(l) ⇒ P(cons(h, l)) for all h, l</li>
+        </ul>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Structural induction on finite labelled trees — the general form</div>
+        More generally, for finite labelled trees, to prove a property <strong>P</strong> it is sufficient to show:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Base case:</strong> P(l) for all <em>leaf nodes</em> l</li>
+          <li><strong>Induction step:</strong> for each tree constructor <em>c</em> (with n ≥ 1 arguments):<br>
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:13px;">∀t₁, …, tₙ. P(t₁) ∧ … ∧ P(tₙ) ⇒ P(c(t₁, …, tₙ))</span></li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why this is <em>exactly</em> the shape of a SIMP grammar</div>
+        Look back at Week 3: the leaves of a SIMP tree are ℤ ∪ {True, False} ∪ L ∪ {skip}, and the non-leaves are operators and commands. So the abstract syntax <em>hands you</em> the base cases and the induction steps — one base case per leaf kind, one induction step per constructor. <strong>The grammar is the induction principle.</strong> That is the deepest idea of the week and it's why abstract syntax was set up as trees in Week 1.
+      </div>
+      <h3>Example: proving a property of SIMP integer expressions</h3>
+      <p>To prove that a property P holds for all integer expressions in SIMP:</p>
+      <div class="proof">
+        <div class="pf-lbl">1 · Base case</div>
+        <div class="pf-step">Prove P(n) for all n ∈ ℤ</div>
+        <div class="pf-step">Prove P(!l) for all locations l</div>
+        <div class="pf-lbl" style="margin-top:12px;">2 · Induction step</div>
+        <div class="pf-step">For all integer expressions E, E′ and operators op:</div>
+        <div class="pf-step">Prove that P(E) and P(E′) implies P(E op E′)</div>
+      </div>
+      <div class="callout">
+        <div class="callout-label">Remark: why structural induction is legitimate</div>
+        <strong>The principle of structural induction can be justified by the principle of mathematical induction.</strong> This is because we work with <em>finite</em> trees, so we can understand structural induction as <strong>induction on the size of the tree</strong>.
+        <p style="margin:10px 0 0 0;">Formally: let <strong>P′(n)</strong> be the property <em>"for all expressions E of size at most n, P(E) holds"</em>. Then <strong>∀E. P(E)</strong> is equivalent to <strong>∀n. P′(n)</strong> — and the latter is ordinary mathematical induction.</p>
+      </div>
+      <!-- ===== APPLICATION ===== -->
+      <h2 id="w4-application">Application: expressions with defined locations always have a value</h2>
+      <p>The lecture proves a real theorem about SIMP with this machinery. Informally:</p>
+      <div class="callout exam">
+        <div class="callout-label">The property, in words</div>
+        <strong>The semantics of SIMP guarantees that for any integer expression E appearing in a program working on a memory m, if E uses locations that are defined in m then the value of E is defined.</strong>
+        <p style="margin:10px 0 0 0;">In other words: for any configuration ⟨E · c, r, m⟩ where <em>c</em> is any arbitrary control stack and <em>r</em> is also arbitrary, there is a configuration ⟨c, n · r, m⟩ such that <strong>⟨E · c, r, m⟩ →* ⟨c, n · r, m⟩</strong>.</p>
+      </div>
+      <p>Formally, we prove <strong>∀E. P(E)</strong> where P is:</p>
+      <div class="code-block" style="text-align:center;">
+∀m. locations(E) ∈ dom(m) ⇒ ∃n. ∀c. ∀r. ⟨E · c, r, m⟩ →* ⟨c, n · r, m⟩
+      </div>
+      <p>This is proved <strong>by induction on the structure of E</strong>:</p>
+      <div class="proof">
+        <div class="pf-lbl">Base case</div>
+        <div class="pf-step"><span class="pf-just">If E is a number n or !l, then the transitions for constants and locations prove P(E).</span></div>
+        <div class="pf-lbl" style="margin-top:14px;">Induction step</div>
+        <div class="pf-step"><span class="pf-just">Assume P(E₁) and P(E₂) hold; we have to prove P(E₁ op E₂).</span></div>
+        <div class="pf-step" style="margin-top:8px;">⟨(E₁ op E₂) · c, r, m⟩ &nbsp;→&nbsp; ⟨E₁ · E₂ · op · c, r, m⟩</div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;→* ⟨E₂ · op · c, n₁ · r, m⟩ &nbsp;&nbsp;<span class="pf-just">for some n₁, by P(E₁)</span></div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;→* ⟨op · c, n₂ · n₁ · r, m⟩ &nbsp;&nbsp;<span class="pf-just">for some n₂, by P(E₂)</span></div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;→* ⟨c, n · r, m⟩ &nbsp;&nbsp;<span class="pf-just">where n = n₁ op n₂</span></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Notice what the "∀c. ∀r." is doing</div>
+        This is precisely the Week 3 observation that expression evaluation <em>leaves the rest of the stacks alone</em>, now stated as a formal property and <em>used as an induction hypothesis</em>. Because P(E₁) holds for <strong>any</strong> control stack, we can instantiate it with the stack <code>E₂ · op · c</code> — which is exactly what the second line of the induction step does. Without the universal quantifiers the proof wouldn't go through.
+      </div>
+      <!-- ===== INDUCTIVE DEFINITIONS ===== -->
+      <h2 id="w4-inductive">Inductive definitions: axioms and rules</h2>
+      <p>Induction isn't only a proof method — <strong>we can also use it to <em>define</em> subsets of a given set T</strong>. Inductive definitions are written using <strong>axioms</strong> (the base case) and <strong>rules</strong> (the induction step).</p>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        An <strong>axiom</strong> is an element of T.<br>
+        A <strong>rule</strong> is a pair <strong>(H, c)</strong> where
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>H</strong> is a non-empty subset of T, called the <strong>hypotheses</strong> of the rule</li>
+          <li><strong>c</strong> is an element of T, called the <strong>conclusion</strong> of the rule</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">The subset <strong>I</strong> of T inductively defined by a collection of axioms <strong>A</strong> and rules <strong>R</strong> consists of those <em>t ∈ T</em> such that:</p>
+        <ul style="margin:8px 0 0 0;">
+          <li><em>t ∈ A</em>, or</li>
+          <li>there are <em>t₁, …, tₙ ∈ I</em> and a rule (H, c) such that H = {t₁, …, tₙ} and t = c.</li>
+        </ul>
+      </div>
+      <p>To show that an element <em>t</em> of T is in <strong>I</strong>, it is sufficient to show that <em>t</em> is an axiom, or that there is a <strong>proof</strong> — a tree whose <em>leaves are axioms</em> and where for each non-leaf node <em>tᵢ</em> there is a rule ({tᵢ₁, …, tᵢₘ}, tᵢ). This kind of proof is usually written with horizontal lines:</p>
+      <div class="deriv-box">
+        <div class="inf">
+          <div class="inf-prem">
+            <div class="inf"><div class="inf-prem"><div class="inf"><div class="inf-concl">⋮</div></div><div class="inf"><div class="inf-concl">⋮</div></div></div><div class="inf-rule"><span class="inf-line"></span></div><div class="inf-concl">t₁</div></div>
+            <div class="inf"><div class="inf-concl">…</div></div>
+            <div class="inf"><div class="inf-prem"><div class="inf"><div class="inf-concl">⋮</div></div></div><div class="inf-rule"><span class="inf-line"></span></div><div class="inf-concl">tₙ</div></div>
+          </div>
+          <div class="inf-rule"><span class="inf-line"></span></div>
+          <div class="inf-concl">t</div>
+        </div>
+      </div>
+      <h3>Example 1 · The natural numbers</h3>
+      <div class="sos">
+        <div class="sos-row">
+          <div class="inf"><div class="inf-concl">0</div><div class="inf-rule" style="margin-top:0;"><span class="inf-name">axiom</span></div></div>
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">n</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">rule</span></div>
+            <div class="inf-concl">n + 1</div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:14px;">Axiom: <code>0</code>. Rule: <code>({n}, n + 1)</code>.</p>
+      <h3>Example 2 · The evaluation relation for integer expressions in SIMP</h3>
+      <p><strong>Notation:</strong> <code>(E, m) ⇓ n</code> means that <em>E evaluates to n in the state m</em>.</p>
+      <div class="sos">
+        <div class="sos-grp">Axioms</div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span></div>
+            <div class="inf-concl">(n, m) ⇓ n</div>
+            <div class="inf-rule" style="margin-top:2px;"><span class="inf-side">for all integer numbers n</span></div>
+          </div>
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span></div>
+            <div class="inf-concl">(!l, m) ⇓ n</div>
+            <div class="inf-rule" style="margin-top:2px;"><span class="inf-side">if l ∈ dom(m) and m(l) = n</span></div>
+          </div>
+        </div>
+        <div class="sos-grp">Rule</div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-prem">
+              <div class="inf"><div class="inf-concl">(E₁, m) ⇓ n₁</div></div>
+              <div class="inf"><div class="inf-concl">(E₂, m) ⇓ n₂</div></div>
+            </div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-side">if n = n₁ op n₂</span></div>
+            <div class="inf-concl">(E₁ op E₂, m) ⇓ n</div>
+          </div>
+        </div>
+      </div>
+      <!-- ===== RULE INDUCTION ===== -->
+      <h2 id="w4-ruleinduction">Rule induction</h2>
+      <p>Once a set is <em>defined</em> by axioms and rules, we get a matching induction principle for free.</p>
+      <div class="callout exam">
+        <div class="callout-label">Principle of rule induction</div>
+        Let <strong>I</strong> be a set defined by induction with axioms and rules <strong>(A, R)</strong>. To show that <strong>P(i)</strong> holds for all i ∈ I, it is sufficient to prove:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Base case:</strong> ∀a ∈ A. P(a)</li>
+          <li><strong>Induction step:</strong> ∀({h₁, …, hₙ}, c) ∈ R. &nbsp;P(h₁) ∧ … ∧ P(hₙ) ⇒ P(c)</li>
+        </ul>
+      </div>
+      <p><strong>Example:</strong> each integer expression in SIMP has a <em>unique value</em> under the evaluation relation ⇓.</p>
+      <div class="proof">
+        <div class="pf-lbl">Basis</div>
+        <div class="pf-step"><span class="pf-just">Trivial, since numbers have unique values.</span></div>
+        <div class="pf-lbl" style="margin-top:12px;">Induction step</div>
+        <div class="pf-step"><span class="pf-just">For non-atomic expressions, we remark that the value of an arithmetic expression is uniquely determined by the values of its arguments, which are unique by the induction hypotheses.</span></div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Special principle of rule induction</div>
+        In some cases we are only interested in proving a property for a <strong>subset J</strong> of the inductive set I defined by (A, R). To prove that <strong>Q(x)</strong> holds for all elements of J, it is sufficient to show:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Basis:</strong> ∀a ∈ (A ∩ J). Q(a)</li>
+          <li><strong>Induction step:</strong> for all (H, c) ∈ R such that <em>c ∈ J</em>: &nbsp;(∀h ∈ H ∩ J. Q(h)) ⇒ Q(c)</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">Note the two intersections with J: you only have to handle the axioms <em>that are in J</em>, and for rules you only get to assume the property for those hypotheses <em>that are in J</em>. It's the ordinary principle, restricted.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Three induction principles — keep them straight</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Mathematical induction</strong> — over ℕ. Base P(0), step P(n) ⇒ P(n+1).</li>
+          <li><strong>Structural induction</strong> — over the <em>syntax</em> (lists, trees, SIMP expressions). One base case per leaf, one step per constructor.</li>
+          <li><strong>Rule induction</strong> — over a set <em>defined</em> by axioms and rules (like the relation ⇓ or →). One base case per axiom, one step per rule.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">A question saying "prove by induction on the structure of E" wants the second; "prove by rule induction" or "prove for all derivations" wants the third.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The bridge to the rest of the lecture</div>
+        There are <strong>two styles of structural operational semantics</strong>:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Small-step semantics:</strong> defined using a <em>reduction</em> relation.</li>
+          <li><strong>Big-step semantics:</strong> defined using an <em>evaluation</em> relation.</li>
+        </ul>
+      </div>
+      <!-- ===== PART 2: SMALL-STEP ===== -->
+      <h2 id="w4-smallstep">Part 2 · Small-step semantics: configurations</h2>
+      <p>We define a transition system with configurations</p>
+      <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:18px; margin:18px 0; color:var(--accent);">⟨P, s⟩</div>
+      <p>where <strong>P is a SIMP program</strong> and <strong>s is a store</strong> (memory) represented by a partial function from locations to integers.</p>
+      <div class="callout exam">
+        <div class="callout-label">Compare with the abstract machine — the configuration got smaller</div>
+        Week 3 used a <em>triple</em> ⟨control, results, memory⟩ with two explicit stacks. Here a configuration is just a <strong>pair</strong>: the program itself, and the store. There are no stacks — <strong>the remaining work is represented by the program text that is left</strong>. Each transition rewrites the program into a slightly-more-evaluated program.
+      </div>
+      <p><strong>Notation:</strong> <code>s[l ↦ n]</code> denotes the function s′ that coincides with s except that it associates to <em>l</em> the value <em>n</em>:</p>
+      <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:12px 0; line-height:1.9;">
+        s[l ↦ n](l) = n<br>
+        s[l ↦ n](l′) = s(l′) &nbsp;&nbsp; if l ≠ l′
+      </div>
+      <div class="callout">
+        <div class="callout-label">The transition relation, and what counts as a result</div>
+        <strong>The transition relation → on configurations is inductively defined by the axioms and rules</strong> below.
+        <ul style="margin:8px 0 0 0;">
+          <li>The expression <strong>E has the value n in the memory state s</strong> if ⟨E, s⟩ →* ⟨n, s′⟩.</li>
+          <li>The command <strong>C has a successful execution in the memory state s</strong> if ⟨C, s⟩ →* ⟨skip, s′⟩. We say that <em>C in s produces s′</em>.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">Note the shift: in Week 3 success meant <em>empty stacks</em>; here it means the program has been <strong>rewritten into the value itself</strong> — into a numeral, a boolean, or <code>skip</code>.</p>
+      </div>
+      <!-- ===== SS EXPRESSIONS ===== -->
+      <h2 id="w4-ss-exp">Small-step rules: expressions</h2>
+      <div class="sos">
+        <div class="sos-grp">Axioms — actually computing</div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">var</span></div>
+            <div class="inf-concl">⟨!l, s⟩ → ⟨n, s⟩</div>
+            <div class="inf-rule" style="margin-top:2px;"><span class="inf-side">if s(l) = n</span></div>
+          </div>
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">op</span></div>
+            <div class="inf-concl">⟨n₁ op n₂, s⟩ → ⟨n, s⟩</div>
+            <div class="inf-rule" style="margin-top:2px;"><span class="inf-side">if n = (n₁ op n₂)</span></div>
+          </div>
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">bop</span></div>
+            <div class="inf-concl">⟨n₁ bop n₂, s⟩ → ⟨b, s⟩</div>
+            <div class="inf-rule" style="margin-top:2px;"><span class="inf-side">if b = (n₁ bop n₂)</span></div>
+          </div>
+        </div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">and</span></div>
+            <div class="inf-concl">⟨b₁ ∧ b₂, s⟩ → ⟨b, s⟩</div>
+            <div class="inf-rule" style="margin-top:2px;"><span class="inf-side">if b = (b₁ and b₂)</span></div>
+          </div>
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">not</span></div>
+            <div class="inf-concl">⟨¬b, s⟩ → ⟨b′, s⟩</div>
+            <div class="inf-rule" style="margin-top:2px;"><span class="inf-side">if b′ = not b</span></div>
+          </div>
+        </div>
+        <div class="sos-grp">Congruence rules — reducing inside a sub-expression</div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨E₁, s⟩ → ⟨E₁′, s′⟩</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">opL</span></div>
+            <div class="inf-concl">⟨E₁ op E₂, s⟩ → ⟨E₁′ op E₂, s′⟩</div>
+          </div>
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨E₂, s⟩ → ⟨E₂′, s′⟩</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">opR</span></div>
+            <div class="inf-concl">⟨n₁ op E₂, s⟩ → ⟨n₁ op E₂′, s′⟩</div>
+          </div>
+        </div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨E₁, s⟩ → ⟨E₁′, s′⟩</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">bopL</span></div>
+            <div class="inf-concl">⟨E₁ bop E₂, s⟩ → ⟨E₁′ bop E₂, s′⟩</div>
+          </div>
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨E₂, s⟩ → ⟨E₂′, s′⟩</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">bopR</span></div>
+            <div class="inf-concl">⟨n₁ bop E₂, s⟩ → ⟨n₁ bop E₂′, s′⟩</div>
+          </div>
+        </div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨B₁, s⟩ → ⟨B₁′, s′⟩</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">notArg</span></div>
+            <div class="inf-concl">⟨¬B₁, s⟩ → ⟨¬B₁′, s′⟩</div>
+          </div>
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨B₁, s⟩ → ⟨B₁′, s′⟩</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">andL</span></div>
+            <div class="inf-concl">⟨B₁ ∧ B₂, s⟩ → ⟨B₁′ ∧ B₂, s′⟩</div>
+          </div>
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨B₂, s⟩ → ⟨B₂′, s′⟩</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">andR</span></div>
+            <div class="inf-concl">⟨b₁ ∧ B₂, s⟩ → ⟨b₁ ∧ B₂′, s′⟩</div>
+          </div>
+        </div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The pattern — and where evaluation order is hiding</div>
+        Each operator gets an <strong>axiom</strong> (both operands are already values → compute) plus <strong>congruence rules</strong> (an operand isn't a value yet → reduce it in place).
+        <p style="margin:10px 0 0 0;">The <strong>L</strong> rule has a general <code>E₁</code> on the left; the <strong>R</strong> rule requires <strong>n₁</strong> — an <em>already-evaluated</em> left operand. That single detail forces <strong>left-to-right evaluation</strong>: you may only start on E₂ once E₁ has become a value. This is the formal answer to the <code>f(i++, --i)</code> problem from Week 3 — <em>the rules leave nothing unspecified</em>.</p>
+      </div>
+      <h3>Worked example: <code>!z + 1</code></h3>
+      <p>Let <em>s</em> be a state such that <strong>s(z) = 0</strong> and let <strong>E = !z + 1</strong>. The expression E evaluates to 1 in s, since</p>
+      <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:14px 0;">⟨!z + 1, s⟩ → ⟨0 + 1, s⟩ → ⟨1, s⟩</div>
+      <p><strong>Each of those two arrows needs a proof:</strong></p>
+      <div class="deriv-box">
+        <div class="db-title">First step</div>
+        <div class="inf">
+          <div class="inf-prem">
+            <div class="inf">
+              <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">var</span></div>
+              <div class="inf-concl">⟨!z, s⟩ → ⟨0, s⟩</div>
+            </div>
+          </div>
+          <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">opL</span></div>
+          <div class="inf-concl">⟨!z + 1, s⟩ → ⟨0 + 1, s⟩</div>
+        </div>
+      </div>
+      <div class="deriv-box">
+        <div class="db-title">Second step</div>
+        <div class="inf">
+          <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">op</span></div>
+          <div class="inf-concl">⟨0 + 1, s⟩ → ⟨1, s⟩</div>
+        </div>
+      </div>
+      <!-- ===== SS COMMANDS ===== -->
+      <h2 id="w4-ss-cmd">Small-step rules: commands</h2>
+      <div class="sos">
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨E, s⟩ → ⟨E′, s′⟩</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">:=R</span></div>
+            <div class="inf-concl">⟨l := E, s⟩ → ⟨l := E′, s′⟩</div>
+          </div>
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">:=</span></div>
+            <div class="inf-concl">⟨l := n, s⟩ → ⟨skip, s[l ↦ n]⟩</div>
+          </div>
+        </div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨C₁, s⟩ → ⟨C₁′, s′⟩</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">seq</span></div>
+            <div class="inf-concl">⟨C₁ ; C₂, s⟩ → ⟨C₁′ ; C₂, s′⟩</div>
+          </div>
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">skip</span></div>
+            <div class="inf-concl">⟨skip ; C, s⟩ → ⟨C, s⟩</div>
+          </div>
+        </div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨B, s⟩ → ⟨B′, s′⟩</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">if</span></div>
+            <div class="inf-concl">⟨if B then C₁ else C₂, s⟩ → ⟨if B′ then C₁ else C₂, s′⟩</div>
+          </div>
+        </div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">ifT</span></div>
+            <div class="inf-concl">⟨if True then C₁ else C₂, s⟩ → ⟨C₁, s⟩</div>
+          </div>
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">ifF</span></div>
+            <div class="inf-concl">⟨if False then C₁ else C₂, s⟩ → ⟨C₂, s⟩</div>
+          </div>
+        </div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">while</span></div>
+            <div class="inf-concl">⟨while B do C, s⟩ → ⟨if B then (C ; while B do C) else skip, s⟩</div>
+          </div>
+        </div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The <code>while</code> rule is the star of this lecture</div>
+        <strong>⟨while B do C, s⟩ → ⟨if B then (C ; while B do C) else skip, s⟩</strong>
+        <p style="margin:10px 0 0 0;">It is an <em>axiom</em> — no premise, no test evaluated, the store unchanged. The loop simply <strong>unfolds itself once into an <code>if</code></strong>, and everything else follows from the rules we already have. Compare Week 3, where <code>while</code> needed three separate rules and had to save B and C on the results stack. Here, one rewriting does the job, because the <em>program text itself</em> is the machine's memory of what remains.</p>
+      </div>
+      <h3>Worked example: the swap program</h3>
+      <p>Let P be <code>z := !x; x := !y; y := !z</code> and s a state such that s(z) = 0, s(x) = 1, s(y) = 2.</p>
+      <div class="ss-trace">
+        <div class="ss-row"><span class="ss-n">0</span><span class="ss-a"></span><span class="ss-c">⟨P, s⟩</span></div>
+        <div class="ss-row"><span class="ss-n">1</span><span class="ss-a">→</span><span class="ss-c">⟨z := 1; (x := !y; y := !z), s⟩</span></div>
+        <div class="ss-row"><span class="ss-n">2</span><span class="ss-a">→</span><span class="ss-c">⟨skip; (x := !y; y := !z), s[z ↦ 1]⟩</span></div>
+        <div class="ss-row"><span class="ss-n">3</span><span class="ss-a">→</span><span class="ss-c">⟨x := !y; y := !z, s[z ↦ 1]⟩</span></div>
+        <div class="ss-row"><span class="ss-n">4</span><span class="ss-a">→</span><span class="ss-c">⟨x := 2; y := !z, s[z ↦ 1]⟩</span></div>
+        <div class="ss-row"><span class="ss-n">5</span><span class="ss-a">→</span><span class="ss-c">⟨skip; y := !z, s[z ↦ 1, x ↦ 2]⟩</span></div>
+        <div class="ss-row"><span class="ss-n">6</span><span class="ss-a">→</span><span class="ss-c">⟨y := !z, s[z ↦ 1, x ↦ 2]⟩</span></div>
+        <div class="ss-row"><span class="ss-n">7</span><span class="ss-a">→</span><span class="ss-c">⟨y := 1, s[z ↦ 1, x ↦ 2]⟩</span></div>
+        <div class="ss-row final"><span class="ss-n">8</span><span class="ss-a">→</span><span class="ss-c">⟨skip, s[z ↦ 1, x ↦ 2, y ↦ 1]⟩</span></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Read the rhythm of that trace</div>
+        Every assignment takes <strong>two</strong> steps — one to evaluate the right-hand side (<code>:=R</code>, via <code>var</code>), one to actually store it (<code>:=</code>) — and then a third (<code>skip</code>) to discard the leftover <code>skip;</code>. Eight transitions for three assignments. Compare Week 3's abstract machine, which took considerably more, most of them pure syntax shuffling.
+      </div>
+      <!-- ===== SS TOOL ===== -->
+      <h3 id="w4-sstool">🛠️ Interactive: Small-Step Reducer</h3>
+      <p>Reduce any SIMP program one step at a time and see the <strong>derivation tree that justifies each step</strong> — because, as the lecture stresses, a reduction is only valid if you can prove it. The tree is what an exam wants when it says "justify this transition".</p>
+      <div class="tool" data-run="ssRunAll">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Small-Step SOS Reducer</h3>
+        </div>
+        <div class="tool-desc">Each row is one transition; the proof tree below shows the rules used. <code>~</code> = ¬, <code>/\</code> = ∧.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1; min-width:280px;">
+            <label>SIMP program</label>
+            <textarea id="ss-prog" rows="3" style="width:100%;">z := !x; x := !y; y := !z</textarea>
+          </div>
+          <div class="tool-field">
+            <label>store s</label>
+            <input type="text" id="ss-store" value="x = 1, y = 2, z = 0" style="width:170px;">
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="ssStepBtn()">Step ▶</button>
+          <button class="tool-btn green" onclick="ssRunAll()">Run all ⏭</button>
+          <button class="tool-btn secondary" onclick="ssPreset('zplus')">!z + 1</button>
+          <button class="tool-btn secondary" onclick="ssPreset('swap')">swap</button>
+          <button class="tool-btn secondary" onclick="ssPreset('blocked')">blocked</button>
+          <button class="tool-btn secondary" onclick="ssPreset('div')">divergent</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="ss-output" class="tool-output"></div>
+      </div>
+      <!-- ===== TERMINAL ===== -->
+      <h2 id="w4-terminal">Terminal and blocked configurations</h2>
+      <div class="callout exam">
+        <div class="callout-label">The remark — know this list</div>
+        <strong>There is no axiom or rule for programs of the form:</strong>
+        <ul style="margin:8px 0 0 0;">
+          <li>⟨n, s⟩ where n is an integer</li>
+          <li>⟨b, s⟩ where b is a boolean</li>
+          <li>⟨!l, s⟩ where <strong>l ∉ dom(s)</strong></li>
+          <li>⟨skip, s⟩</li>
+        </ul>
+        <p style="margin:10px 0 0 0;"><strong>These are terminal configurations.</strong> In the case of ⟨!l, s⟩ where l ∉ dom(s) we say that the program is <strong>blocked</strong>.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Terminal ≠ successful</div>
+        A blocked configuration is terminal in the Week 1 sense — <em>no c′ with c → c′</em> — but it is <strong>not</strong> a result. The first three cases are values and <code>skip</code> is successful termination; the blocked case is a failure that just happens to look the same from the outside. This is the same distinction the Week 3 tool made between "final" and "stuck".
+      </div>
+      <!-- ===== COMPARISON ===== -->
+      <h2 id="w4-comparison">Comparison with the abstract machine</h2>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
+          <h4 style="color:var(--accent-3);">1 · Better</h4>
+          <p style="font-size:13.5px; margin:0;"><strong>Each transition here is doing a part of the computation that leads to the result</strong>, whereas some of the transitions of the machine were <em>only manipulating syntax</em>.</p>
+        </div>
+        <div class="mode-box" style="background:var(--tint-b2); border-color:var(--accent-2);">
+          <h4 style="color:var(--accent-2);">2 · Worse</h4>
+          <p style="font-size:13.5px; margin:0;"><strong>To show that a sequence of reductions is valid we need a proof.</strong> Each single arrow may require a whole derivation tree.</p>
+        </div>
+      </div>
+      <p>The example given: <code>⟨if !l &gt; 0 then (C′; C) else skip, s⟩ → ⟨if 4 &gt; 0 then (C′; C) else skip, s⟩</code> can be proved if s(l) = 4:</p>
+      <div class="deriv-box">
+        <div class="inf">
+          <div class="inf-prem">
+            <div class="inf">
+              <div class="inf-prem">
+                <div class="inf">
+                  <div class="inf-prem"><div class="inf"><div class="inf-concl" style="font-size:10px; color:var(--ink-muted);">l ∈ dom(s), s(l) = 4</div></div></div>
+                  <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">var</span></div>
+                  <div class="inf-concl">⟨!l, s⟩ → ⟨4, s⟩</div>
+                </div>
+              </div>
+              <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">bopL</span></div>
+              <div class="inf-concl">⟨!l &gt; 0, s⟩ → ⟨4 &gt; 0, s⟩</div>
+            </div>
+          </div>
+          <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">if</span></div>
+          <div class="inf-concl">⟨if !l &gt; 0 then (C′; C) else skip, s⟩ → ⟨if 4 &gt; 0 then (C′; C) else skip, s⟩</div>
+        </div>
+      </div>
+      <div class="callout">
+        <div class="callout-label">Summary of part 2</div>
+        We have defined a transition system for SIMP where <strong>the transition relation is defined by induction</strong>. Transition steps represent steps of computation; the result of a program P in a memory state s can be found by performing transition steps starting from ⟨P, s⟩ <strong>until a terminal configuration is obtained</strong> — <em>not all configurations reach a terminal configuration</em>.
+      </div>
+      <!-- ===== PART 3: BIG-STEP ===== -->
+      <h2 id="w4-sequences">Part 3 · Determinism and evaluation sequences</h2>
+      <div class="callout exam">
+        <div class="callout-label">Remark: determinism</div>
+        <strong>The previous system is deterministic:</strong> given a configuration ⟨P, s⟩ there is a <strong>unique sequence of transitions from ⟨P, s⟩ with maximal length</strong>. This is called the <strong>evaluation sequence</strong> for ⟨P, s⟩.
+        <p style="margin:10px 0 0 0;">The evaluation sequence for ⟨P, s⟩ <strong>may be finite or infinite</strong>.</p>
+      </div>
+      <p>Evaluation sequences are classified into <strong>three categories</strong>:</p>
+      <div class="cat-grid">
+        <div class="cat term">
+          <h4>Terminating</h4>
+          <p>The sequence eventually reaches a <strong>terminal non-blocked</strong> configuration — that is, ⟨n, s⟩ with n an integer, ⟨b, s⟩ with b a boolean, or ⟨skip, s⟩.</p>
+          <code>⟨if 4 = 0 then skip else skip, s⟩</code>
+        </div>
+        <div class="cat stuck">
+          <h4>Blocked (Stuck)</h4>
+          <p>The sequence eventually reaches a <strong>blocked</strong> configuration — that is, ⟨!l, s⟩ where <strong>l ∉ dom(s)</strong>.</p>
+          <code>⟨if !x = 0 then skip else skip, s⟩</code> <span style="font-size:11px; color:var(--ink-muted);">when dom(s) does not contain x</span>
+        </div>
+        <div class="cat div">
+          <h4>Divergent</h4>
+          <p>The sequence is <strong>infinite</strong>.</p>
+          <code>⟨while True do skip, s⟩</code>
+        </div>
+      </div>
+      <h2 id="w4-bigstep">Big-step semantics</h2>
+      <div class="callout exam">
+        <div class="callout-label">The goal, and the notation</div>
+        Define a binary relation between configurations which associates a configuration with <strong>its corresponding terminal one</strong> (if it exists). That is, define <em>by induction</em> the relation ⟨P, s⟩ →* ⟨P′, s′⟩ such that ⟨P′, s′⟩ is terminal. The usual notation is <strong>⟨P, s⟩ ⇓ ⟨P′, s′⟩</strong>:
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:12px 0;">
+          ⟨P, s⟩ ⇓ ⟨P′, s′⟩ &nbsp;&nbsp;if&nbsp;&nbsp; ⟨P, s⟩ →* ⟨P′, s′⟩ &nbsp;where ⟨P′, s′⟩ is terminal
+        </div>
+        <p style="margin:0;">Small-step tells you <em>how</em> a program computes, one arrow at a time. Big-step tells you <em>what</em> it computes, in a single judgement — and hides the intermediate states inside the derivation tree.</p>
+      </div>
+      <h3>Big-step rules: expressions</h3>
+      <div class="sos">
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">const</span></div>
+            <div class="inf-concl">⟨c, s⟩ ⇓ ⟨c, s⟩</div>
+            <div class="inf-rule" style="margin-top:2px;"><span class="inf-side">if c ∈ ℤ ∪ {True, False}</span></div>
+          </div>
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">var</span></div>
+            <div class="inf-concl">⟨!l, s⟩ ⇓ ⟨n, s⟩</div>
+            <div class="inf-rule" style="margin-top:2px;"><span class="inf-side">if s(l) = n</span></div>
+          </div>
+        </div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-prem">
+              <div class="inf"><div class="inf-concl">⟨B₁, s⟩ ⇓ ⟨b₁, s′⟩</div></div>
+              <div class="inf"><div class="inf-concl">⟨B₂, s′⟩ ⇓ ⟨b₂, s″⟩</div></div>
+            </div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">and</span></div>
+            <div class="inf-concl">⟨B₁ ∧ B₂, s⟩ ⇓ ⟨b, s″⟩</div>
+            <div class="inf-rule" style="margin-top:2px;"><span class="inf-side">if b = b₁ and b₂</span></div>
+          </div>
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨B₁, s⟩ ⇓ ⟨b₁, s′⟩</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">not</span></div>
+            <div class="inf-concl">⟨¬B₁, s⟩ ⇓ ⟨b, s″⟩</div>
+            <div class="inf-rule" style="margin-top:2px;"><span class="inf-side">if b = not b₁</span></div>
+          </div>
+        </div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-prem">
+              <div class="inf"><div class="inf-concl">⟨E₁, s⟩ ⇓ ⟨n₁, s′⟩</div></div>
+              <div class="inf"><div class="inf-concl">⟨E₂, s′⟩ ⇓ ⟨n₂, s″⟩</div></div>
+            </div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">op</span></div>
+            <div class="inf-concl">⟨E₁ op E₂, s⟩ ⇓ ⟨n, s″⟩</div>
+            <div class="inf-rule" style="margin-top:2px;"><span class="inf-side">if n = n₁ op n₂</span></div>
+          </div>
+          <div class="inf">
+            <div class="inf-prem">
+              <div class="inf"><div class="inf-concl">⟨E₁, s⟩ ⇓ ⟨n₁, s′⟩</div></div>
+              <div class="inf"><div class="inf-concl">⟨E₂, s′⟩ ⇓ ⟨n₂, s″⟩</div></div>
+            </div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">bop</span></div>
+            <div class="inf-concl">⟨E₁ bop E₂, s⟩ ⇓ ⟨b, s″⟩</div>
+            <div class="inf-rule" style="margin-top:2px;"><span class="inf-side">if b = n₁ bop n₂</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Watch the stores thread through: s → s′ → s″</div>
+        In every two-premise rule the <em>output</em> store of the first premise is the <em>input</em> store of the second. That threading is how big-step encodes <strong>sequencing and evaluation order</strong> without any notion of "steps". It's also why the rules are stated with three different store names rather than one — even for expressions, which in SIMP can't actually change the store.
+      </div>
+      <h3>Big-step rules: commands</h3>
+      <div class="sos">
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">skip</span></div>
+            <div class="inf-concl">⟨skip, s⟩ ⇓ ⟨skip, s⟩</div>
+          </div>
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨E, s⟩ ⇓ ⟨n, s′⟩</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">:=</span></div>
+            <div class="inf-concl">⟨l := E, s⟩ ⇓ ⟨skip, s′[l ↦ n]⟩</div>
+          </div>
+        </div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-prem">
+              <div class="inf"><div class="inf-concl">⟨C₁, s⟩ ⇓ ⟨skip, s′⟩</div></div>
+              <div class="inf"><div class="inf-concl">⟨C₂, s′⟩ ⇓ ⟨skip, s″⟩</div></div>
+            </div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">seq</span></div>
+            <div class="inf-concl">⟨C₁ ; C₂, s⟩ ⇓ ⟨skip, s″⟩</div>
+          </div>
+        </div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-prem">
+              <div class="inf"><div class="inf-concl">⟨B, s⟩ ⇓ ⟨True, s′⟩</div></div>
+              <div class="inf"><div class="inf-concl">⟨C₁, s′⟩ ⇓ ⟨skip, s″⟩</div></div>
+            </div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">ifT</span></div>
+            <div class="inf-concl">⟨if B then C₁ else C₂, s⟩ ⇓ ⟨skip, s″⟩</div>
+          </div>
+          <div class="inf">
+            <div class="inf-prem">
+              <div class="inf"><div class="inf-concl">⟨B, s⟩ ⇓ ⟨False, s′⟩</div></div>
+              <div class="inf"><div class="inf-concl">⟨C₂, s′⟩ ⇓ ⟨skip, s″⟩</div></div>
+            </div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">ifF</span></div>
+            <div class="inf-concl">⟨if B then C₁ else C₂, s⟩ ⇓ ⟨skip, s″⟩</div>
+          </div>
+        </div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨B, s⟩ ⇓ ⟨False, s′⟩</div></div></div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">whileF</span></div>
+            <div class="inf-concl">⟨while B do C, s⟩ ⇓ ⟨skip, s′⟩</div>
+          </div>
+        </div>
+        <div class="sos-row">
+          <div class="inf">
+            <div class="inf-prem">
+              <div class="inf"><div class="inf-concl">⟨B, s⟩ ⇓ ⟨True, s′⟩</div></div>
+              <div class="inf"><div class="inf-concl">⟨C, s′⟩ ⇓ ⟨skip, s″⟩</div></div>
+              <div class="inf"><div class="inf-concl">⟨while B do C, s″⟩ ⇓ ⟨skip, s‴⟩</div></div>
+            </div>
+            <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">whileT</span></div>
+            <div class="inf-concl">⟨while B do C, s⟩ ⇓ ⟨skip, s‴⟩</div>
+          </div>
+        </div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">whileT is the rule to understand — it has <em>itself</em> as a premise</div>
+        The third premise of <strong>whileT</strong> is <code>⟨while B do C, s″⟩ ⇓ ⟨skip, s‴⟩</code> — the very same loop, in the store produced by one pass of the body. So a loop that runs four times has a derivation tree <strong>nested four deep</strong>, with the <code>whileF</code> case at the bottom terminating the recursion.
+        <p style="margin:10px 0 0 0;">Consequence worth stating in an exam: <strong>a divergent program simply has no derivation</strong>. There is no finite proof tree for <code>while True do skip</code>, so the relation ⇓ never relates it to anything. Big-step semantics <em>cannot distinguish</em> non-termination from being stuck — both are just "no derivation exists". Small-step can: one gives an infinite sequence, the other reaches a blocked configuration. <strong>That is the sharpest difference between the two styles.</strong></p>
+      </div>
+      <h3>Worked example: swap, in two derivations</h3>
+      <p>Consider <strong>P : (z := !x; x := !y); y := !z</strong> and a state s with s(z) = 0, s(x) = 1, s(y) = 2. We prove P ⇓ ⟨skip, s′⟩ where s′(z) = 1, s′(x) = 2, s′(y) = 1. First:</p>
+      <div class="deriv-box">
+        <div class="inf">
+          <div class="inf-prem">
+            <div class="inf">
+              <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨!x, s⟩ ⇓ ⟨1, s⟩</div></div></div>
+              <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">:=</span></div>
+              <div class="inf-concl">⟨z := !x, s⟩ ⇓ ⟨skip, s[z ↦ 1]⟩</div>
+            </div>
+            <div class="inf">
+              <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨!y, s[z ↦ 1]⟩ ⇓ ⟨2, s[z ↦ 1]⟩</div></div></div>
+              <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">:=</span></div>
+              <div class="inf-concl">⟨x := !y, s[z ↦ 1]⟩ ⇓ ⟨skip, s[z ↦ 1, x ↦ 2]⟩</div>
+            </div>
+          </div>
+          <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">seq</span></div>
+          <div class="inf-concl">⟨z := !x; x := !y, s⟩ ⇓ ⟨skip, s[z ↦ 1, x ↦ 2]⟩</div>
+        </div>
+      </div>
+      <p>Using this we can prove:</p>
+      <div class="deriv-box">
+        <div class="inf">
+          <div class="inf-prem">
+            <div class="inf"><div class="inf-concl">⟨z := !x; x := !y, s⟩ ⇓ ⟨skip, s[z↦1, x↦2]⟩</div><div class="inf-rule" style="margin-top:1px;"><span class="inf-side">(proved above)</span></div></div>
+            <div class="inf">
+              <div class="inf-prem"><div class="inf"><div class="inf-concl">⟨!z, s[z↦1, x↦2]⟩ ⇓ ⟨1, s[z↦1, x↦2]⟩</div></div></div>
+              <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">:=</span></div>
+              <div class="inf-concl">⟨y := !z, s[z↦1, x↦2]⟩ ⇓ ⟨skip, s[z↦1, x↦2, y↦1]⟩</div>
+            </div>
+          </div>
+          <div class="inf-rule"><span class="inf-line"></span><span class="inf-name">seq</span></div>
+          <div class="inf-concl">⟨P, s⟩ ⇓ ⟨skip, s′⟩</div>
+        </div>
+      </div>
+      <!-- ===== BIG STEP TOOL ===== -->
+      <h3 id="w4-bstool">🛠️ Interactive: Big-Step Derivation Prover</h3>
+      <p>Enter a program and a store and get the <strong>complete ⇓ derivation tree</strong>, drawn the way you'd write it by hand. This is the classic exam task ("prove that P ⇓ ⟨skip, s′⟩").</p>
+      <div class="tool" data-run="runBigStep">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Big-Step ⇓ Prover</h3>
+        </div>
+        <div class="tool-desc">Trees for loops grow fast — keep iteration counts small to get a readable proof. Also supports blocks: <code>begin loc x := E; C end</code>.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1; min-width:280px;">
+            <label>SIMP program</label>
+            <textarea id="bs-prog" rows="3" style="width:100%;">(z := !x; x := !y); y := !z</textarea>
+          </div>
+          <div class="tool-field">
+            <label>store s</label>
+            <input type="text" id="bs-store" value="x = 1, y = 2, z = 0" style="width:170px;">
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="runBigStep()">Build derivation ▶</button>
+          <button class="tool-btn secondary" onclick="bsPreset('swap')">swap</button>
+          <button class="tool-btn secondary" onclick="bsPreset('while')">small while</button>
+          <button class="tool-btn secondary" onclick="bsPreset('block')">local block</button>
+          <button class="tool-btn secondary" onclick="bsPreset('div')">divergent</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="bs-output" class="tool-output"></div>
+      </div>
+      <!-- ===== BLOCKS ===== -->
+      <h2 id="w4-blocks">Adding variable declarations to SIMP</h2>
+      <div class="callout">
+        <div class="callout-label">The idea</div>
+        We can add <strong>local declarations</strong> to SIMP by using a <em>local state</em> in which <strong>the scope of a newly created location corresponds precisely with the block where the location is created and initialised</strong> — that is, <strong>static scope</strong>. For this we need a <em>stack-based implementation of the state</em>.
+        <p style="margin:10px 0 0 0;">This is Week 2's static scoping, now given a formal rule.</p>
+      </div>
+      <p><strong>Syntax.</strong> We extend the syntax of SIMP with blocks:</p>
+      <div class="grammar">
+        <span class="nt">C</span> <span class="def">::=</span> <span class="term">begin loc</span> <span class="nt">x</span> <span class="term">:=</span> <span class="nt">E</span><span class="term">;</span> <span class="nt">C</span> <span class="term">end</span>
+      </div>
+      <p><strong>Semantics.</strong> We add the following rule to the big-step semantics:</p>
+      <div class="deriv-box">
+        <div class="inf">
+          <div class="inf-prem">
+            <div class="inf"><div class="inf-concl">⟨E, s⟩ ⇓ ⟨n, s′⟩</div></div>
+            <div class="inf"><div class="inf-concl">⟨C{x ↦ l}, s′[l ↦ n]⟩ ⇓ ⟨skip, s″[l ↦ n′]⟩</div></div>
+          </div>
+          <div class="inf-rule"><span class="inf-line"></span></div>
+          <div class="inf-concl">⟨begin loc x := E; C end, s⟩ ⇓ ⟨skip, s″⟩</div>
+        </div>
+      </div>
+      <p>where</p>
+      <ul>
+        <li><strong>l ∉ dom(s′) ∪ dom(s″) ∪ locations(C)</strong> — that is, <em>l is a fresh name</em>;</li>
+        <li><strong>C{x ↦ l}</strong> is the program C where all the occurrences of x are replaced by l — <em>to avoid confusion with other variables of the same name in other parts of the program</em>.</li>
+      </ul>
+      <div class="callout exam">
+        <div class="callout-label">Read the conclusion's store very carefully</div>
+        The second premise ends in <strong>s″[l ↦ n′]</strong> but the conclusion is just <strong>s″</strong>. The fresh location <em>l</em> — with whatever final value n′ it ended up holding — is <strong>discarded</strong> when the block exits. <em>That deletion is the whole meaning of "local"</em>: the block's variable does not exist outside the block, which is exactly static scope, expressed as a side-condition on a store.
+        <p style="margin:10px 0 0 0;">And the freshness condition plus the renaming <code>C{x ↦ l}</code> is how the rule prevents a local <code>x</code> from clashing with an <code>x</code> elsewhere in the program — the formal counterpart of Week 2's Pascal example where P1's <code>x</code> shadows main's.</p>
+      </div>
+      <h3>Example: swap using a local variable</h3>
+      <div class="code-block">
+<span style="color:var(--code-kw);">begin</span>
+  <span style="color:var(--code-kw);">loc</span> z := !x;
+  x := !y;
+  y := !z
+<span style="color:var(--code-kw);">end</span>
+      </div>
+      <p>To show that the program P is correct:</p>
+      <div class="proof">
+        <div class="pf-step"><span class="pf-just">First we prove</span></div>
+        <div class="pf-step">⟨x := !y; y := !l, &nbsp;s[l ↦ s(x)]⟩ ⇓ ⟨skip, &nbsp;s[x ↦ s(y), y ↦ s(x), l ↦ s(x)]⟩</div>
+        <div class="pf-step"><span class="pf-just">as in the previous examples.</span></div>
+        <div class="pf-step" style="margin-top:10px;"><span class="pf-just">Let s′ = s[x ↦ s(y), y ↦ s(x)] &nbsp;and&nbsp; s″ = s[x ↦ s(y), y ↦ s(x), l ↦ s(x)], then:</span></div>
+      </div>
+      <div class="deriv-box">
+        <div class="inf">
+          <div class="inf-prem">
+            <div class="inf"><div class="inf-concl">⟨!x, s⟩ ⇓ ⟨s(x), s⟩</div></div>
+            <div class="inf"><div class="inf-concl">⟨x := !y; y := !l, s[l ↦ s(x)]⟩ ⇓ ⟨skip, s″⟩</div></div>
+          </div>
+          <div class="inf-rule"><span class="inf-line"></span></div>
+          <div class="inf-concl">⟨P, s⟩ ⇓ ⟨skip, s′⟩</div>
+        </div>
+      </div>
+      <p style="font-size:14px;">Notice the final store is <strong>s′</strong>, not s″ — <em>l</em> has vanished, exactly as the rule prescribes.</p>
+      <!-- ===== COMPARISON TOOL ===== -->
+      <h3 id="w4-cmptool">🛠️ Interactive: Three Semantics, One Program</h3>
+      <p>Aim 3 of the lecture is to <em>understand the differences between alternative semantic descriptions</em>. Run one program through all three — Week 3's abstract machine, small-step, and big-step — and compare what each produces.</p>
+      <div class="tool" data-run="runCompare">
+        <div class="tool-header">
+          <span class="tool-badge">Comparison tool</span>
+          <h3>Abstract machine vs small-step vs big-step</h3>
+        </div>
+        <div class="tool-desc">All three should agree on the final store. What differs is <em>how many steps</em> they take and <em>what an individual step means</em>.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1; min-width:280px;">
+            <label>SIMP program</label>
+            <textarea id="cm-prog" rows="2" style="width:100%;">z := !x; x := !y; y := !z</textarea>
+          </div>
+          <div class="tool-field">
+            <label>store</label>
+            <input type="text" id="cm-store" value="x = 1, y = 2, z = 0" style="width:160px;">
+          </div>
+          <button class="tool-btn" onclick="runCompare()">Compare ▶</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="cm-output" class="tool-output"></div>
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="w4-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 4</div>
+        <ol>
+          <li><strong>Mathematical induction</strong> — base P(0), step ∀n. P(n) ⇒ P(n+1). Be able to run the Σ(2i − 1) = n² proof.</li>
+          <li><strong>Structural induction on lists</strong> — base P(nil), step P(l) ⇒ P(cons(h, l)).</li>
+          <li><strong>Structural induction on trees</strong> — base P(l) for all leaves; step, for each constructor c with n ≥ 1 arguments, ∀t₁…tₙ. P(t₁) ∧ … ∧ P(tₙ) ⇒ P(c(t₁,…,tₙ)).</li>
+          <li><strong>Instantiate it for SIMP expressions</strong> — base: P(n) for all n ∈ ℤ and P(!l) for all l; step: P(E) ∧ P(E′) ⇒ P(E op E′).</li>
+          <li><strong>Why structural induction is valid</strong> — it reduces to mathematical induction on the <em>size</em> of the (finite) tree; ∀E. P(E) ≡ ∀n. P′(n) where P′(n) = "for all E of size ≤ n, P(E)".</li>
+          <li><strong>The application theorem</strong> — if an integer expression uses only locations defined in m, its value is defined. Be able to write the induction step showing ⟨(E₁ op E₂)·c, r, m⟩ →* ⟨c, n·r, m⟩ using P(E₁) then P(E₂).</li>
+          <li><strong>Inductive definitions</strong> — an <em>axiom</em> is an element of T; a <em>rule</em> is a pair (H, c) with H a non-empty set of hypotheses and c the conclusion. I consists of t that are axioms, or conclusions of a rule whose hypotheses are all in I.</li>
+          <li><strong>Proofs are trees</strong> — leaves are axioms, each non-leaf matches a rule. Be able to draw one.</li>
+          <li><strong>The two example definitions</strong> — the naturals (axiom 0, rule n ⊢ n+1); and the evaluation relation (E, m) ⇓ n with its two axioms and one rule.</li>
+          <li><strong>Rule induction</strong> — base ∀a ∈ A. P(a); step ∀({h₁…hₙ}, c) ∈ R. P(h₁) ∧ … ∧ P(hₙ) ⇒ P(c). Example: uniqueness of values under ⇓.</li>
+          <li><strong>Special principle of rule induction</strong> — restrict to a subset J: basis over A ∩ J, and for rules with c ∈ J assume the property only for h ∈ H ∩ J.</li>
+          <li><strong>Small-step configurations</strong> — ⟨P, s⟩ with P a SIMP program and s a partial function from locations to integers; s[l ↦ n] notation.</li>
+          <li><strong>What counts as a result</strong> — E has value n if ⟨E, s⟩ →* ⟨n, s′⟩; C has a successful execution if ⟨C, s⟩ →* ⟨skip, s′⟩ (C in s produces s′).</li>
+          <li><strong>Reproduce the small-step rules</strong> — var, op, bop, and, not as axioms; opL/opR, bopL/bopR, notArg, andL/andR as congruence rules; :=R, :=, seq, skip, if, ifT, ifF, while for commands.</li>
+          <li><strong>Why the R rules require n₁</strong> — a value on the left; this forces left-to-right evaluation.</li>
+          <li><strong>The while rule</strong> — <code>⟨while B do C, s⟩ → ⟨if B then (C; while B do C) else skip, s⟩</code>. An axiom, one unfolding, no premise.</li>
+          <li><strong>Do a small-step trace</strong> — the swap example in 8 transitions, and <code>!z + 1</code> with a derivation tree for <em>each</em> arrow.</li>
+          <li><strong>Terminal configurations</strong> — ⟨n, s⟩, ⟨b, s⟩, ⟨skip, s⟩, and ⟨!l, s⟩ with l ∉ dom(s); the last is called <strong>blocked</strong>.</li>
+          <li><strong>Comparison with the abstract machine</strong> — (1) each transition here does part of the computation, whereas some machine transitions only manipulated syntax; (2) but showing a reduction is valid <em>requires a proof</em>. Know the <code>if !l &gt; 0 …</code> derivation.</li>
+          <li><strong>Determinism</strong> — given ⟨P, s⟩ there is a unique maximal-length transition sequence: the <em>evaluation sequence</em>, which may be finite or infinite.</li>
+          <li><strong>The three categories</strong> — terminating (reaches a terminal non-blocked configuration), blocked/stuck (reaches ⟨!l, s⟩ with l ∉ dom(s)), divergent (infinite). Know the three examples.</li>
+          <li><strong>Big-step definition</strong> — ⟨P, s⟩ ⇓ ⟨P′, s′⟩ if ⟨P, s⟩ →* ⟨P′, s′⟩ with ⟨P′, s′⟩ terminal.</li>
+          <li><strong>Reproduce the big-step rules</strong> — const, var, and, not, op, bop; skip, :=, seq, ifT, ifF, whileF, whileT. Note how stores thread s → s′ → s″.</li>
+          <li><strong>whileT has itself as a third premise</strong> — so a loop's derivation nests once per iteration, bottoming out in whileF. A divergent program has <em>no</em> derivation at all.</li>
+          <li><strong>Build a big-step derivation</strong> — the swap example, in the two stages shown.</li>
+          <li><strong>Variable declarations</strong> — syntax <code>C ::= begin loc x := E; C end</code>; the rule with its two side conditions (l fresh, C{x ↦ l} renaming); and the fact that <em>l is dropped from the store</em> in the conclusion, which is what makes scoping static.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 4 notes. Send Week 5 slides whenever you're ready.</p>
+    </section>

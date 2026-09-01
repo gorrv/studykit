@@ -1,0 +1,260 @@
+    <div class="brand">PLD <span class="accent">Notes</span></div>
+    <div class="brand-sub">Programming Language Design<br>Paradigms · 5CCS2PLD</div>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Switch between light and dark theme">
+      <span class="tt-dot" aria-hidden="true"></span><span class="tt-label" id="tt-label">Light</span>
+    </button>
+    <div class="search-box" id="ns-box">
+      <span class="s-ico" aria-hidden="true">&#9906;</span>
+      <input type="search" id="ns-input" placeholder="Search these notes…" autocomplete="off"
+             spellcheck="false" aria-label="Search these notes"
+             oninput="nsInput()" onkeydown="nsKey(event)" onfocus="nsInput()">
+      <button class="s-clr" onclick="nsClear()" title="Clear search" aria-label="Clear search">&times;</button>
+    </div>
+    <div class="search-results" id="ns-results" hidden></div>
+    <nav>
+      <ul>
+        <li class="week">
+          <div class="week-label">Week 01</div>
+          <a class="week-title" href="#" onclick="showWeek('week1'); return false;">Introduction: Paradigms, Syntax &amp; Semantics</a>
+          <ul class="subsection">
+            <li><a href="#w1-why">Why study languages</a></li>
+            <li><a href="#w1-paradigms">Programming paradigms</a></li>
+            <li><a href="#w1-components">The 3 components</a></li>
+            <li><a href="#w1-arch">Architecture recap</a></li>
+            <li><a href="#w1-impl">Compilation vs interpretation</a></li>
+            <li><a href="#w1-fetool">🛠️ Fetch–execute tool</a></li>
+            <li><a href="#w1-syntax">Syntax &amp; grammars</a></li>
+            <li><a href="#w1-ambiguity">Ambiguity</a></li>
+            <li><a href="#w1-parsetool">🛠️ Parse tree tool</a></li>
+            <li><a href="#w1-abstract">Abstract syntax</a></li>
+            <li><a href="#w1-semantics">Semantics: static &amp; dynamic</a></li>
+            <li><a href="#w1-styles">Styles of semantics</a></li>
+            <li><a href="#w1-transitions">Transition systems</a></li>
+            <li><a href="#w1-tstool">🛠️ Transition system tool</a></li>
+            <li><a href="#w1-exam">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 02</div>
+          <a class="week-title" href="#" onclick="showWeek('week2'); return false;">Imperative Languages: Variables &amp; Control</a>
+          <ul class="subsection">
+            <li><a href="#w2-vonneumann" onclick="showWeek('week2')">Von Neumann &amp; variables</a></li>
+            <li><a href="#w2-properties" onclick="showWeek('week2')">The 4 properties</a></li>
+            <li><a href="#w2-lvalue" onclick="showWeek('week2')">l-value vs r-value</a></li>
+            <li><a href="#w2-lifetime" onclick="showWeek('week2')">Lifetime: 4 classes</a></li>
+            <li><a href="#w2-scope" onclick="showWeek('week2')">Scope: static vs dynamic</a></li>
+            <li><a href="#w2-scopetool" onclick="showWeek('week2')">🛠️ Scope resolver</a></li>
+            <li><a href="#w2-assignment" onclick="showWeek('week2')">Assignment</a></li>
+            <li><a href="#w2-control" onclick="showWeek('week2')">Control statements</a></li>
+            <li><a href="#w2-selection" onclick="showWeek('week2')">Selection &amp; dangling else</a></li>
+            <li><a href="#w2-elsetool" onclick="showWeek('week2')">🛠️ Dangling-else tool</a></li>
+            <li><a href="#w2-multiple" onclick="showWeek('week2')">Multiple selectors</a></li>
+            <li><a href="#w2-loops" onclick="showWeek('week2')">Iterative statements</a></li>
+            <li><a href="#w2-looptool" onclick="showWeek('week2')">🛠️ Loop tracer</a></li>
+            <li><a href="#w2-structure" onclick="showWeek('week2')">Blocks &amp; subprograms</a></li>
+            <li><a href="#w2-exam" onclick="showWeek('week2')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 03</div>
+          <a class="week-title" href="#" onclick="showWeek('week3'); return false;">SIMP &amp; the Abstract Machine</a>
+          <ul class="subsection">
+            <li><a href="#w3-why" onclick="showWeek('week3')">Why formal? f(i++,--i)</a></li>
+            <li><a href="#w3-ordertool" onclick="showWeek('week3')">🛠️ Evaluation-order tool</a></li>
+            <li><a href="#w3-syntax" onclick="showWeek('week3')">Abstract syntax of SIMP</a></li>
+            <li><a href="#w3-examples" onclick="showWeek('week3')">Example programs</a></li>
+            <li><a href="#w3-trees" onclick="showWeek('week3')">Trees, not strings</a></li>
+            <li><a href="#w3-machine" onclick="showWeek('week3')">The machine: c, r, m</a></li>
+            <li><a href="#w3-configs" onclick="showWeek('week3')">Configurations</a></li>
+            <li><a href="#w3-meaning" onclick="showWeek('week3')">Semantics of programs</a></li>
+            <li><a href="#w3-rules-exp" onclick="showWeek('week3')">Rules: expressions</a></li>
+            <li><a href="#w3-worked" onclick="showWeek('week3')">Worked example</a></li>
+            <li><a href="#w3-rules-cmd" onclick="showWeek('week3')">Rules: commands</a></li>
+            <li><a href="#w3-factorial" onclick="showWeek('week3')">Factorial transitions</a></li>
+            <li><a href="#w3-simptool" onclick="showWeek('week3')">🛠️ SIMP machine simulator</a></li>
+            <li><a href="#w3-verdict" onclick="showWeek('week3')">Advantage &amp; disadvantage</a></li>
+            <li><a href="#w3-exam" onclick="showWeek('week3')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 04</div>
+          <a class="week-title" href="#" onclick="showWeek('week4'); return false;">Structural Operational Semantics</a>
+          <ul class="subsection">
+            <li><a href="#w4-induction" onclick="showWeek('week4')">Mathematical induction</a></li>
+            <li><a href="#w4-structural" onclick="showWeek('week4')">Structural induction</a></li>
+            <li><a href="#w4-application" onclick="showWeek('week4')">Application: a proof</a></li>
+            <li><a href="#w4-inductive" onclick="showWeek('week4')">Inductive definitions</a></li>
+            <li><a href="#w4-ruleinduction" onclick="showWeek('week4')">Rule induction</a></li>
+            <li><a href="#w4-smallstep" onclick="showWeek('week4')">Small-step: configurations</a></li>
+            <li><a href="#w4-ss-exp" onclick="showWeek('week4')">Small-step: expressions</a></li>
+            <li><a href="#w4-ss-cmd" onclick="showWeek('week4')">Small-step: commands</a></li>
+            <li><a href="#w4-sstool" onclick="showWeek('week4')">🛠️ Small-step reducer</a></li>
+            <li><a href="#w4-terminal" onclick="showWeek('week4')">Terminal &amp; blocked</a></li>
+            <li><a href="#w4-comparison" onclick="showWeek('week4')">vs the abstract machine</a></li>
+            <li><a href="#w4-sequences" onclick="showWeek('week4')">Evaluation sequences</a></li>
+            <li><a href="#w4-bigstep" onclick="showWeek('week4')">Big-step semantics</a></li>
+            <li><a href="#w4-bstool" onclick="showWeek('week4')">🛠️ Big-step prover</a></li>
+            <li><a href="#w4-blocks" onclick="showWeek('week4')">Variable declarations</a></li>
+            <li><a href="#w4-cmptool" onclick="showWeek('week4')">🛠️ Three semantics compared</a></li>
+            <li><a href="#w4-exam" onclick="showWeek('week4')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 05</div>
+          <a class="week-title" href="#" onclick="return false;" style="color:var(--ink-muted);">Revision — skipped</a>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 06 · Part 2 begins</div>
+          <a class="week-title" href="#" onclick="showWeek('week6'); return false;">Introduction to Functional Programming</a>
+          <ul class="subsection">
+            <li><a href="#w6-intro" onclick="showWeek('week6')">What functional means</a></li>
+            <li><a href="#w6-haskell" onclick="showWeek('week6')">Haskell &amp; applications</a></li>
+            <li><a href="#w6-syntax" onclick="showWeek('week6')">Syntax &amp; evaluation</a></li>
+            <li><a href="#w6-properties" onclick="showWeek('week6')">Unicity &amp; non-termination</a></li>
+            <li><a href="#w6-strategies" onclick="showWeek('week6')">Reduction strategies</a></li>
+            <li><a href="#w6-redtool" onclick="showWeek('week6')">🛠️ Strategy explorer</a></li>
+            <li><a href="#w6-types" onclick="showWeek('week6')">Functional values &amp; types</a></li>
+            <li><a href="#w6-defs" onclick="showWeek('week6')">Definitions &amp; guards</a></li>
+            <li><a href="#w6-application" onclick="showWeek('week6')">Application conventions</a></li>
+            <li><a href="#w6-recursive" onclick="showWeek('week6')">Recursion &amp; error</a></li>
+            <li><a href="#w6-patterns" onclick="showWeek('week6')">Pattern matching</a></li>
+            <li><a href="#w6-fib" onclick="showWeek('week6')">Exercise: fib, four ways</a></li>
+            <li><a href="#w6-local" onclick="showWeek('week6')">let / where</a></li>
+            <li><a href="#w6-arith" onclick="showWeek('week6')">Arithmetic &amp; sections</a></li>
+            <li><a href="#w6-composition" onclick="showWeek('week6')">Functional composition</a></li>
+            <li><a href="#w6-comptool" onclick="showWeek('week6')">🛠️ Composition checker</a></li>
+            <li><a href="#w6-curry" onclick="showWeek('week6')">Curryfication</a></li>
+            <li><a href="#w6-currytool" onclick="showWeek('week6')">🛠️ Partial application</a></li>
+            <li><a href="#w6-exercises" onclick="showWeek('week6')">Exercises 1–5 worked</a></li>
+            <li><a href="#w6-exam" onclick="showWeek('week6')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 07</div>
+          <a class="week-title" href="#" onclick="return false;" style="color:var(--ink-muted);">Reading week — skipped</a>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 08 · Lectures 7.1 – 7.4</div>
+          <a class="week-title" href="#" onclick="showWeek('week8'); return false;">FP: Types and Semantics</a>
+          <ul class="subsection">
+            <li><a href="#w8-typing" onclick="showWeek('week8')">Static vs dynamic typing</a></li>
+            <li><a href="#w8-hstypes" onclick="showWeek('week8')">Types in Haskell</a></li>
+            <li><a href="#w8-poly" onclick="showWeek('week8')">Polymorphism</a></li>
+            <li><a href="#w8-overload" onclick="showWeek('week8')">Overloading &amp; classes</a></li>
+            <li><a href="#w8-inference" onclick="showWeek('week8')">Type inference</a></li>
+            <li><a href="#w8-mgt" onclick="showWeek('week8')">Most general type — method</a></li>
+            <li><a href="#w8-mgtool" onclick="showWeek('week8')">🛠️ Most general type</a></li>
+            <li><a href="#w8-lists" onclick="showWeek('week8')">Lists</a></li>
+            <li><a href="#w8-userdef" onclick="showWeek('week8')">User-defined types</a></li>
+            <li><a href="#w8-evaltool" onclick="showWeek('week8')">🛠️ Pattern-match evaluator</a></li>
+            <li><a href="#w8-structural" onclick="showWeek('week8')">Structural induction</a></li>
+            <li><a href="#w8-sfun" onclick="showWeek('week8')">SFUN: syntax</a></li>
+            <li><a href="#w8-cbv" onclick="showWeek('week8')">Call-by-value rules</a></li>
+            <li><a href="#w8-cbn" onclick="showWeek('week8')">Call-by-name rule</a></li>
+            <li><a href="#w8-sfuntool" onclick="showWeek('week8')">🛠️ SFUN derivations</a></li>
+            <li><a href="#w8-determinism" onclick="showWeek('week8')">Determinism</a></li>
+            <li><a href="#w8-sfuntypes" onclick="showWeek('week8')">Types for SFUN</a></li>
+            <li><a href="#w8-typingrules" onclick="showWeek('week8')">Typing rules</a></li>
+            <li><a href="#w8-typetool" onclick="showWeek('week8')">🛠️ Typing derivations</a></li>
+            <li><a href="#w8-progtyping" onclick="showWeek('week8')">Typing programs</a></li>
+            <li><a href="#w8-exam" onclick="showWeek('week8')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 09 · Lectures 8.1 – 8.3</div>
+          <a class="week-title" href="#" onclick="showWeek('week9'); return false;">Introduction to Logic Programming</a>
+          <ul class="subsection">
+            <li><a href="#w9-intro" onclick="showWeek('week9')">Logic + inference</a></li>
+            <li><a href="#w9-reverse" onclick="showWeek('week9')">No input/output variables</a></li>
+            <li><a href="#w9-prolog" onclick="showWeek('week9')">Prolog</a></li>
+            <li><a href="#w9-terms" onclick="showWeek('week9')">Terms &amp; literals</a></li>
+            <li><a href="#w9-syntaxtool" onclick="showWeek('week9')">🛠️ Syntax checker</a></li>
+            <li><a href="#w9-clauses" onclick="showWeek('week9')">Horn clauses</a></li>
+            <li><a href="#w9-factsrules" onclick="showWeek('week9')">Facts, rules, goals</a></li>
+            <li><a href="#w9-mechanism" onclick="showWeek('week9')">Procedural mechanism</a></li>
+            <li><a href="#w9-subst" onclick="showWeek('week9')">Substitutions</a></li>
+            <li><a href="#w9-substtool" onclick="showWeek('week9')">🛠️ Substitution applier</a></li>
+            <li><a href="#w9-summary" onclick="showWeek('week9')">Clauses in Prolog</a></li>
+            <li><a href="#w9-builtins" onclick="showWeek('week9')">Built-in predicates</a></li>
+            <li><a href="#w9-lists" onclick="showWeek('week9')">Lists in Prolog</a></li>
+            <li><a href="#w9-prologtool" onclick="showWeek('week9')">🛠️ Prolog interpreter</a></li>
+            <li><a href="#w9-negation" onclick="showWeek('week9')">Limitations: negation</a></li>
+            <li><a href="#w9-resolution" onclick="showWeek('week9')">Why definite clauses</a></li>
+            <li><a href="#w9-naf" onclick="showWeek('week9')">Negation as failure</a></li>
+            <li><a href="#w9-exam" onclick="showWeek('week9')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">Week 10 · Lectures 9.1 – 9.3</div>
+          <a class="week-title" href="#" onclick="showWeek('week10'); return false;">Unification &amp; SLD-Resolution</a>
+          <ul class="subsection">
+            <li><a href="#w10-unif" onclick="showWeek('week10')">Unifiers and the mgu</a></li>
+            <li><a href="#w10-why" onclick="showWeek('week10')">Why "most general"</a></li>
+            <li><a href="#w10-rules" onclick="showWeek('week10')">The algorithm: 6 rules</a></li>
+            <li><a href="#w10-uniftool" onclick="showWeek('week10')">🛠️ Unification stepper</a></li>
+            <li><a href="#w10-resolution" onclick="showWeek('week10')">Principle of resolution</a></li>
+            <li><a href="#w10-sld" onclick="showWeek('week10')">S · L · D</a></li>
+            <li><a href="#w10-resolvents" onclick="showWeek('week10')">Computing resolvents</a></li>
+            <li><a href="#w10-trees" onclick="showWeek('week10')">SLD-resolution trees</a></li>
+            <li><a href="#w10-backtracking" onclick="showWeek('week10')">Back-tracking</a></li>
+            <li><a href="#w10-nonterm" onclick="showWeek('week10')">Non-termination</a></li>
+            <li><a href="#w10-constructing" onclick="showWeek('week10')">Constructing a tree</a></li>
+            <li><a href="#w10-sldtool" onclick="showWeek('week10')">🛠️ SLD-tree builder</a></li>
+            <li><a href="#w10-renaming" onclick="showWeek('week10')">Variable renaming</a></li>
+            <li><a href="#w10-exam" onclick="showWeek('week10')">Exam takeaways</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">★ Final revision</div>
+          <a class="week-title" href="#" onclick="showWeek('concepts'); return false;" style="color:var(--accent-4);">Concepts &amp; Definitions</a>
+          <ul class="subsection">
+            <li><a href="#cx-acronyms" onclick="showWeek('concepts')">Acronyms — SLD, SOS, mgu…</a></li>
+            <li><a href="#cx-components" onclick="showWeek('concepts')">The three components</a></li>
+            <li><a href="#cx-syntax" onclick="showWeek('concepts')">Concrete vs abstract syntax</a></li>
+            <li><a href="#cx-impl" onclick="showWeek('concepts')">Compilation vs interpretation</a></li>
+            <li><a href="#cx-styles" onclick="showWeek('concepts')">Three styles of semantics</a></li>
+            <li><a href="#cx-opsem" onclick="showWeek('concepts')">Machine vs small-step vs big-step</a></li>
+            <li><a href="#cx-induction" onclick="showWeek('concepts')">The three inductions</a></li>
+            <li><a href="#cx-vars" onclick="showWeek('concepts')">Variables &amp; l-value/r-value</a></li>
+            <li><a href="#cx-lifetime" onclick="showWeek('concepts')">The four lifetime classes</a></li>
+            <li><a href="#cx-scope" onclick="showWeek('concepts')">Static vs dynamic scope</a></li>
+            <li><a href="#cx-control" onclick="showWeek('concepts')">Loops &amp; dangling else</a></li>
+            <li><a href="#cx-strategies" onclick="showWeek('concepts')">CBN vs CBV vs lazy</a></li>
+            <li><a href="#cx-curry" onclick="showWeek('concepts')">Currying &amp; partial application</a></li>
+            <li><a href="#cx-typing" onclick="showWeek('concepts')">Static vs dynamic typing</a></li>
+            <li><a href="#cx-poly" onclick="showWeek('concepts')">Polymorphism &amp; overloading</a></li>
+            <li><a href="#cx-sfun" onclick="showWeek('concepts')">fn_val vs fn_name</a></li>
+            <li><a href="#cx-terms" onclick="showWeek('concepts')">Horn clauses, facts, rules, goals</a></li>
+            <li><a href="#cx-unif" onclick="showWeek('concepts')">Substitution, unifier, mgu</a></li>
+            <li><a href="#cx-resolution" onclick="showWeek('concepts')">Resolution &amp; SLD</a></li>
+            <li><a href="#cx-limits" onclick="showWeek('concepts')">Negation &amp; disjunction limits</a></li>
+            <li><a href="#cx-drill" onclick="showWeek('concepts')">★ Which is it? drill</a></li>
+            <li><a href="#cx-oneliners" onclick="showWeek('concepts')">★ Thirty one-liners</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">★ Practice</div>
+          <a class="week-title" href="#" onclick="showWeek('practice'); return false;" style="color:var(--accent-3);">Past-Exam Practice</a>
+          <ul class="subsection">
+            <li><a href="#pr-selftest" onclick="showWeek('practice')">🛠️ Self-test generator</a></li>
+            <li><a href="#pr-w5" onclick="showWeek('practice')">Week 5 · past exams</a></li>
+            <li><a href="#pr-w5e1" onclick="showWeek('practice')">— RBT robot language</a></li>
+            <li><a href="#pr-w5e2" onclick="showWeek('practice')">— do C while B</a></li>
+            <li><a href="#pr-w5e3" onclick="showWeek('practice')">— if-then-else equivalence</a></li>
+            <li><a href="#pr-w5e4" onclick="showWeek('practice')">— substituting !x</a></li>
+            <li><a href="#pr-w5e5" onclick="showWeek('practice')">— parallel composition</a></li>
+            <li><a href="#pr-w11" onclick="showWeek('practice')">Week 11 · revision</a></li>
+            <li><a href="#pr-w11e1" onclick="showWeek('practice')">— glorious days</a></li>
+            <li><a href="#pr-w11e2" onclick="showWeek('practice')">— until</a></li>
+            <li><a href="#pr-w11e3" onclick="showWeek('practice')">— double &amp; map</a></li>
+            <li><a href="#pr-w11e4" onclick="showWeek('practice')">— even/1 and looping</a></li>
+          </ul>
+        </li>
+        <li class="week">
+          <div class="week-label">★ Revision</div>
+          <a class="week-title" href="#" onclick="showWeek('cram'); return false;" style="color:var(--accent-2);">Exam Cram Sheet</a>
+          <div class="placeholder">All key insights, one page</div>
+        </li>
+      </ul>
+    </nav>
+  

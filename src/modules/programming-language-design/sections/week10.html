@@ -1,0 +1,394 @@
+<section id="week10" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 10 · Lectures 9.1 – 9.3</div>
+        <h1>Unification &amp; SLD-Resolution</h1>
+        <div class="week-subtitle">the machinery underneath every Prolog query</div>
+      </div>
+      <p>Week 9 described Prolog's behaviour informally — "look for a clause with the same predicate in the head, replace the goal by its body, replacing variables as required". <strong>This week gives both halves precisely:</strong> <em>unification</em> is how the replacing of variables is computed, and <em>SLD-resolution</em> is how the goals evolve.</p>
+      <!-- ===== HISTORY ===== -->
+      <h2 id="w10-unif">Unification: unifiers and the mgu</h2>
+      <div class="callout">
+        <div class="callout-label">A short history</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>A unification algorithm was first sketched by <strong>Jacques Herbrand</strong> in his thesis in the <strong>1930s</strong>.</li>
+          <li>In <strong>1965, Alan Robinson</strong> introduced the <strong>Principle of Resolution</strong> and gave a unification algorithm.</li>
+          <li>Around <strong>1974, Robert Kowalski, Alain Colmerauer and Philippe Roussel</strong> defined and implemented <strong>Prolog</strong> based on these ideas.</li>
+          <li>The version presented here is based on the work of <strong>Martelli and Montanari, 1982</strong>.</li>
+        </ul>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The three definitions</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>A <strong>unification problem U</strong> is a <em>set of equations between terms containing variables</em>: &nbsp;<code>{s₁ = t₁, …, sₙ = tₙ}</code></li>
+          <li>A <strong>solution</strong> to U, also called a <strong>unifier</strong>, is a substitution σ such that when applied to every term in U, for each equation sᵢ = tᵢ the terms <strong>sᵢσ and tᵢσ are syntactically identical</strong>.</li>
+          <li>The <strong>most general unifier (mgu)</strong> of U is a unifier σ such that <strong>any other unifier ρ is an instance of σ</strong>.</li>
+        </ul>
+      </div>
+      <h3>Why "most general" — the worked comparison</h3>
+      <p>Take U = <code>{f(X) = f(Y)}</code> with σ = {X ↦ Y} and ρ = {X ↦ a, Y ↦ a}. Both make the terms syntactically identical:</p>
+      <div class="subst-grid">
+        <span class="sg-lbl">under σ</span><span class="sg-val">f(X)σ = f(Y) = f(Y)σ</span>
+        <span class="sg-lbl">under ρ</span><span class="sg-val">f(X)ρ = f(a) = f(Y)ρ</span>
+      </div>
+      <p>Hence <strong>they are both unifiers</strong>. However <strong>σ is more general than ρ</strong>, because ρ <em>is an instance of</em> σ — applying γ = {Y ↦ a} after σ gives ρ — but <strong>ρ is not an instance of σ</strong> (we cannot get σ back from ρ). So σ is <strong>the most general unifier</strong>: no other unifier is more general.</p>
+      <!-- ===== WHY IT MATTERS ===== -->
+      <h2 id="w10-why">Why the mgu is the one we want</h2>
+      <div class="callout exam">
+        <div class="callout-label">The intuition — a very likely exam discussion point</div>
+        Substitutions are applied to entire clauses to allow them to resolve. <strong>Substitutions that "commit" variables to specific terms (e.g. constants and function terms) prevent future substitutions being able to act as unifiers.</strong>
+        <p style="margin:10px 0 0 0;">We can unify the atoms p(X) and p(Y) in the clauses <code>p(X) ∨ ¬q(X)</code> and <code>¬p(Y)</code> either by replacing X by Y (or Y by X), <em>or</em> by replacing both X and Y by, say, the constant <em>a</em>.</p>
+        <p style="margin:10px 0 0 0;">The first two would let us then unify the resolvent <code>¬q(X)</code> with the clause <code>q(b)</code>; the last would not. <strong>Replacing X and Y by <em>a</em> early commits the variable to the constant</strong>, generating <code>¬q(a)</code>, which cannot then resolve with any atom involving anything other than <em>a</em>.</p>
+        <div style="text-align:center; font-family:'Fraunces',serif; font-style:italic; font-size:17px; margin:14px 0; color:var(--accent-2);">
+          So we want to leave the variables "free", unless we need to bind them for the unification to succeed.
+        </div>
+      </div>
+      <!-- ===== ALGORITHM ===== -->
+      <h2 id="w10-rules">The unification algorithm</h2>
+      <ul>
+        <li>It <strong>finds the mgu</strong> for a unification problem if a solution exists, or otherwise <strong>fails</strong>, indicating that there are no solutions.</li>
+        <li>To find the mgu the algorithm <strong>simplifies the set of equations using a set of transformation rules</strong>.</li>
+        <li>At each step, either a new set of equations is produced or a <strong>failure case</strong> arises.</li>
+        <li>The algorithm <strong>terminates and outputs the mgu when no rule may be applied</strong>.</li>
+      </ul>
+      <div class="callout exam">
+        <div class="callout-label">The six rules — learn these cold</div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:2.1; margin-top:8px;">
+          <strong>(1)</strong> &nbsp;f(s₁,…,sₙ) = f(t₁,…,tₙ), E &nbsp;→&nbsp; s₁ = t₁, …, sₙ = tₙ, E<br>
+          <strong>(2)</strong> &nbsp;f(s₁,…,sₙ) = g(t₁,…,t<sub>m</sub>), E &nbsp;→&nbsp; <span style="color:var(--accent-2);">failure</span><br>
+          <strong>(3)</strong> &nbsp;X = X, E &nbsp;→&nbsp; E<br>
+          <strong>(4)</strong> &nbsp;t = X, E &nbsp;→&nbsp; X = t, E &nbsp;&nbsp;<span style="color:var(--ink-muted); font-style:italic;">if t is not a variable</span><br>
+          <strong>(5)</strong> &nbsp;X = t, E &nbsp;→&nbsp; X = t, E{X ↦ t} &nbsp;&nbsp;<span style="color:var(--ink-muted); font-style:italic;">if X not in t and X in E</span><br>
+          <strong>(6)</strong> &nbsp;X = t, E &nbsp;→&nbsp; <span style="color:var(--accent-2);">failure</span> &nbsp;&nbsp;<span style="color:var(--ink-muted); font-style:italic;">if X occurs in t and X ≠ t</span>
+        </div>
+        <p style="margin:12px 0 0 0;"><strong>Cases (1) and (2) apply also to constants (arity 0):</strong> in the first case the equation is eliminated, in the second failure arises.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Rule (6) is the occur-check</div>
+        For example, <code>X = f(X)</code> is a failure case. <strong>This test is time consuming, and for this reason in some systems it is not implemented.</strong>
+        <p style="margin:10px 0 0 0;">Without it, unifying <code>X</code> with <code>f(X)</code> builds a <em>cyclic</em> term and most Prologs will loop or print something infinite. It comes back at the end of this week in the variable-renaming discussion.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Three more things the slides say about the algorithm</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>The rules are applied in a <strong>non-deterministic</strong> way until no rule can be applied or a failure arises.</li>
+          <li>In the case of success, <strong>by changing each <code>=</code> in the final set of equations to <code>↦</code> we obtain the mgu</strong>.</li>
+          <li><strong>We are working with <em>sets</em> of equations</strong>, so their order in the problem is unimportant.</li>
+        </ul>
+      </div>
+      <h3>Worked examples</h3>
+      <div class="unif">
+        <div class="unif-row start"><span class="u-rule">Input</span><span class="u-set">{ f(a, a) = f(X, a) }</span></div>
+        <div class="unif-row"><span class="u-rule">rule (1), eq 1</span><span class="u-set">{ a = X, &nbsp;a = a }</span></div>
+        <div class="unif-row"><span class="u-rule">rule (4), eq 1</span><span class="u-set">{ X = a, &nbsp;a = a }</span></div>
+        <div class="unif-row"><span class="u-rule">rule (1), eq 2</span><span class="u-set">{ X = a }</span></div>
+        <div class="unif-row done"><span class="u-rule">Output</span><span class="u-set">{ X ↦ a }</span></div>
+      </div>
+      <div class="unif">
+        <div class="unif-row start"><span class="u-rule">Input</span><span class="u-set">{ [X | L] = [0], &nbsp;Y = [1, 2], &nbsp;[X | Z] = U }</span></div>
+        <div class="unif-row"><span class="u-rule">rule (1), eq 1</span><span class="u-set">{ X = 0, &nbsp;L = [], &nbsp;Y = [1, 2], &nbsp;[X | Z] = U }</span></div>
+        <div class="unif-row"><span class="u-rule">rule (5), eq 1</span><span class="u-set">{ X = 0, &nbsp;L = [], &nbsp;Y = [1, 2], &nbsp;[0 | Z] = U }</span></div>
+        <div class="unif-row"><span class="u-rule">rule (4), eq 4</span><span class="u-set">{ X = 0, &nbsp;L = [], &nbsp;Y = [1, 2], &nbsp;U = [0 | Z] }</span></div>
+        <div class="unif-row done"><span class="u-rule">Output</span><span class="u-set">{ X ↦ 0, &nbsp;L ↦ [], &nbsp;Y ↦ [1, 2], &nbsp;U ↦ [0 | Z] }</span></div>
+      </div>
+      <div class="exc">
+        <div class="exc-n">Exercise · full solution given in the deck</div>
+        <h4>{ f(g(a), b) = f(X, b), &nbsp;X = g(Z), &nbsp;f(a, Y) = f(Z, Y) }</h4>
+        <div class="unif" style="margin-top:10px;">
+          <div class="unif-row start"><span class="u-rule">Input</span><span class="u-set">{ f(g(a),b) = f(X,b), &nbsp;X = g(Z), &nbsp;f(a,Y) = f(Z,Y) }</span></div>
+          <div class="unif-row"><span class="u-rule">rule (1), 1</span><span class="u-set">{ g(a) = X, &nbsp;b = b, &nbsp;X = g(Z), &nbsp;f(a,Y) = f(Z,Y) }</span></div>
+          <div class="unif-row"><span class="u-rule">rule (4), 1</span><span class="u-set">{ X = g(a), &nbsp;b = b, &nbsp;X = g(Z), &nbsp;f(a,Y) = f(Z,Y) }</span></div>
+          <div class="unif-row"><span class="u-rule">rule (5), 1</span><span class="u-set">{ X = g(a), &nbsp;b = b, &nbsp;g(a) = g(Z), &nbsp;f(a,Y) = f(Z,Y) }</span></div>
+          <div class="unif-row"><span class="u-rule">rule (1), 2</span><span class="u-set">{ X = g(a), &nbsp;g(a) = g(Z), &nbsp;f(a,Y) = f(Z,Y) }</span></div>
+          <div class="unif-row"><span class="u-rule">rule (1), 2</span><span class="u-set">{ X = g(a), &nbsp;a = Z, &nbsp;f(a,Y) = f(Z,Y) }</span></div>
+          <div class="unif-row"><span class="u-rule">rule (4), 2</span><span class="u-set">{ X = g(a), &nbsp;Z = a, &nbsp;f(a,Y) = f(Z,Y) }</span></div>
+          <div class="unif-row"><span class="u-rule">rule (5), 2</span><span class="u-set">{ X = g(a), &nbsp;Z = a, &nbsp;f(a,Y) = f(a,Y) }</span></div>
+          <div class="unif-row"><span class="u-rule">rule (1), 3</span><span class="u-set">{ X = g(a), &nbsp;Z = a, &nbsp;a = a, &nbsp;Y = Y }</span></div>
+          <div class="unif-row"><span class="u-rule">rule (1), 3</span><span class="u-set">{ X = g(a), &nbsp;Z = a, &nbsp;Y = Y }</span></div>
+          <div class="unif-row"><span class="u-rule">rule (3), 3</span><span class="u-set">{ X = g(a), &nbsp;Z = a }</span></div>
+          <div class="unif-row done"><span class="u-rule">Output</span><span class="u-set">{ X ↦ g(a), &nbsp;Z ↦ a }</span></div>
+        </div>
+      </div>
+      <!-- ===== UNIF TOOL ===== -->
+      <h3 id="w10-uniftool">🛠️ Interactive: Unification Stepper</h3>
+      <p>Runs the Martelli–Montanari rules on any unification problem, naming the rule and the equation used at each step — the exact format the exam asks for. It reproduces all three worked examples above.</p>
+      <div class="tool" data-run="runUnify">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Solve a unification problem</h3>
+        </div>
+        <div class="tool-desc">Separate equations with commas: <code>f(g(a),b) = f(X,b), X = g(Z)</code>. Variables are capitalised; lists <code>[X|L]</code> are supported.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1; min-width:300px;">
+            <label>unification problem U</label>
+            <input type="text" id="un-prob" value="f(g(a), b) = f(X, b), X = g(Z), f(a, Y) = f(Z, Y)" style="width:100%;">
+          </div>
+          <button class="tool-btn" onclick="runUnify()">Solve ▶</button>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="unPreset('e1')">f(a,a) = f(X,a)</button>
+          <button class="tool-btn secondary" onclick="unPreset('e2')">list example</button>
+          <button class="tool-btn secondary" onclick="unPreset('e3')">the exercise</button>
+          <button class="tool-btn danger" onclick="unPreset('occ')">occur-check failure</button>
+          <button class="tool-btn danger" onclick="unPreset('clash')">symbol clash</button>
+          <button class="tool-btn secondary" onclick="unPreset('rename')">myappend (renaming)</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="un-output" class="tool-output"></div>
+      </div>
+      <!-- ===== RESOLUTION ===== -->
+      <h2 id="w10-resolution">The Principle of Resolution</h2>
+      <div class="callout exam">
+        <div class="callout-label">How a goal is proved</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>In order to prove a goal <code>:- G₁, …, Gₙ</code> with respect to a set P of program clauses, resolution seeks to show that <strong>P ∪ {¬G₁ ∨ … ∨ ¬Gₙ} leads to a contradiction</strong>.</li>
+          <li>A <strong>contradiction</strong> is obtained when a literal and its negation are stated at the same time — both A and ¬A (recall A ∧ ¬A is unsatisfiable).</li>
+          <li>If a contradiction does not arise directly, a <strong>new goal is derived by unifying the current goal with a program clause</strong>.</li>
+          <li>The derived goals are called <strong>resolvents</strong>.</li>
+        </ul>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Note the logic: this is proof by contradiction</div>
+        You don't prove the goal directly — you <em>negate</em> it, add it to the program, and derive a contradiction. That is why a query is a clause of <em>only negative</em> literals: <code>:- G₁,…,Gₙ</code> literally <strong>is</strong> ¬G₁ ∨ … ∨ ¬Gₙ. Week 9's definition of a goal was setting this up.
+      </div>
+      <h2 id="w10-sld">What S, L and D stand for</h2>
+      <div class="concept-grid">
+        <div class="concept-card" data-num="S">
+          <h3>Selective</h3>
+          <p>At each resolution step a <strong>fixed computation rule</strong> is applied to select <em>which atom from the goal</em> will be next resolved upon.</p>
+        </div>
+        <div class="concept-card" data-num="L">
+          <h3>Linear</h3>
+          <p>At each resolution step the <strong>most recently derived resolvent</strong> is used as the next goal.</p>
+        </div>
+        <div class="concept-card" data-num="D">
+          <h3>Definite</h3>
+          <p>All the program clauses are <strong>definite clauses</strong>.</p>
+        </div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Two properties of SLD-resolution</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Refutation-complete:</strong> given a program and a goal, <em>if a contradiction can be derived, then SLD-resolution will eventually generate it</em>.</li>
+          <li><strong>Independence of the selection rule:</strong> if there exists a solution to a goal, SLD-resolution will find it, <em>regardless of the selection rule</em> employed for choosing which atom is next resolved upon.</li>
+        </ol>
+      </div>
+      <!-- ===== RESOLVENTS ===== -->
+      <h2 id="w10-resolvents">Computing resolvents</h2>
+      <div class="callout">
+        <div class="callout-label">The recipe</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>Given a goal clause <code>:- G₁, …, G<sub>k</sub></code>, we select an atom <strong>Gᵢ</strong> of the form <code>p(s₁,…,sₙ)</code>.</li>
+          <li>We select a program clause <code>p(t₁,…,tₙ) :- B₁,…,B<sub>m</sub></code> such that <code>p(t₁,…,tₙ)</code> and <code>p(s₁,…,sₙ)</code> are <strong>unifiable using the mgu σ</strong>.</li>
+          <li>We obtain the resolvent <code>:- B₁σ, …, B<sub>m</sub>σ, G₁σ, …, G<sub>i−1</sub>σ, … G<sub>i+1</sub>σ, …, G<sub>k</sub>σ</code>, <strong>from which Gᵢσ has been eliminated</strong>.</li>
+          <li>Continue until an <strong>empty resolvent</strong> is found — a contradiction.</li>
+          <li>When an empty resolvent is generated, <strong>the composition of the substitutions applied at each resolution step, restricted to the variables of the query, is the solution</strong>.</li>
+        </ul>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Prolog's two commitments — and what they cost</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>Prolog always selects the <strong>left-most literal</strong> in the goal.</li>
+          <li>Prolog uses the clauses in the program <strong>in the order they are written</strong>, top to bottom.</li>
+          <li><strong>SLD-resolution is complete, but Prolog's implementation of SLD-resolution is not complete</strong>, because of its search strategy in the SLD-tree.</li>
+          <li>Prolog uses <strong>depth-first search</strong>, which is efficient but <em>not complete</em>, because it may <strong>get stuck in a branch that expands infinitely</strong>.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">Read those together: the <em>calculus</em> is complete, the <em>implementation</em> is not. That gap is entirely due to depth-first search, and it is why clause order matters so much in practice.</p>
+      </div>
+      <h3>Worked example: <code>:- likes(Z, prolog).</code></h3>
+      <div class="numprog">
+        <div class="cl"><span class="n">1</span><span>based(prolog, logic).</span></div>
+        <div class="cl"><span class="n">2</span><span>based(haskell, maths).</span></div>
+        <div class="cl"><span class="n">3</span><span>likes(max, logic).</span></div>
+        <div class="cl"><span class="n">4</span><span>likes(claire, maths).</span></div>
+        <div class="cl"><span class="n">5</span><span>likes(X, P) :- based(P, Y), likes(X, Y).</span></div>
+      </div>
+      <div class="goal-trace">
+        <div class="gt-row"><span class="gt-n">1</span><span class="gt-goal">:- likes(Z, prolog).</span></div>
+        <div class="gt-row"><span class="gt-n">2</span><span class="gt-goal">:- based(prolog, Y), likes(Z, Y).<span class="gt-note">using the last clause and the mgu {X ↦ Z, P ↦ prolog}</span></span></div>
+        <div class="gt-row"><span class="gt-n">3</span><span class="gt-goal">:- likes(Z, logic).<span class="gt-note">using the first clause and the mgu {Y ↦ logic}</span></span></div>
+        <div class="gt-row ok"><span class="gt-n">4</span><span class="gt-goal">□ &nbsp;empty resolvent<span class="gt-note">unify with the fact likes(max, logic) using {Z ↦ max}</span></span></div>
+      </div>
+      <p><strong>The composition of substitutions generated is</strong> <code>{X ↦ max, P ↦ prolog, Y ↦ logic, Z ↦ max}</code>, <strong>and the solution to the initial query is</strong> <code>{Z ↦ max}</code> — restricted to the variables of the query.</p>
+      <!-- ===== TREES ===== -->
+      <h2 id="w10-trees">SLD-resolution trees</h2>
+      <p>Each resolution step is drawn as a goal, an arrow labelled with the mgu, and the resolvent. Since <strong>several clauses may be usable</strong>, a goal may have several children — giving an <strong>SLD-resolution tree</strong>.</p>
+      <div class="callout exam">
+        <div class="callout-label">Three kinds of branch</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>Every branch that leads to an <strong>empty resolvent</strong> (denoted <strong>□</strong>) <strong>yields a solution</strong>.</li>
+          <li>If a goal <strong>unifies with no program clause</strong>, the branch is a <strong>failure</strong>.</li>
+          <li>Thus an SLD-resolution tree may have <strong>success branches, failure branches, but also infinite branches</strong>.</li>
+        </ul>
+      </div>
+      <h2 id="w10-backtracking">Back-tracking</h2>
+      <div class="callout">
+        <div class="callout-label">How Prolog explores the tree</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>When a branch ends, Prolog can <strong>back-track</strong> over the tree to search alternative branches.</li>
+          <li>The previous resolution step is taken back and <strong>the next possible resolvent is generated</strong>.</li>
+          <li><strong>Failure branches back-track automatically</strong>, and <strong>solution branches can be back-tracked from on request</strong>.</li>
+          <li>Back-tracking can be stopped by using the <strong>cut</strong> predicate, written <strong><code>!</code></strong>, which means <em>do not back-track beyond this point</em>.</li>
+        </ul>
+      </div>
+      <p>The standard example — <code>:- append(X, [1, 2], U).</code> produces infinitely many solutions by back-tracking:</p>
+      <div class="pl">(1) {<span class="v">X</span> ↦ [], <span class="v">U</span> ↦ [1, 2]}
+(2) {<span class="v">X</span> ↦ [<span class="v">X1</span>], <span class="v">U</span> ↦ [<span class="v">X1</span>, 1, 2]}
+(3) {<span class="v">X</span> ↦ [<span class="v">X1</span>, <span class="v">X2</span>], <span class="v">U</span> ↦ [<span class="v">X1</span>, <span class="v">X2</span>, 1, 2]}
+(4) ...</div>
+      <!-- ===== NON-TERMINATION ===== -->
+      <h2 id="w10-nonterm">Non-termination: clause order matters</h2>
+      <div class="callout warn">
+        <div class="callout-label">The rule</div>
+        Since Prolog searches the tree using the program clauses <strong>in the order in which they are written</strong>, and <strong>in a depth-first manner</strong>, it is important to <strong>put base clauses before recursive ones</strong>.
+        <div class="pl" style="margin:10px 0 0 0;"><span class="at">append</span>([<span class="v">X</span>|<span class="v">L</span>],<span class="v">Y</span>,[<span class="v">X</span>|<span class="v">Z</span>]) <span class="op">:-</span> append(<span class="v">L</span>,<span class="v">Y</span>,<span class="v">Z</span>).
+<span class="at">append</span>([],<span class="v">L</span>,<span class="v">L</span>).</div>
+        <p style="margin:10px 0 0 0;">This program <strong>produces no solutions and will result in an error</strong>, because Prolog will attempt to construct an <em>infinite branch</em> by using the recursive clause at each resolution step.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Note exactly what changed — and what didn't</div>
+        The two programs are <strong>logically identical</strong>: a set of clauses has no order. Only <em>Prolog's search strategy</em> distinguishes them. This is the sharpest possible illustration of "SLD-resolution is complete, but Prolog's implementation is not": the solution is still there in the tree, depth-first search just never reaches it.
+      </div>
+      <!-- ===== CONSTRUCTING ===== -->
+      <h2 id="w10-constructing">Constructing an SLD-resolution tree</h2>
+      <div class="callout exam">
+        <div class="callout-label">The full checklist</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>Each <strong>node</strong> represents the goal being operated on, which may contain several literals.</li>
+          <li>The <strong>selection function</strong> picks the next literal to resolve — in Prolog, always the <strong>left-most</strong> literal (underlined in the examples).</li>
+          <li>When resolving, Prolog uses the clauses <strong>in order of appearance</strong>, top to bottom.</li>
+          <li>Each node has <strong>as many children as there are clauses that can be unified</strong> with the selected literal. <strong>Failed unifications are not depicted.</strong></li>
+          <li>The order of resolution with program clauses is depicted <strong>left-to-right</strong>.</li>
+          <li>Each child is connected to its parent by an arrow <strong>labelled with the mgu</strong> used.</li>
+          <li>If no clause can be unified, the branch <strong>fails</strong> (no children) — indicated with "failure".</li>
+          <li>If a goal node is <strong>empty</strong>, it is represented by <strong>□</strong> and ends a <strong>success branch</strong>.</li>
+          <li>Some goals need no program clauses — typically <strong>built-in predicates</strong>. E.g. <code>Y is 3+1</code> succeeds if Y can be unified with 4, so it succeeds if Y is free or already bound to 4, and fails otherwise.</li>
+        </ul>
+      </div>
+      <p>The deck's running example program, with clauses numbered:</p>
+      <div class="numprog">
+        <div class="cl"><span class="n">1</span><span>s(3).</span></div>
+        <div class="cl"><span class="n">2</span><span>s(4).</span></div>
+        <div class="cl"><span class="n">3</span><span>r(2).</span></div>
+        <div class="cl"><span class="n">4</span><span>q(3).</span></div>
+        <div class="cl"><span class="n">5</span><span>q(X) :- r(X).</span></div>
+        <div class="cl"><span class="n">6</span><span>p(1).</span></div>
+        <div class="cl"><span class="n">7</span><span>p(X) :- q(X), Y is X+1, s(Y).</span></div>
+      </div>
+      <table>
+        <tr><th>Goal</th><th>Answer</th></tr>
+        <tr><td><code>:- p(X), s(X).</code></td><td><strong>X = 3</strong></td></tr>
+        <tr><td><code>:- p(2).</code></td><td><strong>true</strong> — there are no variables in the goal</td></tr>
+        <tr><td><code>:- s(2).</code></td><td><strong>false</strong> — a single failure node</td></tr>
+        <tr><td><code>:- p(2), s(2).</code></td><td><strong>false</strong> — since <code>s(2)</code> fails</td></tr>
+      </table>
+      <p>Build each of these in the tool below and compare with the slides.</p>
+      <!-- ===== SLD TOOL ===== -->
+      <h3 id="w10-sldtool">🛠️ Interactive: SLD-Resolution Tree Builder</h3>
+      <p>Draws the complete tree: goals as nodes, the <strong>selected (left-most) literal highlighted</strong>, edges labelled with the <strong>clause number and mgu</strong>, success branches ending in <strong>□</strong> and dead ends marked <em>failure</em>. Infinite branches are cut off at a depth limit so you can see them growing.</p>
+      <div class="tool" data-run="runSLD">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Draw the SLD-resolution tree</h3>
+        </div>
+        <div class="tool-desc">Children appear left-to-right in program order, exactly as the lecture prescribes. Failed unifications are not shown.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1; min-width:280px;">
+            <label>program (numbered in order)</label>
+            <textarea id="sd-prog" rows="7" style="width:100%;">s(3).
+s(4).
+r(2).
+q(3).
+q(X) :- r(X).
+p(1).
+p(X) :- q(X), Y is X+1, s(Y).</textarea>
+          </div>
+          <div class="tool-field" style="flex:1; min-width:170px;">
+            <label>goal</label>
+            <input type="text" id="sd-goal" value="p(X), s(X)" style="width:100%;">
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="runSLD()">Build tree ▶</button>
+          <button class="tool-btn secondary" onclick="sdPreset('px')">p(X), s(X)</button>
+          <button class="tool-btn secondary" onclick="sdPreset('p2')">p(2)</button>
+          <button class="tool-btn secondary" onclick="sdPreset('s2')">s(2)</button>
+          <button class="tool-btn secondary" onclick="sdPreset('likes')">likes(Z, prolog)</button>
+          <button class="tool-btn secondary" onclick="sdPreset('paint')">likes(Z, painting)</button>
+          <button class="tool-btn secondary" onclick="sdPreset('len')">length([2,3],X)</button>
+          <button class="tool-btn danger" onclick="sdPreset('bad')">bad clause order</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="sd-output" class="tool-output"></div>
+      </div>
+      <div class="exc">
+        <div class="exc-n">Exercise · solution given in the deck</div>
+        <h4>SLD-tree for <code>:- length([2, 3], X).</code></h4>
+        <div class="pl"><span class="at">length</span>([], 0).
+<span class="at">length</span>([<span class="v">H</span> | <span class="v">T</span>], <span class="v">N</span>) <span class="op">:-</span> length(<span class="v">T</span>, <span class="v">M</span>), <span class="v">N</span> <span class="op">is</span> <span class="v">M</span> + 1.</div>
+        <p style="font-size:14px;">Recall <code>[2, 3]</code> is an abbreviation of <code>[2 | [3 | []]]</code>. The derivation is a single chain:</p>
+        <div class="goal-trace">
+          <div class="gt-row"><span class="gt-n">1</span><span class="gt-goal">:- length([2 | [3 | []]], X).</span></div>
+          <div class="gt-row"><span class="gt-n">2</span><span class="gt-goal">:- length([3 | []], M), N is M + 1.<span class="gt-note">{H ↦ 2, T ↦ [3 | []], X ↦ N}</span></span></div>
+          <div class="gt-row"><span class="gt-n">3</span><span class="gt-goal">:- length([], M1), N1 is M1 + 1, N is N1 + 1.<span class="gt-note">{H ↦ 3, T ↦ [], M ↦ N1}</span></span></div>
+          <div class="gt-row"><span class="gt-n">4</span><span class="gt-goal">:- N1 is 1 + 0, N is N1 + 1.<span class="gt-note">{M1 ↦ 0}</span></span></div>
+          <div class="gt-row"><span class="gt-n">5</span><span class="gt-goal">:- N is 1 + 1.<span class="gt-note">{N1 ↦ 1}</span></span></div>
+          <div class="gt-row ok"><span class="gt-n">6</span><span class="gt-goal">□<span class="gt-note">{N ↦ 2} — answer X = 2, since N = 2</span></span></div>
+        </div>
+      </div>
+      <!-- ===== RENAMING ===== -->
+      <h2 id="w10-renaming">A note on variable renaming</h2>
+      <p>Consider this program clause and goal:</p>
+      <div class="pl"><span class="cm">% in the program</span>
+<span class="at">myappend</span>([<span class="v">X</span>|<span class="v">Y</span>],<span class="v">Z</span>,[<span class="v">X</span>|<span class="v">W</span>]) <span class="op">:-</span> myappend(<span class="v">Y</span>,<span class="v">Z</span>,<span class="v">W</span>).
+
+<span class="cm">% goal</span>
+<span class="op">:-</span> myappend(<span class="v">Y</span>,[2],<span class="v">W</span>).</div>
+      <div class="callout warn">
+        <div class="callout-label">Without renaming, the unification <em>fails</em></div>
+        To resolve, we must solve &nbsp;<code>U = {[X|Y] = Y, &nbsp;Z = [2], &nbsp;[X|W] = W}</code>.
+        <p style="margin:10px 0 0 0;">Formally <code>[X|Y]</code> is shorthand for <code>'[|]'(X,Y)</code>, whose functor is <code>'[|]'</code>. By <strong>rule (6) of the unification algorithm — the occur-check — U cannot be solved</strong>, because <strong>Y occurs in [X|Y]</strong> (and likewise W in [X|W]).</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Why renaming is legitimate, and how to do it</div>
+        <strong>The choice of variables used in a Prolog program is irrelevant, because formally they are universally quantified.</strong> We are free to rename them <em>as long as we do the renaming <strong>uniformly within the clause</strong> and do not use symbols that already appear elsewhere in it</em> (lest we cause unwanted bindings).
+        <p style="margin:10px 0 0 0;">For example, renaming X by Z in <code>myappend([X|Y],Z,[X|W])</code> would <strong>clearly change the intended meaning</strong>, because in the original clause X and Z allow bindings to <em>different</em> terms.</p>
+      </div>
+      <p>It is common to rename systematically with a suffix:</p>
+      <div class="pl"><span class="at">myappend</span>([<span class="v">X1</span>|<span class="v">Y1</span>],<span class="v">Z</span>,[<span class="v">X1</span>|<span class="v">W1</span>]) <span class="op">:-</span> myappend(<span class="v">Y1</span>,<span class="v">Z</span>,<span class="v">W1</span>).</div>
+      <p>which allows <code>myappend(Y,[2],W)</code> and <code>myappend([X1|Y1],Z,[X1|W1])</code> to be resolved using</p>
+      <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:14px 0; color:var(--accent-3);">
+        σ = {Y ↦ [X1 | Y1], &nbsp;Z ↦ [2], &nbsp;W ↦ [X1 | W1]}
+      </div>
+      <p>In this case we do not <em>have</em> to rename X and Z for the unification to be possible, <strong>but renaming is safe if done uniformly</strong>. And: <strong>remember to carry the corresponding bindings back to the variables in the original goal!</strong></p>
+      <div class="callout tip">
+        <div class="callout-label">This is what the tool's <code>_1</code>, <code>_2</code> suffixes are doing</div>
+        Every time the SLD-tree builder below uses a clause, it renames that clause's variables apart first. That's not an implementation convenience — <strong>it is required for correctness</strong>, as this example shows. Try the "myappend (renaming)" preset in the unification tool to see the failure and the fix side by side.
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="w10-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 10</div>
+        <ol>
+          <li><strong>Unification problem</strong> = a set of equations between terms; a <strong>unifier</strong> σ makes sᵢσ and tᵢσ <em>syntactically identical</em>; the <strong>mgu</strong> is a unifier of which every other unifier is an instance.</li>
+          <li><strong>The f(X) = f(Y) comparison</strong> — why {X↦Y} is more general than {X↦a, Y↦a}: ρ is an instance of σ (compose with {Y↦a}) but not conversely.</li>
+          <li><strong>Why generality matters</strong> — committing a variable to a constant early prevents later resolutions; leave variables free unless binding is needed.</li>
+          <li><strong>Write out all six rules.</strong> (1) same functor → equate arguments; (2) different functor → failure; (3) X = X → delete; (4) t = X with t not a variable → swap; (5) X = t with X ∉ t and X in E → substitute in E; (6) X occurs in t and X ≠ t → failure.</li>
+          <li><strong>Rules (1) and (2) apply to constants too</strong> — arity 0: eliminate, or fail.</li>
+          <li><strong>Rule (6) is the occur-check</strong> — <code>X = f(X)</code> fails; the test is time consuming, so some systems omit it.</li>
+          <li><strong>Reading off the answer</strong> — change each <code>=</code> to <code>↦</code> in the final set. The problem is a <em>set</em>, so order is unimportant.</li>
+          <li><strong>Run the algorithm by hand</strong> — all three worked examples, especially the 10-step exercise.</li>
+          <li><strong>The Principle of Resolution</strong> — prove <code>:- G₁,…,Gₙ</code> by showing P ∪ {¬G₁ ∨ … ∨ ¬Gₙ} leads to a contradiction; derived goals are <strong>resolvents</strong>.</li>
+          <li><strong>S, L, D</strong> — Selective (a fixed computation rule picks the atom), Linear (the most recently derived resolvent is the next goal), Definite (all program clauses are definite).</li>
+          <li><strong>Two properties</strong> — refutation-complete; independence of the selection rule.</li>
+          <li><strong>Computing a resolvent</strong> — select Gᵢ, find a clause whose head unifies with mgu σ, replace Gᵢ by the clause body, applying σ throughout. The <strong>composition of substitutions restricted to the query's variables</strong> is the answer.</li>
+          <li><strong>Prolog's strategy</strong> — left-most literal, clauses top to bottom, <strong>depth-first</strong>. <em>SLD-resolution is complete but Prolog's implementation is not</em>, because depth-first search can get stuck in an infinite branch.</li>
+          <li><strong>Draw SLD-trees</strong> — nodes are goals, edges are labelled with mgus, children in program order left-to-right, failed unifications not shown, <strong>□</strong> ends a success branch, dead ends marked <em>failure</em>. Trees may have success, failure <em>and infinite</em> branches.</li>
+          <li><strong>Reproduce the deck's trees</strong> — <code>likes(Z,prolog)</code>, <code>likes(Z,painting)</code>, the four goals on the s/r/q/p program, and <code>length([2,3],X)</code>.</li>
+          <li><strong>Built-ins in a tree</strong> — <code>Y is 3+1</code> needs no program clause; it succeeds if Y is free or already bound to 4.</li>
+          <li><strong>Back-tracking</strong> — failure branches back-track automatically, success branches on request; the <strong>cut <code>!</code></strong> means do not back-track beyond this point.</li>
+          <li><strong>Clause order</strong> — put base clauses before recursive ones; the reversed <code>append</code> yields an infinite branch and no solutions, even though the program is <em>logically</em> the same.</li>
+          <li><strong>Variable renaming</strong> — needed because <code>{[X|Y] = Y, …}</code> fails the occur-check. Renaming is legitimate because clause variables are universally quantified; it must be done <strong>uniformly within the clause</strong> and must not reuse symbols already in it. Carry the bindings back to the original goal's variables.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 10 — and the end of the taught material. 🎓 Week 11 is revision: use the cram sheet.</p>
+    </section>

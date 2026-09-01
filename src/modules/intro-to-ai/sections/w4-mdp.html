@@ -1,0 +1,251 @@
+<section id="w4-mdp" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 04 · Part 2 · Uncertainty in AI</div>
+        <h1>Markov Decision Processes</h1>
+        <div class="week-subtitle">stop planning a route; start deciding what to do everywhere</div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Before this page</div>
+        If any of this stops making sense, go back to <a href="#w4-start" onclick="showWeek('w4-start')">MDPs, Slowly</a> — it builds the same ideas up from scratch with no notation. This page is the formal version.
+      </div>
+
+      <!-- ===== THE GRID ===== -->
+      <h2 id="k-maze">The grid everything runs on</h2>
+      <div class="callout">
+        <div class="callout-label">One picture, used for the whole week</div>
+        <p style="margin:0 0 10px 0;">A robot in a 4×3 grid. It starts bottom-left. There is a wall at (2,2). Two squares end the game: <strong>+1</strong> at the top right, and <strong>−1</strong> just below it.</p>
+        <div class="gw-wrap"><table class="gw"><tbody>
+          <tr><td>−0.04</td><td>−0.04</td><td>−0.04</td><td class="term-pos"><strong>+1</strong><span class="gw-label">end</span></td></tr>
+          <tr><td>−0.04</td><td class="gw-wall"></td><td>−0.04</td><td class="term-neg"><strong>−1</strong><span class="gw-label">end</span></td></tr>
+          <tr><td>−0.04<span class="gw-label">start</span></td><td>−0.04</td><td>−0.04</td><td>−0.04</td></tr>
+        </tbody></table></div>
+        <p style="margin:12px 0 0 0;">Every ordinary square pays <strong>−0.04</strong> when you stand on it. Think of it as a small fee for taking another step.</p>
+        <p style="margin:10px 0 0 0;"><strong>Squares are named (column, row), counting from the bottom left.</strong> So the start is (1,1) and the +1 is (4,3). Getting this the wrong way round is the commonest way to lose marks on an otherwise correct answer.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why this needs anything new</div>
+        As a plain search problem this maze is trivial — Week 1 would solve it in seconds. <strong>It only gets hard when the moves stop being reliable.</strong> That is the next section, and it is the whole reason Week 4 exists.
+      </div>
+
+      <!-- ===== NON-DETERMINISM ===== -->
+      <h2 id="k-nondet">Actions that don't do what you asked</h2>
+      <div class="callout exam">
+        <div class="callout-label">The rule</div>
+        <p style="margin:0 0 10px 0;">You command <strong>Up</strong>. What actually happens:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13.5px; line-height:2; margin:0 0 0 14px;">
+          <strong>0.8</strong> &nbsp;you move up<br>
+          <strong>0.1</strong> &nbsp;you move left instead<br>
+          <strong>0.1</strong> &nbsp;you move right instead
+        </div>
+        <p style="margin:12px 0 0 0;">The two slips are <strong>sideways</strong>, at right angles to what you asked for. You never go backwards. So <strong>every action has exactly three possible outcomes</strong>, not four.</p>
+        <p style="margin:10px 0 0 0;">And if the square you would move into is a wall or off the grid, <strong>you stay where you are</strong>. You do not lose a turn; you just do not move.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The same thing as a picture</div>
+        <div class="diagram">
+          <svg width="100%" viewBox="0 0 420 170" role="img" xmlns="http://www.w3.org/2000/svg">
+            <title>Outcomes of requesting Up</title><desc>From state s, probability 0.8 upward, 0.1 to the left and 0.1 to the right.</desc>
+            <circle cx="210" cy="128" r="17" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="2"/>
+            <text x="210" y="133" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--ink)">s</text>
+            <line x1="210" y1="108" x2="210" y2="52" stroke="var(--accent)" stroke-width="3"/>
+            <polygon points="210,42 205,54 215,54" fill="var(--accent)"/>
+            <text x="219" y="78" font-family="IBM Plex Mono" font-size="12" fill="var(--accent)">0.8</text>
+            <line x1="193" y1="122" x2="120" y2="98" stroke="var(--ink-muted)" stroke-width="2"/>
+            <polygon points="110,95 122,91 120,102" fill="var(--ink-muted)"/>
+            <text x="140" y="98" font-family="IBM Plex Mono" font-size="12" fill="var(--ink-muted)">0.1</text>
+            <line x1="227" y1="122" x2="300" y2="98" stroke="var(--ink-muted)" stroke-width="2"/>
+            <polygon points="310,95 298,91 300,102" fill="var(--ink-muted)"/>
+            <text x="262" y="98" font-family="IBM Plex Mono" font-size="12" fill="var(--ink-muted)">0.1</text>
+            <text x="210" y="24" text-anchor="middle" font-family="IBM Plex Sans" font-size="11.5" fill="var(--ink-muted)">you asked for: UP</text>
+            <text x="210" y="160" text-anchor="middle" font-family="IBM Plex Sans" font-size="11" fill="var(--ink-muted)">blocked by a wall? then you stay in s</text>
+          </svg>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Why this kills the Week 1 answer</div>
+        <p style="margin:0 0 10px 0;">Search says: go <code>Up, Up, Right, Right, Right</code>. Five actions. The chance that <em>all five</em> do what you asked is</p>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:10px 0;">0.8<sup>5</sup> = <strong>0.328</strong></div>
+        <p style="margin:0;">So about a third of the time the sequence runs as written. The other two thirds, something slipped.</p>
+        <p style="margin:10px 0 0 0;"><strong>The deeper problem is not the odds — it is that the list stops meaning anything.</strong> Instruction 3 says "Right" because instructions 1 and 2 were supposed to have put you two squares up. If they did not, "Right" is advice about a square you are not standing on.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">A small precision, if you want it</div>
+        0.328 is the chance of <em>the plan executing exactly</em>, not the chance of reaching the +1. Some slips are harmless — bump a wall and you stay put, so the next instruction still applies. Some are fatal — drift into the −1 and it is over. The true chance of reaching the goal while blindly following that list is a different number. <strong>The point stands either way</strong>, so do not get stuck here.
+      </div>
+
+      <!-- ===== MARKOV ===== -->
+      <h2 id="k-chain">Markov chains, and what "Markov" buys you</h2>
+      <div class="callout exam">
+        <div class="callout-label">A Markov chain</div>
+        A model of a world that moves between states <strong>at random, with nobody steering</strong>. Each state has a probability of leading to each other state, and that is the whole model.
+        <p style="margin:12px 0 0 0;">The defining feature is the <strong>Markov property</strong>: <strong>where you go next depends only on where you are now</strong>. How you got here is irrelevant.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The same sentence in symbols</div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:13.5px; margin:10px 0;">
+          P(S<sub>t+1</sub> | S<sub>t</sub>, S<sub>t−1</sub>, …, S<sub>0</sub>) &nbsp;=&nbsp; P(S<sub>t+1</sub> | S<sub>t</sub>)</div>
+        <p style="margin:0;"><strong>In words:</strong> the probability of the next state, given the entire history, equals the probability given just the current state. Everything before now adds nothing.</p>
+        <p style="margin:10px 0 0 0;">Read the notation as: <code>S<sub>t</sub></code> is "the state at time t", and <code>P(A | B)</code> is "the probability of A given that B happened".</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why this is a design choice, not a restriction</div>
+        If history <em>does</em> matter, you put the history into the state. A chess position includes castling rights for exactly this reason — so that the position alone is enough.
+        <p style="margin:10px 0 0 0;"><strong>And you need this property for value iteration to be possible at all.</strong> Without it, a square would not have <em>a</em> value — it would have a different value depending on how you arrived, and you would need a number per history rather than per square. There are infinitely many histories.</p>
+      </div>
+
+      <!-- ===== DEFINITION ===== -->
+      <h2 id="k-def">What an MDP is</h2>
+      <div class="callout exam">
+        <div class="callout-label">The definition to be able to write down</div>
+        <strong>A Markov Decision Process is a sequential decision making problem for a fully observable but stochastic environment.</strong>
+        <p style="margin:12px 0 0 0;">Taking that apart:</p>
+        <table class="cmp-table" style="margin-top:8px;">
+          <tr><th>phrase</th><th>means</th></tr>
+          <tr><td><strong>sequential decision making</strong></td><td>you choose repeatedly, and each choice affects what comes next</td></tr>
+          <tr><td><strong>fully observable</strong></td><td>you always know which square you are on</td></tr>
+          <tr><td><strong>stochastic</strong></td><td>your actions do not reliably do what you asked</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">It rests on two assumptions:</p>
+        <ul style="margin:8px 0 0 0;">
+          <li>the <strong>Markov property</strong> holds for the action transitions;</li>
+          <li>the probabilities are <strong>stationary</strong> — they never change.</li>
+        </ul>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Markov chain vs MDP — one difference</div>
+        <table class="cmp-table">
+          <tr><th></th><th>Markov chain</th><th>MDP</th></tr>
+          <tr><td><strong>Who steers</strong></td><td>nobody — you watch it happen</td><td><strong>an agent chooses</strong></td></tr>
+          <tr><td><strong>Probabilities</strong></td><td>one distribution per state</td><td>one distribution <strong>per state per action</strong></td></tr>
+          <tr><td><strong>Question it answers</strong></td><td>what will happen?</td><td>what should I do?</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Fix a policy and an MDP collapses back into a Markov chain</strong> — once the action at every square is decided, nobody is choosing any more.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">What "stationary" rules out</div>
+        Moving up is 0.8-reliable on turn 1 and still 0.8-reliable on turn 400. If that were not true, the best action would depend on <em>when</em> you are as well as <em>where</em> — and then a single utility per square could not exist, because a square would be worth different amounts at different times.
+      </div>
+
+      <!-- ===== TRANSITION MODEL ===== -->
+      <h2 id="k-trans">The transition model</h2>
+      <div class="callout exam">
+        <div class="callout-label">T(s, a, s′), also written P(s′ | s, a)</div>
+        <p style="margin:0 0 10px 0;"><strong>In words:</strong> the probability that you end up in square <strong>s′</strong>, given that you were in square <strong>s</strong> and took action <strong>a</strong>.</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.9; margin:0 0 0 14px;">
+          s &nbsp;— the square you are on now<br>
+          a &nbsp;— the action you chose<br>
+          s′ &nbsp;— a square you might land on &nbsp;<span style="color:var(--ink-muted);">(read "s prime")</span>
+        </div>
+        <p style="margin:12px 0 0 0;">On this grid it is just the 0.8 / 0.1 / 0.1 rule written formally. From (1,1) taking Up: <code>P((1,2) | (1,1), Up) = 0.8</code>, and <code>P((2,1) | (1,1), Up) = 0.1</code>, and the leftward slip hits the wall so <code>P((1,1) | (1,1), Up) = 0.1</code>.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">And immediately, a problem</div>
+        In Week 1 an action had <em>an outcome</em>, so it had <em>a cost</em>, so you could compare actions. <strong>Here an action has a distribution over outcomes</strong>, so it has no single value, so there is nothing obvious to compare.
+        <p style="margin:10px 0 0 0;">We need a way to turn "a spread of possible outcomes" into one number. That number is an <strong>expected value</strong>, and it is what Part 3 is about.</p>
+      </div>
+
+      <!-- ===== REWARDS ===== -->
+      <h2 id="k-reward">Rewards, and why they are negative</h2>
+      <div class="callout exam">
+        <div class="callout-label">Three statements from the lecture</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Every state has a reward, R(s).</strong></li>
+          <li><strong>The agent's total utility is the sum of the rewards of every state it visits.</strong></li>
+          <li><strong>Negative rewards encourage the agent to be efficient.</strong></li>
+        </ul>
+        <p style="margin:12px 0 0 0;">For the five-step route <code>Up, Up, Right, Right, Right</code>, if nothing slips:</p>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">(5 × −0.04) + 1 = <strong>0.8</strong></div>
+        <p style="margin:0;">Five step fees, then the goal.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why the small negative number is doing real work</div>
+        Suppose empty squares paid <strong>0</strong> instead. Then wandering in circles forever costs nothing, and an agent that never reaches the goal scores the same as one that does. It has no reason to hurry, or to finish at all.
+        <p style="margin:10px 0 0 0;">Charging <strong>−0.04</strong> per step makes time expensive. Now the agent wants to finish — <strong>and nobody had to tell it to take the short route</strong>. That preference falls out of the reward function on its own.</p>
+        <p style="margin:10px 0 0 0;">Turn that dial and the behaviour changes completely, which is what the four grids below are about. <strong>R(s) is not a detail. It is the specification.</strong></p>
+      </div>
+
+      <!-- ===== POLICIES ===== -->
+      <h2 id="k-policy">Policies</h2>
+      <div class="callout exam">
+        <div class="callout-label">What we are actually looking for</div>
+        <p style="margin:0 0 10px 0;">A <strong>policy</strong>, written π, is <strong>an action for every square</strong>. The best one is written <strong>π*</strong>. It must be:</p>
+        <table class="cmp-table">
+          <tr><th>property</th><th>means</th><th>what goes wrong without it</th></tr>
+          <tr><td><strong>complete</strong></td><td>it has an answer for every state</td><td>you slip somewhere it says nothing about, and you are stuck</td></tr>
+          <tr><td><strong>optimal</strong></td><td>the best action in each state</td><td>you are following a policy, just not a good one</td></tr>
+          <tr><td><strong>stationary</strong></td><td>depends on where you are, not what time it is</td><td>you could not store one action per square</td></tr>
+          <tr><td><strong>proper</strong></td><td>guaranteed to reach a terminal</td><td>the agent circles forever and never collects the +1</td></tr>
+        </table>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The value of following a policy</div>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
+          U<sup>π</sup>(s) = E[ Σ<sub>t=0</sub><sup>∞</sup> γ<sup>t</sup> R(S<sub>t</sub>) ]</div>
+        <p style="margin:0 0 10px 0;"><strong>In words:</strong> start at s, follow policy π, and add up every reward you collect along the way. Since slips make that total uncertain, take the <strong>average over all the ways it could go</strong> — that is what E[…] means.</p>
+        <table class="cmp-table">
+          <tr><th>symbol</th><th>read it as</th></tr>
+          <tr><td><strong>E[ … ]</strong></td><td>"the average value of", over all the ways things might turn out</td></tr>
+          <tr><td><strong>Σ<sub>t=0</sub><sup>∞</sup></strong></td><td>add up over every time step, from now until the end</td></tr>
+          <tr><td><strong>R(S<sub>t</sub>)</strong></td><td>the reward of whichever square you are on at time t</td></tr>
+          <tr><td><strong>γ<sup>t</sup></strong></td><td>shrink rewards that arrive later — see below</td></tr>
+        </table>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">What γ is for</div>
+        <strong>γ (gamma) is the discount factor</strong>, a number between 0 and 1. It says how much a reward arriving later is worth compared with the same reward now. γ = 0.9 means a reward one step away counts for 0.9 of its face value, two steps away 0.81, and so on.
+        <p style="margin:10px 0 0 0;"><strong>The practical reason it exists:</strong> it keeps an infinite sum finite. If the agent might wander forever, adding up infinitely many rewards could blow up. With γ &lt; 1 the total is bounded no matter what.</p>
+        <p style="margin:10px 0 0 0;"><strong>This grid uses γ = 1</strong>, so nothing is discounted at all. That is only safe because the policy is <em>proper</em> — the run is guaranteed to end, so the sum is finite anyway.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The optimal policy when R(s) = −0.04</div>
+        <div class="gw-wrap"><table class="gw"><tbody>
+          <tr><td>→</td><td>→</td><td>→</td><td class="term-pos"><strong>+1</strong></td></tr>
+          <tr><td>↑</td><td class="gw-wall"></td><td>↑</td><td class="term-neg"><strong>−1</strong></td></tr>
+          <tr><td>↑<span class="gw-label">start</span></td><td>←</td><td>←</td><td>←</td></tr>
+        </tbody></table></div>
+        <p style="margin:12px 0 0 0;">The lecture's three comments on it: the policy <strong>balances risk against reward</strong>; it gives <strong>the best action regardless of how the execution goes</strong>; and it is <strong>very sensitive to the action probabilities</strong>.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Look at the bottom-right arrow — that one arrow is the whole lecture</div>
+        At <strong>(4,1)</strong>, directly below the −1, the policy says <strong>Left</strong>. That is <em>away</em> from the goal.
+        <p style="margin:10px 0 0 0;">Going Up would be the short way round. But a 10% sideways slip while moving Up puts you in the −1 and ends the game badly. Going the long way costs a few more −0.04 fees and avoids that risk entirely.</p>
+        <p style="margin:10px 0 0 0;"><strong>Nobody programmed caution.</strong> It came out of the arithmetic, because the expected value of the long route is higher. This is the single most quotable thing in Week 4.</p>
+      </div>
+
+      <!-- ===== REGIMES ===== -->
+      <h2 id="k-regimes">How R(s) changes everything</h2>
+      <div class="callout exam">
+        <div class="callout-label">Four rewards, four completely different agents</div>
+        <table class="cmp-table">
+          <tr><th>R(s)</th><th>behaviour</th><th>why</th></tr>
+          <tr><td><strong>R &lt; −1.6284</strong></td><td>run at the <strong>nearest exit</strong>, including the −1</td><td>living costs more than dying; ending it quickly is the best available deal</td></tr>
+          <tr><td><strong>−0.4278 &lt; R &lt; −0.0850</strong></td><td>take the <strong>short, risky</strong> route</td><td>the fee hurts enough to be worth some risk</td></tr>
+          <tr><td><strong>−0.0221 &lt; R &lt; 0</strong></td><td>take the <strong>long, safe</strong> route</td><td>steps are cheap, so avoid the −1 at all costs</td></tr>
+          <tr><td><strong>R &gt; 0</strong></td><td><strong>never finish</strong></td><td>existing pays, so reaching a terminal would end the income</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">Same grid, same probabilities, same algorithm. <strong>Only the reward changed.</strong></p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">This is Week 1's value alignment problem, in numbers</div>
+        <strong>Nobody wrote "die quickly" anywhere.</strong> They wrote R = −1.65 and asked for the sum to be maximised, and the arithmetic did the rest.
+        <p style="margin:10px 0 0 0;">The reward function <em>is</em> the specification of what you want. Get it slightly wrong and you get an agent that is behaving perfectly correctly and doing something you never intended. Use the <a href="#v-sweep" onclick="showWeek('w4-vi')">reward sweep tool</a> to watch the policy flip as R crosses each boundary.</p>
+      </div>
+
+      <!-- ===== EXAM ===== -->
+      <h2 id="k-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">What to have ready</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>MDP =</strong> sequential decision making, fully observable, stochastic. Assumes Markov + stationary probabilities.</li>
+          <li><strong>Markov property:</strong> the next state depends only on the current state, not the history. If history matters, put it in the state.</li>
+          <li><strong>Chain vs MDP:</strong> a chain has one distribution per state; an MDP has one per state <em>per action</em>, because an agent chooses. Fix a policy and an MDP becomes a chain.</li>
+          <li><strong>T(s, a, s′) = P(s′ | s, a)</strong> — probability of landing in s′ from s via a. Here: 0.8 intended, 0.1 to each side, never backwards, walls leave you put.</li>
+          <li><strong>0.8<sup>5</sup> = 0.328</strong> — why a fixed plan fails. The real problem is that the list stops meaning anything after a slip.</li>
+          <li><strong>A policy π(s)</strong> gives an action for every state. π* must be complete, optimal, stationary and proper.</li>
+          <li><strong>γ</strong> discounts future rewards and keeps infinite sums finite. This grid uses γ = 1, which is safe only because the policy is proper.</li>
+          <li><strong>The (4,1) arrow points Left</strong> — away from the goal, to avoid a 10% slip into the −1. Caution emerged from the arithmetic.</li>
+          <li><strong>R(s) is the specification.</strong> Four regimes, four different agents, from one number.</li>
+        </ul>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Part 3 turns "a spread of outcomes" into one number.</p>
+    </section>

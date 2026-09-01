@@ -1,0 +1,430 @@
+<section id="week3" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 03 · Imperative Languages — Formal Description</div>
+        <h1>SIMP &amp; the Abstract Machine</h1>
+        <div class="week-subtitle">making Week 2's informal descriptions precise</div>
+      </div>
+      <p>Week 2 described imperative constructs in English. This week we do it <strong>properly</strong> — with a transition system. Week 1 defined an <em>abstract machine</em> as "a transition system that specifies an interpreter for a programming language"; here we actually build one, for a small imperative language called <strong>SIMP</strong>.</p>
+      <div class="callout">
+        <div class="callout-label">The three aims</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>Distinguish between <strong>informal and formal</strong> descriptions of programming languages.</li>
+          <li>Be able to <strong>use transition systems in the form of abstract machines</strong> to give the semantics of the main constructs used in imperative languages.</li>
+          <li>Understand the <strong>differences between alternative semantic descriptions</strong> given in terms of transition systems.</li>
+        </ol>
+        <p style="margin:10px 0 0 0;">Aim 2 is the one that gets examined as a <em>calculation</em>: given a program and a memory, write the sequence of transitions. Practise it until it's mechanical.</p>
+      </div>
+      <!-- ===== WHY FORMAL ===== -->
+      <h2 id="w3-why">Why formal? The <code>f(i++, --i)</code> problem</h2>
+      <p><strong>Informal semantics can be imprecise.</strong> The lecture opens with a single devastating example:</p>
+      <p style="text-align:center; font-family:'Fraunces',serif; font-size:22px; font-style:italic; margin:22px 0;">What is the meaning of the C expression <code style="font-size:0.8em;">f(i++, --i)</code>?</p>
+      <p>Everything about it seems well defined. From Week 2 we know exactly what each operator does:</p>
+      <ul>
+        <li><code>i++</code> increases the value of <code>i</code> by 1 and also returns the <strong>old</strong> value of <code>i</code>.</li>
+        <li><code>--i</code> decreases the value of <code>i</code> by 1 and returns the <strong>new</strong> value of <code>i</code>.</li>
+      </ul>
+      <div class="callout warn">
+        <div class="callout-label">The gap</div>
+        <strong>The order of evaluation of parameters of functions was not specified in the definition of the language C.</strong>
+        <p style="margin:10px 0 0 0;">Therefore <strong>different C compilers could generate very different code for <code>f(i++, --i)</code></strong>. Both operators are individually precise; what's missing is the <em>order</em> in which they happen. And since both have <strong>side-effects on the same variable</strong>, the order changes the answer.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why this argument works so well</div>
+        It isn't that the C designers were careless about <code>++</code> — it's that an informal description <em>cannot even express</em> the thing that was left out. A formal semantics is forced to say, for every construct, exactly what happens and in what order: the transition rules either specify it or the relation isn't a function. <strong>Formality makes omissions visible.</strong>
+      </div>
+      <!-- ===== ORDER TOOL ===== -->
+      <h3 id="w3-ordertool">🛠️ Interactive: Evaluation Order</h3>
+      <p>Set a starting value for <code>i</code> and watch the two evaluation orders produce genuinely different arguments to <code>f</code> — from the same source text.</p>
+      <div class="tool" data-run="runEvalOrder">
+        <div class="tool-header">
+          <span class="tool-badge">Motivation demo</span>
+          <h3>f(i++, --i) under two orders</h3>
+        </div>
+        <div class="tool-desc">Each step shows the value returned to <code>f</code> and the side-effect on <code>i</code>. Neither order is "wrong" — the C definition simply didn't say.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>initial i</label>
+            <input type="number" id="eo-i" value="5" style="width:100px;">
+          </div>
+          <button class="tool-btn" onclick="runEvalOrder()">Evaluate ▶</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="eo-output" class="tool-output"></div>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The move the lecture makes next</div>
+        <strong>The first approach to giving a precise, formal description of the behaviour of programming constructs was in terms of an abstract machine.</strong>
+        <p style="margin:10px 0 0 0;">And, restating Week 1's definition: <strong>an abstract machine is a transition system, which specifies an interpreter for the programming language.</strong> We give an example for a small imperative language: <strong>SIMP</strong>.</p>
+      </div>
+      <!-- ===== SYNTAX ===== -->
+      <h2 id="w3-syntax">Abstract syntax of SIMP</h2>
+      <p>Three syntactic categories — programs, commands, expressions — with booleans separated from integers.</p>
+      <div class="grammar">
+        <div style="font-family:'IBM Plex Sans',sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--ink-muted); margin-bottom:4px;">Programs</div>
+        <span class="nt">P</span> <span class="def">::=</span> <span class="nt">C</span> <span class="bar">|</span> <span class="nt">E</span> <span class="bar">|</span> <span class="nt">B</span><br><br>
+        <div style="font-family:'IBM Plex Sans',sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--ink-muted); margin-bottom:4px;">Commands</div>
+        <span class="nt">C</span> <span class="def">::=</span> <span class="term">skip</span> <span class="bar">|</span> <span class="nt">l</span> <span class="term">:=</span> <span class="nt">E</span> <span class="bar">|</span> <span class="nt">C</span> <span class="term">;</span> <span class="nt">C</span> <span class="bar">|</span> <span class="term">if</span> <span class="nt">B</span> <span class="term">then</span> <span class="nt">C</span> <span class="term">else</span> <span class="nt">C</span> <span class="bar">|</span> <span class="term">while</span> <span class="nt">B</span> <span class="term">do</span> <span class="nt">C</span><br><br>
+        <div style="font-family:'IBM Plex Sans',sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--ink-muted); margin-bottom:4px;">Integer expressions</div>
+        <span class="nt">E</span> <span class="def">::=</span> <span class="term">!</span><span class="nt">l</span> <span class="bar">|</span> <span class="nt">n</span> <span class="bar">|</span> <span class="nt">E</span> <span class="nt">op</span> <span class="nt">E</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="nt">op</span> <span class="def">::=</span> <span class="term">+</span> <span class="bar">|</span> <span class="term">−</span> <span class="bar">|</span> <span class="term">∗</span> <span class="bar">|</span> <span class="term">/</span><br><br>
+        <div style="font-family:'IBM Plex Sans',sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--ink-muted); margin-bottom:4px;">Boolean expressions</div>
+        <span class="nt">B</span> <span class="def">::=</span> <span class="term">True</span> <span class="bar">|</span> <span class="term">False</span> <span class="bar">|</span> <span class="nt">E</span> <span class="nt">bop</span> <span class="nt">E</span> <span class="bar">|</span> <span class="term">¬</span><span class="nt">B</span> <span class="bar">|</span> <span class="nt">B</span> <span class="term">∧</span> <span class="nt">B</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="nt">bop</span> <span class="def">::=</span> <span class="term">&gt;</span> <span class="bar">|</span> <span class="term">&lt;</span> <span class="bar">|</span> <span class="term">=</span>
+        <div class="g-note">
+          <strong>n ∈ ℤ</strong> = {…, −2, −1, 0, 1, 2, …} — the integers.<br>
+          <strong>l ∈ L</strong> = {l₀, l₁, …} — <em>locations</em> (or variables). <strong>The expression <code>!l</code> denotes the value stored in <code>l</code>.</strong>
+        </div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The <code>!</code> is the whole l-value/r-value distinction, made syntactic</div>
+        This is the single most important notational point of the week, and it comes straight from Week 2. In SIMP, a location <code>l</code> and its contents <code>!l</code> are <strong>different pieces of syntax</strong>:
+        <ul style="margin:8px 0 0 0;">
+          <li><code>l</code> on its own is the <strong>l-value</strong> — the address. That's why assignment is written <code>l := E</code>, with a bare <code>l</code> on the left.</li>
+          <li><code>!l</code> is the <strong>r-value</strong> — the contents. That's why <code>l := !l − 1</code> has the <code>!</code> on the right but not the left.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">C and Java hide this by letting context decide; SIMP makes it explicit, and the machine rules depend on it. <strong>Forgetting a <code>!</code> is the most common way to lose marks in SIMP questions.</strong></p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Two more things to notice about this grammar</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Booleans and integers are separate categories.</strong> There is no rule letting a <code>B</code> appear where an <code>E</code> is expected, so <code>1 + True</code> is not even a SIMP program — a whole class of type errors is excluded <em>by the syntax</em>, before any type system is needed.</li>
+          <li><strong>There is no <code>∨</code> and no <code>≥</code>.</strong> The language is deliberately minimal (recall Böhm–Jacopini from Week 2: <code>if</code> and <code>while</code> suffice). Anything else you need, you encode — e.g. <code>B₁ ∨ B₂</code> as <code>¬(¬B₁ ∧ ¬B₂)</code>.</li>
+        </ul>
+      </div>
+      <!-- ===== EXAMPLES ===== -->
+      <h2 id="w3-examples">Example programs in SIMP</h2>
+      <h3>Swapping the contents of <code>x</code> and <code>y</code></h3>
+      <div class="code-block">
+z := !x ; x := !y ; y := !z
+      </div>
+      <p style="font-size:14px;">Read the <code>!</code>s carefully: each left-hand side is a bare location, each right-hand side dereferences one. <code>z := !x</code> copies the <em>contents</em> of x into the <em>cell</em> z.</p>
+      <h3>Factorial</h3>
+      <p>Assuming the variable <code>l</code> contains a natural number <em>n</em>, this program computes the factorial of <em>n</em>:</p>
+      <div class="code-block">
+factorial := 1;
+<span style="color:var(--code-kw);">while</span> !l &gt; 0 <span style="color:var(--code-kw);">do</span>
+    (factorial := !factorial ∗ !l;
+    l := !l − 1)
+      </div>
+      <p style="font-size:14px;">Note the brackets around the loop body: they group the two assignments into a single command <code>C₁ ; C₂</code>, which is what <code>while B do C</code> requires. This program is used again below as the worked transition example.</p>
+      <!-- ===== TREES ===== -->
+      <h2 id="w3-trees">These grammars specify <em>trees</em></h2>
+      <div class="callout exam">
+        <div class="callout-label">Straight from the slides</div>
+        <strong>The grammars specify the abstract syntax of SIMP, therefore rules specify labelled trees rather than strings.</strong>
+        <ul style="margin:8px 0 0 0;">
+          <li>The <strong>leaf nodes</strong> of the tree are labelled by elements of <strong>ℤ ∪ {True, False} ∪ L ∪ {skip}</strong>.</li>
+          <li>The <strong>non-leaf nodes</strong> are labelled by <strong>operators and commands</strong>.</li>
+        </ul>
+      </div>
+      <p>The example given — this tree:</p>
+      <div class="ast">
+        <svg viewBox="0 0 460 250" style="max-width:460px; width:100%;" xmlns="http://www.w3.org/2000/svg">
+          <!-- edges from root -->
+          <line x1="215" y1="42" x2="105" y2="86" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <line x1="230" y1="46" x2="228" y2="84" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <line x1="248" y1="42" x2="352" y2="86" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <!-- > children -->
+          <line x1="82" y1="112" x2="52" y2="152" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <line x1="108" y1="112" x2="132" y2="152" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <!-- ; children -->
+          <line x1="336" y1="112" x2="300" y2="152" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <line x1="368" y1="112" x2="404" y2="152" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <!-- := children -->
+          <line x1="392" y1="178" x2="368" y2="212" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <line x1="416" y1="178" x2="440" y2="212" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <!-- root -->
+          <rect x="163" y="12" width="124" height="30" rx="6" fill="var(--tint-d)" stroke="var(--accent-4)" stroke-width="2"/>
+          <text x="225" y="32" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--accent-4)">if-then-else</text>
+          <!-- > -->
+          <circle cx="95" cy="99" r="16" fill="var(--tint-b)" stroke="var(--accent-2)" stroke-width="2"/>
+          <text x="95" y="105" text-anchor="middle" font-family="IBM Plex Mono" font-size="15" fill="var(--accent-2)">&gt;</text>
+          <!-- skip (middle) -->
+          <rect x="196" y="84" width="64" height="28" rx="6" fill="var(--tint-c)" stroke="var(--accent-3)" stroke-width="1.5"/>
+          <text x="228" y="103" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="var(--accent-3)">skip</text>
+          <!-- ; -->
+          <circle cx="352" cy="99" r="16" fill="var(--tint-b)" stroke="var(--accent-2)" stroke-width="2"/>
+          <text x="352" y="105" text-anchor="middle" font-family="IBM Plex Mono" font-size="15" fill="var(--accent-2)">;</text>
+          <!-- 5 -->
+          <circle cx="45" cy="166" r="15" fill="var(--tint-a)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="45" y="171" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--accent)">5</text>
+          <!-- 0 -->
+          <circle cx="139" cy="166" r="15" fill="var(--tint-a)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="139" y="171" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--accent)">0</text>
+          <!-- skip -->
+          <rect x="268" y="152" width="64" height="28" rx="6" fill="var(--tint-c)" stroke="var(--accent-3)" stroke-width="1.5"/>
+          <text x="300" y="171" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="var(--accent-3)">skip</text>
+          <!-- := -->
+          <circle cx="404" cy="166" r="16" fill="var(--tint-b)" stroke="var(--accent-2)" stroke-width="2"/>
+          <text x="404" y="172" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--accent-2)">:=</text>
+          <!-- l -->
+          <circle cx="361" cy="226" r="15" fill="var(--tint-a)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="361" y="231" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--accent)">l</text>
+          <!-- 0 -->
+          <circle cx="447" cy="226" r="15" fill="var(--tint-a)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="447" y="231" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="var(--accent)">0</text>
+        </svg>
+        <div class="ast-legend">
+          Leaves (blue / green) are elements of ℤ ∪ {True, False} ∪ L ∪ {skip}; non-leaves (orange / purple) are operators and commands.
+        </div>
+      </div>
+      <p>…is written in a <strong>textual notation</strong> as:</p>
+      <div class="code-block">
+<span style="color:var(--code-kw);">if</span> 5 &gt; 0 <span style="color:var(--code-kw);">then</span> skip <span style="color:var(--code-kw);">else</span> (skip; l := 0)
+      </div>
+      <p><strong>…using brackets where there is ambiguity.</strong></p>
+      <div class="callout tip">
+        <div class="callout-label">The role brackets play here — a Week 1 callback</div>
+        The <em>tree</em> is the program; the textual notation is just a convenient way of writing it down. Brackets are <strong>not part of the abstract syntax</strong> — there is no bracket node in the tree. They exist only because we're flattening a tree into a line of text, and without them the reader couldn't recover which tree was meant. This is exactly Week 1's point that abstract syntax is unambiguous while its textual rendering need not be.
+      </div>
+      <!-- ===== THE MACHINE ===== -->
+      <h2 id="w3-machine">The abstract machine: control, results, memory</h2>
+      <p>The machine is defined with three components:</p>
+      <div class="concept-grid">
+        <div class="concept-card" data-num="1">
+          <h3>A control stack <code>c</code></h3>
+          <p>What the machine still has to <strong>do</strong>. Holds program phrases waiting to be processed, and operator tokens waiting to be applied.</p>
+        </div>
+        <div class="concept-card" data-num="2">
+          <h3>An auxiliary stack <code>r</code></h3>
+          <p>Also called the <strong>results stack</strong>. Holds values already computed, plus locations and command phrases saved for later.</p>
+        </div>
+        <div class="concept-card" data-num="3">
+          <h3>Memory <code>m</code> — the <em>store</em></h3>
+          <p>Modelled by a <strong>partial function</strong> mapping each address to an integer. <strong>dom(m)</strong> denotes the locations where <em>m</em> is defined.</p>
+        </div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Memory update notation — you will need to write this</div>
+        <strong>m[l ↦ n]</strong> is the function that maps each <em>l′ ≠ l</em> to the value <em>m(l′)</em>, and <em>l</em> to the value <em>n</em>. More precisely:
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:12px 0; line-height:1.9;">
+          m[l ↦ n](l) &nbsp;=&nbsp; n<br>
+          m[l ↦ n](l′) &nbsp;=&nbsp; m(l′) &nbsp;&nbsp;&nbsp;if l ≠ l′
+        </div>
+        <p style="margin:0;">In words: <em>the same memory as before, except that l now holds n</em>. Note it is a <strong>new function</strong>, not a mutation — the formalism has no notion of "changing" anything; each transition simply produces a new triple.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why "partial" matters</div>
+        <em>m</em> is a <strong>partial</strong> function, so <code>m(l)</code> may be undefined. Look at the rule for <code>!l</code> below: it applies only <em>if m(l) = n</em>. If <code>l ∉ dom(m)</code> there is no applicable transition and the machine is <strong>stuck</strong> — a configuration that is not final but has no successor. That is exactly how "reading an uninitialised variable" is modelled: not as an error message, but as the absence of a transition.
+      </div>
+      <p><strong>An abstract machine is a transition system.</strong> Therefore it is defined by a set of <strong>configurations</strong> and a set of <strong>transition rules</strong>.</p>
+      <!-- ===== CONFIGURATIONS ===== -->
+      <h2 id="w3-configs">Configurations</h2>
+      <p>A configuration is a <strong>triple</strong>: ⟨Control, Results, Memory⟩. The two stacks are themselves defined by grammars:</p>
+      <div class="grammar">
+        <span class="nt">c</span> <span class="def">::=</span> <span class="term">nil</span> <span class="bar">|</span> <span class="nt">i</span> <span class="term">·</span> <span class="nt">c</span><br>
+        <span class="nt">i</span> <span class="def">::=</span> <span class="nt">P</span> <span class="bar">|</span> <span class="nt">op</span> <span class="bar">|</span> <span class="term">¬</span> <span class="bar">|</span> <span class="term">∧</span> <span class="bar">|</span> <span class="nt">bop</span> <span class="bar">|</span> <span class="term">:=</span> <span class="bar">|</span> <span class="term">if</span> <span class="bar">|</span> <span class="term">while</span><br>
+        <span class="nt">r</span> <span class="def">::=</span> <span class="term">nil</span> <span class="bar">|</span> <span class="nt">P</span> <span class="term">·</span> <span class="nt">r</span> <span class="bar">|</span> <span class="nt">l</span> <span class="term">·</span> <span class="nt">r</span>
+        <div class="g-note">where P, bop and op are the non-terminals used in the rules defining SIMP programs.</div>
+      </div>
+      <p>So the control stack holds <em>either</em> whole program phrases <em>or</em> one of eight bare <strong>tokens</strong> — the operators, plus <code>:=</code>, <code>if</code> and <code>while</code>. Those tokens are instructions to the machine meaning <em>"the operands are ready; now apply me"</em>.</p>
+      <p>To model the execution of a program we define transitions between initial and final configurations:</p>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">Initial configurations</h4>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:15px; text-align:center; margin:8px 0 0 0;">⟨C · nil, &nbsp;nil, &nbsp;m⟩</div>
+          <p style="font-size:13px; margin:8px 0 0 0;">The whole command sits alone on the control stack; nothing computed yet.</p>
+        </div>
+        <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
+          <h4 style="color:var(--accent-3);">Final configurations</h4>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:15px; text-align:center; margin:8px 0 0 0;">⟨nil, &nbsp;nil, &nbsp;m⟩</div>
+          <p style="font-size:13px; margin:8px 0 0 0;">Both stacks empty. Recall from Week 1: a terminal configuration has <em>no</em> outgoing transition.</p>
+        </div>
+      </div>
+      <!-- ===== MEANING ===== -->
+      <h2 id="w3-meaning">Semantics of SIMP programs</h2>
+      <div class="callout exam">
+        <div class="callout-label">The two definitions — quote these</div>
+        <p style="margin:0 0 8px 0;"><strong>For a command.</strong> If there is a sequence of transitions</p>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:8px 0;">⟨C · nil, nil, m⟩ &nbsp;→*&nbsp; ⟨nil, nil, m′⟩</div>
+        <p style="margin:0 0 8px 0;">then we say that the program <em>C</em> executed in the state <em>m</em> <strong>terminates successfully producing the state <em>m′</em></strong>. The semantics of a command <em>C</em> in the state <em>m</em> is described by giving the <em>sequence of transitions</em> that transform ⟨C · nil, nil, m⟩ into ⟨nil, nil, m′⟩.</p>
+        <p style="margin:12px 0 8px 0;"><strong>For an expression.</strong> If there is a sequence of transitions</p>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:8px 0;">⟨E · c, r, m⟩ →* ⟨c, v · r, m′⟩ &nbsp;&nbsp;&nbsp;&nbsp; ⟨B · c, r, m⟩ →* ⟨c, v · r, m′⟩</div>
+        <p style="margin:0;">then we say that <strong>the value of the expression E (resp. B) in the state m is v</strong>.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Read the expression definition carefully — it's cleverer than it looks</div>
+        It is stated for an <em>arbitrary</em> surrounding <code>c</code> and <code>r</code>, and says the machine ends up with the same <code>c</code> and <code>r</code>, plus one new value <code>v</code> on top. That is a precise way of saying: <strong>evaluating an expression consumes itself from the control stack and leaves exactly one value behind, disturbing nothing else.</strong> It's what lets expression evaluation be used as a subroutine inside command rules.
+      </div>
+      <p>A <strong>transition rule</strong> has the form <em>c → c′</em>, where <em>c</em> and <em>c′</em> describe configurations. <strong>The transition rules generate the transition relation.</strong> They divide into two groups: rules for the evaluation of <strong>expressions</strong>, and rules for the evaluation of <strong>commands</strong>.</p>
+      <!-- ===== RULES: EXPRESSIONS ===== -->
+      <h2 id="w3-rules-exp">Transition rules: evaluation of expressions</h2>
+      <div class="rules">
+        <table>
+          <tr class="grp"><td colspan="5">Pushing values · decomposing phrases</td></tr>
+          <tr><td class="lhs">⟨n · c, r, m⟩</td><td class="arr">→</td><td class="rhs">⟨c, n · r, m⟩</td><td class="side"></td><td class="rname">num</td></tr>
+          <tr><td class="lhs">⟨b · c, r, m⟩</td><td class="arr">→</td><td class="rhs">⟨c, b · r, m⟩</td><td class="side"></td><td class="rname">bool</td></tr>
+          <tr><td class="lhs">⟨¬B · c, r, m⟩</td><td class="arr">→</td><td class="rhs">⟨B · ¬ · c, r, m⟩</td><td class="side"></td><td class="rname">not-decomp</td></tr>
+          <tr><td class="lhs">⟨(B₁ ∧ B₂) · c, r, m⟩</td><td class="arr">→</td><td class="rhs">⟨B₁ · B₂ · ∧ · c, r, m⟩</td><td class="side"></td><td class="rname">and-decomp</td></tr>
+          <tr><td class="lhs">⟨(E₁ op E₂) · c, r, m⟩</td><td class="arr">→</td><td class="rhs">⟨E₁ · E₂ · op · c, r, m⟩</td><td class="side"></td><td class="rname">op-decomp</td></tr>
+          <tr><td class="lhs">⟨(E₁ bop E₂) · c, r, m⟩</td><td class="arr">→</td><td class="rhs">⟨E₁ · E₂ · bop · c, r, m⟩</td><td class="side"></td><td class="rname">bop-decomp</td></tr>
+          <tr class="grp"><td colspan="5">Applying operators · reading memory</td></tr>
+          <tr><td class="lhs">⟨¬ · c, b · r, m⟩</td><td class="arr">→</td><td class="rhs">⟨c, b′ · r, m⟩</td><td class="side">if b′ = not b</td><td class="rname">not-apply</td></tr>
+          <tr><td class="lhs">⟨∧ · c, b₂ · b₁ · r, m⟩</td><td class="arr">→</td><td class="rhs">⟨c, b · r, m⟩</td><td class="side">if b₁ and b₂ = b</td><td class="rname">and-apply</td></tr>
+          <tr><td class="lhs">⟨op · c, n₂ · n₁ · r, m⟩</td><td class="arr">→</td><td class="rhs">⟨c, n · r, m⟩</td><td class="side">if n₁ op n₂ = n</td><td class="rname">op-apply</td></tr>
+          <tr><td class="lhs">⟨bop · c, n₂ · n₁ · r, m⟩</td><td class="arr">→</td><td class="rhs">⟨c, b · r, m⟩</td><td class="side">if n₁ bop n₂ = b</td><td class="rname">bop-apply</td></tr>
+          <tr><td class="lhs">⟨!l · c, r, m⟩</td><td class="arr">→</td><td class="rhs">⟨c, n · r, m⟩</td><td class="side">if m(l) = n</td><td class="rname">deref</td></tr>
+        </table>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The pattern — learn this, not the eleven rules</div>
+        Every operator gets <strong>two</strong> rules, and they always have the same shape:
+        <ol style="margin:8px 0 0 0;">
+          <li>A <strong>decomposition</strong> rule: the compound phrase is popped and replaced by <em>its sub-phrases followed by the operator token</em>. Nothing is computed. This is what the lecture later calls "phrase analysis".</li>
+          <li>An <strong>application</strong> rule: the token surfaces on the control stack, its operands are now on the results stack, and it consumes them and pushes one value.</li>
+        </ol>
+        <p style="margin:10px 0 0 0;">Once you see that, the table is just the same idea repeated for ¬, ∧, op and bop.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">The argument-order trap — this is where marks are lost</div>
+        In the application rules the results stack is written <strong>n₂ · n₁ · r</strong> — the <em>second</em> operand is on top. That's because decomposition pushes <code>E₁ · E₂ · op</code>, so E₁ is evaluated first, then E₂ lands on top of it. The side condition is therefore <strong>n₁ op n₂</strong>, not n₂ op n₁.
+        <p style="margin:10px 0 0 0;">It only matters for non-commutative operators — but that's exactly what an exam will test. <code>5 − 3</code> must give 2, not −2.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">And notice what this machine <em>does</em> specify</div>
+        Look back at <code>f(i++, --i)</code>. The op-decomp rule pushes <code>E₁ · E₂ · op</code> in that order, so the machine fixes <strong>left-to-right evaluation</strong> — no ambiguity is possible. SIMP has no side-effecting expressions, so it couldn't have bitten us here anyway; but the rule shows how a formal semantics settles the question that C's informal definition left open.
+      </div>
+      <!-- ===== WORKED EXAMPLE ===== -->
+      <h2 id="w3-worked">Worked example: evaluating <code>!l &gt; 0</code></h2>
+      <p>Assume <strong>m = {l ↦ 4}</strong> and we want to evaluate the expression <code>!l &gt; 0</code>. Initial configuration: ⟨!l &gt; 0 · nil, nil, m⟩.</p>
+      <div class="trans-trace">
+        <div class="trans-step"><span class="ts-n">0</span><span class="ts-a"></span><span class="ts-c">⟨!l &gt; 0 · nil, &nbsp;nil, &nbsp;m⟩</span></div>
+        <div class="trans-step"><span class="ts-n">1</span><span class="ts-a">→</span><span class="ts-c">⟨!l · 0 · &gt; · nil, &nbsp;nil, &nbsp;m⟩<span class="ts-rule">bop-decomp</span></span></div>
+        <div class="trans-step"><span class="ts-n">2</span><span class="ts-a">→</span><span class="ts-c">⟨0 · &gt; · nil, &nbsp;4 · nil, &nbsp;m⟩<span class="ts-rule">deref &nbsp;(m(l) = 4)</span></span></div>
+        <div class="trans-step"><span class="ts-n">3</span><span class="ts-a">→</span><span class="ts-c">⟨&gt; · nil, &nbsp;0 · 4 · nil, &nbsp;m⟩<span class="ts-rule">num</span></span></div>
+        <div class="trans-step final"><span class="ts-n">4</span><span class="ts-a">→</span><span class="ts-c">⟨nil, &nbsp;True · nil, &nbsp;m⟩<span class="ts-rule">bop-apply &nbsp;(4 &gt; 0 = True)</span></span></div>
+      </div>
+      <p><strong>The machine reached a final configuration.</strong> The expression <code>!l &gt; 0</code> evaluates to <strong>True</strong> in the given memory state.</p>
+      <div class="callout tip">
+        <div class="callout-label">Watch step 4 to fix the argument order in your head</div>
+        At step 3 the results stack is <strong>0 · 4 · nil</strong>: n₂ = 0 on top, n₁ = 4 beneath. The rule computes <strong>n₁ bop n₂</strong> = <strong>4 &gt; 0</strong> = True. Had you read the stack top-down you'd have computed 0 &gt; 4 = False — the wrong answer, from the right stack.
+      </div>
+      <!-- ===== RULES: COMMANDS ===== -->
+      <h2 id="w3-rules-cmd">Transition rules: evaluation of commands</h2>
+      <div class="rules">
+        <table>
+          <tr><td class="lhs">⟨skip · c, r, m⟩</td><td class="arr">→</td><td class="rhs">⟨c, r, m⟩</td><td class="rname">skip</td></tr>
+          <tr><td class="lhs">⟨(l := E) · c, r, m⟩</td><td class="arr">→</td><td class="rhs">⟨E · := · c, l · r, m⟩</td><td class="rname">assign-decomp</td></tr>
+          <tr><td class="lhs">⟨:= · c, n · l · r, m⟩</td><td class="arr">→</td><td class="rhs">⟨c, r, m[l ↦ n]⟩</td><td class="rname">assign-apply</td></tr>
+          <tr><td class="lhs">⟨(C₁ ; C₂) · c, r, m⟩</td><td class="arr">→</td><td class="rhs">⟨C₁ · C₂ · c, r, m⟩</td><td class="rname">seq</td></tr>
+          <tr><td class="lhs">⟨(if B then C₁ else C₂) · c, r, m⟩</td><td class="arr">→</td><td class="rhs">⟨B · if · c, C₁ · C₂ · r, m⟩</td><td class="rname">if-decomp</td></tr>
+          <tr><td class="lhs">⟨if · c, True · C₁ · C₂ · r, m⟩</td><td class="arr">→</td><td class="rhs">⟨C₁ · c, r, m⟩</td><td class="rname">if-true</td></tr>
+          <tr><td class="lhs">⟨if · c, False · C₁ · C₂ · r, m⟩</td><td class="arr">→</td><td class="rhs">⟨C₂ · c, r, m⟩</td><td class="rname">if-false</td></tr>
+          <tr><td class="lhs">⟨(while B do C) · c, r, m⟩</td><td class="arr">→</td><td class="rhs">⟨B · while · c, B · C · r, m⟩</td><td class="rname">while-decomp</td></tr>
+          <tr><td class="lhs">⟨while · c, True · B · C · r, m⟩</td><td class="arr">→</td><td class="rhs">⟨C · (while B do C) · c, r, m⟩</td><td class="rname">while-true</td></tr>
+          <tr><td class="lhs">⟨while · c, False · B · C · r, m⟩</td><td class="arr">→</td><td class="rhs">⟨c, r, m⟩</td><td class="rname">while-false</td></tr>
+        </table>
+      </div>
+      <h3>Three rules worth staring at</h3>
+      <div class="callout">
+        <div class="callout-label">1 · Assignment — where the <code>!</code> distinction pays off</div>
+        <code>⟨(l := E) · c, r, m⟩ → ⟨E · := · c, l · r, m⟩</code>
+        <p style="margin:8px 0 0 0;">The <strong>location <em>l</em> is pushed onto the results stack unevaluated</strong> — it is <em>not</em> looked up in memory. Meanwhile <em>E</em> goes on the control stack to be evaluated normally. When <code>:=</code> surfaces, the results stack holds <code>n · l · r</code>: the value on top, the address beneath. That's an l-value and an r-value sitting next to each other, and the rule writes one into the other.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">2 · If — the branches are <em>parked</em>, not executed</div>
+        <code>⟨(if B then C₁ else C₂) · c, r, m⟩ → ⟨B · if · c, C₁ · C₂ · r, m⟩</code>
+        <p style="margin:8px 0 0 0;">Both branches are pushed onto the <strong>results stack</strong>, where nothing executes them — the results stack is storage, not work. Only <em>B</em> goes on the control stack. When <code>if</code> surfaces it finds <code>True/False · C₁ · C₂</code>, discards all three, and moves <em>the chosen branch</em> onto the control stack. This is how the machine guarantees <strong>exactly one branch runs</strong>.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">3 · While — the rule that explains looping</div>
+        <code>⟨while · c, True · B · C · r, m⟩ → ⟨C · (while B do C) · c, r, m⟩</code>
+        <p style="margin:8px 0 0 0;">This is the heart of the week. When the test is True, the machine pushes the body <em>and then <strong>rebuilds the entire loop</strong></em> behind it. So after <em>C</em> finishes, the whole <code>while B do C</code> phrase is next on the control stack and the process starts again. When the test is False, the loop and its saved copies are simply discarded.</p>
+        <p style="margin:10px 0 0 0;">Note <em>why</em> <code>while-decomp</code> pushes <strong>B · C</strong> onto the results stack: the machine must remember the test and the body in order to reconstruct the loop on the next iteration. Nothing else in SIMP needs to do this — it's what makes <code>while</code> the only genuinely recursive rule.</p>
+      </div>
+      <!-- ===== FACTORIAL ===== -->
+      <h2 id="w3-factorial">Example: transitions of the factorial loop</h2>
+      <p>Let <em>C</em> = <code>while B do C′</code>, &nbsp;<em>B</em> = <code>!l &gt; 0</code>, &nbsp;<em>C′</em> = <code>factorial := !factorial ∗ !l; l := !l − 1</code>, &nbsp;and <em>m</em> = {l ↦ 4, factorial ↦ 1}.</p>
+      <div class="trans-trace">
+        <div class="trans-step"><span class="ts-n">0</span><span class="ts-a"></span><span class="ts-c">⟨C · nil, &nbsp;nil, &nbsp;m⟩</span></div>
+        <div class="trans-step"><span class="ts-n">1</span><span class="ts-a">→</span><span class="ts-c">⟨B · while · nil, &nbsp;B · C′ · nil, &nbsp;m⟩<span class="ts-rule">while-decomp</span></span></div>
+        <div class="trans-step"><span class="ts-n">2</span><span class="ts-a">→</span><span class="ts-c">⟨!l · 0 · &gt; · while · nil, &nbsp;B · C′ · nil, &nbsp;m⟩<span class="ts-rule">bop-decomp</span></span></div>
+        <div class="trans-step"><span class="ts-n">3</span><span class="ts-a">→</span><span class="ts-c">⟨0 · &gt; · while · nil, &nbsp;4 · B · C′ · nil, &nbsp;m⟩<span class="ts-rule">deref</span></span></div>
+        <div class="trans-step"><span class="ts-n">4</span><span class="ts-a">→</span><span class="ts-c">⟨&gt; · while · nil, &nbsp;0 · 4 · B · C′ · nil, &nbsp;m⟩<span class="ts-rule">num</span></span></div>
+        <div class="trans-step"><span class="ts-n">5</span><span class="ts-a">→</span><span class="ts-c">⟨while · nil, &nbsp;True · B · C′ · nil, &nbsp;m⟩<span class="ts-rule">bop-apply</span></span></div>
+        <div class="trans-step"><span class="ts-n">6</span><span class="ts-a">→</span><span class="ts-c">⟨C′ · C · nil, &nbsp;nil, &nbsp;m⟩<span class="ts-rule">while-true &nbsp;— note C is rebuilt behind C′</span></span></div>
+        <div class="trans-step"><span class="ts-n">⋯</span><span class="ts-a"></span><span class="ts-c" style="color:var(--ink-muted);">(three more iterations)</span></div>
+        <div class="trans-step final"><span class="ts-n">n</span><span class="ts-a">→</span><span class="ts-c">⟨nil, &nbsp;nil, &nbsp;m[l ↦ 0, factorial ↦ 24]⟩</span></div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The sentence the lecture ends this example with</div>
+        <strong>The abstract machine describes the exact behaviour of a while loop.</strong> Compare with the informal definition: <em>"…the body of the loop is executed as long as the value of the expression is true."</em>
+        <p style="margin:10px 0 0 0;">The informal sentence is not <em>wrong</em> — it's just not a definition. It doesn't say when the expression is re-evaluated, what happens to the saved body, or in what order side-effects occur. The six transitions above answer all of that, mechanically. <strong>This contrast is the thesis of the whole lecture</strong>, and is very likely to be an essay-style exam question.</p>
+      </div>
+      <!-- ===== SIMP MACHINE TOOL ===== -->
+      <h3 id="w3-simptool">🛠️ Interactive: SIMP Abstract Machine</h3>
+      <p>A full implementation of the twenty-one rules above. Enter any SIMP program and an initial memory, then step through — or run the whole thing — and read off the transition sequence, with the rule used at each step. This is the exam mechanic; use it to check your hand-written traces.</p>
+      <div class="tool" data-run="smRunAll">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>SIMP Machine Simulator</h3>
+        </div>
+        <div class="tool-desc">Write <code>!l</code> to dereference. Use <code>~</code> or <code>¬</code> for not, <code>/\</code> or <code>∧</code> for and, <code>*</code> for ∗. Brackets group. The highlighted item is the head of the control stack — the one the next rule matches.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1; min-width:280px;">
+            <label>SIMP program</label>
+            <textarea id="sm-prog" rows="4" style="width:100%;">factorial := 1;
+while !l > 0 do
+  (factorial := !factorial * !l;
+   l := !l - 1)</textarea>
+          </div>
+          <div class="tool-field">
+            <label>initial memory m</label>
+            <input type="text" id="sm-mem" value="l = 4" style="width:150px;">
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="smStep()">Step ▶</button>
+          <button class="tool-btn green" onclick="smRunAll()">Run all ⏭</button>
+          <button class="tool-btn secondary" onclick="smPreset('expr')">!l &gt; 0</button>
+          <button class="tool-btn secondary" onclick="smPreset('swap')">swap</button>
+          <button class="tool-btn secondary" onclick="smPreset('if')">if 5&gt;0 …</button>
+          <button class="tool-btn secondary" onclick="smPreset('fact')">factorial</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="sm-output" class="tool-output"></div>
+      </div>
+      <!-- ===== VERDICT ===== -->
+      <h2 id="w3-verdict">Operational semantics: the verdict on abstract machines</h2>
+      <table class="scorecard">
+        <tr><th>Advantage</th><th>Disadvantage</th></tr>
+        <tr>
+          <td class="good">✓ The abstract machine <strong>explains the execution of the commands step by step</strong>, which is <strong>useful if we have to implement the language</strong>.</td>
+          <td class="bad">✗ <strong>It is not very intuitive.</strong> <em>Many transitions are doing just phrase analysis; only a few really perform computations.</em></td>
+        </tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">You can see the disadvantage in your own trace</div>
+        Run the factorial example in the tool and count. The overwhelming majority of steps are decomposition rules — pulling phrases apart and pushing tokens. Only <code>op-apply</code>, <code>bop-apply</code> and <code>assign-apply</code> actually <em>compute</em> anything. That ratio <strong>is</strong> the disadvantage, and quoting it with a number from your own trace makes for a strong exam answer.
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The fix, and the bridge to next lecture</div>
+        <strong>Structural Approach to Operational Semantics.</strong> To overcome the previous problem, another approach to operational semantics based on transition systems was developed: <strong>the structural approach (Plotkin)</strong>.
+        <p style="margin:10px 0 0 0;"><strong>Idea:</strong> the transitions for a compound statement should be defined <em>in terms of the transitions for its constituent sub-statements</em>. <strong>In other words: the definition should be inductive.</strong></p>
+        <p style="margin:10px 0 0 0;">Compare with Week 1, which put it identically: <em>"each command is described in terms of its components."</em> The next lecture builds this alternative — and aim 3 of this lecture ("understand the differences between alternative semantic descriptions") is asking you to compare the two.</p>
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="w3-exam">Exam-style takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">Key things to nail for Week 3</div>
+        <ol>
+          <li><strong>Why formal semantics</strong> — be able to reproduce the <code>f(i++, --i)</code> argument: both operators are precisely defined, but <em>the order of evaluation of parameters was not specified in the definition of C</em>, so different compilers could generate very different code.</li>
+          <li><strong>Abstract machine</strong> = a transition system which specifies an <em>interpreter</em> for the programming language. It was the <em>first</em> approach to formal description.</li>
+          <li><strong>Write out the abstract syntax of SIMP</strong> — P ::= C | E | B; the five commands; E ::= !l | n | E op E; B ::= True | False | E bop E | ¬B | B ∧ B; op ::= + − ∗ /; bop ::= &gt; &lt; =.</li>
+          <li><strong>The meaning of <code>!l</code></strong> — the value stored in <em>l</em>. Bare <code>l</code> = address (l-value); <code>!l</code> = contents (r-value). Get this right in every program you write.</li>
+          <li><strong>Write the two example programs</strong> — swap (<code>z := !x; x := !y; y := !z</code>) and factorial.</li>
+          <li><strong>Leaves vs non-leaves</strong> — leaves are labelled by ℤ ∪ {True, False} ∪ L ∪ {skip}; non-leaves by operators and commands. Be able to convert between a tree and the textual notation (brackets used where there is ambiguity).</li>
+          <li><strong>The three machine components</strong> — control stack <em>c</em>, auxiliary/results stack <em>r</em>, memory (store) <em>m</em>, a <strong>partial</strong> function from addresses to integers; dom(m) = where m is defined.</li>
+          <li><strong>Memory update notation</strong> — m[l ↦ n](l) = n and m[l ↦ n](l′) = m(l′) if l ≠ l′.</li>
+          <li><strong>Configurations</strong> — a triple ⟨Control, Results, Memory⟩; the grammars for c, i and r; <strong>initial</strong> ⟨C · nil, nil, m⟩ and <strong>final</strong> ⟨nil, nil, m⟩.</li>
+          <li><strong>Definition of successful termination</strong> — if ⟨C · nil, nil, m⟩ →* ⟨nil, nil, m′⟩ then C executed in state m terminates successfully producing m′.</li>
+          <li><strong>Definition of the value of an expression</strong> — if ⟨E · c, r, m⟩ →* ⟨c, v · r, m′⟩ then the value of E in state m is v.</li>
+          <li><strong>Reproduce the expression rules</strong> — and know the two-rule pattern (decomposition then application) rather than memorising eleven separate lines.</li>
+          <li><strong>The argument order</strong> — results stack is n₂ · n₁ · r, and the side condition is <strong>n₁ op n₂</strong>. Get this backwards on a subtraction and the answer is wrong.</li>
+          <li><strong>Reproduce the command rules</strong> — especially assignment (location pushed <em>unevaluated</em>), if (branches parked on the results stack), and while.</li>
+          <li><strong>The while rule</strong> — <code>⟨while · c, True · B · C · r, m⟩ → ⟨C · (while B do C) · c, r, m⟩</code>: the loop <em>rebuilds itself</em> behind the body. Explain why while-decomp saves B · C on the results stack.</li>
+          <li><strong>Do a full trace by hand</strong> — the <code>!l &gt; 0</code> evaluation with m = {l ↦ 4} (4 steps), and the opening steps of the factorial loop. Expect exactly this as a calculation question.</li>
+          <li><strong>Advantage vs disadvantage</strong> — ✓ explains execution step by step, useful for implementing the language; ✗ not very intuitive, <em>many transitions are doing just phrase analysis, only a few really perform computations</em>.</li>
+          <li><strong>The structural approach (Plotkin)</strong> — transitions for a compound statement defined in terms of the transitions for its constituent sub-statements; i.e. the definition should be <strong>inductive</strong>. Know that this is the answer to the abstract machine's disadvantage.</li>
+        </ol>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 3 notes. Next: an alternative way to define operational semantics — the structural approach.</p>
+    </section>

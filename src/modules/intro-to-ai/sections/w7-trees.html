@@ -1,0 +1,262 @@
+<section id="w7-trees" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">Week 07 · Part 2 · Supervised Learning</div>
+        <h1>Decision Trees</h1>
+        <div class="week-subtitle">Gini, Gini-Split, and choosing what to ask first</div>
+      </div>
+      <!-- ===== USING A TREE ===== -->
+      <h2 id="d-use">Using a tree before building one</h2>
+      <div class="callout">
+        <div class="callout-label">Figure 7.4 — the credit-risk classifier</div>
+        A person has attributes <strong>HasJob</strong> and <strong>OwnsHome</strong>, each 0 (False) or 1 (True). The tree assigns them to one of <strong>C = {High, Low, Medium}</strong> — their credit risk.
+        <div class="ix-canvas" style="margin:14px 0 0 0;">
+          <svg width="100%" viewBox="0 0 470 210" role="img" xmlns="http://www.w3.org/2000/svg">
+            <title>Figure 7.4</title><desc>Root tests HasJob at or below 0.5; the true branch is class High, the false branch tests OwnsHome, whose true branch is Medium and false branch is Low.</desc>
+            <rect x="160" y="8" width="150" height="30" rx="7" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="1.4"/>
+            <text x="235" y="28" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="var(--accent)" font-weight="600">HasJob ≤ 0.50</text>
+            <path d="M 200 38 C 200 60, 90 60, 90 82" fill="none" stroke="var(--ink-muted)" stroke-width="1.4"/>
+            <path d="M 270 38 C 270 60, 350 60, 350 82" fill="none" stroke="var(--ink-muted)" stroke-width="1.4"/>
+            <text x="128" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-3)">True</text>
+            <text x="322" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-2)">False</text>
+            <rect x="24" y="82" width="132" height="30" rx="7" fill="var(--tint-c)" stroke="var(--accent-3)" stroke-width="1.4"/>
+            <text x="90" y="102" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="var(--ink)">class = High</text>
+            <rect x="272" y="82" width="164" height="30" rx="7" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="1.4"/>
+            <text x="354" y="102" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="var(--accent)" font-weight="600">OwnsHome ≤ 0.50</text>
+            <path d="M 320 112 C 320 136, 250 136, 250 158" fill="none" stroke="var(--ink-muted)" stroke-width="1.4"/>
+            <path d="M 390 112 C 390 136, 410 136, 410 158" fill="none" stroke="var(--ink-muted)" stroke-width="1.4"/>
+            <text x="272" y="138" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-3)">True</text>
+            <text x="412" y="138" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-2)">False</text>
+            <rect x="182" y="158" width="136" height="30" rx="7" fill="var(--tint-c)" stroke="var(--accent-3)" stroke-width="1.4"/>
+            <text x="250" y="178" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="var(--ink)">class = Medium</text>
+            <rect x="344" y="158" width="118" height="30" rx="7" fill="var(--tint-c)" stroke="var(--accent-3)" stroke-width="1.4"/>
+            <text x="403" y="178" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="var(--ink)">class = Low</text>
+          </svg>
+        </div>
+        <p style="margin:12px 0 0 0;">Someone with <strong>HasJob = 0 is classified High, regardless of OwnsHome</strong> — the feature simply never gets consulted on that branch. That is a decision tree's whole appeal: the questions you get asked depend on your earlier answers.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Two conventions to state before you draw anything</div>
+        <ul style="margin:6px 0 0 0;">
+          <li>For <strong>binary</strong> trees (two children at every non-leaf), <strong>the left branch is where the statement is True.</strong></li>
+          <li>For a <strong>non-binary</strong> branch, <strong>label each arrow with the attribute value</strong> it stands for. Nothing forces a tree to be binary — a feature <em>profession</em> with values journalist / mathematician / historian gives three branches out of one node.</li>
+        </ul>
+      </div>
+      <!-- ===== THE DATA ===== -->
+      <h2 id="d-data">Table 7.3 — the dataset behind the figures</h2>
+      <div class="callout">
+        <div class="callout-label">Fifteen people</div>
+        <table class="cmp-table" style="max-width:420px;">
+          <tr><th>ID</th><th>OwnsHome</th><th>HasJob</th><th>CreditRisk</th></tr>
+          <tr><td>1</td><td>Yes</td><td>Yes</td><td>Low</td></tr>
+          <tr><td>2</td><td>No</td><td>Yes</td><td>Medium</td></tr>
+          <tr><td>3</td><td>No</td><td>No</td><td>High</td></tr>
+          <tr><td>4</td><td>Yes</td><td>No</td><td>High</td></tr>
+          <tr><td>5</td><td>Yes</td><td>Yes</td><td>Low</td></tr>
+          <tr><td>6</td><td>No</td><td>Yes</td><td>Medium</td></tr>
+          <tr><td>7</td><td>Yes</td><td>No</td><td>High</td></tr>
+          <tr><td>8</td><td>No</td><td>No</td><td>High</td></tr>
+          <tr><td>9</td><td>Yes</td><td>Yes</td><td>Low</td></tr>
+          <tr><td>10</td><td>No</td><td>Yes</td><td>Medium</td></tr>
+          <tr><td>11</td><td>Yes</td><td>No</td><td>High</td></tr>
+          <tr><td>12</td><td>Yes</td><td>Yes</td><td>Low</td></tr>
+          <tr><td>13</td><td>No</td><td>Yes</td><td>Medium</td></tr>
+          <tr><td>14</td><td>Yes</td><td>No</td><td>High</td></tr>
+          <tr><td>15</td><td>Yes</td><td>Yes</td><td>Low</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">Class totals: <strong>High 6, Low 5, Medium 4</strong>. The figures print them as the vector <code>[6, 5, 4]</code>, and that ordering is <strong>alphabetical</strong> — High, Low, Medium — which is what makes “lowest index” a well-defined tie-break.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">What the “class =” line in a node means</div>
+        <strong>The most common class in that node</strong> — the simple majority — <strong>with ties broken by taking the class with lowest index.</strong> It is the label the tree would output if it had to stop right there, which is why every node carries one, not just the leaves.
+      </div>
+      <!-- ===== GINI ===== -->
+      <h2 id="d-gini">The Gini index</h2>
+      <div class="callout exam">
+        <div class="callout-label">What it measures</div>
+        <strong>How ‘impure’ the set of points in a node is</strong>, with respect to the classes. The left node of the second row in Figure 7.5 has Gini <strong>0</strong>: every point in it is Low, so there is no impurity at all.
+        <p style="margin:10px 0 0 0;">That is the motivation in one line — <strong>we want to branch so that the children are as pure as possible.</strong></p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The root of Figure 7.5, by hand — how do you get to 0.658?</div>
+        For each class, <strong>multiply the chance of sampling it by the chance of not sampling it</strong>, then add over the classes:
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14.5px; margin:12px 0;">
+          (6/15)(9/15) + (5/15)(10/15) + (4/15)(11/15) ≈ <strong>0.658</strong> &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(7.8)</span></div>
+        <p style="margin:0;">Exactly, that is <code>(54 + 50 + 44)/225 = 148/225 = 0.6578…</code>. The notes invite you to do the same for the right-hand node of the second row and get <strong>0.494</strong>: <code>(5/9)(4/9) + (4/9)(5/9) = 40/81 = 0.4938…</code></p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Definition 7.4 — Gini Index</div>
+        Let <strong>v = (v₁, …, v<sub>k</sub>) ∈ ℕ<sup>k</sup></strong> be a k-dimensional vector of non-negative integers, and let <strong>n = Σᵢ vᵢ</strong>. Then
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:12px 0;">Gini(v) = Σ<sub>i=1..k</sub> pᵢ(1 − pᵢ) &nbsp;&nbsp;where&nbsp; pᵢ = vᵢ/n &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(7.9)</span></div>
+        <p style="margin:0;">Note what the argument is: <strong>a vector of counts, not a set of points.</strong> Gini does not care which points are in the node, only how many of each class.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Three properties worth carrying into the exam</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Gini = 0 exactly when the node is pure</strong> — one class has everything.</li>
+          <li><strong>Maximum is 1 − 1/k</strong>, reached when all k classes are equally represented. For k = 2 that is <strong>½</strong> (<a href="#y-4" onclick="showWeek('w7-ex')">Exercise 4</a>); for k = 3 it is ⅔; for k = 4, ¾.</li>
+          <li><strong>Equivalently Gini(v) = 1 − Σ pᵢ²</strong>, since Σpᵢ = 1. Faster to compute under time pressure, and identical in value.</li>
+        </ul>
+      </div>
+      <!-- ===== GINI TOOL ===== -->
+      <h2 id="d-gtool">Tool · Gini index calculator</h2>
+      <div class="tool" data-run="runGini">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Every pᵢ(1 − pᵢ) term, and where you sit on the curve</h3></div>
+        <p class="tool-desc"><strong>Type a count vector, or nudge any count with the + / − buttons and watch the total move.</strong> The curve underneath is the k = 2 case, Gini = 2p(1 − p) — the shape that makes “maximum ½ at p = ½” obvious rather than memorised.</p>
+        <div class="compare-2" style="margin-top:4px;">
+          <div class="tool-field"><label for="gi-v">Class counts <code>v</code> — space or comma separated</label>
+            <input type="text" id="gi-v" value="6 5 4" spellcheck="false"></div>
+          <div class="tool-field"><label for="gi-names">Class names (optional)</label>
+            <input type="text" id="gi-names" value="High Low Medium" spellcheck="false"></div>
+        </div>
+        <div class="tool-controls" style="margin-top:12px;"><button class="tool-btn" onclick="runGini()">Compute</button></div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="gi-output" class="tool-output"></div>
+      </div>
+      <!-- ===== FIGURE 7.5 ERROR ===== -->
+      <h2 id="d-err">A caution about Figure 7.5</h2>
+      <div class="callout">
+        <div class="callout-label">Figure 7.5, drawn with the labels the vectors imply</div>
+        <div class="ix-canvas"><svg width="100%" viewBox="0 0 680 320" role="img" xmlns="http://www.w3.org/2000/svg"><title>Figure 7.5, corrected</title><desc>The decision tree with gini, sample counts and class vectors. Three class labels differ from the printed figure.</desc><path d="M 330 76 C 330 96, 175 96, 175 116" fill="none" stroke="var(--ink-muted)" stroke-width="1.4"/><path d="M 330 76 C 330 96, 470 96, 470 116" fill="none" stroke="var(--ink-muted)" stroke-width="1.4"/><text x="235" y="100" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-3)">True</text><text x="415" y="100" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-2)">False</text><path d="M 470 182 C 470 202, 350 202, 350 222" fill="none" stroke="var(--ink-muted)" stroke-width="1.4"/><path d="M 470 182 C 470 202, 590 202, 590 222" fill="none" stroke="var(--ink-muted)" stroke-width="1.4"/><text x="392" y="206" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-3)">True</text><text x="556" y="206" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--accent-2)">False</text><rect x="250" y="20" width="160" height="56" rx="7" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="1.5"/><text x="330" y="36" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="var(--accent)" font-weight="600">HasJob &#8804; 0.5</text><text x="330" y="49" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">gini 0.658 &#183; n 15</text><text x="330" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--ink)" font-weight="600">[6, 5, 4] &#8594; High</text><rect x="100" y="116" width="150" height="66" rx="7" fill="var(--tint-c)" stroke="var(--accent-3)" stroke-width="1.5"/><text x="175" y="132" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--accent-3)">leaf</text><text x="175" y="145" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">gini 0.0 &#183; n 6</text><text x="175" y="158" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">[6, 0, 0]</text><text x="175" y="171" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="var(--ink)" font-weight="600">High</text><rect x="395" y="116" width="150" height="66" rx="7" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="1.5"/><text x="470" y="132" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--accent)" font-weight="600">OwnsHome &#8804; 0.5</text><text x="470" y="145" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">gini 0.494 &#183; n 9</text><text x="470" y="158" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">[0, 5, 4]</text><text x="470" y="171" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="var(--accent-2)" font-weight="600">Low</text><rect x="275" y="222" width="150" height="66" rx="7" fill="var(--tint-c)" stroke="var(--accent-3)" stroke-width="1.5"/><text x="350" y="238" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--accent-3)">leaf</text><text x="350" y="251" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">gini 0.0 &#183; n 4</text><text x="350" y="264" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">[0, 0, 4]</text><text x="350" y="277" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="var(--accent-2)" font-weight="600">Medium</text><rect x="515" y="222" width="150" height="66" rx="7" fill="var(--tint-c)" stroke="var(--accent-3)" stroke-width="1.5"/><text x="590" y="238" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--accent-3)">leaf</text><text x="590" y="251" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">gini 0.0 &#183; n 5</text><text x="590" y="264" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-muted)">[0, 5, 0]</text><text x="590" y="277" text-anchor="middle" font-family="IBM Plex Mono" font-size="11.5" fill="var(--accent-2)" font-weight="600">Low</text><text x="330" y="308" text-anchor="middle" font-family="IBM Plex Sans" font-size="11" fill="var(--accent-2)">the three labels in red are where Figure 7.5 disagrees with its own value vectors</text></svg></div>
+        <p style="margin:12px 0 0 0;">Class order is alphabetical &mdash; <code>[High, Low, Medium]</code> &mdash; which the root fixes: <code>[6, 5, 4]</code> with class High can only be that order, and Table 7.3 has High 6, Low 5, Medium 4.</p>
+        <p style="margin:10px 0 0 0;"><strong>Read every label off the vector.</strong> <code>[0, 5, 4]</code> is Low (5 beats 4). <code>[0, 0, 4]</code> is Medium. <code>[0, 5, 0]</code> is Low. The printed figure has Low and Medium swapped in these three nodes; Figures 7.4 and 7.6 are both correct.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Three class labels in Figure 7.5 are swapped — the Gini numbers are all correct</div>
+        <p style="margin:0 0 10px 0;">Figure 7.5 is meant to be Figure 7.4 with the extra bookkeeping added. Its <strong>gini</strong>, <strong>samples</strong> and <strong>value</strong> lines all check out against Table 7.3. But three of its <code>class =</code> lines disagree with both Figure 7.4 and Figure 7.6, and the value vectors themselves say which is right.</p>
+        <table class="cmp-table">
+          <tr><th>node</th><th>value</th><th>Figure 7.5 says</th><th>the vector implies</th></tr>
+          <tr><td>HasJob = Yes (n = 9)</td><td><code>[0, 5, 4]</code></td><td>class = Medium</td><td><strong>class = Low</strong> — Low has 5, Medium has 4</td></tr>
+          <tr><td>… &amp; OwnsHome = No (n = 4)</td><td><code>[0, 0, 4]</code></td><td>class = Low</td><td><strong>class = Medium</strong> — the only non-zero entry is Medium</td></tr>
+          <tr><td>… &amp; OwnsHome = Yes (n = 5)</td><td><code>[0, 5, 0]</code></td><td>class = Medium</td><td><strong>class = Low</strong></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">The ordering is fixed by the root itself: <code>[6, 5, 4]</code> with <code>class = High</code> can only be <strong>[High, Low, Medium]</strong>, because Table 7.3 has High 6, Low 5, Medium 4. Under that ordering <strong>Figure 7.4 and Figure 7.6 are both entirely correct</strong>, and Figure 7.5 has Low and Medium interchanged in its three lower nodes.</p>
+        <p style="margin:10px 0 0 0;"><strong>What to do in an exam:</strong> read the labels off the <em>vector</em>, not off a remembered picture. Cross-check against Figure 7.4, which says plainly that HasJob = Yes and OwnsHome = No gives <strong>Medium</strong> — and Table 7.3 rows 2, 6, 10 and 13 confirm it.</p>
+      </div>
+      <!-- ===== GINI SPLIT ===== -->
+      <h2 id="d-split">Gini-Split — choosing what to ask</h2>
+            <div class="callout tip">
+        <div class="callout-label">Where 0.444, 0.494 and 0 come from</div>
+        <p style="margin:0 0 10px 0;">Each one is the <strong>Gini of one child group</strong>, from Definition 7.4 applied to that group's class counts. Nothing else.</p>
+        <table class="cmp-table">
+          <tr><th>split</th><th>group</th><th>counts [High, Low, Medium]</th><th>Gini = &#931; p&#7522;(1 &#8722; p&#7522;)</th></tr>
+          <tr><td rowspan="2"><strong>OwnsHome</strong></td><td>= No, 6 people</td><td><code>[2, 0, 4]</code></td>
+              <td><code>(2/6)(4/6) + 0 + (4/6)(2/6) = 16/36 = <strong>0.444</strong></code></td></tr>
+          <tr><td>= Yes, 9 people</td><td><code>[4, 5, 0]</code></td>
+              <td><code>(4/9)(5/9) + (5/9)(4/9) + 0 = 40/81 = <strong>0.494</strong></code></td></tr>
+          <tr><td rowspan="2"><strong>HasJob</strong></td><td>= No, 6 people</td><td><code>[6, 0, 0]</code></td>
+              <td><code>(6/6)(0/6) + 0 + 0 = <strong>0</strong></code> &mdash; pure</td></tr>
+          <tr><td>= Yes, 9 people</td><td><code>[0, 5, 4]</code></td>
+              <td><code>0 + (5/9)(4/9) + (4/9)(5/9) = 40/81 = <strong>0.494</strong></code></td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;">And the <strong>6/15</strong> and <strong>9/15</strong> are simply what fraction of the 15 rows landed in each group. So:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.9; margin:10px 0 0 12px;">
+          OwnsHome: (6/15)(0.444) + (9/15)(0.494) = 0.178 + 0.296 = <strong>0.474</strong><br>
+          HasJob:&nbsp;&nbsp;&nbsp;(6/15)(0)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + (9/15)(0.494) = 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + 0.296 = <strong>0.296</strong>
+        </div>
+        <p style="margin:12px 0 0 0;"><strong>That zero is the whole reason HasJob wins.</strong> Splitting on it hands you one group with nothing left to decide &mdash; all six are High.</p>
+      </div>
+      <div class="callout">
+        <div class="callout-label">Figure 7.6 — the same data split the other way</div>
+        Splitting Table 7.3 by <strong>OwnsHome</strong> instead gives a tree that <em>looks</em> worse. Why?
+        <p style="margin:10px 0 0 0;">Because <strong>splitting by ‘OwnsHome’ generates children with worse Gini values on average</strong> — well, <strong>weighted</strong> average. Weighting matters: a very impure child holding two points should not count as much as a slightly impure one holding nine.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The two calculations, side by side</div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:2.1; margin:0 0 0 8px;">
+          Gini-Split(OwnsHome) = (6/15)·0.444 + (9/15)·0.494 ≈ <strong>0.474</strong><br>
+          <span style="font-size:11px; color:var(--ink-muted);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑ OwnsHome = False, Gini(2,0,4)&nbsp;&nbsp;&nbsp;&nbsp;↑ OwnsHome = True, Gini(4,5,0)</span><br><br>
+          Gini-Split(HasJob)&nbsp;&nbsp;&nbsp;= (6/15)·0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (9/15)·0.494 ≈ <strong>0.296</strong><br>
+          <span style="font-size:11px; color:var(--ink-muted);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑ HasJob = False, Gini(6,0,0)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑ HasJob = True, Gini(0,5,4)</span>
+        </div>
+        <p style="margin:14px 0 0 0;"><strong>HasJob is less impure, so we split by it.</strong> Exactly: 64/135 ≈ 0.4741 against 8/27 ≈ 0.2963.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Definition 7.5 — Gini-Split Index</div>
+        Assume <strong>categorical features only</strong>. Let S be a set of n data points with features A₁, …, A<sub>k</sub>, and let A<sub>i</sub> be an attribute with <strong>a</strong> possible values. Then
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:12px 0;">Gini-Split(A<sub>i</sub>) = Σ<sub>j=1..a</sub> (n<sub>j</sub>/n) · Gini(v<sub>j</sub>) &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(7.10)</span></div>
+        <p style="margin:0;">where <strong>v<sub>j</sub> counts the classes in the child node where A<sub>i</sub> = j</strong>, and n<sub>j</sub> is the sum of its entries. To choose the attribute:</p>
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:12px 0;">arg min<sub>A₁,…,A<sub>k</sub></sub> { Gini-Split(A<sub>i</sub>) } &nbsp;&nbsp;<span style="font-size:11px; color:var(--ink-muted);">(7.11)</span></div>
+        <p style="margin:0;"><strong>arg min, not min</strong> — the answer is <em>which attribute</em>, not the number. Write the attribute name.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Two extensions the definition already covers</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>More than two features:</strong> compute Gini-Split for all of them and pick the lowest.</li>
+          <li><strong>More than two values:</strong> the sum simply runs over all the children. Nothing in (7.10) assumes a is 2.</li>
+        </ul>
+      </div>
+      <!-- ===== BUILDING ===== -->
+      <h2 id="d-build">Building the rest of the tree</h2>
+      <div class="callout exam">
+        <div class="callout-label">The recursion, and the question people get wrong</div>
+        <strong>Formula (7.11) applies at every node, not just the root.</strong> So: at each node, score every remaining attribute against the points that reached <em>that node</em>, take the arg min, split, and recurse. Stop when the node is pure — or when you run out of attributes.
+        <p style="margin:12px 0 0 0;">Look at Figure 7.6: both children of the root are split by the same feature, HasJob, but only because <strong>there were only two features to choose from</strong>. In general, <strong>should we force different branches to split the same way?</strong></p>
+        <p style="margin:10px 0 0 0;"><strong>No.</strong> Nothing stops us, but it makes more sense to allow different splits in different branches: when a new point arrives, <strong>its feature values are no secret to us</strong>, so we can simply traverse the tree taking the current best option at each node. Allowing branches to differ is what <strong>scikit-learn</strong> does.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Why re-splitting on a used feature is pointless, not just inelegant</div>
+        Everything reaching a node below <code>HasJob = Yes</code> has <code>HasJob = Yes</code>. That feature now has one value across the whole node, so the split has a single child containing everything, and its Gini-Split equals the node's own Gini — no improvement, ever. The tool below marks such features <em>useless here</em> rather than scoring them.
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">What happens when you run out of features before you run out of impurity</div>
+        Two rows with identical features but different classes can never be separated. The node becomes a <strong>leaf labelled with the majority class</strong> — impure, and accepting some training error. Table 7.4 in <a href="#y-5" onclick="showWeek('w7-ex')">Exercise 5</a> does this on purpose: with 3 binary features there are only 8 possible feature vectors but 20 rows and 4 classes, so <strong>no tree on those features can be perfect.</strong>
+      </div>
+      <!-- ===== TREE TOOL ===== -->
+      <h2 id="d-ttool">Tool · Decision tree builder</h2>
+      <div class="tool" data-run="runDT">
+        <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Grow the tree one arg min at a time</h3></div>
+        <p class="tool-desc"><strong>Step through with ▶ and each split appears in the order the algorithm makes it. Click any box for the full Gini-Split table at that node</strong> — every candidate feature, every child's weighted term, and which one wins. Change the dataset and the whole tree rebuilds. Use <em>force</em> on the root split to reproduce Figure 7.6 and see the damage in numbers.</p>
+        <div class="tool-field"><label for="dt-data">Dataset — header line, then one row per point; last column is the class</label>
+          <textarea id="dt-data" rows="9" spellcheck="false">OwnsHome, HasJob, CreditRisk
+Yes, Yes, Low
+No, Yes, Medium
+No, No, High
+Yes, No, High
+Yes, Yes, Low
+No, Yes, Medium
+Yes, No, High
+No, No, High
+Yes, Yes, Low
+No, Yes, Medium
+Yes, No, High
+Yes, Yes, Low
+No, Yes, Medium
+Yes, No, High
+Yes, Yes, Low</textarea></div>
+        <div class="tool-controls" style="margin-top:12px;"><button class="tool-btn" onclick="runDT()">Build tree</button></div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="dt-output" class="tool-output"></div>
+      </div>
+      <!-- ===== NEURAL NETS ===== -->
+      <h2 id="d-nn">A note on neural networks</h2>
+      <div class="callout">
+        <div class="callout-label">Explicitly out of scope</div>
+        <strong>Neural networks are beyond the scope of this course</strong> — they are not examinable here, and several later modules cover them properly. The chapter closes by listing resources for anyone who wants to start early:
+        <ul style="margin:10px 0 0 0;">
+          <li><strong>Neural Networks</strong> — 3Blue1Brown (Grant Sanderson), a five-part video series, recommended for its animations and simple examples.</li>
+          <li><strong>Understanding Deep Learning</strong> — Simon J. D. Prince (MIT Press, 2023), with free PDF and Jupyter notebooks.</li>
+          <li><strong>Deep Learning</strong> — Goodfellow, Bengio and Courville, the classical reference.</li>
+        </ul>
+        <p style="margin:12px 0 0 0;">For the examinable material, the chapter again points at <strong>Chapter 19 of Russell &amp; Norvig, <em>Artificial Intelligence: A Modern Approach</em> (4th edition)</strong>, with the caveat that it is not very complete on some machine learning parts.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">The footnote worth reading twice</div>
+        The notes raise, in passing, whether it is fair that machine learning “seems to have absorbed all these statistical methods known for a long time” — it sounds fancier to put linear regression in the ML pot, though statisticians have been calling it <em>regression</em> for a century. Worth having an opinion on; it is the kind of thing that makes a good sentence in a discussion answer.
+      </div>
+      <!-- ===== EXAM ===== -->
+      <h2 id="d-key">Exam takeaways</h2>
+      <div class="callout exam">
+        <div class="callout-label">What to have ready</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Gini(v) = Σ pᵢ(1 − pᵢ)</strong>, pᵢ = vᵢ/n. Zero ⟺ pure. Maximum <strong>1 − 1/k</strong> at equal classes; ½ when k = 2.</li>
+          <li><strong>Gini-Split(A) = Σⱼ (nⱼ/n)·Gini(vⱼ)</strong> — a <em>weighted</em> average over the children, and you pick the <strong>arg min</strong>.</li>
+          <li><strong>Show the weights.</strong> Marks in these questions sit on the (nⱼ/n) factors as much as on the Gini values.</li>
+          <li><strong>Node label = majority class, ties to the lowest index</strong>, and index order is the alphabetical class order.</li>
+          <li><strong>Apply (7.11) at every node</strong>, on that node's points only, and let different branches split on different features.</li>
+          <li><strong>Left = True</strong> in a binary tree; label the arrows in a non-binary one.</li>
+          <li><strong>Decision Tree Regression is out of scope</strong>; continuous <em>features</em> are not.</li>
+          <li><strong>Neural networks are out of scope.</strong></li>
+        </ul>
+      </div>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">The chapter's five exercises are worked in Part 3 — their solution boxes in the PDF are empty.</p>
+    </section>

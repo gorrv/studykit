@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function(){
+  var t = null;
+  try { t = localStorage.getItem('ai-theme'); } catch (e) {}
+  if (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
+  document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+})();
+</script>
+<title>Intro to AI — Study Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+<!--@include styles.css--></style>
+</head>
+<body>
+<div class="layout">
+  <!-- ============ SIDEBAR ============ -->
+  <aside>
+<!--@include nav.html--></aside>
+  <!-- ============ MAIN ============ -->
+  <main>
+    <!-- ============ START ============ -->
+    <!--@include sections/start.html-->
+    <!-- ============ W1 INTRO ============ -->
+    <!-- ============ READING THE NOTATION ============ -->
+    <!--@include sections/notation.html-->
+
+    <!--@include sections/w1-intro.html-->
+    <!-- ============ W1 SEARCH ============ -->
+    <!--@include sections/w1-search.html-->
+    <!-- ============ W1 ASTAR ============ -->
+    <!--@include sections/w1-astar.html-->
+    <!-- ============ W2 MINIMAX ============ -->
+    <!--@include sections/w2-minimax.html-->
+    <!-- ============ W2 ALPHA-BETA ============ -->
+    <!--@include sections/w2-alphabeta.html-->
+    <!-- ============ W2 CSP 1 ============ -->
+    <!--@include sections/w2-csp1.html-->
+    <!-- ============ W2 CSP 2 ============ -->
+    <!--@include sections/w2-csp2.html-->
+    <!-- ============ W3 PLANNING ============ -->
+    <!--@include sections/w3-plan.html-->
+    <!-- ============ W3 PDDL ============ -->
+    <!--@include sections/w3-pddl.html-->
+    <!-- ============ W3 PDDL 2.1 ============ -->
+    <!--@include sections/w3-pddl21.html-->
+    <!-- ============ W3 RPG ============ -->
+    <!--@include sections/w3-rpg.html-->
+    <!-- ============ W4 UNCERTAINTY ============ -->
+    <!-- ============ W4 · START HERE ============ -->
+    <!--@include sections/w4-start.html-->
+
+    <!--@include sections/w4-uncert.html-->
+    <!-- ============ W4 MDP ============ -->
+    <!--@include sections/w4-mdp.html-->
+
+    <!--@include sections/w4-prob.html-->
+
+    <!--@include sections/w4-vi.html-->
+    <!-- ============ W5 OVERVIEW ============ -->
+    <!--@include sections/w5-overview.html-->
+    <!-- ============ W5 METRICS ============ -->
+    <!--@include sections/w5-metrics.html-->
+    <!-- ============ W5 FITTING ============ -->
+    <!--@include sections/w5-fitting.html-->
+    <!-- ============ W6 K-MEANS ============ -->
+    <!--@include sections/w6-kmeans.html-->
+    <!-- ============ W6 HIERARCHICAL ============ -->
+    <!--@include sections/w6-hier.html-->
+    <!-- ============ W6 EXERCISES ============ -->
+    <!--@include sections/w6-ex.html-->
+    <!-- ============ W7 · PART 1 ============ -->
+    <!--@include sections/w7-linreg.html-->
+
+    <!-- ============ W7 · PART 2 ============ -->
+    <!--@include sections/w7-trees.html-->
+
+    <!-- ============ W7 · PART 3 ============ -->
+    <!--@include sections/w7-ex.html-->
+
+    <!-- ============ W8 · PART 1 ============ -->
+    <!--@include sections/w8-bandit.html-->
+
+    <!-- ============ W8 · PART 2 ============ -->
+    <!--@include sections/w8-eps.html-->
+
+    <!-- ============ W8 · PART 3 ============ -->
+    <!--@include sections/w8-ucb.html-->
+
+    <!-- ============ W8 · PART 4 ============ -->
+    <!--@include sections/w8-ex.html-->
+
+    <!-- ============ W9 · PART 1 ============ -->
+    <!--@include sections/w9-apply.html-->
+
+    <!-- ============ W9 · PART 2 ============ -->
+    <!--@include sections/w9-harms.html-->
+
+    <!-- ============ W9 · PART 3 ============ -->
+    <!--@include sections/w9-bias.html-->
+
+    <!-- ============ W9 · PART 4 ============ -->
+    <!--@include sections/w9-mitig.html-->
+
+    <!-- ============ PRACTICE ============ -->
+    <!--@include sections/practice.html-->
+    <!-- ============ CRAM SHEET ============ -->
+    <!--@include sections/cram.html-->
+    <!-- ============ FINAL REVISION ============ -->
+    <!--@include sections/concepts.html-->
+
+    <!-- ============ HOW TO COMPUTE IT ============ -->
+    <!--@include sections/howto.html-->
+
+    <!-- ============ MOCK EXAM ============ -->
+    <!--@include sections/exam.html-->
+
+  </main>
+</div>
+<script>
+<!--@include js/theme.js--><!--@include js/section-switching.js--><!--@include js/shared-helpers.js--><!--@include js/self-test-quiz-driver-question-generators-get-pushed-into.js--><!--@include js/generic-tool-reset.js--><!--@include js/week-tools-added-here-as-each-week-s-content-goes-in.js--><!--@include js/w1-·-a-lab-where-h-comes-from-and-what-changes-when-it-chang.js--><!--@include js/w2-·-game-trees-minimax-and-alpha-beta.js--><!--@include js/w2-·-csp-parsing-backtracking-forward-checking-ac-3.js--><!--@include js/w3-·-blocks-world-strips-engine-rpg-forward-chain-search.js--><!--@include js/w4-·-mdps-grid-worlds-and-value-iteration.js--><!--@include js/w4-·-how-information-spreads-the-picture-behind-value-iterat.js--><!--@include js/w5-·-machine-learning-metrics-and-curve-fitting.js--><!--@include js/interaction-layer-dragging-on-svg-step-players-live-edit.js--><!--@include js/w6-·-clustering-k-means-within-cluster-variance-hierarchical.js--><!--@include js/w7-·-supervised-learning.js--><!--@include js/w8-·-reinforcement-learning.js--><!--@include js/w9-·-ai-ethics.js--><!--@include js/mock-exam-a-scored-optionally-timed-test-over-any-set-of-wee.js--><!--@include js/const-adv.js--><!--@include js/const-cspq.js--><!--@include js/const-plan.js--><!--@include js/const-mdpq.js--><!--@include js/const-mlq.js--><!--@include js/const-clq.js--><!--@include js/site-search-full-text-across-every-section.js--></script>
+</body>
+</html>

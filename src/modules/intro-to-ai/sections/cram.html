@@ -1,0 +1,425 @@
+<section id="cram" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">★ Revision · One-Page Quick Reference</div>
+        <h1>Exam Cram Sheet</h1>
+        <div class="week-subtitle">every core concept, condensed</div>
+      </div>
+      <p class="no-print">A distilled summary of the whole module. Use <strong>Ctrl/Cmd+P</strong> to print it — the sidebar and tools are hidden in print. One card per week, added as the content goes in.</p>
+      <div class="cram-grid">
+        <div class="cram-card">
+          <h3>W1 · What AI is</h3>
+          <ul>
+            <li><span class="term">Two senses:</span> a kind of intelligence (a property — no such thing as "<em>an</em> AI"), and a field of research.</li>
+            <li><span class="term">McCarthy 1956:</span> science and engineering of making intelligent machines — <em>need not confine itself to biologically observable methods</em>.</li>
+            <li><span class="term">Four approaches:</span> think / act × like humans / rationally. "Like humans" = cognitive models; "rationally" = laws of logic and probability.</li>
+            <li><span class="term">Turing test</span> 1950, Q&amp;A. <span class="term">Total Turing test</span> = a robot, physical behaviour too.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W1 · Agents</h3>
+          <ul>
+            <li><span class="term">Agent:</span> makes an intelligent decision when given the opportunity, using the knowledge and actions available <em>at that time</em>.</li>
+            <li><span class="term">Autonomous agent:</span> decides without human input.</li>
+            <li><span class="term">Rational agent:</span> always takes the <em>best</em> action.</li>
+            <li><span class="term">The loop:</span> Sensors → what the world is like now → what it'll be like if I do A → what action to do now → Effectors. Knowledge = how the world evolves, effects of my actions, goals.</li>
+            <li><span class="term">Value alignment:</span> aligning system goals with human ones; exactly specifying "good" is the hard part.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W1 · Model-based vs data-driven</h3>
+          <ul>
+            <li><span class="term">Model-based</span> = explicit knowledge = Symbolic / Classical AI: encode the world, encode how it changes, <em>search</em> for strategies. "Pretends to think."</li>
+            <li><span class="term">Data-driven</span> = tacit knowledge = ML: read coarse data, be told the problem, adjust the model. "Pretends to learn."</li>
+            <li><span class="term">Dimensions:</span> knowledge explicit/tacit, model-based/data-driven; perception perfect/imperfect; environment fully/partially observable, static/dynamic; actions instantaneous/durative, deterministic/stochastic.</li>
+            <li><span class="term">Search assumes the easy end of every axis.</span></li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W1 · Search problems</h3>
+          <ul>
+            <li><span class="term">Search</span> = computing a sequence of actions that form a path to a goal.</li>
+            <li><span class="term">Five parts:</span> state space; initial state + goal test; actions; transition model; action costs.</li>
+            <li><span class="term">Search tree:</span> node = state, edge = action. Redundant paths ⇒ infinite tree.</li>
+            <li><span class="term">Two fixes:</span> check the path back to the root, or track visited states.</li>
+            <li><span class="term">Notation:</span> <em>b</em> branching factor, <em>d</em> depth of shallowest solution, <em>m</em> max depth.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W1 · The five algorithms</h3>
+          <ul>
+            <li><span class="term">One algorithm, five f's.</span> Best-first = priority queue on <em>f(n)</em>.</li>
+            <li><span class="term">BFS</span> <em>f = depth</em>. Queue + reached. Complete ✓. Optimal ✓ <em>only if equal costs</em>. Time &amp; space <em>b + b² + … + b^d</em>.</li>
+            <li><span class="term">DFS</span> <em>f = −depth</em>. Complete ✓ if redundant paths prevented. Optimal ✗ (left-most solution). Time <em>b^m</em>, space <em>b·m</em>.</li>
+            <li><span class="term">UCS</span> <em>f = g</em>. Complete ✓, optimal ✓. Time &amp; space ∝ nodes cheaper than the goal. Minimum-<em>cost</em>, not minimum-<em>action</em>.</li>
+            <li><span class="term">Greedy</span> <em>f = h</em>. Fast, not optimal.</li>
+            <li><span class="term">A*</span> <em>f = g + h</em>. Optimal if <em>h</em> admissible.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W1 · Numbers to remember</h3>
+          <ul>
+            <li><span class="term">BFS vs UCS</span> from D: 2 actions cost <strong>310</strong> vs 3 actions cost <strong>278</strong>.</li>
+            <li><span class="term">Greedy</span> ARAD → D → F → BUCHAREST = 140 + 99 + 211 = <strong>450</strong>.</li>
+            <li><span class="term">A*</span> ARAD → D → E → G → BUCHAREST = 140 + 80 + 97 + 101 = <strong>418</strong>.</li>
+            <li><span class="term">First f-values from ARAD:</span> A 447, B 449, <strong>D 393</strong>. Then C 671, <strong>E 413</strong>, F 415. Then <strong>G 417</strong>, H 526.</li>
+            <li><span class="term">Goal offered</span> via F at 450, via G at <strong>418</strong>.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W1 · Heuristics</h3>
+          <ul>
+            <li><span class="term">Heuristic</span> = rule of thumb estimating cost from <em>n</em> to the goal. UCS looks <em>backwards</em> (g); <em>h</em> looks forwards.</li>
+            <li><span class="term">Admissible</span> = never over-estimates: actual cost ≥ h(n). Straight-line distance is admissible.</li>
+            <li><span class="term">A* + admissible ⇒ optimal.</span></li>
+            <li><span class="term">h ≡ 0</span> is admissible but turns A* into UCS.</li>
+            <li><span class="term">Challenge:</span> admissible <em>and</em> informative — obtained by <strong>relaxing problem constraints</strong>.</li>
+            <li><span class="term">A* stops on expanding the goal, not on generating it.</span></li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W2 · Minimax</h3>
+          <ul>
+            <li><span class="term">Game tree:</span> nodes = states, edges = moves; Max, Min and Terminal nodes; only terminals have no children.</li>
+            <li><span class="term">MINIMAX(n)</span> = utility <em>for MAX</em>, assuming <em>both play optimally</em>.</li>
+            <li>MIN nodes take the min of their children; MAX nodes the max. Bottom-up.</li>
+            <li><span class="term">Complexity:</span> time <em>O(b<sup>d</sup>)</em>, space <em>O(b·d)</em> — it's a DFS.</li>
+            <li><span class="term">Complete</span> if the tree is finite; <span class="term">optimal</span> if the opponent is optimal.</li>
+            <li><span class="term">Worked tree:</span> 3,12,8 | 2,4,6 | 14,5,2 → B=3, C=2, D=2, <strong>A=3 via a₁</strong>.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W2 · Alpha-beta</h3>
+          <ul>
+            <li><span class="term">α</span> = minimum score the MAX player could get (a floor, only rises).</li>
+            <li><span class="term">β</span> = maximum score the MIN player could get (a ceiling, only falls).</li>
+            <li><span class="term">Cut rule:</span> skip the rest of the children when <strong>β ≤ α</strong> — same condition at MAX and MIN nodes.</li>
+            <li><span class="term">Same value as minimax</span>, always. Only the node count changes.</li>
+            <li><span class="term">Worked tree:</span> B=3 sets α=3; C's first leaf 2 gives β=2 ≤ 3 → prune C's other two. <strong>7 of 9 leaves.</strong></li>
+            <li><span class="term">Ordering:</span> worst case <em>O(b<sup>d</sup>)</em>, best case <em>O(b<sup>d/2</sup>)</em> — twice the depth for the same effort.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W2 · CSPs</h3>
+          <ul>
+            <li><span class="term">Three parts:</span> variables X, domains D, constraints C. Each constraint = <strong>scope + relation</strong>.</li>
+            <li><span class="term">Solution</span> = instantiation of all of X from D satisfying all of C. Solvers search <em>incomplete but consistent</em> partial assignments.</li>
+            <li><span class="term">Australia:</span> X = {WA, NT, Q, NSW, V, SA, T}; D = {red, green, blue}; <strong>9 constraints</strong>; SA degree 5, T degree 0.</li>
+            <li><span class="term">n-Queens:</span> X = {x<sub>ij</sub>}, D = {0,1}, Σx<sub>ij</sub> = N plus "not both 1" on rows, columns, both diagonals.</li>
+            <li><span class="term">Tree depth n</span>, but <strong>n! × m<sup>n</sup></strong> paths; commutativity cuts it to <strong>m<sup>n</sup></strong>.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W2 · Solving CSPs</h3>
+          <ul>
+            <li><span class="term">Backtracking</span> = DFS, one variable per level, backtrack on failure.</li>
+            <li><span class="term">MRV</span> — fewest legal values. <span class="term">Degree</span> — most constraining. <span class="term">LCV</span> — rules out fewest values elsewhere.</li>
+            <li><span class="term">Forward checking</span> — track legal values, stop when one empties; propagates <em>assigned → unassigned</em> only.</li>
+            <li><span class="term">Arc consistency</span> — X→Y consistent iff every value of X has a support in Y; deletes from <strong>X</strong>; if X shrinks, re-queue all Z→X.</li>
+            <li><span class="term">AC detects failure earlier:</span> AC fails after WA=red, Q=green; FC needs V=blue too.</li>
+            <li><span class="term">{SA=blue}:</span> 3⁵ = 243 → 2⁵ = 32, an <strong>87%</strong> reduction.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W3 · Classical planning</h3>
+          <ul>
+            <li><span class="term">Given</span> I, G and A (actions with preconditions and effects); <span class="term">find</span> a plan — a sequence taking I to G.</li>
+            <li>Planning is <span class="term">more powerful than CSP</span> — CSPs can be modelled as planning problems.</li>
+            <li><span class="term">An action has:</span> parameters, preconditions (relations that must hold), effects (relations added or deleted).</li>
+            <li><span class="term">Closed-world assumption</span> — what is not listed in the initial state is assumed false.</li>
+            <li><span class="term">Logistics:</span> Move (at t from / connected → +at t to, −at t from) · Load (at t l, at c l → +on c t, −at c l) · Unload (mirror of Load).</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W3 · PDDL</h3>
+          <ul>
+            <li><span class="term">Language + algorithm</span> — write any problem in PDDL, any planner solves it.</li>
+            <li><span class="term">Versions:</span> PDDL propositional · <strong>2.1</strong> numbers + time · <strong>3</strong> preferences · <strong>+</strong> continuous change, processes, events.</li>
+            <li><span class="term">One domain file</span> (predicates, actions) + <span class="term">many problem files</span> (objects, init, goal).</li>
+            <li><span class="term">Action syntax:</span> <code>:parameters</code>, <code>:precondition</code>, <code>:effect</code>; <code>(and …)</code>; deletes as <code>(not (…))</code>.</li>
+            <li><span class="term">Fluents (2.1):</span> <code>:functions</code>, comparisons in preconditions, <code>increase</code>/<code>decrease</code> in effects, <code>(:metric minimize …)</code>.</li>
+            <li><span class="term">Durative:</span> <code>:duration</code>; conditions <code>at start</code> / <code>over all</code> / <code>at end</code>; effects <code>at start</code> / <code>at end</code>.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W3 · Forward chaining &amp; RPG</h3>
+          <ul>
+            <li><span class="term">Forward chaining:</span> <strong>S′ = S − {deletes} + {adds}</strong>; a goal state <em>contains</em> the goal conditions.</li>
+            <li><span class="term">Put X on Y from Z</span> — pre: clear X, on X Z, clear Y; add: clear Z, on X Y; del: on X Z, clear Y.</li>
+            <li><span class="term">RPG</span> — plan from S to G <strong>ignoring delete effects</strong>; its length is h(S). FF, Hoffmann &amp; Nebel 2001.</li>
+            <li><span class="term">Build:</span> f(0) = initial state; a(n+1) = actions with preconditions in f(n); <strong>f(n+1) = f(n) + adds</strong>. Layers only grow.</li>
+            <li><span class="term">Extract:</span> backwards from g(m) = goals; fact in f(n−1) drops down, else pick an action from a(n) and add its preconditions.</li>
+            <li><span class="term">h(s) := Σ |O<sub>i</sub>|</span> — <strong>actions, not layers</strong>. Demo: m = 2 but <strong>h = 3</strong>.</li>
+            <li>Used as h in A*, <span class="term">rebuilt for every node</span> added to the open list.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W4 · Uncertainty &amp; MDPs</h3>
+          <ul>
+            <li><span class="term">Search assumed</span> the state is known (<em>fully observable</em>) and actions execute as intended (<em>deterministic</em>).</li>
+            <li><span class="term">MDP</span> = sequential decision making for a <strong>fully observable but stochastic</strong> environment.</li>
+            <li><span class="term">Two principles:</span> Markov property holds for action transitions; probability distributions are <strong>stationary</strong>.</li>
+            <li><span class="term">Markov property:</span> next state depends only on the current state, not the history.</li>
+            <li><span class="term">Transition model</span> T(s,a,s′) = <strong>P(s′|s,a)</strong>. Grid: 0.8 intended, 0.1 each side, blocked ⇒ stay.</li>
+            <li><span class="term">Plan → policy.</span> A sequence breaks when an action slips; a policy covers every state.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W4 · Rewards &amp; policies</h3>
+          <ul>
+            <li><span class="term">Utility</span> = sum of rewards of all states visited. Up,Up,Right,Right,Right ⇒ <strong>(5×−0.04)+1 = 0.8</strong>; that plan executes with probability 0.8⁵ ≈ <strong>33%</strong>.</li>
+            <li><span class="term">Negative reward incentivises optimality.</span></li>
+            <li><span class="term">π must be</span> complete · optimal · stationary · <strong>proper</strong> (guaranteed to reach a terminal).</li>
+            <li><span class="term">U<sup>π</sup>(s) = E[Σ γ<sup>t</sup>R(S<sub>t</sub>)]</span>; γ values current over future rewards.</li>
+            <li><span class="term">Four regimes:</span> R=−1.65 rush for <em>any</em> exit · −0.04 balanced · −0.01 take no risks (stall against the wall) · R&gt;0 never terminate.</li>
+            <li><span class="term">At (4,1) with R=−0.04 the policy points away from the goal</span> — a 10% slip would hit the −1.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W4 · Expected utility</h3>
+          <ul>
+            <li><span class="term">E[U] = Σ<sub>c∈C</sub> P(c)U(c)</span>. Coin: 0.5×0 + 0.5×5 = <strong>2.5</strong>.</li>
+            <li><span class="term">P(a,b)</span> joint — both true at once. <span class="term">P(a|b)</span> conditional — a true given b known. <strong>P(a|b) ≥ P(a,b)</strong>.</li>
+            <li><span class="term">Bayes:</span> <strong>P(a|b) = P(a,b) / P(b)</strong>.</li>
+            <li><span class="term">E[U|s,a] = Σ<sub>s′∈nei(s)</sub> P(s′|s,a)U(s′)</span> — sum over <em>every</em> state the action could reach.</li>
+            <li>It's an expectation because the action may not do what you asked; all you know is the probability of each outcome.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W4 · Value iteration</h3>
+          <ul>
+            <li><span class="term">Bellman update:</span> <strong>U<sub>i+1</sub>(s) = R(s) + γ max<sub>a</sub> Σ<sub>s′</sub> P(s′|s,a)U<sub>i</sub>(s′)</strong>.</li>
+            <li><span class="term">Max over your actions, average over the world's outcomes.</span></li>
+            <li><span class="term">Init:</span> U = 0 everywhere except end states, where U(s) = R(s).</li>
+            <li><span class="term">Stop</span> when U<sub>i+1</sub> = U<sub>i</sub>; formally <strong>δ &lt; ε(1−γ)/γ</strong>.</li>
+            <li><span class="term">One sweep by hand</span> (R=−0.04, γ=1): all −0.04 except (3,3) = −0.04 + 0.8 = <strong>0.76</strong>.</li>
+            <li><span class="term">Converged U:</span> 0.812 0.868 0.918 / 0.762 ▪ 0.660 / 0.705 0.655 0.611 0.388.</li>
+            <li><span class="term">Policy:</span> <strong>π(s) = arg max<sub>a</sub> Σ P(s′|s,a)U(s′)</strong> — R and γ drop out.</li>
+            <li><span class="term">Iterations blow up as γ → 1</span>; distant states dip negative before climbing.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W5 · ML overview</h3>
+          <ul>
+            <li><span class="term">Samuel 1959:</span> "gives computers the ability to learn <strong>without being explicitly programmed</strong>".</li>
+            <li><span class="term">Mohri et al. 2018</span> experience → performance · <span class="term">R&amp;N 2022</span> observes data, builds a model that is both hypothesis and software · <span class="term">Murphy 2012</span> detect patterns, predict future data.</li>
+            <li><span class="term">Supervised</span> = trained on labelled examples. <span class="term">Unsupervised</span> = unlabelled, discover patterns. <span class="term">Reinforcement</span> = learns from reward/punishment, <em>exploitation</em> vs <em>exploration</em>.</li>
+            <li><span class="term">Supervised problems:</span> classification (labels), regression (numbers).</li>
+            <li><span class="term">Unsupervised problems:</span> clustering (discovers groups), dimensionality reduction (high-dim → low-dim, preserving desired properties).</li>
+            <li><span class="term">Many ML algorithms have no proof they work</span> — hence measurement replaces proof.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W5 · Classification metrics</h3>
+          <ul>
+            <li><span class="term">Training set</span> = used for learning, with labels. <span class="term">Test set</span> = <strong>untouched</strong>, labels hidden, used after training.</li>
+            <li><span class="term">Accuracy</span> = correct / all = (TP+TN)/total.</li>
+            <li><span class="term">The 99% trap:</span> 1% prevalence, always answer "no" → 99% accuracy, catches nothing.</li>
+            <li><span class="term">Precision</span> = TP/(TP+FP) — of what I flagged, how much was real. Punishes false alarms.</li>
+            <li><span class="term">Recall / sensitivity</span> = TP/(TP+FN) — of what was real, how much I caught. Punishes misses.</li>
+            <li><span class="term">F1</span> = 2/(recall⁻¹+precision⁻¹) = 2PR/(P+R), the harmonic mean — high only if <em>both</em> are high.</li>
+            <li><span class="term">Recall exposes the always-"no" model;</span> precision is 0/0 or a perfect 1.00. <strong>Neither uses TN.</strong></li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W5 · Regression metrics</h3>
+          <ul>
+            <li><span class="term">MAE</span> = (1/n) Σ |ŷᵢ − yᵢ| — every unit of error equal.</li>
+            <li><span class="term">MSE</span> = (1/n) Σ (ŷᵢ − yᵢ)² — squares, so <strong>very sensitive to outliers</strong>.</li>
+            <li><span class="term">RMSE</span> = √MSE — same as MSE but back in the <strong>original units</strong>.</li>
+            <li><span class="term">RMSE ≥ MAE</span> always; equal only when all errors have the same size.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W5 · Under- and overfitting</h3>
+          <ul>
+            <li><span class="term">Generalisation error</span> = error on <em>unseen</em> data. Can't compute it, so minimise the <span class="term">empirical error</span> — the one we control.</li>
+            <li><span class="term">Underfitting</span> = fails to capture the complexity of the training data. Too simple.</li>
+            <li><span class="term">Overfitting</span> = fits too much to the training data, fails to generalise. Too complex — it memorises the noise.</li>
+            <li><span class="term">Training error only ever falls</span> with complexity; <span class="term">validation error is U-shaped</span>. Pick the bottom of the U.</li>
+            <li><span class="term">The three fits:</span> deg 1 → 1.89e−01 / 3.79e−01 · deg 4 → 6.91e−03 / <strong>1.20e−02</strong> · deg 29 → 3.22e−03 / <strong>1.76e+15</strong>.</li>
+            <li><span class="term">Diagnose from the gap:</span> both high &amp; close = under · both low &amp; close = right · train ≈ 0 with validation climbing = over.</li>
+            <li><span class="term">Validation not test:</span> choosing with a set means fitting to it. Train / choose / report, on three sets.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W6 · K-means</h3>
+          <ul>
+            <li><span class="term">Unsupervised</span> = patterns without labels; clustering finds groups but <strong>cannot name them</strong>.</li>
+            <li><span class="term">V(C<sub>k</sub>)</span> = (1/|C<sub>k</sub>|) Σ<sub>i,i′∈C<sub>k</sub></sub> d(p<sub>i</sub>,p<sub>i′</sub>)². Each pair <strong>once</strong>; divide by the number of <strong>points</strong>.</li>
+            <li><span class="term">Better clustering</span> = lower <em>total</em> within-cluster variance.</li>
+            <li><span class="term">Algorithm:</span> pick K data points as centres → assign each point to the nearest centre (<strong>ties to lowest index</strong>) → recompute centres as means → repeat until clusters stop changing.</li>
+            <li><span class="term">Why not brute force:</span> n = 20, K = 2 gives 2²⁰ − 1 = 1,048,575 assignments; exponential in n.</li>
+            <li><span class="term">Local minima:</span> initialisation decides. Fixes = many restarts (<code>n_init</code>) + smart seeding (<code>k-means++</code>).</li>
+            <li><span class="term">Prop 6.3</span> (non-examinable): V(C) = 2 Σ d(p,µ)² — justifies "assign to nearest centre", and only for <strong>Euclidean</strong>.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W6 · Hierarchical</h3>
+          <ul>
+            <li><span class="term">Start:</span> n singleton clusters. <span class="term">Step:</span> merge the closest pair. <span class="term">Stop:</span> one cluster.</li>
+            <li><span class="term">Two independent choices:</span> linkage (cluster–cluster) and metric (point–point). Any combination.</li>
+            <li><span class="term">L₁</span> = Σ|p₁ᵢ − p₂ᵢ| · <span class="term">L₂</span> = (Σ(p₁ᵢ − p₂ᵢ)²)<sup>½</sup>. L₂ ≤ L₁.</li>
+            <li><span class="term">Single = min · Complete = max · Average = mean</span> (divide by mn).</li>
+            <li><span class="term">Single chains</span> (straggly clusters); <span class="term">complete stays compact</span> (bounds the diameter).</li>
+            <li><span class="term">Ties:</span> merge <em>all</em> clusters at the threshold — two pairs → two merges, a chain → one big cluster. Cost: some K unreachable.</li>
+            <li><span class="term">Max steps = n − 1.</span> <span class="term">Dendogram:</span> join height = merge threshold; a long vertical gap = good place to cut.</li>
+            <li><span class="term">Worked run</span> (single, L₁): thresholds <strong>4, 5, 7, 8, 12</strong> — {1,5}, {2,3}, {2,3,6}, {2,3,4,6}, all.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W6 · The exercise answers</h3>
+          <ul>
+            <li><span class="term">Ex 1:</span> V(C̃₁)=13.75, V(C̃₂)=1, V(Ĉ₁)=6.67, V(Ĉ₂)=9.33 → totals <strong>14.75 vs 16.00</strong>, so {p₁p₂p₃p₄}/{p₅p₆} wins.</li>
+            <li><span class="term">Ex 2:</span> C₁={p₁..p₄}, C₂={p₅,p₆}; µ₁=(2.5, 2.25), µ₂=(6.5, 6.5); converges at t = 2.</li>
+            <li><span class="term">Ex 3:</span> swap the centres → C₁={p₄,p₅,p₆}, C₂={p₁,p₂,p₃}; µ₁≈(5.67,5.67), µ₂≈(2,1.67). Total <strong>16.00</strong> — a local minimum that is not global.</li>
+            <li><span class="term">Ex 4:</span> 6 + 0 + 1 + 6 = <strong>13</strong>.</li>
+            <li><span class="term">Ex 5:</span> <strong>n − 1</strong> (a maximum, because ties can merge several at once).</li>
+            <li><span class="term">Ex 6:</span> single and complete first differ at <strong>K = 3</strong> — {1,5}{2,3,6}{4} vs {1,5}{2,3}{4,6}.</li>
+            <li><span class="term">Ex 7:</span> <strong>complete-linkage</strong> — it bounds the worst pair, so every city in a cluster is within 100 miles.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W7 · Linear regression</h3>
+          <ul>
+            <li><span class="term">Supervised</span> = labelled data. <em>Regression</em> → a number; <em>classification</em> → a class.</li>
+            <li><span class="term">Model:</span> y = β₀ + β₁x + ε, ε ∼ N(0, σ²). Prediction ŷ = β₀ + β₁x; residual ε = y − ŷ.</li>
+            <li><span class="term">N(µ, σ²)</span> carries the <strong>variance</strong>. σ = 0.3 ⟹ N(µ, 0.09). µ ± σ ≈ 68%, ±2σ ≈ 95%, ±3σ ≈ 99.7%. P(one exact value) = 0.</li>
+            <li><span class="term">Objective:</span> minimise SSE = Σεᵢ². (Least Absolute Deviations minimises Σ|εᵢ| instead.)</li>
+            <li><span class="term">By hand:</span> collect SSE = nβ₀² + (Σx²)β₁² + (2Σx)β₀β₁ − (2Σy)β₀ − (2Σxy)β₁ + Σy², freeze one β, take the vertex at <strong>−b/2a</strong>, solve the pair.</li>
+            <li><span class="term">Theorem 7.3:</span> β̂₁ = (nΣxy − ΣxΣy)/(nΣx² − (Σx)²); β̂₀ = (Σx²Σy − ΣxΣxy)/(same denominator).</li>
+            <li><span class="term">Notes' example</span> (−1,2),(0,0),(2,0): β̂₀ = <strong>6/7</strong>, β̂₁ = <strong>−4/7</strong>, SSE = 8/7. Ex 1: ŷ(5) = <strong>−2</strong>.</li>
+            <li><span class="term">"Linear" is about the βs</span> — polynomial regression is a special case of linear regression.</li>
+            <li><span class="term">Normality is <em>not</em> used</span> in the proof of Theorem 7.3, only for further properties like unbiasedness.</li>
+            <li><span class="term">Free check:</span> residuals sum to zero at the optimum; the line passes through (x̄, ȳ).</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W7 · Decision trees</h3>
+          <ul>
+            <li><span class="term">Gini(v) = Σ pᵢ(1 − pᵢ)</span>, pᵢ = vᵢ/n. Equivalently <strong>1 − Σpᵢ²</strong>.</li>
+            <li><span class="term">0 ⟺ pure.</span> Maximum <strong>1 − 1/k</strong> at equal classes: ½ (k=2), ⅔ (k=3), ¾ (k=4).</li>
+            <li><span class="term">Gini-Split(A) = Σⱼ (nⱼ/n)·Gini(vⱼ)</span> — a <strong>weighted</strong> average. Choose by <strong>arg min</strong> (7.11), at every node, not just the root.</li>
+            <li><span class="term">Table 7.3:</span> Gini(root) = 148/225 ≈ 0.658. Gini-Split(HasJob) = 8/27 ≈ <strong>0.296</strong> beats Gini-Split(OwnsHome) = 64/135 ≈ <strong>0.474</strong>.</li>
+            <li><span class="term">Node label</span> = majority class, ties → lowest index; ordering is alphabetical.</li>
+            <li><span class="term">⚠ Figure 7.5</span> mislabels three nodes — [0,5,4] is <strong>Low</strong> not Medium, [0,0,4] is <strong>Medium</strong>, [0,5,0] is <strong>Low</strong>. Figures 7.4 and 7.6 are correct. Read labels off the vector.</li>
+            <li><span class="term">Branches may split differently</span> — that is what scikit-learn does, and re-using a feature on the same path is pointless (one child, no gain).</li>
+            <li><span class="term">Left = True</span> for binary nodes; label each arrow for non-binary ones.</li>
+            <li><span class="term">Ex 4:</span> max Gini for k=2 is <strong>½</strong>. <span class="term">Ex 5:</span> split by <strong>Feature1</strong> — 0.67 vs 0.7313 vs 0.73.</li>
+            <li><span class="term">Out of scope:</span> Decision Tree Regression, neural networks. <span class="term">In scope:</span> continuous <em>features</em> in a classification tree.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W8 · Bandits &amp; action values</h3>
+          <ul>
+            <li><span class="term">RL</span> = learn by doing. <span class="term">k-armed bandit</span> = k arms, each with its own reward distribution, maximise long-run average.</li>
+            <li><span class="term">q⋆(a) = E[R<sub>t</sub> | A<sub>t</sub> = a]</span> (8.2) — the <em>true</em> value, unknown. Stationary ⟹ drop the t (8.3).</li>
+            <li><span class="term">Q<sub>t</sub>(a)</span> (8.4) = average of rewards a paid on steps <strong>strictly before t</strong>. Q₁(a) = 0; 0 whenever N = 0.</li>
+            <li><span class="term">1<sub>predicate</sub></span> = 1 if true, 0 otherwise — it selects a's own steps in (8.4).</li>
+            <li><span class="term">Incremental form:</span> Q ← Q + (1/N)(R − Q). Same average, constant memory.</li>
+            <li><span class="term">N(µ, σ²) is the variance.</span> B ∼ N(11, 4) ⟹ σ = 2.</li>
+            <li><span class="term">Exploit</span> = take the current best. <span class="term">Explore</span> = try something else in case an early sample was an outlier. No fixed definition of "too much".</li>
+            <li><span class="term">Ex 1:</span> q⋆(A)=10, q⋆(B)=11. <span class="term">Ex 2:</span> Q<sub>t</sub>(A) = 0, 0.5, 0.1, 0.1, <strong>0.4</strong>; Q<sub>t</sub>(B) = 0, 0, 0, 0.4, <strong>0.4</strong> (tie at t=5).</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W8 · Selection methods</h3>
+          <ul>
+            <li><span class="term">Random (8.4):</span> Pr(A<sub>t</sub>=a<sub>i</sub>) = 1/k, forever. <span class="term">Ex 4:</span> k=50 → <strong>0.02</strong>.</li>
+            <li><span class="term">Greedy (8.5):</span> A<sub>t</sub> = arg max<sub>a</sub> Q<sub>t</sub>(a), Q₁=0, <strong>ties randomised</strong>.</li>
+            <li><span class="term">ε-greedy (8.6):</span> random w.p. ε, greedy w.p. 1−ε. <span class="term">Ex 6:</span> ε=0 → greedy, ε=1 → random.</li>
+            <li><span class="term">Pr(greedy action) = 1 − ε + ε/k</span>; <span class="term">Pr(specific other) = ε/k</span>. Ties split the 1−ε.</li>
+            <li><span class="term">Ex 5</span> (ε=0.5, k=2, optimal a₂): estimates point away <strong>0.25</strong> · tie <strong>0.5</strong> · point at it <strong>0.75</strong>.</li>
+            <li><span class="term">Fig 8.4:</span> random ≈ 0 (arm values ~ N(0,1)); greedy stalls, stuck on the first positive arm; ε=0.1 leads at 500; ε=0.01 wins asymptotically by the <strong>law of large numbers</strong> — every arm sampled infinitely often for any ε&gt;0, then the bigger ε just pays more to randomise.</li>
+            <li><span class="term">Asymptote ≈ (1−ε)·q⋆(best) + ε·(mean arm)</span>; testbed q⋆(best) ≈ 1.54. <span class="term">Ex 7:</span> ε=0.75 → ≈0.39 → <strong>between random and greedy</strong>.</li>
+            <li><span class="term">% optimal ceiling</span> for ε-greedy = 1 − ε + ε/k.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W8 · UCB</h3>
+          <ul>
+            <li><span class="term">Why:</span> ε-greedy explores <em>uniformly</em> — it wastes pulls on arms it already knows are bad.</li>
+            <li><span class="term">(8.5)/(8.6):</span> A<sub>t</sub> = arg max<sub>a</sub> [ Q<sub>t</sub>(a) + c√(ln t / N<sub>t</sub>(a)) ].</li>
+            <li><span class="term">Remark 8.8:</span> N=0 ⟹ +∞ ⟹ maximising, so <strong>no Q₁ needed</strong> and the first k steps are a₁…a<sub>k</sub> in order. <strong>Ties → lowest index</strong> (greedy randomises — different rule!).</li>
+            <li><span class="term">Terms:</span> Q = exploitation · c = exploration <em>parameter</em> (a priori, data-independent) · c√(ln t/N) = exploration term ≈ uncertainty.</li>
+            <li><span class="term">c ↑ ⟹ explore more.</span> c = 0 ⟹ greedy. Common value <strong>√2</strong>; Ex 8 uses c = 2.</li>
+            <li><span class="term">(8.7):</span> √(ln t / t) → 0 — intervals shrink under repeated sampling. But ln t grows while N stays fixed, so a <strong>neglected arm's bound creeps back up</strong>.</li>
+            <li><span class="term">Ex 8 (c=2):</span> A₁…A₈ = <strong>a₁ a₂ a₃ a₃ a₁ a₁ a₁ a₂</strong>; UCB₈ = <strong>6.1920 / 6.3841 / 5.0393</strong>. A₈ picks the <em>worst</em> Q because its interval is widest — Figure 8.5.</li>
+            <li><span class="term">vs MDPs:</span> the reward function is <strong>unknown</strong> (must be estimated), and there is <strong>only one state</strong> — richer RL needs q⋆(s, a).</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W9 · Application &amp; access</h3>
+          <ul>
+            <li><span class="term">Five key questions:</span> how applied / who has access / who benefits · what harms, who is harmed · how bias manifests and why · who is responsible · how to minimise. <strong>Use as headings.</strong></li>
+            <li><span class="term">Two columns:</span> well-intentioned → <em>“what are the hidden risks?”</em>; fundamentally problematic → <em>“should we even build this?”</em></li>
+            <li><span class="term">Policing:</span> breadth of surveillance · worse face recognition on minorities <em>due to lack of data</em> → wrongful arrests / stop-and-search · lack of accountability.</li>
+            <li><span class="term">Military:</span> targeting → bias into war, more deaths. Automated defense → dehumanization, loss of moral engagement, simplification of moral choices, easier escalation, arms races.</li>
+            <li><span class="term">Political control:</span> surveillance of opposition &amp; minorities → authoritarianism, loss of privacy/speech/religious freedom · censorship &amp; disinformation → polarisation, less informed citizens.</li>
+            <li><span class="term">Phrenology:</span> disproved pseudoscience predicting gender, intelligence, criminality, internal states from facial analysis. Revived by predicting gender/sexuality/race/emotion/criminality — but these are <strong>social constructs or unobservable; only the subjects can say.</strong></li>
+            <li><span class="term">Access:</span> compute · GPUs · money to train and house · Big Tech monopoly → universities can't compete, poorer labs/countries excluded.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W9 · The seven harms</h3>
+          <ul>
+            <li><span class="term">Order:</span> human agency · accountability · safety and wellbeing · privacy · fairness and dignity · societal · environmental.</li>
+            <li><span class="term">Agency:</span> loss of control · loss of right to contest · over-delegation · loss of critical thinking.</li>
+            <li><span class="term">Accountability:</span> loss of accountability, <em>or</em> incorrect blaming of humans (warehouse workers blamed for robot mistakes).</li>
+            <li><span class="term">Safety:</span> physical safety · abuse &amp; tech-facilitated violence · health · wellbeing.</li>
+            <li><span class="term">Privacy by setting:</span> intimate spaces · work &amp; school · public spaces.</li>
+            <li><span class="term">Fairness — allocative:</span> opportunities · resources · <strong>quality-of-service</strong>. <span class="term">Representational:</span> stereotyping · demeaning · erasing · alienating · loss of self-identification · essentialist categories.</li>
+            <li><span class="term">Societal:</span> information · cultural · civic and political · social relationships · deskilling. <em>No identifiable individual victim</em> — that's the test.</li>
+            <li><span class="term">Environmental:</span> energy &amp; pollution · mineral mining for datacentres · <strong>AI for oil &amp; gas</strong>.</li>
+            <li><span class="term">Reparation (after):</span> outcry · perpetrator communication (incl. denials) · investigation · legal action · legal repercussions · compensation · removal · discontinuation · design changes · law change.</li>
+            <li><span class="term">Anticipation (before):</span> quantitative measurement · ablation studies · qualitative (interviews, surveys, workshops, lit reviews, ethnography) · critique (speculation, argument).</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W9 · Discrimination &amp; bias</h3>
+          <ul>
+            <li><span class="term">Direct = disparate treatment</span> — disadvantaged <em>because of</em> a personal attribute.</li>
+            <li><span class="term">Indirect = disparate impact</span> — disadvantaged <em>even though the attribute is not explicitly considered</em>. Removing the attribute does <strong>not</strong> prevent it.</li>
+            <li><span class="term">Bias, two senses:</span> imbalance/tendency in data (<em>input</em>) · direct or indirect discrimination (<em>output</em>).</li>
+            <li><span class="term">Five causes:</span> <strong>world</strong> (world distribution) · <strong>representation</strong> (data collection) · <strong>measurement</strong> (wrong categorization/measurements) · <strong>algorithm</strong> (wrong algorithm) · <strong>evaluation</strong> (wrong metric or test set).</li>
+            <li><span class="term">★ Developer's fault:</span> all except <strong>world bias</strong>.</li>
+            <li><span class="term">Second branch</span> (obvious risk, problematic task): ethics board doesn't flag · <strong>★ developer doesn't oppose/report/whistleblow</strong> · management deploys.</li>
+            <li><span class="term">ProPublica:</span> more likely to <em>mistakenly</em> predict high-risk for Black than White defendants.</li>
+            <li><span class="term">GPT-3 / DALL·E:</span> “All white male” — representational (stereotyping, erasing).</li>
+            <li><span class="term">Brandao 2019:</span> age &amp; gender bias in pedestrian detection miss rates.</li>
+            <li><span class="term">Gender Shades (Buolamwini &amp; Gebru 2018):</span> Type VI error <strong>46.5% (Face++), 46.8% (IBM)</strong>, vs ~1–5% on Type I. Microsoft 0% (IV) → 25% (VI). <strong>Intersectional</strong> — one attribute at a time hides it.</li>
+            <li><span class="term">Who finds these:</span> women, Black scholars, LGBTQ → <strong>lived experience &amp; diversity</strong>.</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>W9 · Mitigation &amp; responsibility</h3>
+          <ul>
+            <li><span class="term">Seven principles:</span> human oversight &amp; agency · safety &amp; robustness · privacy · <strong>transparency</strong> · fairness · societal &amp; environmental wellbeing · accountability. (Mirror the harms; transparency is the extra.)</li>
+            <li><span class="term">Transparency</span> = documentation/logging, explainability, informing when AI is used. <span class="term">Accountability</span> = auditability, documenting how trade-offs were resolved, responsibility for harms.</li>
+            <li><span class="term">Governance:</span> regulations/standards/codes (safeguard present + constrain future) · <strong>internal AND external</strong> audit/verification/validation · <strong>“Trustworthy AI” = design AND governance</strong>.</li>
+            <li><span class="term">Value alignment:</span> technical (encode rules) <strong>and</strong> social (decide the values). Used in chatbots; important in game AI, credit scoring, Gen AI.</li>
+            <li><span class="term">Bias mitigation:</span> dataset curation (+ participatory design) · <strong>reweighting</strong> (weight more) · <strong>resampling</strong> (sample more often) · <strong>fairness functions</strong> (maximise <em>minimum</em> accuracy).</li>
+            <li><span class="term">Privacy mitigation:</span> anonymization (face blurring, text) · <strong>differential privacy</strong> — hides whether a person is <em>in</em> the dataset, by adding noise to computations.</li>
+            <li><span class="term">Environmental:</span> emission estimation (CodeCarbon) · smaller models.</li>
+            <li><span class="term">Responsible:</span> institution (allowing harms) · ethics board (passing it) · <strong>developers</strong> (best placed to anticipate, only ones able to test; also transparency, inefficiency, power).</li>
+            <li><span class="term">Minimising:</span> awareness · participatory design · team diversity · balanced datasets · testing with diverse groups · documentation · logging &amp; explainability · ethics boards · <strong>whistleblowing</strong> (last — every other item assumes good faith).</li>
+          </ul>
+        </div>
+        <div class="cram-card">
+          <h3>Cross-cutting threads</h3>
+          <ul>
+            <li><span class="term">"Search for good strategies"</span> in the model-based bullet list <em>is</em> Parts 2–3. Classical AI = encode + search.</li>
+            <li><span class="term">Optimal is always relative to something</span> — fewest actions (BFS) vs cheapest (UCS) vs looks-closest (greedy).</li>
+            <li><span class="term">Every trade is memory vs quality vs information</span> — DFS buys memory with quality; A* buys expansions with a heuristic.</li>
+            <li><span class="term">Relaxation</span> is the general recipe for building heuristics: make the problem easier, use its cost as the estimate. Straight-line distance (W1) and the RPG's "ignore deletes" (W3) are the same trick twice.</li>
+            <li><span class="term">Everything is still search.</span> Minimax is a DFS. Backtracking is a DFS. Forward chaining is A*. Only the state and the successor rule change.</li>
+            <li><span class="term">Fail first, cheaply.</span> Alpha-beta's β ≤ α, forward checking's empty domain and the RPG's fixpoint are all the same move: prove a branch is dead before paying to explore it.</li>
+            <li><span class="term">Heuristics cost something.</span> W1's h was a lookup; W3's h is an entire sub-problem solved per node — worth it because the node saving is larger.</li>
+            <li><span class="term">The reward function is the specification.</span> Week 1's value alignment problem, made numeric: R(s) = −1.65 quietly means "please die quickly".</li>
+            <li><span class="term">When the world stops cooperating, the answer changes shape.</span> Deterministic ⇒ a plan. Stochastic ⇒ a policy. Adversarial (W2) ⇒ a strategy that assumes the worst.</li>
+            <li><span class="term">W1–4 are the model-based half; W5 is the data-driven half.</span> Weeks 1–4 all need you to write the world down first — that's what "without being explicitly programmed" rules out.</li>
+            <li><span class="term">Guarantees give way to measurement.</span> A*, alpha-beta, AC-3 and value iteration all come with proofs. Machine learning largely doesn't, so it substitutes held-out evaluation — which is why metrics and the train/validation/test split get two thirds of Week 5.</li>
+            <li><span class="term">Reinforcement learning is Week 4 with the model taken away.</span> Same rewards and policies; you're no longer given P(s′|s,a), so you must explore to find out.</li>
+          </ul>
+        </div>
+      </div>
+    </section>

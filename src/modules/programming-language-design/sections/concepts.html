@@ -1,0 +1,516 @@
+<section id="concepts" class="week-section">
+      <div class="week-header">
+        <div class="week-eyebrow">★ Final revision · conceptual</div>
+        <h1>Concepts, Definitions &amp; Distinctions</h1>
+        <div class="week-subtitle">every term, every acronym, every X-vs-Y — in one place</div>
+      </div>
+      <div class="callout">
+        <div class="callout-label">What this page is for</div>
+        The other pages teach the machinery. This one is the <strong>vocabulary</strong>: the definitions you either know or don't, the acronyms you have to expand, and every distinction the course draws between two or three named things.
+        <p style="margin:10px 0 0 0;">It is written to be <strong>read straight through</strong> in about half an hour. Everything here comes from the lecture material — where a term is worth knowing but the slides don't stress it, it's marked <em>context</em>.</p>
+      </div>
+
+      <!-- ===================== ACRONYMS ===================== -->
+      <h2 id="cx-acronyms">Acronyms &amp; names — expand these on sight</h2>
+      <table>
+        <tr><th>Abbrev.</th><th>Stands for</th><th>One-line meaning</th></tr>
+        <tr><td><strong>SLD</strong></td><td><strong>S</strong>elective, <strong>L</strong>inear, <strong>D</strong>efinite</td>
+            <td>The resolution strategy Prolog uses. <strong>Selective</strong> — a fixed computation rule selects which atom of the goal is resolved next. <strong>Linear</strong> — the most recently derived resolvent is used as the next goal. <strong>Definite</strong> — all the program clauses are definite clauses.</td></tr>
+        <tr><td><strong>SOS</strong></td><td>Structural Operational Semantics</td><td>Plotkin's structural approach: transitions for a compound statement are defined in terms of the transitions of its sub-statements — i.e. <em>inductively</em>.</td></tr>
+        <tr><td><strong>BNF</strong></td><td>Backus–Naur Form</td><td>The notation used to write grammars — <code>e ::= n | e + e | …</code></td></tr>
+        <tr><td><strong>mgu</strong></td><td>most general unifier</td><td>The unifier that commits to as little as possible; every other unifier is an instance of it.</td></tr>
+        <tr><td><strong>AST</strong></td><td>Abstract Syntax Tree</td><td>What abstract syntax defines. Trees, not strings — which is how ambiguity is dodged.</td></tr>
+        <tr><td><strong>CBV / CBN</strong></td><td>call-by-value / call-by-name</td><td>Evaluate the argument first / substitute the argument unevaluated first.</td></tr>
+        <tr><td><strong>SIMP</strong></td><td>the course's toy imperative language</td><td>The language whose abstract machine and SOS rules you learned in Weeks 3–4.</td></tr>
+        <tr><td><strong>SFUN</strong></td><td>the course's toy functional language</td><td>First-order functional language with two semantics, <code>fn<sub>val</sub></code> and <code>fn<sub>name</sub></code>.</td></tr>
+        <tr><td><strong>l-value / r-value</strong></td><td><em>left</em>-value / <em>right</em>-value</td><td>Named after the two sides of <code>x = y</code>: the <strong>address</strong> you write to, and the <strong>value</strong> you read.</td></tr>
+        <tr><td><strong>NAF</strong></td><td>negation as failure</td><td>Failure to prove <em>A</em> is taken as proof that <em>¬A</em> follows. Written <code>\+</code> in Prolog.</td></tr>
+      </table>
+      <div class="callout exam">
+        <div class="callout-label">If you learn one acronym properly, make it SLD</div>
+        <strong>Selective · Linear · Definite.</strong> And know the two properties that go with it:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Refutation-complete</strong> — given a program and a goal, <em>if a contradiction can be derived, SLD-resolution will eventually generate it</em>.</li>
+          <li><strong>Independence of the selection rule</strong> — if a solution exists, SLD-resolution will find it <em>regardless of the selection rule</em> used to choose the next atom.</li>
+        </ul>
+      </div>
+
+      <!-- ===================== THREE COMPONENTS ===================== -->
+      <h2 id="cx-components">The three components of a language</h2>
+      <table>
+        <tr><th>Component</th><th>Definition (as given)</th><th>Answers</th></tr>
+        <tr><td><strong>Syntax</strong></td><td>Defines the <strong>form</strong> of programs: how expressions, commands and declarations are built and put together to form a program.</td><td>Which strings (or trees) <em>are</em> programs?</td></tr>
+        <tr><td><strong>Semantics</strong></td><td>Gives the <strong>meaning</strong> of programs: how they behave when they are executed.</td><td>What does this program <em>do</em>?</td></tr>
+        <tr><td><strong>Implementation</strong></td><td>A <strong>software system</strong> that can read a program and execute it on a machine, plus a set of tools (editors, debuggers, etc).</td><td>How does the meaning actually <em>happen</em> on hardware?</td></tr>
+      </table>
+
+      <!-- ===================== SYNTAX ===================== -->
+      <h2 id="cx-syntax">Concrete vs abstract syntax</h2>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">Concrete syntax</h4>
+          <ul style="font-size:13.5px;">
+            <li>Defines <strong>strings</strong> of characters.</li>
+            <li>Written in BNF over terminals.</li>
+            <li><strong>Can be ambiguous</strong> — one string, two parse trees, two different values.</li>
+            <li>What a parser has to cope with.</li>
+          </ul>
+        </div>
+        <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
+          <h4 style="color:var(--accent-3);">Abstract syntax</h4>
+          <ul style="font-size:13.5px;">
+            <li>Defines <strong>trees</strong>, not strings.</li>
+            <li>e.g. <code>e ::= n | op(e, e)</code></li>
+            <li><strong>No ambiguity</strong> — the two readings are simply two different trees.</li>
+            <li>The form the rest of the course works with.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Ambiguity — the definition and the fix</div>
+        A grammar is <strong>ambiguous</strong> when a single string has <strong>more than one parse tree</strong>. It matters because different trees can give <strong>different values</strong> — <code>1 − 2 − 3</code> is <strong>−4</strong> or <strong>2</strong> depending on which derivation you take.
+        <p style="margin:10px 0 0 0;"><strong>The course's fix is not to patch the concrete grammar but to move up a level to abstract syntax.</strong></p>
+      </div>
+
+      <!-- ===================== IMPLEMENTATION ===================== -->
+      <h2 id="cx-impl">Compilation vs interpretation vs hybrid</h2>
+      <table>
+        <tr><th>Method</th><th>What it does</th><th>Trade</th></tr>
+        <tr><td><strong>Compilation</strong></td><td>The compiler <strong>translates the source language into machine language</strong> that can be executed directly on the computer.</td><td><strong>Fast execution.</strong></td></tr>
+        <tr><td><strong>Interpretation</strong></td><td>A program (the interpreter) <strong>reads and executes</strong> the source directly, without producing machine code first.</td><td>Slower execution, easier debugging and portability.</td></tr>
+        <tr><td><strong>Hybrid</strong></td><td>Source is compiled to an <strong>intermediate form</strong> which is then interpreted (or JIT-compiled).</td><td>A middle ground — portability of interpretation with much of the speed of compilation.</td></tr>
+      </table>
+      <div class="callout exam">
+        <div class="callout-label">The four phases of compilation — memorise the list and the order</div>
+        <ol style="margin:6px 0 0 0;">
+          <li><strong>Lexical Analysis</strong> — characters → tokens</li>
+          <li><strong>Syntax Analysis (Parsing)</strong> — tokens → syntax tree</li>
+          <li><strong>Type and Semantics Analysis</strong> — static checks on the tree</li>
+          <li><strong>Machine Code Generation</strong> — emit machine code</li>
+        </ol>
+        <p style="margin:10px 0 0 0;"><strong>The three components are hiding in that pipeline:</strong> phases 1–2 implement the <em>syntax</em> (concrete in, abstract out), phase 3 the <em>static semantics</em>, phase 4 the <em>implementation</em>.</p>
+      </div>
+
+      <!-- ===================== SEMANTICS STYLES ===================== -->
+      <h2 id="cx-styles">The three styles of semantics</h2>
+      <table>
+        <tr><th>Style</th><th>Meaning is given…</th><th>Good for</th></tr>
+        <tr><td><strong>Denotational</strong></td><td>in an <strong>abstract, mathematical way</strong>, using a mathematical model of the language; describes the <em>effect</em> of each construct.</td><td>reasoning &amp; proving properties of programs</td></tr>
+        <tr><td><strong>Axiomatic</strong></td><td>using <strong>axioms and deduction rules</strong> in a specific logic — a <strong>precondition</strong> and a <strong>postcondition</strong> around each construct.</td><td>reasoning &amp; proving properties of programs</td></tr>
+        <tr><td><strong>Operational</strong> ★</td><td>in terms of <strong>computation steps</strong> — the behaviour of each construct.</td><td>implementing the language; this is the one the course develops</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">The examinable framing</div>
+        They are <strong>complementary</strong>, not rivals — "each has its advantages". If asked to compare, say what each is <em>for</em>: denotational and axiomatic for <strong>proving things about programs</strong>, operational for <strong>saying how they run</strong>.
+      </div>
+
+      <!-- ===================== OPERATIONAL FLAVOURS ===================== -->
+      <h2 id="cx-opsem">Abstract machine vs small-step vs big-step</h2>
+      <table>
+        <tr><th></th><th>Abstract machine (W3)</th><th>Small-step / SOS (W4)</th><th>Big-step ⇓ (W4)</th></tr>
+        <tr><td><strong>Shape</strong></td><td>⟨control, results, memory⟩ triple, rewritten by transitions</td><td>⟨P, s⟩ → ⟨P′, s′⟩ — one step of computation</td><td>a single judgement, proved by a derivation tree</td></tr>
+        <tr><td><strong>Granularity</strong></td><td>finest — many steps</td><td>medium</td><td>coarsest — one relation, all at once</td></tr>
+        <tr><td><strong>Disadvantage</strong></td><td><strong>Not very intuitive</strong>: many transitions do only <em>phrase analysis</em>; only a few really compute.</td><td>To show a sequence of reductions is valid you need a <strong>proof</strong> — each arrow may need a whole derivation tree.</td><td>Cannot distinguish <strong>blocked</strong> from <strong>divergent</strong> — both are just "no derivation".</td></tr>
+        <tr><td><strong>Advantage</strong></td><td>Explains execution <strong>step by step</strong> — useful if you have to implement the language.</td><td>Each transition does <strong>part of the computation</strong> that leads to the result.</td><td>Compact; good when you only care about the final value.</td></tr>
+      </table>
+      <div class="callout exam">
+        <div class="callout-label">Configurations: terminal vs blocked vs value</div>
+        A configuration is <strong>terminal</strong> when there is no <em>c′</em> with <em>c → c′</em>. The ones with no rule are:
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; margin:10px 0 0 12px; line-height:1.9;">
+          ⟨n, s⟩ &nbsp;— an integer<br>
+          ⟨b, s⟩ &nbsp;— a boolean<br>
+          ⟨skip, s⟩ &nbsp;— successful termination<br>
+          ⟨!l, s⟩ where l ∉ dom(s) &nbsp;— <strong style="color:var(--accent-2);">blocked</strong></div>
+        <p style="margin:12px 0 0 0;"><strong>Terminal ≠ successful.</strong> The first three are values or successful termination; the fourth is a <em>failure</em> that merely looks the same from outside. Blocked is different again from <strong>divergent</strong> (never terminating).</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Determinism, in one line</div>
+        A transition system is <strong>deterministic</strong> if every configuration has <strong>at most one</strong> successor — for each <em>c</em> there is at most one <em>c′</em> with <em>c → c′</em>. That is what makes "the" evaluation sequence well defined.
+      </div>
+
+      <!-- ===================== INDUCTION ===================== -->
+      <h2 id="cx-induction">The three inductions</h2>
+      <table>
+        <tr><th>Kind</th><th>You induct over…</th><th>Base case / step</th></tr>
+        <tr><td><strong>Mathematical induction</strong></td><td>the natural numbers</td><td>prove P(0); assume P(n), prove P(n+1)</td></tr>
+        <tr><td><strong>Structural induction</strong></td><td>the <strong>structure of a term or tree</strong> (e.g. an expression, a list, a user-defined type)</td><td>prove it for the atomic constructors; assume it for the sub-terms, prove it for the compound constructor</td></tr>
+        <tr><td><strong>Rule induction</strong></td><td>the <strong>derivations</strong> of an inductively defined relation — its axioms and rules</td><td>prove it for each axiom; assume it for the premises of each rule, prove it for the conclusion</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">How to pick the right one in an exam</div>
+        Look at what the statement quantifies over. <em>"For all n…"</em> → mathematical. <em>"For all expressions/commands/lists…"</em> → structural. <em>"Whenever ⟨P,s⟩ → ⟨P′,s′⟩ …"</em> or "for everything in this inductively defined set" → <strong>rule induction</strong>, because you are inducting over <em>how the judgement was derived</em>.
+      </div>
+
+      <!-- ===================== VARIABLES ===================== -->
+      <h2 id="cx-vars">Variables: the four properties</h2>
+      <table>
+        <tr><th>Property</th><th>What it is</th></tr>
+        <tr><td><strong>Name</strong></td><td>Usually a string of characters with constraints — maximal length, allowed characters.</td></tr>
+        <tr><td><strong>Type</strong></td><td>Indicates <strong>the range of values allowed</strong> and <strong>the operations available</strong>. Some languages are <em>untyped</em>; others <em>statically typed</em> (Java, Haskell, ML, Scala) or <em>dynamically typed</em> (Python, Ruby).</td></tr>
+        <tr><td><strong>Address — the l-value</strong></td><td>The memory address the variable is associated with. The association is <em>not simple</em>: the same name may be associated with different addresses in different parts of the program.</td></tr>
+        <tr><td><strong>Value — the r-value</strong></td><td>The contents of the memory location it is associated with.</td></tr>
+      </table>
+      <div class="callout exam">
+        <div class="callout-label">l-value vs r-value — the whole point of the names</div>
+        From the two sides of <code>x = y</code>:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>l-value = the address.</strong> What appears on the <em>left</em>: we need to know <strong>where to put</strong> something.</li>
+          <li><strong>r-value = the value.</strong> What appears on the <em>right</em>: we need to know <strong>what is stored</strong> there.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">So <code>x = y</code> means: take the <strong>r-value of y</strong> and store it at the <strong>l-value of x</strong>. In SIMP this is why you write <code>l := !l − 1</code> — the <code>!</code> is exactly "take the r-value".</p>
+      </div>
+
+      <h2 id="cx-lifetime">Lifetime: the four classes of variable</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        <strong>Lifetime</strong> = the time during which the variable is <strong>allocated a specific memory location</strong> — between allocation and deallocation.
+      </div>
+      <table>
+        <tr><th>Class</th><th>Allocated…</th><th>✓ Advantage</th><th>✗ Disadvantage</th></tr>
+        <tr><td><strong>Static</strong></td>
+            <td>Bound to a memory location <strong>before program execution begins</strong>, and until it ends.</td>
+            <td><strong>Efficiency</strong> — all addressing resolved at <strong>compile time</strong>; no allocation/deallocation at run time.</td>
+            <td>Storage <strong>cannot be reused</strong>, and <strong>recursive programs need dynamic variables</strong>.</td></tr>
+        <tr><td><strong>Stack dynamic</strong></td>
+            <td>Allocated <strong>when the declaration is processed at run time</strong>; deallocated when the block exits.</td>
+            <td>Supports <strong>recursion</strong> — each activation gets its own copy.</td>
+            <td>Run-time overhead for allocation/deallocation; the value does not survive the block.</td></tr>
+        <tr><td><strong>Explicit heap-dynamic</strong></td>
+            <td>Allocated and deallocated by <strong>explicit instructions written by the programmer</strong> (e.g. <code>new</code> / <code>delete</code>, <code>malloc</code> / <code>free</code>), at run time.</td>
+            <td>Full programmer control over lifetime; needed for dynamic data structures.</td>
+            <td>Error-prone — leaks and dangling pointers are the programmer's fault.</td></tr>
+        <tr><td><strong>Implicit heap-dynamic</strong></td>
+            <td>Allocated <strong>automatically, when a value is assigned to the variable</strong> — no declaration or explicit instruction.</td>
+            <td>Maximum flexibility; very high-level code.</td>
+            <td>Costly at run time, and <strong>loses compile-time error detection</strong> because the type isn't fixed in advance.</td></tr>
+      </table>
+      <div class="callout warn">
+        <div class="callout-label">Explicit vs implicit heap-dynamic — the one they love to ask</div>
+        Both live on the <strong>heap</strong> and both are created at <strong>run time</strong>. The difference is <strong>who does the allocating</strong>:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Explicit</strong> — the <em>programmer</em> writes an instruction that allocates and one that deallocates.</li>
+          <li><strong>Implicit</strong> — it just <em>happens</em>, on assignment. The variable is bound to storage (and often to a type) only when something is assigned to it.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;"><strong>Memory hook:</strong> explicit = <em>you</em> say when. Implicit = the <em>assignment</em> says when.</p>
+      </div>
+
+      <h2 id="cx-scope">Scope: static vs dynamic — and scope vs lifetime</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definitions</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>Scope</strong> = the range of instructions in which the variable is <strong>visible</strong> (can be used).</li>
+          <li><strong>Local</strong> variables are those declared in the block of program being executed.</li>
+          <li>Variables that are visible but <strong>not local</strong> are called <strong>global</strong>.</li>
+        </ul>
+      </div>
+      <div class="compare-2">
+        <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
+          <h4 style="color:var(--accent);">Static scope</h4>
+          <ul style="font-size:13.5px;">
+            <li>Can be determined <strong>before execution</strong> (at compile time).</li>
+            <li><strong>The rule:</strong> look for the declaration in the <em>same block</em>; if not there, in the <em>parent block</em>; and so on outwards.</li>
+            <li>If no declaration is found, the compiler reports an <strong>error</strong>.</li>
+            <li>Follows the <strong>program text</strong>.</li>
+          </ul>
+        </div>
+        <div class="mode-box" style="background:var(--tint-b); border-color:var(--accent-2);">
+          <h4 style="color:var(--accent-2);">Dynamic scope</h4>
+          <ul style="font-size:13.5px;">
+            <li>Determined <strong>at run time</strong>.</li>
+            <li>The declaration is looked for in the <strong>chain of calls</strong> — the most recent still-active declaration wins.</li>
+            <li>Follows the <strong>execution history</strong>, not the text.</li>
+            <li>The same name in the same place can refer to different variables on different runs.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Don't confuse scope with lifetime</div>
+        Two different questions about the same variable:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>Lifetime is about <em>time</em></strong> — when does this variable have memory allocated?</li>
+          <li><strong>Scope is about <em>place in the program text</em></strong> — where can this name be used?</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">A variable can be <strong>alive but invisible</strong> (a caller's local while a callee runs) — which is exactly the situation dynamic scoping exploits.</p>
+      </div>
+
+      <!-- ===================== CONTROL ===================== -->
+      <h2 id="cx-control">Control statements</h2>
+      <div class="callout exam">
+        <div class="callout-label">Loops — two independent classifications, and the exam likes both</div>
+        <table style="margin:8px 0 0 0;">
+          <tr><th>By <em>when the test happens</em></th><th>By <em>what controls it</em></th></tr>
+          <tr><td><strong>Pre-test</strong> — the test for loop completion is done <strong>before</strong> the body executes. (<code>while</code>, <code>for</code>)</td>
+              <td><strong>Counter-controlled</strong> — a counter variable with an initial value, an increment and a limit.</td></tr>
+          <tr><td><strong>Post-test</strong> — the test occurs <strong>after</strong> the body is executed. (<code>do…while</code>, <code>repeat…until</code>)</td>
+              <td><strong>Logically-controlled</strong> — repetition is governed by a boolean condition rather than a count.</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>The consequence to state:</strong> a post-test loop <strong>always runs its body at least once</strong>; a pre-test loop can run it zero times.</p>
+        <p style="margin:8px 0 0 0;">And the trap: <code>do…while</code> continues <em>while</em> the condition is true, <code>repeat…until</code> stops <em>when</em> it becomes true — <strong>same expression, opposite meaning</strong>.</p>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">The dangling else</div>
+        In <code>if C₁ then if C₂ then S₁ else S₂</code>, the <code>else</code> could attach to <strong>either</strong> <code>if</code>. This is an <strong>ambiguity in the concrete syntax</strong>. The usual resolution: <strong>the <code>else</code> binds to the nearest unmatched <code>if</code></strong>.
+      </div>
+
+      <!-- ===================== FUNCTIONAL ===================== -->
+      <h2 id="cx-funcprops">Functional: the two properties of evaluation</h2>
+      <table>
+        <tr><th>Property</th><th>Statement</th></tr>
+        <tr><td><strong>Unicity of normal forms</strong></td><td>In (pure) functional languages the <strong>value of an expression is uniquely determined by its components</strong>, and is <strong>independent of the order of reduction</strong>.</td></tr>
+        <tr><td><strong>Non-termination</strong></td><td><strong>Not all reduction sequences lead to a value</strong> — some do not terminate.</td></tr>
+      </table>
+      <div class="callout warn">
+        <div class="callout-label">How the two interact — the sentence that gets marks</div>
+        With <code>fortytwo x = 42</code> and <code>infinity = infinity + 1</code>:
+        <p style="margin:10px 0 0 0;">for <code>fortytwo infinity</code>, <strong>some reduction sequences do not terminate, but those which terminate give the value 42</strong>.</p>
+        <p style="margin:10px 0 0 0;">So unicity says: <em>if</em> you reach a normal form, it is <strong>the</strong> normal form. It does <strong>not</strong> promise you will reach one.</p>
+      </div>
+
+      <h2 id="cx-strategies">Call-by-name vs call-by-value vs lazy</h2>
+      <table>
+        <tr><th>Strategy</th><th>Definition</th><th>Consequence</th></tr>
+        <tr><td><strong>Call-by-name</strong><br><span style="font-size:12px; color:var(--ink-muted);">normal order</span></td>
+            <td><strong>Reduce first the application</strong> using the definition of the function, <strong>and then the argument.</strong></td>
+            <td>Finds a value whenever one exists. May evaluate the same argument <strong>more than once</strong>.</td></tr>
+        <tr><td><strong>Call-by-value</strong><br><span style="font-size:12px; color:var(--ink-muted);">applicative order</span></td>
+            <td><strong>Evaluate first the argument</strong> and then the application using the definition of the function.</td>
+            <td>Each argument evaluated once, but may <strong>diverge where call-by-name succeeds</strong> — e.g. <code>fortytwo infinity</code>.</td></tr>
+        <tr><td><strong>Lazy</strong></td>
+            <td>Call-by-name <strong>plus sharing</strong>: the argument is not evaluated until needed, and once evaluated the result is <strong>shared</strong>.</td>
+            <td>Same termination behaviour as call-by-name, without the duplicated work. This is what Haskell does.</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">The one-line comparison</div>
+        <strong>CBV can fail where CBN succeeds; lazy = CBN with the repeated work removed.</strong> If asked why lazy exists, the answer is <em>sharing</em>, not termination — it terminates exactly as often as call-by-name does.
+      </div>
+
+      <h2 id="cx-curry">Currying, partial application, composition</h2>
+      <div class="callout exam">
+        <div class="callout-label">The central fact</div>
+        <strong>Functions in Haskell take no more than one argument.</strong> Applying a function to <em>n</em> &gt; 1 arguments yields <strong>another function with n − 1 arguments</strong>. This is what allows <strong>partial application</strong>.
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; margin:12px 0 0 12px; line-height:1.9;">
+          plus :: Int → Int → Int<br>
+          plus 3 :: Int → Int &nbsp;&nbsp;<span style="color:var(--ink-muted);">— partially applied</span><br>
+          (plus 3) 2 = 5</div>
+        <p style="margin:12px 0 0 0;"><strong>Two conventions doing the work:</strong> <code>→</code> is <strong>right</strong>-associative (<code>Int→(Int→Int)</code>) while application is <strong>left</strong>-associative (<code>(plus 3) 2</code>).</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Tuples vs currying — the distinction they ask for</div>
+        Multiple arguments <em>can</em> be passed as one <strong>tuple</strong>, <strong>but this does not allow partial application</strong>: a tuple argument is <strong>one</strong> argument, so there is no intermediate stage to stop at.
+      </div>
+
+      <!-- ===================== TYPES ===================== -->
+      <h2 id="cx-typing">Static vs dynamic typing</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definitions</div>
+        <strong>Types</strong> help ensure a program behaves in a precise, pre-determined way. Values are divided into classes called <strong>types</strong>, and <strong>each type is associated with a set of operations</strong>. Types may be given <strong>explicitly by the programmer</strong> or <strong>inferred automatically by the type system</strong>.
+        <p style="margin:10px 0 0 0;">Checking that types are used correctly is called <strong>typing</strong>, and may be checked:</p>
+        <table style="margin:10px 0 0 0;">
+          <tr><th>Static typing</th><th>Dynamic typing</th></tr>
+          <tr><td><strong>Before execution</strong></td><td><strong>During execution</strong></td></tr>
+          <tr><td>C, C++, Java, Haskell</td><td>Python, JavaScript, PHP</td></tr>
+        </table>
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Static typing — the claims to quote</div>
+        <strong>Every valid expression must have a type. Expressions that cannot be "typed" are considered erroneous and are rejected by the compiler without evaluation.</strong>
+        <p style="margin:10px 0 0 0;"><strong>Advantages:</strong></p>
+        <ul style="margin:6px 0 0 0;">
+          <li>Types help <strong>detecting errors at an early stage</strong>.</li>
+          <li>Types help in the <strong>design of software</strong>, since they are <strong>a simple form of specification</strong>.</li>
+        </ul>
+        <p style="margin:12px 0 0 0; padding:10px 12px; background:rgba(var(--highlight-rgb),0.25); border-radius:6px;"><strong>A program that passes the type controls is not guaranteed to be correct, but it is free of type errors at runtime.</strong> — learn this sentence verbatim; it is the honest statement of what types do and don't buy you.</p>
+      </div>
+
+      <h2 id="cx-poly">Monomorphic vs polymorphic, and the two polymorphisms</h2>
+      <div class="callout exam">
+        <div class="callout-label">Definition</div>
+        Type systems can be:
+        <ul style="margin:8px 0 0 0;">
+          <li><strong>monomorphic</strong> — every expression has <strong>at most one type</strong>;</li>
+          <li><strong>polymorphic</strong> — <strong>some expressions have more than one type</strong>.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">The standard example is functional composition, where a, b, c are <strong>type variables</strong>:</p>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; margin:8px 0 0 12px;">(.) :: (b → c) → (a → b) → (a → c)</div>
+      </div>
+      <table>
+        <tr><th></th><th>Parametric polymorphism</th><th>Overloading (ad-hoc polymorphism)</th></tr>
+        <tr><td><strong>What</strong></td><td><strong>One</strong> definition that works uniformly for <strong>any</strong> type, written with type variables.</td><td><strong>Several functions, with different types, share the same name.</strong></td></tr>
+        <tr><td><strong>Example</strong></td><td><code>length :: [a] → Int</code></td><td><code>+</code> for both integers and reals</td></tr>
+        <tr><td><strong>Why needed</strong></td><td>Write it once, use it at every type.</td><td>A polymorphic <code>(+) :: a → a → a</code> is <strong>too general</strong> — it would allow <code>'a' + 'b'</code>, which makes no sense.</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">Where type classes come in</div>
+        Type classes are Haskell's mechanism for overloading: they <strong>constrain</strong> a type variable to those types that support the operation, e.g. <code>(+) :: Num a ⇒ a → a → a</code>. That reads "for any type <em>a</em> <strong>that is a Num</strong>" — general enough to reuse, restricted enough to reject characters.
+      </div>
+      <div class="callout exam">
+        <div class="callout-label">Type inference, in one sentence</div>
+        The type system works out the <strong>most general type</strong> of an expression <strong>without the programmer writing it down</strong>. "Most general" is the key word: it commits to nothing it doesn't have to, leaving type variables wherever the code doesn't force a particular type.
+      </div>
+
+      <h2 id="cx-sfun">SFUN: fn<sub>val</sub> vs fn<sub>name</sub></h2>
+      <table>
+        <tr><th></th><th>fn<sub>val</sub> (call-by-value)</th><th>fn<sub>name</sub> (call-by-name)</th></tr>
+        <tr><td><strong>The rule</strong></td><td>The argument must be <strong>evaluated to a value first</strong>, then substituted.</td><td>The argument is <strong>substituted unevaluated</strong>, then the body is evaluated.</td></tr>
+        <tr><td><strong>Failure mode</strong></td><td>If the argument has <strong>no value</strong>, there is <strong>no derivation at all</strong> — even if the body never uses it.</td><td>Succeeds where CBV fails, because an unused argument is simply discarded.</td></tr>
+        <tr><td><strong>Cost</strong></td><td>Each argument evaluated <strong>once</strong>.</td><td>An argument used twice is <strong>evaluated twice</strong> — visible as <em>repeated sub-derivations</em> in the proof tree.</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">The canonical example</div>
+        <code>fortytwo(infinity)</code> — <strong>no derivation under fn<sub>val</sub></strong>, value <strong>42</strong> under fn<sub>name</sub>. And <code>max(3, square(2))</code> gives 12 under both, but call-by-name's derivation is <em>larger</em> because it evaluates <code>square(2)</code> twice. That duplication is exactly what sharing removes in a lazy implementation.
+      </div>
+
+      <!-- ===================== LOGIC PROGRAMMING ===================== -->
+      <h2 id="cx-terms">Logic programming: the vocabulary ladder</h2>
+      <table>
+        <tr><th>Term</th><th>Definition</th></tr>
+        <tr><td><strong>Term</strong></td><td>A constant, a variable, or a function symbol applied to terms.</td></tr>
+        <tr><td><strong>Atomic formula (atom)</strong></td><td>A predicate symbol applied to terms — e.g. <code>p(s₁,…,sₙ)</code>.</td></tr>
+        <tr><td><strong>Literal</strong></td><td>An atomic formula (<em>positive</em>) or its negation (<em>negative</em>).</td></tr>
+        <tr><td><strong>Horn clause</strong></td><td>A <strong>disjunction of literals of which at most one may be positive</strong>.</td></tr>
+        <tr><td><strong>Definite clause</strong></td><td>A Horn clause with <strong>exactly one positive literal</strong>. <em>(The notes warn this terminology is not uniform — some books call all Horn clauses definite.)</em></td></tr>
+        <tr><td><strong>Fact</strong></td><td>A definite clause comprising <strong>a single positive literal</strong> A.</td></tr>
+        <tr><td><strong>Rule</strong></td><td>A definite clause <strong>with some negative literals</strong>: A ∨ ¬B₁ ∨ … ∨ ¬Bₙ &nbsp;— written <code>A :- B₁, …, Bₙ.</code></td></tr>
+        <tr><td><strong>Goal</strong></td><td>A clause with <strong>only negative literals</strong> — written <code>:- G₁, …, Gₙ.</code></td></tr>
+        <tr><td><strong>Program</strong></td><td>A set of definite clauses (facts and rules).</td></tr>
+      </table>
+      <div class="callout warn">
+        <div class="callout-label">The three cases of a Horn clause — say them in this order</div>
+        <ol style="margin:6px 0 0 0;">
+          <li>a single positive literal <strong>and</strong> some negative literals → a <strong>rule</strong>;</li>
+          <li>a single positive literal <strong>and no</strong> negative literals → a <strong>fact</strong>;</li>
+          <li><strong>only</strong> negative literals → a <strong>goal</strong>.</li>
+        </ol>
+        <p style="margin:10px 0 0 0;">Cases 1 and 2 are the <strong>definite</strong> clauses. That is why a program is made of facts and rules, and a query is the odd one out.</p>
+      </div>
+
+      <h2 id="cx-unif">Substitution, unifier, mgu</h2>
+      <table>
+        <tr><th>Term</th><th>Definition</th></tr>
+        <tr><td><strong>Substitution</strong></td><td>A <strong>partial mapping from variables to terms, with a finite domain</strong>. Written σ = {X₁ ↦ t₁, …, Xₙ ↦ tₙ}.</td></tr>
+        <tr><td><strong>Unification problem</strong></td><td>A <strong>set of equations between terms</strong> containing variables: {s₁ = t₁, …, sₙ = tₙ}.</td></tr>
+        <tr><td><strong>Unifier (a solution)</strong></td><td>A substitution σ such that applying it to every term makes each pair <strong>syntactically identical</strong>.</td></tr>
+        <tr><td><strong>mgu</strong></td><td>The <strong>most general unifier</strong> — every other unifier is an instance of it. It commits to as little as possible.</td></tr>
+      </table>
+      <div class="callout exam">
+        <div class="callout-label">Two details worth a mark each</div>
+        <ul style="margin:6px 0 0 0;">
+          <li><strong>We always replace variables with terms, never the other way round</strong> — because only variables can be replaced, and not all terms are variables.</li>
+          <li><strong>Application is simultaneous.</strong> A substitution is applied to all variables in one pass, not one after another.</li>
+        </ul>
+        <p style="margin:10px 0 0 0;">And the <strong>occur check</strong>: <code>X = f(X)</code> has <strong>no solution</strong> — a variable cannot be unified with a term properly containing it.</p>
+      </div>
+
+      <h2 id="cx-resolution">Resolution and SLD</h2>
+      <div class="callout exam">
+        <div class="callout-label">The Principle of Resolution</div>
+        To prove a goal <code>:- G₁, …, Gₙ</code> against a set P of program clauses, resolution seeks to show that
+        <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">P ∪ {¬G₁ ∨ … ∨ ¬Gₙ} &nbsp;leads to a <strong>contradiction</strong>.</div>
+        A contradiction arises when a literal <strong>and its negation</strong> are stated at the same time (A ∧ ¬A is unsatisfiable). If no contradiction arises directly, a <strong>new goal is derived by unifying the current goal with a program clause</strong>. The derived goals are called <strong>resolvents</strong>.
+        <p style="margin:10px 0 0 0;"><strong>Note the logic: this is proof by contradiction.</strong> You don't prove the goal directly — you negate it and derive a contradiction.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">Backtracking, and why clause order matters</div>
+        Prolog searches the SLD-tree <strong>depth-first, left-to-right</strong>, and <strong>backtracks</strong> when a branch fails. Because the search is depth-first, <strong>the order of the clauses in the program can decide whether the query terminates at all</strong> — a solution further right in the tree is never reached if an infinite branch sits to its left. <em>Independence of the selection rule</em> is about which <em>atom</em> is chosen, not about clause order.
+      </div>
+      <div class="callout warn">
+        <div class="callout-label">Variable renaming — why <code>X</code> becomes <code>X_14</code></div>
+        Program clauses are <strong>renamed apart</strong> (given fresh variables) at every use, so that a variable in the clause is never accidentally identified with a variable of the same name in the goal. Without it, unification can fail — or worse, succeed wrongly — through pure name collision.
+      </div>
+
+      <h2 id="cx-limits">Prolog's two limitations</h2>
+      <table>
+        <tr><th>Limitation</th><th>Why</th><th>What Prolog does instead</th></tr>
+        <tr><td><strong>Negation</strong></td>
+            <td>Programs are made of <strong>definite clauses</strong>, which contain <strong>exactly one positive literal</strong>. So you cannot state negative facts (<code>¬p(b)</code>) nor put a negative literal in a clause <em>head</em>.</td>
+            <td><strong>Negation as failure</strong> — failure to prove A is taken as proof that ¬A follows. Written <code>\+</code>. A negative literal is then allowed in the <em>body</em> of a clause (and in a goal).</td></tr>
+        <tr><td><strong>Disjunction</strong></td>
+            <td>A definite clause has one positive literal, so you cannot write a disjunctive head <code>A ∨ B</code>.</td>
+            <td>Express the alternatives as <strong>separate clauses</strong> with the same head.</td></tr>
+      </table>
+      <div class="callout warn">
+        <div class="callout-label">Negation as failure is <em>not</em> logical negation</div>
+        It is a <strong>weaker</strong> notion. It assumes everything not derivable is false (a closed-world assumption). <code>:- \+ p(a).</code> <strong>fails</strong> precisely because <code>:- p(a).</code> succeeds — so what you are really testing is <em>"can I prove it?"</em>, not <em>"is it false?"</em>.
+      </div>
+
+      <!-- ===================== DRILL ===================== -->
+      <h2 id="cx-drill">Which is it? — rapid classification</h2>
+      <div class="callout exam">
+        <div class="callout-label">Cover the right-hand column</div>
+        <table style="margin:8px 0 0 0;">
+          <tr><th>Prompt</th><th>Answer</th></tr>
+          <tr><td>A variable allocated by <code>new</code> and freed by <code>delete</code></td><td>explicit heap-dynamic</td></tr>
+          <tr><td>A variable that gets storage the moment you assign to it</td><td>implicit heap-dynamic</td></tr>
+          <tr><td>A local of a procedure, created on entry</td><td>stack dynamic</td></tr>
+          <tr><td>Addressing resolved entirely at compile time</td><td>static</td></tr>
+          <tr><td>Which class does recursion rule out?</td><td>static — each activation needs its own copy</td></tr>
+          <tr><td>Scope decided by the chain of calls</td><td>dynamic scope</td></tr>
+          <tr><td>Scope decided by nesting in the program text</td><td>static scope</td></tr>
+          <tr><td>Python and JavaScript</td><td>dynamically typed</td></tr>
+          <tr><td>Java, Haskell, C</td><td>statically typed</td></tr>
+          <tr><td><code>do…while</code></td><td>post-test, logically controlled</td></tr>
+          <tr><td><code>for i = 1 to 10</code></td><td>pre-test, counter-controlled</td></tr>
+          <tr><td>Semantics good for <em>proving</em> program properties</td><td>denotational and axiomatic</td></tr>
+          <tr><td>Semantics given as computation steps</td><td>operational</td></tr>
+          <tr><td>Precondition / postcondition</td><td>axiomatic</td></tr>
+          <tr><td>⟨!l, s⟩ with l ∉ dom(s)</td><td>terminal <em>and</em> blocked — a failure, not a value</td></tr>
+          <tr><td>⟨skip, s⟩</td><td>terminal and successful</td></tr>
+          <tr><td>Cannot tell blocked from divergent</td><td>big-step semantics</td></tr>
+          <tr><td>Many transitions do only phrase analysis</td><td>the abstract machine</td></tr>
+          <tr><td>Evaluate the argument first</td><td>call-by-value</td></tr>
+          <tr><td>Call-by-name plus sharing</td><td>lazy</td></tr>
+          <tr><td>Several functions with different types sharing one name</td><td>overloading / ad-hoc polymorphism</td></tr>
+          <tr><td>One definition working at every type</td><td>parametric polymorphism</td></tr>
+          <tr><td>A clause with only negative literals</td><td>a goal</td></tr>
+          <tr><td>A definite clause with a single positive literal and nothing else</td><td>a fact</td></tr>
+          <tr><td>At most one positive literal</td><td>Horn clause</td></tr>
+          <tr><td>Exactly one positive literal</td><td>definite clause</td></tr>
+          <tr><td>What <code>\+</code> means</td><td>negation as failure</td></tr>
+          <tr><td>X = f(X)</td><td>fails the occur check — no solution</td></tr>
+        </table>
+      </div>
+
+      <!-- ===================== ONE-LINERS ===================== -->
+      <h2 id="cx-oneliners">Thirty one-line answers</h2>
+      <div class="callout">
+        <div class="callout-label">If you only have ten minutes left</div>
+        <ol style="margin:6px 0 0 0; line-height:1.75;">
+          <li><strong>SLD</strong> = Selective, Linear, Definite.</li>
+          <li><strong>Selective</strong> — a fixed computation rule picks which atom is resolved next.</li>
+          <li><strong>Linear</strong> — the most recently derived resolvent becomes the next goal.</li>
+          <li><strong>Definite</strong> — every program clause is a definite clause.</li>
+          <li><strong>Refutation-complete</strong> — if a contradiction can be derived, SLD will eventually derive it.</li>
+          <li><strong>Independence of the selection rule</strong> — if a solution exists, SLD finds it whichever atom-selection rule is used.</li>
+          <li><strong>Three components of a language</strong> — syntax, semantics, implementation.</li>
+          <li><strong>Four phases of compilation</strong> — lexical, syntax, type &amp; semantics, code generation.</li>
+          <li><strong>Ambiguous grammar</strong> — one string, more than one parse tree.</li>
+          <li><strong>Abstract syntax defines trees</strong>, so ambiguity disappears.</li>
+          <li><strong>Three styles of semantics</strong> — denotational, axiomatic, operational.</li>
+          <li><strong>Deterministic</strong> — each configuration has at most one successor.</li>
+          <li><strong>Terminal</strong> — no c′ with c → c′. <strong>Blocked</strong> — terminal but a failure.</li>
+          <li><strong>Four properties of a variable</strong> — name, type, address (l-value), value (r-value).</li>
+          <li><strong>l-value</strong> = address, <strong>r-value</strong> = contents.</li>
+          <li><strong>Lifetime</strong> = time between allocation and deallocation.</li>
+          <li><strong>Four lifetime classes</strong> — static, stack dynamic, explicit heap-dynamic, implicit heap-dynamic.</li>
+          <li><strong>Explicit heap-dynamic</strong> — the programmer allocates and deallocates.</li>
+          <li><strong>Implicit heap-dynamic</strong> — allocated automatically on assignment.</li>
+          <li><strong>Scope</strong> = where a name is visible; <strong>lifetime</strong> = when it has memory.</li>
+          <li><strong>Static scope</strong> — resolved at compile time by looking outwards through enclosing blocks.</li>
+          <li><strong>Dynamic scope</strong> — resolved at run time through the chain of calls.</li>
+          <li><strong>Post-test loops run the body at least once.</strong></li>
+          <li><strong>Static typing</strong> = checked before execution; <strong>dynamic typing</strong> = during execution.</li>
+          <li><strong>Passing the type checks doesn't guarantee correctness</strong> — only freedom from type errors at runtime.</li>
+          <li><strong>Monomorphic</strong> — at most one type per expression; <strong>polymorphic</strong> — some have more than one.</li>
+          <li><strong>Overloading</strong> = ad-hoc polymorphism = one name, several differently-typed functions.</li>
+          <li><strong>Currying</strong> — functions take at most one argument; applying to n gives a function of n−1.</li>
+          <li><strong>Unicity of normal forms</strong> — the value is independent of reduction order, <em>if</em> you reach one.</li>
+          <li><strong>Lazy</strong> = call-by-name + sharing.</li>
+        </ol>
+      </div>
+
+      <div class="callout tip" style="margin-top:26px;">
+        <div class="callout-label">Last thing</div>
+        Where this page and a lecture slide disagree on wording, <strong>use the slide's wording</strong> — examiners mark against their own phrasing. This page is built from the material in these notes, but it is a revision aid, not the syllabus.
+      </div>
+      <p style="margin-top:44px; padding-top:22px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Good luck tomorrow.</p>
+    </section>
