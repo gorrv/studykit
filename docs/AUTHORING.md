@@ -1,28 +1,73 @@
 # Adding a module
 
-A module is one HTML file in `modules/`. It carries its own CSS, its own engine and its own
-content, so there is nothing to wire up beyond adding a card to the landing page and a test
-suite.
+A module is a directory under `src/modules/`. `build.js` assembles it into one self-contained file
+in `dist/modules/`. Nothing is fetched at runtime, so a built module works offline.
 
-The fastest route is to copy `modules/intro-to-ai.html` — it has the most complete engine —
-and replace the content.
+```
+src/modules/<id>/
+  index.html     the template — the only file that lists includes
+  module.json    id, which engine files it uses, which scripts
+  nav.html       sidebar: brand, theme toggle, search box, section links
+  sections/      one .html per section
+  js/            one .js per tool
+  js/questions/  one .js per topic's question generators
+  styles.css     module-specific rules and design tokens
+```
+
+The fastest route is to copy `src/modules/operating-systems` — it is the smallest complete example,
+with tools, generators and a mock exam — and replace the content.
 
 ---
 
-## 1. Sections
+## 1. The template
 
-Content lives in `<section class="week-section">`. Exactly one carries `active`; the sidebar
-calls `showWeek(id)` to switch between them.
+`index.html` is ordinary HTML with `<!--@include path-->` directives. `@/` resolves from `src/`;
+anything else resolves from the module directory. Order is source order: the engine first, then your
+tools, then your question generators, then `boot.js` last.
 
 ```html
-<section id="w1-search" class="week-section">
+<style>
+<!--@include @/styles/theme.css-->
+<!--@include @/styles/chrome.css-->
+<!--@include styles.css--></style>
+...
+<script>
+  <!--@include @/engine/helpers.js-->
+  <!--@include @/engine/theme.js-->
+  <!--@include @/engine/nav.js-->
+  <!--@include @/engine/ix.js-->
+  <!--@include @/engine/tools.js-->
+  <!--@include @/engine/quiz.js-->
+  <!--@include @/engine/search.js-->
+  <!--@include js/w2-scheduling.js-->
+  <!--@include js/questions/scheduling.js-->
+  <!--@include @/engine/boot.js-->
+</script>
+```
+
+Everything is concatenated into one classic script, so a top-level `function foo()` is a global and
+the engine can find it by name. `const` and `let` at top level are not — if the tests need to read
+your state, assign it to `window` explicitly (see §6).
+
+Keep the `<head>` boot script that reads `studykit-theme` from localStorage. It runs before first
+paint, and without it a dark-theme reader gets a white flash on every page load.
+
+---
+
+## 2. Sections
+
+Content lives in `<section class="week-section">`. Exactly one carries `active`; the sidebar calls
+`showWeek(id)` to switch.
+
+```html
+<section id="w4-paging" class="week-section">
   <div class="week-header">
-    <div class="week-eyebrow">Week 01 · Part 2</div>
-    <h1>Search</h1>
-    <div class="week-subtitle">breadth, depth and cost</div>
+    <div class="week-eyebrow">Week 04</div>
+    <h1>Demand Paging</h1>
+    <div class="week-subtitle">faults as a feature</div>
   </div>
 
-  <h2 id="s-problem">What a search problem is</h2>
+  <h2 id="w4-replacement">Page replacement</h2>
   <div class="callout exam">
     <div class="callout-label">The definition</div>
     …
@@ -30,26 +75,33 @@ calls `showWeek(id)` to switch between them.
 </section>
 ```
 
-Callout variants: plain, `exam` (things to memorise), `tip` (helpful asides),
-`warn` (traps and corrections).
+Callout variants: plain, `exam` (things to memorise), `tip` (helpful asides), `warn` (traps and
+corrections). Give every `<h2>` an `id` so it can be linked and found by search, and add a matching
+entry to `nav.html`.
 
-Add a matching entry to the sidebar `<nav>`, and give every `<h2>` an `id` so it can be
-linked and found by search.
+If a section needs to do something when it opens — build a paper, seed a tool — push a handler
+rather than editing the engine:
+
+```js
+NAV.onShow.push(function (id) {
+  if (id === 'mock') renderMock();
+});
+```
 
 ---
 
-## 2. Tools
+## 3. Tools
 
-A tool is a `<div class="tool" data-run="fnName">` containing inputs and an output pane.
-The engine calls `fnName()` on load, and again ~300 ms after any input changes.
+A tool is `<div class="tool" data-run="fnName">` containing inputs and an output pane. The engine
+calls `fnName()` on load, again ~300 ms after any input changes, and again on reset.
 
 ```html
 <div class="tool" data-run="runGini">
   <div class="tool-header">
-    <span class="tool-badge">Interactive</span>
+    <span class="tool-badge">Practice tool</span>
     <h3>Every term, and where you sit on the curve</h3>
   </div>
-  <p class="tool-desc">Type a count vector and watch the total move.</p>
+  <div class="tool-desc">Type a count vector and watch the total move.</div>
 
   <div class="tool-field">
     <label for="gi-v">Class counts</label>
@@ -64,21 +116,26 @@ The engine calls `fnName()` on load, and again ~300 ms after any input changes.
 
 ```js
 function runGini() {
-  const out = document.getElementById('gi-output');
+  var out = document.getElementById('gi-output');
   if (!out) return;
-  const v = parse(document.getElementById('gi-v').value);
-  if (!v.ok) { out.innerHTML = `<div class="tool-error">${v.message}</div>`; return; }
+  var v = parse(document.getElementById('gi-v').value);
+  if (!v.ok) { out.innerHTML = '<div class="tool-error">' + v.message + '</div>'; return; }
   out.innerHTML = render(v.value);
 }
-TOOL_RUNNERS.runGini = runGini;      // required — the tests check this
 ```
 
 Rules the tests enforce:
 
-- register the runner in `TOOL_RUNNERS`
+- a `.tool-output` pane, which must render something without erroring
 - report bad input as `<div class="tool-error">`, never by throwing
 - never leak `undefined` or `NaN` into a value position
-- expose your state object on `window` if the tests need to inspect it
+- `data-run` must resolve — as a top-level function, or via `TOOL_RUNNERS.fnName = fn` if your
+  function is inside a closure
+
+**Separate the algorithm from the rendering.** Every tool worth testing has a pure function at its
+centre that takes inputs and returns a result. Write that first, expose it on `window`, and let the
+render function only turn it into HTML. That is what makes it possible to assert `prRun(refs, 3,
+'fifo').faults === 15` instead of scraping the DOM for a number.
 
 ### The interaction layer
 
@@ -89,83 +146,60 @@ Rules the tests enforce:
 | `IX.drag(svg, {W, H, onMove, onDrop, onRemove, onBlank})` | dragging inside an SVG, letterbox-aware |
 | `IX.player(id, frame, total, label, phase)` | the ⏮ ◀ ▶ ⏭ transport bar |
 | `IX.play(id, total, get, set, ms)` | animate through frames |
+| `ixTrace(id, outputId, {label})` | free transport bar for any output with `data-step="k"` rows |
 | `IX.toggles([{label, on, fn}])` | checkbox row |
 | `IX.layout(names, adj, W, H)` | deterministic force-directed graph layout |
 
-`IX.drag` resolves the live SVG by `id` at event time rather than closing over the node, so
-a tool that re-renders on every mouse-move keeps working. Give every draggable SVG a stable
-`id` and put `data-ix="key"` on the draggable elements.
-
-For step-through tools, define `<id>Step(d, fromSlider)` and let `IX.player` drive it:
-
-```js
-function giStep(d, fromSlider) {
-  const total = GI.frames.length;
-  if (d === 'play') { IX.play('gi', total, () => GI.frame, f => { GI.frame = f; giRender(); }); giRender(); return; }
-  IX.stop('gi');
-  if (d === 'first') GI.frame = 0;
-  else if (d === 'last') GI.frame = total - 1;
-  else if (typeof d === 'number' && fromSlider) GI.frame = d;
-  else GI.frame = Math.max(0, Math.min(total - 1, GI.frame + d));
-  giRender();
-}
-```
+`IX.drag` resolves the live SVG by `id` at event time rather than closing over the node, so a tool
+that re-renders on every mouse-move keeps working. Give every draggable SVG a stable `id` and put
+`data-ix="key"` on the draggable elements.
 
 ---
 
-## 3. Questions
+## 4. Questions
 
-Push generators onto `QZ_GEN`. Each has a `topic` and a `make()` returning one question.
-`make()` may `throw` to reject an unsuitable random draw — the engine retries.
+Push generators onto `QZ_GEN`. Each has a `topic` and a `make()` returning one question. `make()`
+may `throw` to reject an unsuitable random draw — the engine retries.
 
 ```js
-// Multiple choice, fixed wording
-QZ_GEN.push({ topic: 'search', make: () => ({
-  topic: 'search · properties',
-  kind: 'choice',
-  prompt: 'Which search is optimal only when all step costs are equal?',
-  choices: ['Breadth-first', 'Depth-first', 'Uniform-cost', 'A*'],
-  answer: 'Breadth-first',
-  check: textCheck('Breadth-first'),
-  explain: 'BFS expands the shallowest node, so it finds the shortest path in <em>edges</em>…',
-}) });
-
-// Computed, with randomised numbers
-QZ_GEN.push({ topic: 'clustering', make: () => {
-  const a = [qzInt(0, 9), qzInt(0, 9)], b = [qzInt(0, 9), qzInt(0, 9)];
-  const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
-  if (d === 0) throw new Error('retry');           // reject a degenerate draw
+QZ_GEN.push({ topic: 'replacement', make: function () {
+  var refs = [], frames = qzInt(2, 4);
+  for (var i = 0; i < 12; i++) refs.push(qzInt(0, 5));
+  var faults = prRun(refs, frames, 'lru').faults;      // the tool's own function
+  if (faults === refs.length) throw new Error('retry'); // every reference faulting is a dull question
   return {
-    topic: 'clustering · metrics',
-    prompt: `p₁ = (${a}), p₂ = (${b}).<br><br>What is the Euclidean distance?`,
+    topic: 'replacement · counting faults',
+    prompt: 'Reference string <code>' + refs.join(' ') + '</code> with ' + frames + ' frames under LRU…',
     placeholder: 'a number',
-    answer: d.toFixed(4),
-    check: v => {
-      const x = parseFloat(String(v).replace(/[^0-9.\-]/g, ''));
-      if (isNaN(x)) return { ok: false, msg: 'Give a number.' };
-      return { ok: Math.abs(x - d) < 0.011 };
+    answer: String(faults),
+    check: function (v) {
+      var x = parseInt(String(v).replace(/[^0-9\-]/g, ''), 10);
+      if (isNaN(x)) return { ok: false, msg: 'Give a whole number.' };
+      return { ok: x === faults };
     },
-    explain: `√((${a[0]}−${b[0]})² + (${a[1]}−${b[1]})²) = <strong>${d.toFixed(4)}</strong>`,
+    explain: '…show the working here…',
   };
 } });
 ```
 
+Multiple choice sets `kind: 'choice'` with `choices` and usually `check: textCheck(answer)`.
+
+Two things the fuzzer will catch, and both are easy to do by accident:
+
+- **Exactly one choice may be correct.** "Which of these can suffer Belady's anomaly" has two right
+  answers among FIFO, LRU, OPT and Clock, so it is a broken question however it is marked. Ask it in
+  the direction that has one.
+- **The marker must accept the answer the question states.** If `answer` is `'6/7'`, `check('6/7')`
+  has to pass.
+
 Write the `explain` as if the reader got it wrong — show the working, not just the answer.
-
-To include the topic in the mock exam, add it to `EX_WEEKS`:
-
-```js
-{ w: 1, label: 'W1 · Search', topics: ['search', 'astar'] },
-```
 
 ---
 
-## 4. Figures
+## 5. Figures
 
-Compute them; don't screenshot them. The repo's figures are generated by scripts that run
-the real algorithm and emit SVG path data, then inlined.
-
-Use CSS variables for every colour so figures work in both themes:
+Compute them; don't screenshot them. The repo's figures are generated by running the real algorithm
+and emitting SVG path data.
 
 ```html
 <svg width="100%" viewBox="0 0 680 300" role="img">
@@ -176,11 +210,15 @@ Use CSS variables for every colour so figures work in both themes:
 ```
 
 `role="img"` with `<title>` and `<desc>` is required — screen readers get nothing otherwise.
-Never hardcode a hex colour: it will be invisible in one of the two themes.
+
+**Never hardcode a colour.** Use the tokens in `src/styles/theme.css`, which are defined for both
+palettes. If you need a colour the shared set doesn't have, add it to your module's `styles.css` in
+*both* a `:root` block and an `html[data-theme="dark"]` block — `build.test.js` fails if a token you
+use has no dark value, because that is invisible in dark mode and nothing else will tell you.
 
 ---
 
-## 5. Tests
+## 6. Tests
 
 Add `tests/<module>.test.js`:
 
@@ -189,7 +227,7 @@ const { loadModule, Suite, checkStructure, checkQuestionBank } = require('./lib/
 
 module.exports = async function run() {
   const s = new Suite('my-module');
-  const m = await loadModule('my-module.html');
+  const m = await loadModule('my-module.html');   // loads from dist/
 
   await checkStructure(s, m);         // structural invariants, free
   checkQuestionBank(s, m, 2000);      // fuzz the generators
@@ -201,10 +239,24 @@ module.exports = async function run() {
 };
 ```
 
-`checkStructure` and `checkQuestionBank` apply to any module. The value is in what you add
-after them: assert the results your notes claim, ideally against a value derived a different
-way — a closed form, exact rational arithmetic, or a second implementation. That is what
-turns the suite from a smoke test into something that catches errors in the source material.
+Expose whatever the suite needs on `window` — by convention in a `js/expose.js` included just before
+`boot.js`, so it is obvious what the test surface is.
 
-Finally, add a card to `index.html`. `tests/landing.test.js` fails if a module file exists
-but nothing links to it.
+`checkStructure` and `checkQuestionBank` apply to any module. The value is in what you add after
+them. Assert against a value derived a *different* way — a closed form, exact rational arithmetic, a
+published worked example, or exhaustive search over small inputs. Three kinds of assertion have
+earned their place here:
+
+- **Published worked examples.** If a textbook prints the answer, assert that number. It is what a
+  student will be marked against.
+- **Invariants over random inputs.** "No policy ever beats OPT." "Waiting time equals turnaround
+  minus burst." These cover the whole input space, not the three cases you thought of.
+- **Agreement with a slower, obviously-correct implementation.** The Banker's safety check is
+  greedy; safety is defined by the *existence* of a completion order. Comparing the greedy answer
+  against every permutation on small instances tests the algorithm rather than the code.
+
+The last two are what catch the errors a handful of examples never will. The OPT tie-breaking bug
+produced correct fault counts on every worked example and was found only by the stack property.
+
+Finally, add a card to `src/site/index.html`. `tests/landing.test.js` fails if a module builds but
+nothing links to it.

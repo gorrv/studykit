@@ -59,8 +59,6 @@ h2 .s{color:var(--accent-2);font-weight:600;margin-right:6px}
 .stat{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:4px 9px;border-radius:6px;
   background:var(--surface-2);color:var(--ink-muted);border:1px solid var(--rule)}
 .stat b{color:var(--ink);font-weight:600}
-.card.wip{opacity:.9}
-.card.wip .code{color:var(--ink-muted)}
 .feat{display:grid;grid-template-columns:1fr;gap:14px;margin-top:6px}
 @media(min-width:720px){.feat{grid-template-columns:1fr 1fr}}
 .f{border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;
@@ -87,7 +85,8 @@ footer a{color:var(--accent)}
 <div class="wrap">
   <section class="hero">
     <h1>Revision notes that compute.</h1>
-    <p class="lede">Each module is <strong>one HTML file</strong> — no build step, no server, no dependencies.
+    <p class="lede">Each module builds into <strong>one self-contained HTML file</strong> — no server, no
+      runtime dependencies, nothing fetched as you read.
       Open it and you get the notes, <strong>interactive tools that run the actual algorithms</strong>,
       <strong>self-marking questions generated fresh every time</strong>, full-text search, and a mock exam that
       scores you per topic.</p>
@@ -112,7 +111,7 @@ footer a{color:var(--accent)}
       <div class="stats">
         <span class="stat"><b>40</b> sections</span>
         <span class="stat"><b>33</b> tools</span>
-        <span class="stat"><b>43</b> question generators</span>
+        <span class="stat"><b>230</b> question generators</span>
         <span class="stat"><b>44</b> figures</span>
       </div>
     </a>
@@ -130,15 +129,17 @@ footer a{color:var(--accent)}
       </div>
     </a>
 
-    <a class="card wip" href="modules/operating-systems.html">
-      <div class="code">Operating Systems · notes only</div>
+    <a class="card" href="modules/operating-systems.html">
+      <div class="code">6CCS3OSC · Weeks 1–11</div>
       <h3>Operating Systems</h3>
       <p>Processes and scheduling, threads, virtual memory and address translation, demand paging,
-        copy-on-write, page replacement. Prose notes — interactive tools not yet built for this module.</p>
+        copy-on-write, page replacement, access control and cryptography, Java concurrency,
+        deadlock and semaphores.</p>
       <div class="stats">
-        <span class="stat"><b>12</b> sections</span>
-        <span class="stat">no tools yet</span>
-        <span class="stat">no question bank yet</span>
+        <span class="stat"><b>13</b> sections</span>
+        <span class="stat"><b>12</b> tools</span>
+        <span class="stat"><b>10</b> question generators</span>
+        <span class="stat"><b>123</b> exam questions</span>
       </div>
     </a>
 

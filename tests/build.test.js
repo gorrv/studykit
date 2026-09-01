@@ -92,8 +92,7 @@ module.exports = async function run() {
     !f.endsWith(path.join('index.html')) || !f.startsWith('modules'));
   const orphans = all.filter(f =>
     !includedByAll.has(f) &&
-    !f.startsWith('site' + path.sep) &&
-    path.basename(f) !== 'module.json');
+    !f.startsWith('site' + path.sep));
   s.ok('no orphaned source files', orphans.length === 0, orphans.slice(0, 5).join(', '));
 
   // The built site must carry its own landing page.
