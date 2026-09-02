@@ -1,0 +1,49 @@
+    <section id="practice" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Revision</div>
+        <h1>Self-test</h1>
+        <div class="topic-subtitle">generated questions, marked by the tools themselves</div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why these are worth doing</div>
+        The machines, words, expressions and splits are different every time, and your answer is checked
+        by running the same simulator the tools upstairs use — the DFA question is marked by actually
+        running the DFA. You cannot pass by half-remembering a question you have seen before; you have
+        to do the working.
+      </div>
+
+      <h2 id="pr-selftest">Question generator</h2>
+
+      <div class="tool" data-run="qzNext">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Generate a question and mark my answer</h3>
+        </div>
+        <div class="tool-desc">State names are answered as written, e.g. <code>q2</code>. Sets are
+          answered as a comma-separated list, e.g. <code>p, q, s</code>. Counts are plain numbers.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="qz-topic">topic</label>
+            <select id="qz-topic">
+              <option value="all">everything</option>
+              <option value="automata">finite automata</option>
+              <option value="languages">expressions &amp; pumping</option>
+              <option value="machines">Turing machines</option>
+            </select>
+          </div>
+          <button class="tool-btn green" onclick="qzNext()">New question ▶</button>
+          <button class="tool-btn secondary" onclick="qzReveal()">Show answer</button>
+          <button class="tool-btn danger" onclick="qzResetScore()">Reset score</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="qz-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">If you get one wrong</div>
+        Every explanation shows the working — the full configuration sequence for a DFA question, the
+        surviving split for a pumping one, the tape for a Turing machine. Read it, then draw another on
+        the same topic and do that one by hand before pressing Check.
+      </div>
+    </section>
