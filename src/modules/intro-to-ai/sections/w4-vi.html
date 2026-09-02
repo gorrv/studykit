@@ -1,8 +1,8 @@
-<section id="w4-vi" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 04 · Part 4 · Uncertainty in AI</div>
+<section id="t4-vi" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 04 · Part 4 · Uncertainty in AI</div>
         <h1>Value Iteration</h1>
-        <div class="week-subtitle">guess zeros, sweep until still, read off the arrows</div>
+        <div class="topic-subtitle">guess zeros, sweep until still, read off the arrows</div>
       </div>
 
       <!-- ===== BELLMAN ===== -->
@@ -96,7 +96,7 @@
       <div class="callout tip">
         <div class="callout-label">How information travels</div>
         <strong>Utility spreads outwards from the terminals, one square per sweep.</strong> After one sweep only (3,3) has heard about the +1. After two, its neighbours have. And so on.
-        <p style="margin:10px 0 0 0;">That is why <strong>(4,1) is the last to settle</strong> — it is furthest from anything good — and why the number of sweeps grows with the size of the world. Value iteration is a flood fill, carrying value backwards from the rewards. <a href="#s4-spread" onclick="showWeek('w4-start')">Watch it happen here.</a></p>
+        <p style="margin:10px 0 0 0;">That is why <strong>(4,1) is the last to settle</strong> — it is furthest from anything good — and why the number of sweeps grows with the size of the world. Value iteration is a flood fill, carrying value backwards from the rewards. <a href="#s4-spread" onclick="showSection('t4-start')">Watch it happen here.</a></p>
       </div>
       <div class="callout warn">
         <div class="callout-label">A note on the lecture slide's U₁ map</div>
@@ -165,7 +165,7 @@
       <h2 id="v-tool">Tool · Grid-world solver</h2>
       <div class="tool" data-run="runVI">
         <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Value iteration, step by step</h3></div>
-        <p class="tool-desc"><strong>Click cells to build your own maze, drag the sliders to reshape the policy live, and step through the Bellman sweeps one at a time.</strong> Defaults to the 4×3 grid from the slides — press ⏭ and it reproduces 0.812 / 0.868 / 0.918.</p>
+        <p class="tool-desc"><strong>Click cells to build your own maze, drag the sliders to reshape the policy live, and step through the Bellman sweeps one at a time.</strong> Defaults to the 4×3 grid from the lectures — press ⏭ and it reproduces 0.812 / 0.868 / 0.918.</p>
         <div class="tool-field" style="width:100%;">
           <label for="vi-grid">Grid — one row per line, cells separated by spaces. <code>.</code> = normal · <code>#</code> = wall · a number = terminal with that reward · <code>S</code> = mark the start</label>
           <textarea id="vi-grid" rows="4" spellcheck="false">.  .  .  +1
@@ -251,5 +251,5 @@ S  .  .  .</textarea>
           <li><strong>The policy stabilises before the utilities do</strong> — worth a sentence if you're asked when you can stop.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 4.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 04.</p>
     </section>

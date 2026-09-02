@@ -33,7 +33,7 @@
   window.FR = FR;
   window.PN = PN;
   window.EX = EX;
-  window.EX_WEEKS = EX_WEEKS;
+  window.EX_TOPICS = EX_TOPICS;
   window.SP = SP;
   window.AL = AL;
   window.HARMS = HARMS;

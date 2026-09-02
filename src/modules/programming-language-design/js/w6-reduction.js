@@ -277,7 +277,7 @@
     // verdict
     const cbn = results[0].r, cbv = results[1].r, lz = results[2].r;
     if (cbn.done && cbn.nf && !(cbv.done && cbv.nf)) {
-      html += `<div class="verdict bad">💥 <strong>Call-by-value fails where call-by-name succeeds.</strong> The value is <strong>${esc(fpShow(cbn.final, 0, null))}</strong>, and call-by-name finds it in ${cbn.steps} steps — but call-by-value insists on evaluating the argument first, and that evaluation never terminates. This is exactly the slides' point: <em>call-by-name always finds the value, if there is one; call-by-value may fail to find a value.</em></div>`;
+      html += `<div class="verdict bad">💥 <strong>Call-by-value fails where call-by-name succeeds.</strong> The value is <strong>${esc(fpShow(cbn.final, 0, null))}</strong>, and call-by-name finds it in ${cbn.steps} steps — but call-by-value insists on evaluating the argument first, and that evaluation never terminates. This is exactly the lectures' point: <em>call-by-name always finds the value, if there is one; call-by-value may fail to find a value.</em></div>`;
     } else if (cbn.done && cbv.done && lz.done && cbn.nf) {
       if (lz.steps < cbn.steps) {
         html += `<div class="verdict safe">✓ All three reach the same value <strong>${esc(fpShow(cbn.final, 0, null))}</strong> — <em>unicity of normal forms</em>. Note the step counts: call-by-name takes <strong>${cbn.steps}</strong> because it duplicates the unevaluated argument and reduces it twice; lazy takes <strong>${lz.steps}</strong> because <strong>sharing</strong> means the duplicated copies are the same object and are reduced once. Call-by-value takes ${cbv.steps}. <em>That gap is what "+ sharing" buys.</em></div>`;

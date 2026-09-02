@@ -1,10 +1,10 @@
   /* ============================================================
      SITE SEARCH — full text across every section
      Type in the sidebar box (or press Ctrl/Cmd+K, or "/") to
-     search all weeks at once, including the ones not on screen.
+     search all topics at once, including the ones not on screen.
      ============================================================ */
   var NS_SEL = 'h1, h2, h3, h4, p, li, td, th, pre, blockquote, .callout-label, .caption, ' +
-               '.week-subtitle, .tool-desc, .gw-label, .qlab, .rpg-a, .term';
+               '.topic-subtitle, .tool-desc, .gw-label, .qlab, .rpg-a, .term';
   var NS_SKIP = 'textarea, script, style, select, option, input, .tool-output, .search-results, nav';
   var nsIndex = null, nsHits = [], nsSel = -1, nsMarks = [], nsTerms = [];
 
@@ -14,11 +14,11 @@
   }
   function nsBuild() {
     var idx = [], seen = {};
-    var secs = document.querySelectorAll('.week-section');
+    var secs = document.querySelectorAll('.topic-section');
     for (var i = 0; i < secs.length; i++) {
       var sec = secs[i];
-      var h1 = sec.querySelector('.week-header h1');
-      var eb = sec.querySelector('.week-eyebrow');
+      var h1 = sec.querySelector('.topic-header h1');
+      var eb = sec.querySelector('.topic-eyebrow');
       var title = h1 ? h1.textContent.trim() : sec.id;
       var label = eb ? eb.textContent.trim() : title;
       var heading = '';
@@ -87,7 +87,7 @@
     var h = '';
     if (!R.hits.length) {
       h = '<div class="sr-none">No match for <strong>' + nsEscHtml(q) + '</strong>.<br>' +
-          'Try a single word, or part of one — the search is a plain substring match over every week.</div>';
+          'Try a single word, or part of one — the search is a plain substring match over every topic.</div>';
     } else {
       h = '<div class="sr-meta">' + R.total + ' match' + (R.total === 1 ? '' : 'es') +
           (R.total > R.hits.length ? ' · showing first ' + R.hits.length : '') +
@@ -191,7 +191,7 @@
     var hit = nsHits[i];
     if (!hit) return;
     nsUnmark();
-    if (typeof showWeek === 'function') showWeek(hit.e.sec);
+    if (typeof showSection === 'function') showSection(hit.e.sec);
     var sec = document.getElementById(hit.e.sec);
     if (sec) nsMark(sec, nsTerms);
     var el = hit.e.el;

@@ -1,8 +1,8 @@
-<section id="w2-minimax" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 02 · Part 1 · Adversarial search</div>
+<section id="t2-minimax" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 02 · Part 1 · Adversarial search</div>
         <h1>Adversarial Search: Minimax</h1>
-        <div class="week-subtitle">searching when someone is trying to stop you</div>
+        <div class="topic-subtitle">searching when someone is trying to stop you</div>
       </div>
       <!-- ===== TWO PLAYER ===== -->
       <h2 id="m-two">A second agent changes everything</h2>
@@ -26,7 +26,7 @@
       <div class="callout tip">
         <div class="callout-label">Why the names</div>
         The whole game is scored on <strong>one number, from MAX's point of view</strong>. MAX wants it large, MIN wants it small — so MIN's goal is not "win" in some separate sense, it's "make MAX's number as small as possible". That single shared scale is what makes the algorithm work; you never need two sets of values.
-        <p style="margin:10px 0 0 0;">Compare Week 1: there the world was indifferent, so a plan you found stayed valid. Here <strong>every second move is chosen by someone who wants your plan to fail</strong>, so you must plan for the worst reply, not the convenient one.</p>
+        <p style="margin:10px 0 0 0;">Compare Topic 01: there the world was indifferent, so a plan you found stayed valid. Here <strong>every second move is chosen by someone who wants your plan to fail</strong>, so you must plan for the worst reply, not the convenient one.</p>
       </div>
       <!-- ===== TREES ===== -->
       <h2 id="m-trees">Game trees</h2>
@@ -64,7 +64,7 @@
       </table>
       <div class="callout warn">
         <div class="callout-label">Read the jump</div>
-        Tic-Tac-Toe is fully solvable by brute force — 765 states is nothing. Chess is 10<sup>37</sup> times bigger; Go is beyond absurd. <strong>The rest of this week exists because you cannot look at the whole tree.</strong> Minimax is the correct-but-impossible algorithm; alpha-beta is the first thing you do about it.
+        Tic-Tac-Toe is fully solvable by brute force — 765 states is nothing. Chess is 10<sup>37</sup> times bigger; Go is beyond absurd. <strong>The rest of this topic exists because you cannot look at the whole tree.</strong> Minimax is the correct-but-impossible algorithm; alpha-beta is the first thing you do about it.
       </div>
       <!-- ===== MINIMAX ===== -->
       <h2 id="m-minimax">The minimax value</h2>
@@ -92,7 +92,7 @@
       </div>
       <!-- ===== WORKED ===== -->
       <h2 id="m-worked">The worked example</h2>
-      <p>The tree from the slides: root <strong>A</strong> is a MAX node with moves <em>a₁, a₂, a₃</em> to MIN nodes <strong>B, C, D</strong>, each with three terminal children.</p>
+      <p>The tree from the lectures: root <strong>A</strong> is a MAX node with moves <em>a₁, a₂, a₃</em> to MIN nodes <strong>B, C, D</strong>, each with three terminal children.</p>
       <div class="diagram">
         <svg width="100%" viewBox="0 0 640 250" role="img" xmlns="http://www.w3.org/2000/svg">
           <title>The minimax worked example</title>
@@ -154,7 +154,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Why those two complexities, and why they matter</div>
-        The space bound <code>O(b·d)</code> should look familiar — it's DFS's <code>b·m</code> from Week 1, because minimax <em>is</em> a DFS. That means memory is fine. The problem is entirely <code>O(b^d)</code> time: for chess, <code>b ≈ 35</code> and <code>d ≈ 100</code>, so 35<sup>100</sup> nodes. Alpha-beta attacks the exponent's base; it does not change the fact that the exponent is still there.
+        The space bound <code>O(b·d)</code> should look familiar — it's DFS's <code>b·m</code> from Topic 01, because minimax <em>is</em> a DFS. That means memory is fine. The problem is entirely <code>O(b^d)</code> time: for chess, <code>b ≈ 35</code> and <code>d ≈ 100</code>, so 35<sup>100</sup> nodes. Alpha-beta attacks the exponent's base; it does not change the fact that the exponent is still there.
       </div>
       <!-- ===== EXAM ===== -->
       <h2 id="m-exam">Exam-style takeaways</h2>

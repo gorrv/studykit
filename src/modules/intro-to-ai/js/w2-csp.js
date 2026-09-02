@@ -422,7 +422,7 @@
         it compares <em>unassigned</em> variables against each other, which forward checking never does.
         <strong>Arc consistency detects failure earlier.</strong>
         <br><br><span style="font-size:13px;">Which variable ends up empty (here <strong>${esc(AC.acR.wipe)}</strong>) depends on the order arcs come off the queue —
-        the slides' trace happens to empty SA. AC-3 only promises that <em>some</em> domain will empty, not which one.</span></div>`;
+        the lectures' trace happens to empty SA. AC-3 only promises that <em>some</em> domain will empty, not which one.</span></div>`;
     } else if (!AC.fcOk && !AC.acR.ok) {
       html += '<div class="verdict warn">Both detect the failure here. Un-assign one variable to find the point where only arc consistency notices.</div>';
     } else if (AC.fcOk && AC.acR.ok) {

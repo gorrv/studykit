@@ -449,7 +449,7 @@
     });
     html += '</table>';
     html += `<p class="ix-hint"><strong>This is Figure 8.4, recomputed live.</strong> Random hovers around 0 because the action values are drawn from N(0, 1), so the average action is worth nothing.
-      Greedy climbs fast and then stalls — it is stuck on whatever looked good early. Turn on <strong>ε = 0.75</strong> to settle <a href="#z-7" onclick="showWeek('w8-ex')">Exercise 7</a>, and switch to <em>% optimal action</em> to see the ceiling each ε imposes on itself: ε-greedy can never exceed <strong>1 − ε + ε/k</strong>.</p>`;
+      Greedy climbs fast and then stalls — it is stuck on whatever looked good early. Turn on <strong>ε = 0.75</strong> to settle <a href="#z-7" onclick="showSection('t8-ex')">Exercise 7</a>, and switch to <em>% optimal action</em> to see the ceiling each ε imposes on itself: ε-greedy can never exceed <strong>1 − ε + ε/k</strong>.</p>`;
     out.innerHTML = html;
   }
   function runEG() { EG.cache = null; egRender(); }

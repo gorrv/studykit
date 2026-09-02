@@ -1,8 +1,8 @@
-<section id="w6-kmeans" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 06 · Part 1 · Unsupervised Learning</div>
+<section id="t6-kmeans" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 06 · Part 1 · Unsupervised Learning</div>
         <h1>K-Means Clustering</h1>
-        <div class="week-subtitle">finding groups when nobody tells you what they are</div>
+        <div class="topic-subtitle">finding groups when nobody tells you what they are</div>
       </div>
       <!-- ===== INTRO ===== -->
       <h2 id="c-intro">Unsupervised learning</h2>
@@ -10,10 +10,10 @@
         <div class="callout-label">The setting</div>
         In the unsupervised learning setting, we <strong>look for patterns in the data without having the labels</strong> of such data points.
         <p style="margin:10px 0 0 0;">For example, given pictures of cats and dogs, an unsupervised algorithm may be able to identify <strong>two groups of similar pictures</strong> in the dataset — <strong>without, of course, being able to 'name' them</strong>.</p>
-        <p style="margin:10px 0 0 0;">A very common technique to do that is <strong>clustering</strong>. This week covers two: <strong>K-Means</strong> and <strong>Hierarchical</strong> clustering.</p>
+        <p style="margin:10px 0 0 0;">A very common technique to do that is <strong>clustering</strong>. This topic covers two: <strong>K-Means</strong> and <strong>Hierarchical</strong> clustering.</p>
       </div>
       <div class="callout tip">
-        <div class="callout-label">"Without being able to name them" is the whole difference from Week 5</div>
+        <div class="callout-label">"Without being able to name them" is the whole difference from Topic 05</div>
         A supervised classifier trained on labelled photos outputs "cat". A clustering algorithm outputs "<em>group 2</em>" — it has found that some photos resemble each other more than others, and that is all. <strong>Nothing in the data says which group is the cats.</strong>
         <p style="margin:10px 0 0 0;">This also means there is no accuracy, no precision, no F1 — <strong>there is no right answer to compare against.</strong> So the quality of a clustering has to be judged from the data's own geometry, which is exactly what "within-cluster variance" is for.</p>
       </div>
@@ -94,7 +94,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Where this is going</div>
-        Compute V for both candidate clusterings, add up each pair, and the one with the lower <strong>total</strong> wins. That is <a href="#x-1" onclick="showWeek('w6-ex')">Exercise 1</a> — worked in full in Part 3, and the answer settles where p₄ goes. Do it yourself first; the calculator below will mark it.
+        Compute V for both candidate clusterings, add up each pair, and the one with the lower <strong>total</strong> wins. That is <a href="#x-1" onclick="showSection('t6-ex')">Exercise 1</a> — worked in full in Part 3, and the answer settles where p₄ goes. Do it yourself first; the calculator below will mark it.
       </div>
       <!-- ===== VARIANCE TOOL ===== -->
       <h2 id="c-vtool">Tool · Within-cluster variance</h2>
@@ -141,7 +141,7 @@ p1 p2 p3 | p4 p5 p6</textarea></div>
         <div class="callout-label">Four things worth noticing in that definition</div>
         <ul style="margin:6px 0 0 0;">
           <li><strong>The initial centres are actual data points</strong> — "select K different data points" — not arbitrary coordinates. Later centres are averages and generally are <em>not</em> data points.</li>
-          <li><strong>The tie-break is specified</strong>: lowest index wins. This is unusual for a textbook and it matters — <a href="#x-2" onclick="showWeek('w6-ex')">Exercises 2 and 3</a> both hinge on a tie at p₄, and the tie-break is what sends it one way or the other.</li>
+          <li><strong>The tie-break is specified</strong>: lowest index wins. This is unusual for a textbook and it matters — <a href="#x-2" onclick="showSection('t6-ex')">Exercises 2 and 3</a> both hinge on a tie at p₄, and the tie-break is what sends it one way or the other.</li>
           <li><strong>The stopping test is on the clusters, not the centres.</strong> If no point changes cluster, the centres cannot change either, so it is equivalent — but the notes phrase it in terms of clusters.</li>
           <li><strong>K is an input.</strong> K-means does not discover how many clusters there are; you have to tell it. (Hierarchical clustering, in Part 2, gives you every K at once.)</li>
         </ul>

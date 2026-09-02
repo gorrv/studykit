@@ -33,7 +33,7 @@
         e: 'Hoffmann &amp; Nebel 2001, "The FF Planning System: Fast Plan Generation through Heuristic Search", <em>JAIR</em> vol. 14.' },
       { q: 'How often does a planner build the RPG?', a: 'Once for every node added to the open list',
         c: ['Once for every node added to the open list', 'Once, at the start', 'Once per action layer', 'Only when the search gets stuck'],
-        e: 'The heuristic is an <strong>entire sub-problem solved from scratch per node</strong> — far more expensive than Week 1’s straight-line distance, and worth it because the reduction in nodes expanded is larger still.' }
+        e: 'The heuristic is an <strong>entire sub-problem solved from scratch per node</strong> — far more expensive than Topic 01’s straight-line distance, and worth it because the reduction in nodes expanded is larger still.' }
     ];
     PLAN.forEach(d => QZ_GEN.push({ topic: 'planning', make: () => ({
       topic: 'planning · concepts', kind: 'choice', prompt: d.q, choices: d.c.slice(), answer: d.a,

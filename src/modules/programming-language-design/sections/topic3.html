@@ -1,10 +1,10 @@
-<section id="week3" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 03 · Imperative Languages — Formal Description</div>
+<section id="topic3" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 03 · Imperative Languages — Formal Description</div>
         <h1>SIMP &amp; the Abstract Machine</h1>
-        <div class="week-subtitle">making Week 2's informal descriptions precise</div>
+        <div class="topic-subtitle">making Topic 02's informal descriptions precise</div>
       </div>
-      <p>Week 2 described imperative constructs in English. This week we do it <strong>properly</strong> — with a transition system. Week 1 defined an <em>abstract machine</em> as "a transition system that specifies an interpreter for a programming language"; here we actually build one, for a small imperative language called <strong>SIMP</strong>.</p>
+      <p>Topic 02 described imperative constructs in English. This topic we do it <strong>properly</strong> — with a transition system. Topic 01 defined an <em>abstract machine</em> as "a transition system that specifies an interpreter for a programming language"; here we actually build one, for a small imperative language called <strong>SIMP</strong>.</p>
       <div class="callout">
         <div class="callout-label">The three aims</div>
         <ol style="margin:6px 0 0 0;">
@@ -15,10 +15,10 @@
         <p style="margin:10px 0 0 0;">Aim 2 is the one that gets examined as a <em>calculation</em>: given a program and a memory, write the sequence of transitions. Practise it until it's mechanical.</p>
       </div>
       <!-- ===== WHY FORMAL ===== -->
-      <h2 id="w3-why">Why formal? The <code>f(i++, --i)</code> problem</h2>
+      <h2 id="t3-why">Why formal? The <code>f(i++, --i)</code> problem</h2>
       <p><strong>Informal semantics can be imprecise.</strong> The lecture opens with a single devastating example:</p>
       <p style="text-align:center; font-family:'Fraunces',serif; font-size:22px; font-style:italic; margin:22px 0;">What is the meaning of the C expression <code style="font-size:0.8em;">f(i++, --i)</code>?</p>
-      <p>Everything about it seems well defined. From Week 2 we know exactly what each operator does:</p>
+      <p>Everything about it seems well defined. From Topic 02 we know exactly what each operator does:</p>
       <ul>
         <li><code>i++</code> increases the value of <code>i</code> by 1 and also returns the <strong>old</strong> value of <code>i</code>.</li>
         <li><code>--i</code> decreases the value of <code>i</code> by 1 and returns the <strong>new</strong> value of <code>i</code>.</li>
@@ -33,7 +33,7 @@
         It isn't that the C designers were careless about <code>++</code> — it's that an informal description <em>cannot even express</em> the thing that was left out. A formal semantics is forced to say, for every construct, exactly what happens and in what order: the transition rules either specify it or the relation isn't a function. <strong>Formality makes omissions visible.</strong>
       </div>
       <!-- ===== ORDER TOOL ===== -->
-      <h3 id="w3-ordertool">🛠️ Interactive: Evaluation Order</h3>
+      <h3 id="t3-ordertool">🛠️ Interactive: Evaluation Order</h3>
       <p>Set a starting value for <code>i</code> and watch the two evaluation orders produce genuinely different arguments to <code>f</code> — from the same source text.</p>
       <div class="tool" data-run="runEvalOrder">
         <div class="tool-header">
@@ -54,10 +54,10 @@
       <div class="callout">
         <div class="callout-label">The move the lecture makes next</div>
         <strong>The first approach to giving a precise, formal description of the behaviour of programming constructs was in terms of an abstract machine.</strong>
-        <p style="margin:10px 0 0 0;">And, restating Week 1's definition: <strong>an abstract machine is a transition system, which specifies an interpreter for the programming language.</strong> We give an example for a small imperative language: <strong>SIMP</strong>.</p>
+        <p style="margin:10px 0 0 0;">And, restating Topic 01's definition: <strong>an abstract machine is a transition system, which specifies an interpreter for the programming language.</strong> We give an example for a small imperative language: <strong>SIMP</strong>.</p>
       </div>
       <!-- ===== SYNTAX ===== -->
-      <h2 id="w3-syntax">Abstract syntax of SIMP</h2>
+      <h2 id="t3-syntax">Abstract syntax of SIMP</h2>
       <p>Three syntactic categories — programs, commands, expressions — with booleans separated from integers.</p>
       <div class="grammar">
         <div style="font-family:'IBM Plex Sans',sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--ink-muted); margin-bottom:4px;">Programs</div>
@@ -75,7 +75,7 @@
       </div>
       <div class="callout exam">
         <div class="callout-label">The <code>!</code> is the whole l-value/r-value distinction, made syntactic</div>
-        This is the single most important notational point of the week, and it comes straight from Week 2. In SIMP, a location <code>l</code> and its contents <code>!l</code> are <strong>different pieces of syntax</strong>:
+        This is the single most important notational point of the topic, and it comes straight from Topic 02. In SIMP, a location <code>l</code> and its contents <code>!l</code> are <strong>different pieces of syntax</strong>:
         <ul style="margin:8px 0 0 0;">
           <li><code>l</code> on its own is the <strong>l-value</strong> — the address. That's why assignment is written <code>l := E</code>, with a bare <code>l</code> on the left.</li>
           <li><code>!l</code> is the <strong>r-value</strong> — the contents. That's why <code>l := !l − 1</code> has the <code>!</code> on the right but not the left.</li>
@@ -86,11 +86,11 @@
         <div class="callout-label">Two more things to notice about this grammar</div>
         <ul style="margin:6px 0 0 0;">
           <li><strong>Booleans and integers are separate categories.</strong> There is no rule letting a <code>B</code> appear where an <code>E</code> is expected, so <code>1 + True</code> is not even a SIMP program — a whole class of type errors is excluded <em>by the syntax</em>, before any type system is needed.</li>
-          <li><strong>There is no <code>∨</code> and no <code>≥</code>.</strong> The language is deliberately minimal (recall Böhm–Jacopini from Week 2: <code>if</code> and <code>while</code> suffice). Anything else you need, you encode — e.g. <code>B₁ ∨ B₂</code> as <code>¬(¬B₁ ∧ ¬B₂)</code>.</li>
+          <li><strong>There is no <code>∨</code> and no <code>≥</code>.</strong> The language is deliberately minimal (recall Böhm–Jacopini from Topic 02: <code>if</code> and <code>while</code> suffice). Anything else you need, you encode — e.g. <code>B₁ ∨ B₂</code> as <code>¬(¬B₁ ∧ ¬B₂)</code>.</li>
         </ul>
       </div>
       <!-- ===== EXAMPLES ===== -->
-      <h2 id="w3-examples">Example programs in SIMP</h2>
+      <h2 id="t3-examples">Example programs in SIMP</h2>
       <h3>Swapping the contents of <code>x</code> and <code>y</code></h3>
       <div class="code-block">
 z := !x ; x := !y ; y := !z
@@ -106,9 +106,9 @@ factorial := 1;
       </div>
       <p style="font-size:14px;">Note the brackets around the loop body: they group the two assignments into a single command <code>C₁ ; C₂</code>, which is what <code>while B do C</code> requires. This program is used again below as the worked transition example.</p>
       <!-- ===== TREES ===== -->
-      <h2 id="w3-trees">These grammars specify <em>trees</em></h2>
+      <h2 id="t3-trees">These grammars specify <em>trees</em></h2>
       <div class="callout exam">
-        <div class="callout-label">Straight from the slides</div>
+        <div class="callout-label">Straight from the lectures</div>
         <strong>The grammars specify the abstract syntax of SIMP, therefore rules specify labelled trees rather than strings.</strong>
         <ul style="margin:8px 0 0 0;">
           <li>The <strong>leaf nodes</strong> of the tree are labelled by elements of <strong>ℤ ∪ {True, False} ∪ L ∪ {skip}</strong>.</li>
@@ -172,11 +172,11 @@ factorial := 1;
       </div>
       <p><strong>…using brackets where there is ambiguity.</strong></p>
       <div class="callout tip">
-        <div class="callout-label">The role brackets play here — a Week 1 callback</div>
-        The <em>tree</em> is the program; the textual notation is just a convenient way of writing it down. Brackets are <strong>not part of the abstract syntax</strong> — there is no bracket node in the tree. They exist only because we're flattening a tree into a line of text, and without them the reader couldn't recover which tree was meant. This is exactly Week 1's point that abstract syntax is unambiguous while its textual rendering need not be.
+        <div class="callout-label">The role brackets play here — a Topic 01 callback</div>
+        The <em>tree</em> is the program; the textual notation is just a convenient way of writing it down. Brackets are <strong>not part of the abstract syntax</strong> — there is no bracket node in the tree. They exist only because we're flattening a tree into a line of text, and without them the reader couldn't recover which tree was meant. This is exactly Topic 01's point that abstract syntax is unambiguous while its textual rendering need not be.
       </div>
       <!-- ===== THE MACHINE ===== -->
-      <h2 id="w3-machine">The abstract machine: control, results, memory</h2>
+      <h2 id="t3-machine">The abstract machine: control, results, memory</h2>
       <p>The machine is defined with three components:</p>
       <div class="concept-grid">
         <div class="concept-card" data-num="1">
@@ -207,7 +207,7 @@ factorial := 1;
       </div>
       <p><strong>An abstract machine is a transition system.</strong> Therefore it is defined by a set of <strong>configurations</strong> and a set of <strong>transition rules</strong>.</p>
       <!-- ===== CONFIGURATIONS ===== -->
-      <h2 id="w3-configs">Configurations</h2>
+      <h2 id="t3-configs">Configurations</h2>
       <p>A configuration is a <strong>triple</strong>: ⟨Control, Results, Memory⟩. The two stacks are themselves defined by grammars:</p>
       <div class="grammar">
         <span class="nt">c</span> <span class="def">::=</span> <span class="term">nil</span> <span class="bar">|</span> <span class="nt">i</span> <span class="term">·</span> <span class="nt">c</span><br>
@@ -226,11 +226,11 @@ factorial := 1;
         <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
           <h4 style="color:var(--accent-3);">Final configurations</h4>
           <div style="font-family:'IBM Plex Mono',monospace; font-size:15px; text-align:center; margin:8px 0 0 0;">⟨nil, &nbsp;nil, &nbsp;m⟩</div>
-          <p style="font-size:13px; margin:8px 0 0 0;">Both stacks empty. Recall from Week 1: a terminal configuration has <em>no</em> outgoing transition.</p>
+          <p style="font-size:13px; margin:8px 0 0 0;">Both stacks empty. Recall from Topic 01: a terminal configuration has <em>no</em> outgoing transition.</p>
         </div>
       </div>
       <!-- ===== MEANING ===== -->
-      <h2 id="w3-meaning">Semantics of SIMP programs</h2>
+      <h2 id="t3-meaning">Semantics of SIMP programs</h2>
       <div class="callout exam">
         <div class="callout-label">The two definitions — quote these</div>
         <p style="margin:0 0 8px 0;"><strong>For a command.</strong> If there is a sequence of transitions</p>
@@ -246,7 +246,7 @@ factorial := 1;
       </div>
       <p>A <strong>transition rule</strong> has the form <em>c → c′</em>, where <em>c</em> and <em>c′</em> describe configurations. <strong>The transition rules generate the transition relation.</strong> They divide into two groups: rules for the evaluation of <strong>expressions</strong>, and rules for the evaluation of <strong>commands</strong>.</p>
       <!-- ===== RULES: EXPRESSIONS ===== -->
-      <h2 id="w3-rules-exp">Transition rules: evaluation of expressions</h2>
+      <h2 id="t3-rules-exp">Transition rules: evaluation of expressions</h2>
       <div class="rules">
         <table>
           <tr class="grp"><td colspan="5">Pushing values · decomposing phrases</td></tr>
@@ -283,7 +283,7 @@ factorial := 1;
         Look back at <code>f(i++, --i)</code>. The op-decomp rule pushes <code>E₁ · E₂ · op</code> in that order, so the machine fixes <strong>left-to-right evaluation</strong> — no ambiguity is possible. SIMP has no side-effecting expressions, so it couldn't have bitten us here anyway; but the rule shows how a formal semantics settles the question that C's informal definition left open.
       </div>
       <!-- ===== WORKED EXAMPLE ===== -->
-      <h2 id="w3-worked">Worked example: evaluating <code>!l &gt; 0</code></h2>
+      <h2 id="t3-worked">Worked example: evaluating <code>!l &gt; 0</code></h2>
       <p>Assume <strong>m = {l ↦ 4}</strong> and we want to evaluate the expression <code>!l &gt; 0</code>. Initial configuration: ⟨!l &gt; 0 · nil, nil, m⟩.</p>
       <div class="trans-trace">
         <div class="trans-step"><span class="ts-n">0</span><span class="ts-a"></span><span class="ts-c">⟨!l &gt; 0 · nil, &nbsp;nil, &nbsp;m⟩</span></div>
@@ -298,7 +298,7 @@ factorial := 1;
         At step 3 the results stack is <strong>0 · 4 · nil</strong>: n₂ = 0 on top, n₁ = 4 beneath. The rule computes <strong>n₁ bop n₂</strong> = <strong>4 &gt; 0</strong> = True. Had you read the stack top-down you'd have computed 0 &gt; 4 = False — the wrong answer, from the right stack.
       </div>
       <!-- ===== RULES: COMMANDS ===== -->
-      <h2 id="w3-rules-cmd">Transition rules: evaluation of commands</h2>
+      <h2 id="t3-rules-cmd">Transition rules: evaluation of commands</h2>
       <div class="rules">
         <table>
           <tr><td class="lhs">⟨skip · c, r, m⟩</td><td class="arr">→</td><td class="rhs">⟨c, r, m⟩</td><td class="rname">skip</td></tr>
@@ -327,11 +327,11 @@ factorial := 1;
       <div class="callout exam">
         <div class="callout-label">3 · While — the rule that explains looping</div>
         <code>⟨while · c, True · B · C · r, m⟩ → ⟨C · (while B do C) · c, r, m⟩</code>
-        <p style="margin:8px 0 0 0;">This is the heart of the week. When the test is True, the machine pushes the body <em>and then <strong>rebuilds the entire loop</strong></em> behind it. So after <em>C</em> finishes, the whole <code>while B do C</code> phrase is next on the control stack and the process starts again. When the test is False, the loop and its saved copies are simply discarded.</p>
+        <p style="margin:8px 0 0 0;">This is the heart of the topic. When the test is True, the machine pushes the body <em>and then <strong>rebuilds the entire loop</strong></em> behind it. So after <em>C</em> finishes, the whole <code>while B do C</code> phrase is next on the control stack and the process starts again. When the test is False, the loop and its saved copies are simply discarded.</p>
         <p style="margin:10px 0 0 0;">Note <em>why</em> <code>while-decomp</code> pushes <strong>B · C</strong> onto the results stack: the machine must remember the test and the body in order to reconstruct the loop on the next iteration. Nothing else in SIMP needs to do this — it's what makes <code>while</code> the only genuinely recursive rule.</p>
       </div>
       <!-- ===== FACTORIAL ===== -->
-      <h2 id="w3-factorial">Example: transitions of the factorial loop</h2>
+      <h2 id="t3-factorial">Example: transitions of the factorial loop</h2>
       <p>Let <em>C</em> = <code>while B do C′</code>, &nbsp;<em>B</em> = <code>!l &gt; 0</code>, &nbsp;<em>C′</em> = <code>factorial := !factorial ∗ !l; l := !l − 1</code>, &nbsp;and <em>m</em> = {l ↦ 4, factorial ↦ 1}.</p>
       <div class="trans-trace">
         <div class="trans-step"><span class="ts-n">0</span><span class="ts-a"></span><span class="ts-c">⟨C · nil, &nbsp;nil, &nbsp;m⟩</span></div>
@@ -350,7 +350,7 @@ factorial := 1;
         <p style="margin:10px 0 0 0;">The informal sentence is not <em>wrong</em> — it's just not a definition. It doesn't say when the expression is re-evaluated, what happens to the saved body, or in what order side-effects occur. The six transitions above answer all of that, mechanically. <strong>This contrast is the thesis of the whole lecture</strong>, and is very likely to be an essay-style exam question.</p>
       </div>
       <!-- ===== SIMP MACHINE TOOL ===== -->
-      <h3 id="w3-simptool">🛠️ Interactive: SIMP Abstract Machine</h3>
+      <h3 id="t3-simptool">🛠️ Interactive: SIMP Abstract Machine</h3>
       <p>A full implementation of the twenty-one rules above. Enter any SIMP program and an initial memory, then step through — or run the whole thing — and read off the transition sequence, with the rule used at each step. This is the exam mechanic; use it to check your hand-written traces.</p>
       <div class="tool" data-run="smRunAll">
         <div class="tool-header">
@@ -383,7 +383,7 @@ while !l > 0 do
         <div id="sm-output" class="tool-output"></div>
       </div>
       <!-- ===== VERDICT ===== -->
-      <h2 id="w3-verdict">Operational semantics: the verdict on abstract machines</h2>
+      <h2 id="t3-verdict">Operational semantics: the verdict on abstract machines</h2>
       <table class="scorecard">
         <tr><th>Advantage</th><th>Disadvantage</th></tr>
         <tr>
@@ -399,12 +399,12 @@ while !l > 0 do
         <div class="callout-label">The fix, and the bridge to next lecture</div>
         <strong>Structural Approach to Operational Semantics.</strong> To overcome the previous problem, another approach to operational semantics based on transition systems was developed: <strong>the structural approach (Plotkin)</strong>.
         <p style="margin:10px 0 0 0;"><strong>Idea:</strong> the transitions for a compound statement should be defined <em>in terms of the transitions for its constituent sub-statements</em>. <strong>In other words: the definition should be inductive.</strong></p>
-        <p style="margin:10px 0 0 0;">Compare with Week 1, which put it identically: <em>"each command is described in terms of its components."</em> The next lecture builds this alternative — and aim 3 of this lecture ("understand the differences between alternative semantic descriptions") is asking you to compare the two.</p>
+        <p style="margin:10px 0 0 0;">Compare with Topic 01, which put it identically: <em>"each command is described in terms of its components."</em> The next lecture builds this alternative — and aim 3 of this lecture ("understand the differences between alternative semantic descriptions") is asking you to compare the two.</p>
       </div>
       <!-- ===== EXAM ===== -->
-      <h2 id="w3-exam">Exam-style takeaways</h2>
+      <h2 id="t3-exam">Exam-style takeaways</h2>
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 3</div>
+        <div class="callout-label">Key things to nail for Topic 03</div>
         <ol>
           <li><strong>Why formal semantics</strong> — be able to reproduce the <code>f(i++, --i)</code> argument: both operators are precisely defined, but <em>the order of evaluation of parameters was not specified in the definition of C</em>, so different compilers could generate very different code.</li>
           <li><strong>Abstract machine</strong> = a transition system which specifies an <em>interpreter</em> for the programming language. It was the <em>first</em> approach to formal description.</li>
@@ -426,5 +426,5 @@ while !l > 0 do
           <li><strong>The structural approach (Plotkin)</strong> — transitions for a compound statement defined in terms of the transitions for its constituent sub-statements; i.e. the definition should be <strong>inductive</strong>. Know that this is the answer to the abstract machine's disadvantage.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 3 notes. Next: an alternative way to define operational semantics — the structural approach.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 03 notes. Next: an alternative way to define operational semantics — the structural approach.</p>
     </section>

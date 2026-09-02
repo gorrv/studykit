@@ -50,7 +50,7 @@ module.exports = async function run() {
       bad.slice(0, 2).map(q => q.topic).join(', '));
   }
 
-  // ------------------------------------------------------------ Week 2
+  // ------------------------------------------------------------ Topic 2
   // Silberschatz's worked examples, which is what the exam questions look like.
   const P = (n, a, b, pr) => ({ name: n, arrival: a, burst: b, priority: pr });
 
@@ -120,7 +120,7 @@ module.exports = async function run() {
     s.ok('SJF achieves the minimum possible average waiting time', worse === 0, `${worse} of 40`);
   }
 
-  // ------------------------------------------------------------ Week 3
+  // ------------------------------------------------------------ Topic 3
   {
     const split = w.xlSplit(0x5123, 32, 12, 1);
     s.near('0x5123 with 4kB pages is page 5', split.page, 5);
@@ -139,7 +139,7 @@ module.exports = async function run() {
     s.near('the offset is unchanged by the number of levels', two.offset, split.offset);
   }
 
-  // ------------------------------------------------------------ Week 4
+  // ------------------------------------------------------------ Topic 4
   {
     const S = [7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1];
     s.near('FIFO on the standard string, 3 frames: 15 faults', w.prRun(S, 3, 'fifo').faults, 15);
@@ -192,7 +192,7 @@ module.exports = async function run() {
     }
   }
 
-  // ------------------------------------------------------------ Week 11
+  // ------------------------------------------------------------ Topic 11
   {
     const max = [[7, 5, 3], [3, 2, 2], [9, 0, 2], [2, 2, 2], [4, 3, 3]];
     const alloc = [[0, 1, 0], [2, 0, 0], [3, 0, 2], [2, 1, 1], [0, 0, 2]];

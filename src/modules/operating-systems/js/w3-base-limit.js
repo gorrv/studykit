@@ -1,5 +1,5 @@
   /* ============================================================
-     TOOL 4: BASE & LIMIT CHECKER (Week 3)
+     TOOL 4: BASE & LIMIT CHECKER (Topic 03)
      ============================================================ */
   function parseHex(s) { s = s.trim().toLowerCase(); return s.startsWith('0x') ? parseInt(s,16) : parseInt(s,16); }
 

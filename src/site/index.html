@@ -73,6 +73,15 @@ footer{margin-top:70px;border-top:1px solid var(--rule);padding:26px 0 50px;
 footer a{color:var(--accent)}
 .note{border:1px solid var(--rule);border-radius:10px;padding:15px 17px;background:var(--surface-2);
   font-size:14px;color:var(--ink-soft);margin-top:18px}
+.about{border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:0 12px 12px 0;
+  padding:20px 22px;background:var(--surface);margin-top:6px}
+.about p{margin:0 0 14px;color:var(--ink-soft);font-size:15px;max-width:68ch}
+.about p:last-of-type{margin-bottom:18px}
+.about strong{color:var(--ink)}
+.links{display:flex;flex-wrap:wrap;gap:8px}
+.links a{font-family:'IBM Plex Mono',monospace;font-size:12px;padding:6px 12px;border-radius:7px;
+  border:1px solid var(--rule);background:var(--surface-2);color:var(--accent);text-decoration:none}
+.links a:hover{border-color:var(--accent);background:var(--tint-a)}
 </style>
 </head>
 <body>
@@ -104,7 +113,7 @@ footer a{color:var(--accent)}
   <div class="cards">
 
     <a class="card" href="modules/intro-to-ai.html">
-      <div class="code">5CCS2INT · Weeks 1–9</div>
+      <div class="code">Topics 1–9</div>
       <h3>Introduction to AI</h3>
       <p>Search and A*, adversarial search, CSPs, planning and PDDL, MDPs and value iteration,
         machine learning, clustering, regression and decision trees, reinforcement learning, AI ethics.</p>
@@ -117,7 +126,7 @@ footer a{color:var(--accent)}
     </a>
 
     <a class="card" href="modules/programming-language-design.html">
-      <div class="code">5CCS2PLD · Weeks 1–10</div>
+      <div class="code">Topics 1–8</div>
       <h3>Programming Language Design</h3>
       <p>BNF and syntax, semantics and abstract machines, small-step and big-step evaluation, induction,
         variables and scope, Haskell and laziness, type systems and inference, Prolog and SLD-resolution.</p>
@@ -130,7 +139,7 @@ footer a{color:var(--accent)}
     </a>
 
     <a class="card" href="modules/operating-systems.html">
-      <div class="code">6CCS3OSC · Weeks 1–11</div>
+      <div class="code">Topics 1–10</div>
       <h3>Operating Systems</h3>
       <p>Processes and scheduling, threads, virtual memory and address translation, demand paging,
         copy-on-write, page replacement, access control and cryptography, Java concurrency,
@@ -166,7 +175,7 @@ footer a{color:var(--accent)}
     <div class="f">
       <h4>The numbers are verified</h4>
       <p>Each module ships with a jsdom test suite that drives the real page and cross-checks results
-        against independent implementations. Several errors in the source lecture slides were caught this way.</p>
+        against independent implementations. Several errors in the source course material were caught this way.</p>
     </div>
   </div>
 
@@ -181,15 +190,42 @@ That's the whole install. It works with no network connection.
 
   <div class="note">
     <strong>A note on the content.</strong> The explanatory writing, tools, figures and question banks
-    in these files are original. The underlying course material — definitions, exercises and some
-    figures — belongs to the module leaders at King's College London and is used here for personal
-    revision. If you want to adapt this for your own course, the engine is the reusable part;
-    see <code>docs/AUTHORING.md</code>.
+    in these files are original. The underlying subject matter — standard definitions, classic worked
+    examples and exercises — comes from the usual sources any course on these topics draws on, and is
+    reproduced here for study. The engine is the part built to be reused: see
+    <code>docs/AUTHORING.md</code> to point it at your own material.
+  </div>
+
+  <h2><span class="s">§</span>Who made this</h2>
+  <div class="about">
+    <p>I'm <strong>Gor</strong>, a computer science undergraduate. I started this because revising from
+      slide decks wasn't working — I could follow a worked example on paper and still not be able to
+      reproduce it under exam conditions. So I built the tools first: a scheduler that actually
+      simulates the clock, a value-iteration grid that actually sweeps, a page-replacement tracer that
+      shows you Belady's anomaly rather than asserting it.</p>
+
+    <p>The notes grew around the tools, and the test suite grew around both — 512 assertions that drive
+      the real pages and check the results against published worked examples and, where none exists,
+      against exhaustive search. That turned out to be the most useful part: it caught several genuine
+      errors in the material I was revising from, and a few of my own.</p>
+
+    <p>It's organised by topic rather than by anyone's timetable, so it should be usable whatever course
+      you're taking — or none. If you adapt it for your own module I'd be glad to hear about it.</p>
+
+    <div class="links">
+      <a href="https://github.com/gorrv">GitHub</a>
+      <a href="https://www.linkedin.com/in/gorv225/">LinkedIn</a>
+      <a href="mailto:gorv255@gmail.com">gorv255@gmail.com</a>
+      <a href="https://github.com/gorrv/studykit">Source for this project</a>
+    </div>
   </div>
 
   <footer class="wrap">
-    Built as a revision project. Engine and notes by Gor.
+    Built by <strong>Gor</strong> as a revision project, and kept going because the tools turned out to
+    be the useful part.
     &nbsp;·&nbsp; <a href="https://github.com/gorrv/studykit">source</a>
+    &nbsp;·&nbsp; <a href="https://www.linkedin.com/in/gorv225/">LinkedIn</a>
+    &nbsp;·&nbsp; <a href="mailto:gorv255@gmail.com">email</a>
   </footer>
 </div>
 

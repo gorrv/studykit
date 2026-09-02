@@ -1,22 +1,22 @@
-<section id="week2" class="week-section">
+<section id="topic2" class="topic-section">
 
-      <div class="week-header">
-        <div class="week-eyebrow">Week 02 · Processes &amp; Scheduling</div>
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 02 · Processes &amp; Scheduling</div>
         <h1>Processes, Scheduling &amp; Threads</h1>
-        <div class="week-subtitle">how the OS juggles many programs on few CPUs</div>
+        <div class="topic-subtitle">how the OS juggles many programs on few CPUs</div>
       </div>
 
-      <p>This week answers a fundamental question: a computer has only a handful of CPUs, yet runs dozens of programs "at once." How? The answer is <strong>processes</strong> (tracked instances of running programs), <strong>scheduling</strong> (deciding who runs next), and <strong>threads</strong> (multiple strands of work within one program).</p>
+      <p>This topic answers a fundamental question: a computer has only a handful of CPUs, yet runs dozens of programs "at once." How? The answer is <strong>processes</strong> (tracked instances of running programs), <strong>scheduling</strong> (deciding who runs next), and <strong>threads</strong> (multiple strands of work within one program).</p>
 
       <!-- ===== Multitasking ===== -->
-      <h2 id="w2-multitask">Multitasking &amp; types of task</h2>
+      <h2 id="t2-multitask">Multitasking &amp; types of task</h2>
 
       <p>For most of computing history, a computer had <strong>one CPU</strong> and could run <strong>one program at a time</strong>, doing <strong>one thing at a time</strong>. To switch programs you'd shut one down and start another. Painful.</p>
 
       <p>The fix was <strong>multitasking</strong>: the CPU switches between tasks rapidly, letting each run for a slice of time. Only one runs at any instant, but switching fast creates the <em>illusion</em> of simultaneity. This is <strong>concurrency</strong> — multiple tasks making progress.</p>
 
       <div class="callout tip">
-        <div class="callout-label">Connects to Week 1</div>
+        <div class="callout-label">Connects to Topic 01</div>
         This is exactly the concurrency-vs-parallelism distinction. One CPU multitasking = concurrency (illusion). Multiple cores = parallelism (real simultaneity).
       </div>
 
@@ -38,7 +38,7 @@
       <p>I/O devices are <em>extremely</em> slow relative to the CPU. Without multitasking, a task reading from disk would force the CPU to <strong>sit idle</strong> until the read finishes. Early multitasking systems learned to detect I/O starting, then switch to another task until the I/O completed (helped by a disk controller + buffer holding the data until the CPU is ready).</p>
 
       <!-- ===== Program vs Process ===== -->
-      <h2 id="w2-program-process">Program vs Process</h2>
+      <h2 id="t2-program-process">Program vs Process</h2>
 
       <p>A subtle but crucial distinction:</p>
 
@@ -89,7 +89,7 @@
       <p>If two processes run the <em>same</em> program, the OS might <strong>share the code and data segments</strong> between them (they're identical and read-only). But the <strong>stack and heap are never shared</strong> — each process gets its own.</p>
 
       <!-- ===== PCB ===== -->
-      <h2 id="w2-pcb">Process Control Block &amp; process states</h2>
+      <h2 id="t2-pcb">Process Control Block &amp; process states</h2>
 
       <p>The OS must track every process it starts. It does this with a <strong>Process Control Block (PCB)</strong> — one per process. Notable contents:</p>
 
@@ -156,7 +156,7 @@
       </table>
 
       <!-- ===== Context switching ===== -->
-      <h2 id="w2-context">Context switching</h2>
+      <h2 id="t2-context">Context switching</h2>
 
       <p>When the CPU switches from running process A to process B, the register values currently in the CPU belong to A. To switch cleanly:</p>
 
@@ -173,7 +173,7 @@
       </div>
 
       <!-- ===== Scheduling ===== -->
-      <h2 id="w2-scheduling">Scheduling algorithms</h2>
+      <h2 id="t2-scheduling">Scheduling algorithms</h2>
 
       <p>A modern system has many processes ready to run. The <strong>CPU scheduler</strong> decides which one runs next. (There's also a <em>long-term scheduler</em> that decides which processes get loaded from storage into RAM — but we focus on CPU scheduling.)</p>
 
@@ -198,7 +198,7 @@
 
       <div class="callout tip">
         <div class="callout-label">📘 From the textbook (OSTEP Ch.7): two different metrics</div>
-        The slides focus on waiting time, but OSTEP frames scheduling around <em>two</em> metrics that pull in opposite directions:
+        The lectures focus on waiting time, but OSTEP frames scheduling around <em>two</em> metrics that pull in opposite directions:
         <ul style="margin:8px 0 0 0;">
           <li><strong>Turnaround time</strong> = T<sub>completion</sub> − T<sub>arrival</sub>. How long from arriving to finishing. A <em>performance</em> metric.</li>
           <li><strong>Response time</strong> = T<sub>first run</sub> − T<sub>arrival</sub>. How long until you <em>first</em> get the CPU. An <em>interactivity</em> metric — this is what matters when you're typing at a terminal and want to see something happen.</li>
@@ -343,7 +343,7 @@
       </div>
 
       <!-- ===== INTERACTIVE SCHEDULER ===== -->
-      <h3 id="w2-playground">🛠️ Interactive: Scheduling Playground</h3>
+      <h3 id="t2-playground">🛠️ Interactive: Scheduling Playground</h3>
       <p>Enter processes with their burst times (and arrival times), pick an algorithm, and watch the Gantt chart and average waiting time generate live. Great for checking your hand-worked answers.</p>
 
       <div class="tool" data-run="runSchedule">
@@ -396,7 +396,7 @@
       </div>
 
       <!-- ===== Threads ===== -->
-      <h2 id="w2-threads">Threads</h2>
+      <h2 id="t2-threads">Threads</h2>
 
       <p>Processes let you run multiple <em>programs</em> at once. But a single program often needs to do several things at once too. A word processor wants to let you keep typing while it spell-checks, repaginates, and auto-saves in the background. Enter the <strong>thread</strong>.</p>
 
@@ -406,7 +406,7 @@
 
       <h3>What threads share (and don't)</h3>
 
-      <p>This is the <strong>most important part for the concurrency weeks ahead</strong>:</p>
+      <p>This is the <strong>most important part for the concurrency topics ahead</strong>:</p>
 
       <div class="proc-mem">
         <div class="proc-box">
@@ -436,7 +436,7 @@
 
       <div class="callout exam">
         <div class="callout-label">This is THE source of concurrency bugs</div>
-        Because threads <strong>share the heap and globals</strong>, two threads can touch the same data at the same time → race conditions, corruption, synchronisation problems. Each thread has its <em>own stack</em> because each calls different methods with different local variables. The shared data is what makes concurrency hard — and is the entire subject of the upcoming weeks.
+        Because threads <strong>share the heap and globals</strong>, two threads can touch the same data at the same time → race conditions, corruption, synchronisation problems. Each thread has its <em>own stack</em> because each calls different methods with different local variables. The shared data is what makes concurrency hard — and is the entire subject of the upcoming topics.
       </div>
 
       <h3>One CPU vs multicore</h3>
@@ -450,10 +450,10 @@
       <p>The OS usually maps user threads to kernel threads <strong>one-to-one</strong> (many-to-one and many-to-many exist but are less common). Crucially: <strong>the kernel schedules threads, not processes</strong> — because kernel threads are the basic unit of execution. Java threads are managed as kernel threads by the OS.</p>
 
       <!-- ===== Exam ===== -->
-      <h2 id="w2-exam">Exam-style takeaways</h2>
+      <h2 id="t2-exam">Exam-style takeaways</h2>
 
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 2</div>
+        <div class="callout-label">Key things to nail for Topic 02</div>
         <ol>
           <li><strong>Program vs process</strong> — file vs running instance. (Chrome twice = 1 program, 2 processes.)</li>
           <li><strong>Memory layout</strong> — text + data from file; stack + heap created by OS; which grows which way; why stack/heap are dynamic.</li>
@@ -469,6 +469,6 @@
         </ol>
       </div>
 
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 2 notes. Send Week 3 slides whenever you're ready.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 02 notes. Send Topic 03 slides whenever you're ready.</p>
 
     </section>

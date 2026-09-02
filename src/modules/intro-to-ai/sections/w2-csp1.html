@@ -1,8 +1,8 @@
-<section id="w2-csp1" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 02 · Part 3 · CSPs</div>
+<section id="t2-csp1" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 02 · Part 3 · CSPs</div>
         <h1>CSPs: Introduction</h1>
-        <div class="week-subtitle">when only the answer matters, not how you got there</div>
+        <div class="topic-subtitle">when only the answer matters, not how you got there</div>
       </div>
       <!-- ===== GOAL ===== -->
       <h2 id="cs-goal">It's not the journey, it's the goal</h2>
@@ -18,7 +18,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Why this changes the algorithm</div>
-        In Week 1 the <em>path</em> was the answer, so cost and ordering mattered. In a Sudoku or a colouring, the sequence you wrote the values in is <strong>irrelevant</strong> — nobody grades your filling-in order. That single observation is worth an exponential factor, and it's cashed in later under the word <em>commutativity</em>.
+        In Topic 01 the <em>path</em> was the answer, so cost and ordering mattered. In a Sudoku or a colouring, the sequence you wrote the values in is <strong>irrelevant</strong> — nobody grades your filling-in order. That single observation is worth an exponential factor, and it's cashed in later under the word <em>commutativity</em>.
       </div>
       <div class="callout warn">
         <div class="callout-label">Why plain search wastes effort here</div>
@@ -90,7 +90,7 @@
       <!-- ===== QUEENS ===== -->
       <h2 id="cs-queens"><em>n</em>-Queens as a CSP</h2>
       <div class="callout exam">
-        <div class="callout-label">The formulation from the slides</div>
+        <div class="callout-label">The formulation from the lectures</div>
         <ul style="margin:6px 0 0 0;">
           <li><strong>X</strong> = {x<sub>ij</sub>} — one variable per <em>square</em> of the board.</li>
           <li><strong>D</strong> = {0, 1} — <em>empty</em> or <em>queen</em>.</li>
@@ -117,7 +117,7 @@
       </div>
       <div class="callout warn">
         <div class="callout-label">This is a deliberately clumsy modelling</div>
-        One variable per square means <strong>n² variables</strong> and a global sum constraint. A tighter model uses <strong>one variable per column</strong> with domain {1…n} = the row its queen sits in, which makes "no two in a column" free and reduces the problem to row and diagonal constraints. The slides use the square version because it shows off <em>scope and relation</em> explicitly — but if a question asks you to "model n-Queens efficiently", the column version is the better answer.
+        One variable per square means <strong>n² variables</strong> and a global sum constraint. A tighter model uses <strong>one variable per column</strong> with domain {1…n} = the row its queen sits in, which makes "no two in a column" free and reduces the problem to row and diagonal constraints. The lectures use the square version because it shows off <em>scope and relation</em> explicitly — but if a question asks you to "model n-Queens efficiently", the column version is the better answer.
       </div>
       <!-- ===== EXAM ===== -->
       <h2 id="cs-exam">Exam-style takeaways</h2>

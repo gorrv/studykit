@@ -1,5 +1,5 @@
   /* ============================================================
-     TOOL 10: DINING PHILOSOPHERS (Week 11)
+     TOOL 10: DINING PHILOSOPHERS (Topic 10)
      ============================================================ */
   function runPhil() {
     const mode = document.getElementById('phil-mode').value;

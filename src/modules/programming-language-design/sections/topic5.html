@@ -1,23 +1,23 @@
-<section id="week6" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 06 · Part 2 begins · Lectures 6.1 – 6.3</div>
+<section id="topic5" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 05 · Part 2 begins · Functional programming</div>
         <h1>Introduction to Functional Programming</h1>
-        <div class="week-subtitle">from <em>how</em> to <em>what</em></div>
+        <div class="topic-subtitle">from <em>how</em> to <em>what</em></div>
       </div>
       <div class="callout">
         <div class="callout-label">Where Part 2 goes</div>
         <ul style="margin:6px 0 0 0;">
-          <li><strong>Week 7:</strong> Introduction to Functional Programming <em>(this material)</em></li>
-          <li><strong>Week 8:</strong> Functional programming types and semantics</li>
-          <li><strong>Week 9:</strong> Introduction to Logic Programming</li>
-          <li><strong>Week 10:</strong> Semantics of Logic Programming</li>
-          <li><strong>Week 11:</strong> Revision of Part 2, and preparation for the exam</li>
+          <li><strong>Topic 7:</strong> Introduction to Functional Programming <em>(this material)</em></li>
+          <li><strong>Topic 06:</strong> Functional programming types and semantics</li>
+          <li><strong>Topic 07:</strong> Introduction to Logic Programming</li>
+          <li><strong>Topic 08:</strong> Semantics of Logic Programming</li>
+          <li><strong>Topic 11:</strong> Revision of Part 2, and preparation for the exam</li>
         </ul>
         <p style="margin:10px 0 0 0; font-size:13px; color:var(--ink-soft);">Practicals use <strong>Haskell</strong> for the functional part and <strong>SWI-Prolog</strong> for the logic part. Part 2 is taught by Dr Odinaldo Rodrigues.</p>
       </div>
-      <p>Week 1 defined the functional paradigm in one line: <em>based on the mathematical notion of function; the focus is on <strong>what</strong> should be computed, not <strong>how</strong></em>. Everything in this lecture is that sentence unpacked.</p>
+      <p>Topic 01 defined the functional paradigm in one line: <em>based on the mathematical notion of function; the focus is on <strong>what</strong> should be computed, not <strong>how</strong></em>. Everything in this lecture is that sentence unpacked.</p>
       <!-- ===== INTRO ===== -->
-      <h2 id="w6-intro">What "functional" actually means</h2>
+      <h2 id="t5-intro">What "functional" actually means</h2>
       <div class="callout exam">
         <div class="callout-label">The three opening claims</div>
         <ul style="margin:6px 0 0 0;">
@@ -46,10 +46,10 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Connect it back to Part 1</div>
-        Imperative languages were <em>abstractions of the Von Neumann architecture</em> (Week 2), so their strength is that they map onto the hardware — hence the speed. Functional languages abstract from <em>mathematics</em> instead, so they map onto reasoning — hence "easier to verify". <strong>The advantages and disadvantages are two sides of the same design decision.</strong>
+        Imperative languages were <em>abstractions of the Von Neumann architecture</em> (Topic 02), so their strength is that they map onto the hardware — hence the speed. Functional languages abstract from <em>mathematics</em> instead, so they map onto reasoning — hence "easier to verify". <strong>The advantages and disadvantages are two sides of the same design decision.</strong>
       </div>
       <!-- ===== HASKELL ===== -->
-      <h2 id="w6-haskell">Haskell, and where functional languages are used</h2>
+      <h2 id="t5-haskell">Haskell, and where functional languages are used</h2>
       <h3>Examples of applications</h3>
       <ul>
         <li>Theorem provers and proof assistants</li>
@@ -66,14 +66,14 @@
           <li><strong>GHC</strong> is the Glasgow Haskell Compiler.</li>
           <li><strong>GHCi</strong> is the GHC interactive environment (interpreter).</li>
         </ul>
-        <p style="margin:10px 0 0 0;">Haskell was named in honour of <strong>Haskell B. Curry</strong>, whose work forms the logical basis of the language. <em>(His surname supplies the other word you'll meet this week: <strong>currying</strong>.)</em></p>
+        <p style="margin:10px 0 0 0;">Haskell was named in honour of <strong>Haskell B. Curry</strong>, whose work forms the logical basis of the language. <em>(His surname supplies the other word you'll meet this topic: <strong>currying</strong>.)</em></p>
       </div>
       <div class="callout tip">
-        <div class="callout-label">Week 1 callback: which implementation technique is this?</div>
-        Haskell ships with both a compiler (<code>ghc</code>) and an interpreter (<code>ghci</code>) — exactly the case Week 1 described: <em>"the interpreter is used to develop and debug programs which are later compiled to increase execution speed."</em>
+        <div class="callout-label">Topic 01 callback: which implementation technique is this?</div>
+        Haskell ships with both a compiler (<code>ghc</code>) and an interpreter (<code>ghci</code>) — exactly the case Topic 01 described: <em>"the interpreter is used to develop and debug programs which are later compiled to increase execution speed."</em>
       </div>
       <!-- ===== SYNTAX & EVALUATION ===== -->
-      <h2 id="w6-syntax">Syntax and evaluation</h2>
+      <h2 id="t5-syntax">Syntax and evaluation</h2>
       <p>The notation is <strong>inspired by the mathematical definition of functions, using equations</strong>. We compute the square of a number with:</p>
       <div class="hs"><span class="fn">square</span> x = x * x</div>
       <div class="callout exam">
@@ -89,7 +89,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Notice the notation is deliberately the same as Part 1</div>
-        <code>e → e′</code> is the transition relation of Weeks 1–4, reused. Functional evaluation <em>is</em> a small-step operational semantics — but with one enormous simplification: <strong>there is no store</strong>. A configuration is just an expression, not ⟨P, s⟩, because nothing can be assigned to. That absence is what buys you all the advantages listed above.
+        <code>e → e′</code> is the transition relation of Topics 1–4, reused. Functional evaluation <em>is</em> a small-step operational semantics — but with one enormous simplification: <strong>there is no store</strong>. A configuration is just an expression, not ⟨P, s⟩, because nothing can be assigned to. That absence is what buys you all the advantages listed above.
       </div>
       <h3>Examples of evaluation</h3>
       <div class="red-seq">
@@ -115,7 +115,7 @@
       </div>
       <p style="text-align:center; font-style:italic; color:var(--ink-muted); font-size:13px;">In both cases the value is the same.</p>
       <!-- ===== PROPERTIES ===== -->
-      <h2 id="w6-properties">Two properties of evaluation</h2>
+      <h2 id="t5-properties">Two properties of evaluation</h2>
       <div class="concept-grid">
         <div class="concept-card" data-num="1">
           <h3>Unicity of normal forms</h3>
@@ -142,7 +142,7 @@
         <p style="margin:10px 0 0 0;">That gap between "a value exists" and "this strategy finds it" is exactly why the next topic exists.</p>
       </div>
       <!-- ===== STRATEGIES ===== -->
-      <h2 id="w6-strategies">Reduction strategies</h2>
+      <h2 id="t5-strategies">Reduction strategies</h2>
       <p><strong>Although the normal form is unique, the order of reductions is important.</strong> The <strong>strategy of evaluation</strong> defines the reduction sequence that the language implements. The two most popular:</p>
       <div class="compare-2">
         <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
@@ -168,13 +168,13 @@
         <p style="margin:0;"><strong>Lazy evaluation defers the evaluation of expressions until their results are needed for other computations.</strong></p>
       </div>
       <div class="callout tip">
-        <div class="callout-label">What "+ sharing" buys you — the bit the slides state but don't demonstrate</div>
+        <div class="callout-label">What "+ sharing" buys you — the bit the lectures state but don't demonstrate</div>
         Plain call-by-name substitutes an <em>unevaluated</em> argument everywhere the parameter appears. If the parameter occurs twice, the argument gets evaluated <strong>twice</strong> — that's why CBV is "in general more efficient".
         <p style="margin:10px 0 0 0;"><strong>Sharing</strong> fixes this: the copies are the <em>same object</em>, so reducing one reduces all of them. Lazy evaluation therefore gets call-by-name's guarantee <em>and</em> call-by-value's efficiency. You can watch this happen in the tool below with <code>square (3 + 1)</code>.</p>
       </div>
       <!-- ===== REDUCTION TOOL ===== -->
-      <h3 id="w6-redtool">🛠️ Interactive: Reduction Strategy Explorer</h3>
-      <p>Run one expression under all three strategies side by side. The highlighted sub-expression is the redex about to be reduced. Use the presets to reproduce the slides' examples — especially <code>fortytwo infinity</code>, where call-by-value fails and call-by-name succeeds.</p>
+      <h3 id="t5-redtool">🛠️ Interactive: Reduction Strategy Explorer</h3>
+      <p>Run one expression under all three strategies side by side. The highlighted sub-expression is the redex about to be reduced. Use the presets to reproduce the lectures' examples — especially <code>fortytwo infinity</code>, where call-by-value fails and call-by-name succeeds.</p>
       <div class="tool" data-run="runReduce">
         <div class="tool-header">
           <span class="tool-badge">Practice tool</span>
@@ -207,7 +207,7 @@ fact n = n * fact (n - 1)</textarea>
         <div id="fp-output" class="tool-output"></div>
       </div>
       <!-- ===== FUNCTIONAL VALUES ===== -->
-      <h2 id="w6-types">Functional values and types</h2>
+      <h2 id="t5-types">Functional values and types</h2>
       <div class="callout">
         <div class="callout-label">Functions are values</div>
         <strong>Functions are also values</strong>, even though we cannot display or print them. As in mathematics, a function is a <strong>mapping</strong> that associates to each element of a given type A — called the <strong>domain</strong> — an element of type B, the <strong>codomain</strong>:
@@ -217,7 +217,7 @@ fact n = n * fact (n - 1)</textarea>
       <div class="hs"><span class="fn">square</span>   :: <span class="ty">Integer</span> → <span class="ty">Integer</span>
 <span class="fn">fortytwo</span> :: <span class="ty">Integer</span> → <span class="ty">Integer</span></div>
       <!-- ===== DEFINITIONS ===== -->
-      <h2 id="w6-defs">Function definitions: equations and guards</h2>
+      <h2 id="t5-defs">Function definitions: equations and guards</h2>
       <p><strong>Functions are defined in terms of equations.</strong></p>
       <div class="hs"><span class="fn">square</span> x = x * x
 <span class="fn">min</span> x y = <span class="kw">if</span> x ≤ y <span class="kw">then</span> x <span class="kw">else</span> y</div>
@@ -229,7 +229,7 @@ fact n = n * fact (n - 1)</textarea>
       <p>The latter is <strong>equivalent to, but clearer than</strong>:</p>
       <div class="hs"><span class="kw">if</span> x < 0 <span class="kw">then</span> -1 <span class="kw">else</span> <span class="kw">if</span> x == 0 <span class="kw">then</span> 0 <span class="kw">else</span> 1</div>
       <!-- ===== APPLICATION ===== -->
-      <h2 id="w6-application">Function application and its conventions</h2>
+      <h2 id="t5-application">Function application and its conventions</h2>
       <p><strong>Application is denoted by juxtaposition:</strong> <code>(f x)</code>. Examples: <code>(square 3)</code>, <code>(sign (-5))</code>, <code>(min 3 (-5))</code>.</p>
       <div class="callout exam">
         <div class="callout-label">Three conventions to avoid too many brackets</div>
@@ -245,7 +245,7 @@ fact n = n * fact (n - 1)</textarea>
         <code>square square 3</code> does <em>not</em> mean "square of square of 3". Left association makes it <code>(square square) 3</code> — applying <code>square</code> to <code>square</code>, which is a type error. If you want the nesting you must write <code>square (square 3)</code>. This is a favourite exam trick, and it's also <em>why</em> function composition (below) is worth having.
       </div>
       <!-- ===== RECURSION ===== -->
-      <h2 id="w6-recursive">Recursive definitions</h2>
+      <h2 id="t5-recursive">Recursive definitions</h2>
       <p><strong>In the definition of a function f we can use the function f itself.</strong></p>
       <div class="hs"><span class="fn">fact</span> :: <span class="ty">Integer</span> → <span class="ty">Integer</span>
 <span class="fn">fact</span> n = <span class="kw">if</span> n == 0 <span class="kw">then</span> 1 <span class="kw">else</span> n * (fact (n - 1))</div>
@@ -276,7 +276,7 @@ fact n = n * fact (n - 1)</textarea>
         <strong>error</strong> is a predefined function that takes a <em>string</em> as argument. When evaluated it causes <strong>immediate termination of the evaluator</strong> and displays the string.
       </div>
       <!-- ===== PATTERN MATCHING ===== -->
-      <h2 id="w6-patterns">Function definitions by pattern matching</h2>
+      <h2 id="t5-patterns">Function definitions by pattern matching</h2>
       <div class="callout exam">
         <div class="callout-label">Definition, and the rule that decides which equation is used</div>
         Functions may also be defined using <strong>pattern matching on their arguments</strong>. <em>This is an important feature of functional languages.</em>
@@ -290,11 +290,11 @@ fact n = n * fact (n - 1)</textarea>
         The pattern <code>n</code> is a variable, so it matches <em>anything</em> — including 0. If you wrote the two equations the other way round, <code>fact 0</code> would match <code>fact n</code> first and recurse forever. <strong>Specific patterns must come before general ones.</strong>
       </div>
       <!-- ===== FIB EXERCISE ===== -->
-      <h2 id="w6-fib">Exercise: <code>fib</code>, four ways</h2>
+      <h2 id="t5-fib">Exercise: <code>fib</code>, four ways</h2>
       <p>The exercise: write definitions for <code>fib n</code> giving the n-th value of the Fibonacci sequence <strong>1, 1, 2, 3, 5, 8, 13, 21, …</strong> — one using a <em>conditional</em>, one using <em>guarded equations</em>, one using <em>pattern matching</em>.</p>
       <div class="callout tip">
         <div class="callout-label">Solutions below are worked out here, not taken from the slide deck</div>
-        The slides pose this as a pause-and-try exercise and give the sample solution in the video. The three straightforward versions are written out below; <strong>the fourth version is the one the slides then go on to unravel</strong>, so it is the one to study closely.
+        The lectures pose this as a pause-and-try exercise and give the sample solution in the video. The three straightforward versions are written out below; <strong>the fourth version is the one the lectures then go on to unravel</strong>, so it is the one to study closely.
       </div>
       <div class="compare-2">
         <div>
@@ -342,7 +342,7 @@ fact n = n * fact (n - 1)</textarea>
         <p style="margin:10px 0 0 0;">This is the single best illustration of "<strong>lazy evaluation defers the evaluation of expressions until their results are needed</strong>" — an <em>infinite</em> list, defined in one line, that terminates whenever you only ask for a finite part of it. Sharing matters too: without it each element would be recomputed exponentially often.</p>
       </div>
       <!-- ===== LOCAL DEFINITIONS ===== -->
-      <h2 id="w6-local">Local definitions: <code>where</code> and <code>let … in</code></h2>
+      <h2 id="t5-local">Local definitions: <code>where</code> and <code>let … in</code></h2>
       <p>As in mathematics, we can write:</p>
       <div class="compare-2">
         <div class="hs" style="margin:0;"><span class="fn">f</span> x = a + 1 <span class="kw">where</span> a = x / 2</div>
@@ -373,11 +373,11 @@ fact n = n * fact (n - 1)</textarea>
         <div class="red-step nf"><span class="rs-n">7</span><span class="rs-a">→</span><span class="rs-e">5</span></div>
       </div>
       <div class="callout tip">
-        <div class="callout-label">Compare with Week 2's notion of scope</div>
-        "Available just on the right-hand side of the equation" is a <strong>scope</strong> rule — and a <em>static</em> one, in Week 2's terminology. It's the functional counterpart of the block from Week 4: a local name, visible in a delimited region, gone afterwards.
+        <div class="callout-label">Compare with Topic 02's notion of scope</div>
+        "Available just on the right-hand side of the equation" is a <strong>scope</strong> rule — and a <em>static</em> one, in Topic 02's terminology. It's the functional counterpart of the block from Topic 04: a local name, visible in a delimited region, gone afterwards.
       </div>
       <!-- ===== ARITHMETIC ===== -->
-      <h2 id="w6-arith">Arithmetic functions, infix and prefix</h2>
+      <h2 id="t5-arith">Arithmetic functions, infix and prefix</h2>
       <p><strong>Arithmetic operators are also functions (primitives)</strong>, used in <em>infix</em> notation, e.g. <code>3 + 4</code>. We can use them in <strong>prefix</strong> notation if we enclose them in brackets, e.g. <code>(+) 3 4</code>.</p>
       <div class="callout exam">
         <div class="callout-label">(+) denotes the <em>curryfied</em> version of +</div>
@@ -394,7 +394,7 @@ fact n = n * fact (n - 1)</textarea>
         <tr><td><strong>Application has priority</strong></td><td><code>square 1 + 4 * 2</code> means <code>(square 1) + (4 * 2)</code></td></tr>
       </table>
       <!-- ===== COMPOSITION ===== -->
-      <h2 id="w6-composition">Functional composition</h2>
+      <h2 id="t5-composition">Functional composition</h2>
       <div class="callout exam">
         <div class="callout-label">Definition</div>
         <strong>Functions are the building blocks of functional languages.</strong> One way of combining functions is by <strong>composition</strong>, written infix as <code>f · g</code>. <strong>Composition is itself a (pre-defined) function.</strong>
@@ -422,7 +422,7 @@ fact n = n * fact (n - 1)</textarea>
         <p style="margin:10px 0 0 0;">Note also that <code>sample = double · len</code> defines a function <em>without mentioning its argument at all</em> — the composition operator makes the parameter unnecessary.</p>
       </div>
       <!-- ===== COMPOSITION TOOL ===== -->
-      <h3 id="w6-comptool">🛠️ Interactive: Composition Type Checker</h3>
+      <h3 id="t5-comptool">🛠️ Interactive: Composition Type Checker</h3>
       <p>Enter two function types and see whether <code>f · g</code> type-checks, which type it gets, and — if not — exactly where the mismatch is.</p>
       <div class="tool" data-run="runCompose">
         <div class="tool-header">
@@ -446,7 +446,7 @@ fact n = n * fact (n - 1)</textarea>
         <div id="cp-output" class="tool-output"></div>
       </div>
       <!-- ===== CURRYFICATION ===== -->
-      <h2 id="w6-curry">Curryfication and partial application</h2>
+      <h2 id="t5-curry">Curryfication and partial application</h2>
       <div class="callout exam">
         <div class="callout-label">The central fact</div>
         <strong>Functions in Haskell take no more than one argument.</strong> Applying a function to <em>n &gt; 1</em> arguments <strong>yields another function with n − 1 arguments</strong>. This allows one to create new functions by <strong>partial application</strong>.
@@ -475,7 +475,7 @@ plus 3       :: <span class="ty">Int</span> → <span class="ty">Int</span>
         <code>plusTuple</code> has <em>one</em> argument that happens to be a pair, so there is no intermediate stage to stop at — you cannot write <code>plusTuple 3</code>. The curried version has genuinely two stages, and <code>plus 3</code> is a perfectly good value: the "add 3" function. That's why <code>(+) 1</code> could be described as the successor function above.
       </div>
       <!-- ===== CURRY TOOL ===== -->
-      <h3 id="w6-currytool">🛠️ Interactive: Partial Application Stepper</h3>
+      <h3 id="t5-currytool">🛠️ Interactive: Partial Application Stepper</h3>
       <p>Apply arguments one at a time and watch the type shrink. Try the tuple version to see partial application refused.</p>
       <div class="tool" data-run="runCurry">
         <div class="tool-header">
@@ -508,9 +508,9 @@ plus 3       :: <span class="ty">Int</span> → <span class="ty">Int</span>
         <div id="cu-output" class="tool-output"></div>
       </div>
       <!-- ===== EXERCISES ===== -->
-      <h2 id="w6-exercises">Exercises 1–5, worked</h2>
+      <h2 id="t5-exercises">Exercises 1–5, worked</h2>
       <div class="callout tip">
-        <div class="callout-label">These solutions are worked out here, not copied from the slides</div>
+        <div class="callout-label">These solutions are worked out here, not copied from the lectures</div>
         The deck states the five exercises and gives sample solutions in the video. Below is a solution for each, in the style the exercise asks for. Where the exercise names a technique (conditionals, guards), both versions are given.
       </div>
       <div class="exc">
@@ -531,7 +531,7 @@ plus 3       :: <span class="ty">Int</span> → <span class="ty">Int</span>
     | n == 0 = 0
     | otherwise = n + sumNat (n - 1)</div>
         </div>
-        <p style="font-size:13px; color:var(--ink-soft);">The guarded version also guards against <code>sumNat (-1)</code>, which would otherwise recurse forever — the same trap the slides pointed out for <code>fact</code>.</p>
+        <p style="font-size:13px; color:var(--ink-soft);">The guarded version also guards against <code>sumNat (-1)</code>, which would otherwise recurse forever — the same trap the lectures pointed out for <code>fact</code>.</p>
       </div>
       <div class="exc">
         <div class="exc-n">Exercise 2</div>
@@ -575,9 +575,9 @@ plus 3       :: <span class="ty">Int</span> → <span class="ty">Int</span>
         <p style="font-size:13px; color:var(--ink-soft);">The hint given: <code>(x:xs)</code> matches <em>x</em> with the head and <em>xs</em> with the tail; <code>[]</code> matches the empty list; <code>null</code> checks whether a list is empty. Note the equation order — <code>[]</code> and <code>[x]</code> must come before <code>(x:xs)</code>, since <code>(x:xs)</code> would otherwise match a one-element list and recurse into the empty case.</p>
       </div>
       <!-- ===== EXAM ===== -->
-      <h2 id="w6-exam">Exam-style takeaways</h2>
+      <h2 id="t5-exam">Exam-style takeaways</h2>
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 6</div>
+        <div class="callout-label">Key things to nail for Topic 05</div>
         <ol>
           <li><strong>What functional programming is</strong> — programs consist entirely of functions; functions defined in terms of other functions; focus on <em>what</em>, not <em>how</em>.</li>
           <li><strong>Modern functional languages</strong> are strongly typed (no core dumps) with built-in memory management. <strong>Advantages:</strong> shorter programs, easier to understand, easier to design/verify/maintain. <strong>Disadvantages:</strong> usually slower, arguably less flexible.</li>
@@ -602,5 +602,5 @@ plus 3       :: <span class="ty">Int</span> → <span class="ty">Int</span>
           <li><strong>List notation from the fib example</strong> — <code>!!</code> indexes from 0, <code>:</code> is cons, <code>zipWith f l1 l2</code> applies f pointwise. Be able to explain why the self-referential <code>xs</code> definition works under laziness.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 6 notes. Next: functional programming types and semantics.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 05 notes. Next: functional programming types and semantics.</p>
     </section>

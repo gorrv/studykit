@@ -1,5 +1,5 @@
   /* ============================================================
-     TOOL 8: FORK() SIMULATOR (Week 8)
+     TOOL 8: FORK() SIMULATOR (Topic 07)
      ============================================================ */
   function runFork() {
     const n = parseInt(document.getElementById('fork-n').value, 10);

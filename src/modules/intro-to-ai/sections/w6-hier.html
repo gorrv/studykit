@@ -1,8 +1,8 @@
-<section id="w6-hier" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 06 · Part 2 · Unsupervised Learning</div>
+<section id="t6-hier" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 06 · Part 2 · Unsupervised Learning</div>
         <h1>Hierarchical Clustering</h1>
-        <div class="week-subtitle">every K at once, from n clusters down to one</div>
+        <div class="topic-subtitle">every K at once, from n clusters down to one</div>
       </div>
       <!-- ===== IDEA ===== -->
       <h2 id="h-idea">The idea</h2>
@@ -77,7 +77,7 @@
           <li><strong>Complete-linkage</strong> requires <em>every</em> pair to be close before it merges, so it produces tight, compact, roughly equal-sized clusters — and refuses to merge anything with an outlier hanging off it.</li>
           <li><strong>Average-linkage</strong> sits between the two and is the usual compromise.</li>
         </ul>
-        <p style="margin:10px 0 0 0;">This is <strong>not cosmetic</strong>. On the notes' own six points, single and complete linkage produce genuinely different clusterings at K = 3, which is <a href="#x-6" onclick="showWeek('w6-ex')">Exercise 6</a>. And the difference is exactly what <a href="#x-7" onclick="showWeek('w6-ex')">Exercise 7</a>'s helicopter question turns on.</p>
+        <p style="margin:10px 0 0 0;">This is <strong>not cosmetic</strong>. On the notes' own six points, single and complete linkage produce genuinely different clusterings at K = 3, which is <a href="#x-6" onclick="showSection('t6-ex')">Exercise 6</a>. And the difference is exactly what <a href="#x-7" onclick="showSection('t6-ex')">Exercise 7</a>'s helicopter question turns on.</p>
       </div>
       <!-- ===== EXAMPLE ===== -->
       <h2 id="h-example">The worked example</h2>
@@ -212,8 +212,8 @@ p6: 2 -4</textarea>
           <li><strong>Press ▶ play</strong> and watch the clusters swallow each other one merge at a time, with the dashed line showing which pair is about to join and the dendogram colouring in behind it.</li>
           <li><strong>Drag the cut line up and down the dendogram.</strong> The plot on the left recolours instantly — that is what "choosing K from a dendogram" actually means, and you can feel the long vertical gaps as the K that the cut sits in for the longest.</li>
           <li>The default reproduces Figures 6.3–6.6 exactly: thresholds <strong>4, 5, 7, 8, 12</strong> and the distance table for each merge.</li>
-          <li>Switch to <strong>complete</strong> linkage, keep L₁, and compare the K = 3 row against single linkage. They differ — <strong>that is <a href="#x-6" onclick="showWeek('w6-ex')">Exercise 6</a></strong>, and the tool marks the highest K at which the two disagree. The dropdowns re-cluster instantly, so you can flip back and forth.</li>
-          <li><strong>Drag a point into the gap between two clusters</strong>, then switch between single and complete linkage. Single-linkage will chain the two groups together through your new point; complete-linkage will refuse. That is <a href="#x-7" onclick="showWeek('w6-ex')">Exercise 7</a>'s helicopter argument, drawn.</li>
+          <li>Switch to <strong>complete</strong> linkage, keep L₁, and compare the K = 3 row against single linkage. They differ — <strong>that is <a href="#x-6" onclick="showSection('t6-ex')">Exercise 6</a></strong>, and the tool marks the highest K at which the two disagree. The dropdowns re-cluster instantly, so you can flip back and forth.</li>
+          <li><strong>Drag a point into the gap between two clusters</strong>, then switch between single and complete linkage. Single-linkage will chain the two groups together through your new point; complete-linkage will refuse. That is <a href="#x-7" onclick="showSection('t6-ex')">Exercise 7</a>'s helicopter argument, drawn.</li>
           <li>Run all six linkage × metric combinations and check the threshold sequences against the table above. <strong>Average + L₂ is the one that splits differently at K = 2.</strong></li>
           <li>Look for the <strong>biggest gap</strong> in each dendogram — that is the K the notes would recommend. With complete + L₁ the jump is 20 → 36, pointing at K = 2.</li>
 

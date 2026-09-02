@@ -1,5 +1,5 @@
   /* ============================================================
-     TOOL 9: RACE CONDITION SIMULATOR (Week 9)
+     TOOL 9: RACE CONDITION SIMULATOR (Topic 08)
      ============================================================ */
   function runRace() {
     const iters = Math.max(1, Math.min(1000, parseInt(document.getElementById('race-iters').value, 10) || 20));

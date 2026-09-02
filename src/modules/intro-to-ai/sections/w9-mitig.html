@@ -1,8 +1,8 @@
-<section id="w9-mitig" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 09 · Part 4 · AI Ethics</div>
+<section id="t9-mitig" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 09 · Part 4 · AI Ethics</div>
         <h1>Mitigation &amp; Responsibility</h1>
-        <div class="week-subtitle">principles, governance, named methods — and who is answerable</div>
+        <div class="topic-subtitle">principles, governance, named methods — and who is answerable</div>
       </div>
       <!-- ===== PRINCIPLES ===== -->
       <h2 id="mt-prin">Designing with ethical principles</h2>
@@ -66,7 +66,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">The third appearance of this idea</div>
-        Value alignment was introduced in <strong>Week 1</strong> as the difficulty of exactly specifying “good”. <strong>Weeks 4 and 8</strong> made it concrete: the reward function <em>is</em> the specification, and an agent optimises precisely what you wrote, not what you meant. Here it returns as a named mitigation method. Being able to trace it through all three is the kind of cross-week connection that reads well in an exam.
+        Value alignment was introduced in <strong>Topic 01</strong> as the difficulty of exactly specifying “good”. <strong>Topics 4 and 8</strong> made it concrete: the reward function <em>is</em> the specification, and an agent optimises precisely what you wrote, not what you meant. Here it returns as a named mitigation method. Being able to trace it through all three is the kind of cross-topic connection that reads well in an exam.
       </div>
       <!-- ===== BIAS MITIGATION ===== -->
       <h2 id="mt-bias">Bias mitigation methods</h2>
@@ -98,7 +98,7 @@
       <h2 id="mt-ftool">Tool · What a fairness function actually changes</h2>
       <div class="tool" data-run="runFair">
         <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Average accuracy vs minimum accuracy vs smallest gap</h3></div>
-        <p class="tool-desc">The fourth bias-mitigation bullet says to maximise the <em>minimum</em> accuracy rather than the average. This computes both, plus the gap, for any table of per-group accuracies — and tells you when the three objectives <strong>pick different models</strong>. Group sizes go in the header as <code>name (n=…)</code>, which is what makes the overall figure diverge from the macro average. Presets: the <strong>Gender Shades</strong> table from the lecture's own slide, a case built so the objectives disagree, and Week 5's accuracy trap.</p>
+        <p class="tool-desc">The fourth bias-mitigation bullet says to maximise the <em>minimum</em> accuracy rather than the average. This computes both, plus the gap, for any table of per-group accuracies — and tells you when the three objectives <strong>pick different models</strong>. Group sizes go in the header as <code>name (n=…)</code>, which is what makes the overall figure diverge from the macro average. Presets: the <strong>Gender Shades</strong> table from the lecture's own slide, a case built so the objectives disagree, and Topic 05's accuracy trap.</p>
         <div class="tool-field"><label for="fr-data">Per-group accuracy (%) — header row is <code>label, group (n=…), …</code>, then one row per model</label>
           <textarea id="fr-data" rows="5" spellcheck="false">system, Type I, Type II, Type III, Type IV, Type V, Type VI
 Microsoft, 98.3, 98.9, 96.7, 100, 76.8, 75.0
@@ -216,5 +216,5 @@ IBM, 94.9, 92.6, 91.8, 91.7, 66.7, 53.2</textarea></div>
           <li><strong>The conclusion slide answers all five key questions</strong> in one line each — the safest possible structure for an open-ended question.</li>
         </ul>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 9.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 09.</p>
     </section>

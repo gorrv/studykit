@@ -1,5 +1,5 @@
   /* ============================================================
-     WEEK TOOLS — added here as each week's content goes in.
+     TOPIC TOOLS — added here as each topic's content goes in.
      ============================================================ */
 
   /* ---------- W1: graph + heuristic parsing ---------- */
@@ -511,7 +511,7 @@
     html += '</table>';
     html += `<div class="ix-bar">
       <span class="ix-lab">set every h to:</span>
-      <button class="ix-btn" onclick="adReset('slides')">the slides' values</button>
+      <button class="ix-btn" onclick="adReset('slides')">the lectures' values</button>
       <button class="ix-btn" onclick="adReset('zero')">0 (admissible, useless)</button>
       <button class="ix-btn" onclick="adReset('true')">the true cost (perfect)</button>
     </div>`;

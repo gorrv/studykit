@@ -1,15 +1,15 @@
-<section id="week5" class="week-section">
+<section id="topic5" class="topic-section">
 
-      <div class="week-header">
-        <div class="week-eyebrow">Week 05 · User-Space Topics</div>
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 05 · User-Space Topics</div>
         <h1>malloc, the Stack, Files &amp; I/O</h1>
-        <div class="week-subtitle">the machinery that lives on top of the kernel</div>
+        <div class="topic-subtitle">the machinery that lives on top of the kernel</div>
       </div>
 
-      <p>This week steps <em>up</em> from the kernel into <strong>user space</strong> — the things that run on top of the OS but lean heavily on it. Four threads, all connecting back to ideas you've already met (fragmentation, the stack, system calls, interrupts).</p>
+      <p>This topic steps <em>up</em> from the kernel into <strong>user space</strong> — the things that run on top of the OS but lean heavily on it. Four threads, all connecting back to ideas you've already met (fragmentation, the stack, system calls, interrupts).</p>
 
       <!-- ===== malloc ===== -->
-      <h2 id="w5-malloc">malloc &amp; the heap</h2>
+      <h2 id="t5-malloc">malloc &amp; the heap</h2>
 
       <p>The OS only deals in <strong>big chunks of memory — at least a page</strong>. But programs want small pieces: <code>malloc(42 * sizeof(int))</code> wants 168 bytes, not a 4kB page. The job of a <strong>memory allocator</strong> (malloc/free in C, new/delete in C++) is to <em>parcel out small pieces from a bigger chunk</em> the OS gave it — the <strong>heap</strong>.</p>
 
@@ -32,7 +32,7 @@
       </div>
 
       <!-- ===== Free list ===== -->
-      <h2 id="w5-freelist">Free lists &amp; fit policies</h2>
+      <h2 id="t5-freelist">Free lists &amp; fit policies</h2>
 
       <p>How does malloc "mark" a chunk as free? It records it in a data structure. The simplest is a <strong>free list</strong> — a linked list <em>threaded through the unallocated space itself</em>. Each node records the <strong>size</strong> of its free area and a <strong>pointer to the next</strong> free area.</p>
 
@@ -59,7 +59,7 @@
       <p style="font-size:13px; color:var(--ink-muted);">A better real-world structure: <em>segregated free lists</em> — separate lists bucketed by size class, so the search is much faster.</p>
 
       <!-- ===== brk/mmap ===== -->
-      <h2 id="w5-brk">Getting more memory: brk &amp; mmap</h2>
+      <h2 id="t5-brk">Getting more memory: brk &amp; mmap</h2>
 
       <p>When the heap is full and fragmented, a big <code>malloc</code> can't be satisfied. The allocator must <strong>ask the OS for more memory</strong> via a system call. Two ways on Unix-like systems:</p>
 
@@ -76,7 +76,7 @@
 
       <div class="callout tip">
         <div class="callout-label">Connecting back to demand paging</div>
-        Asking for memory via <code>brk</code>/<code>mmap</code> <em>need not allocate physical memory immediately</em> — it just reserves virtual address space. Physical frames arrive lazily on first access, via page faults (Week 4!). Note <code>mmap</code> with <code>MAP_ANONYMOUS</code> gives blank memory; mapping a <em>named file</em> instead is how you get memory-mapped files.
+        Asking for memory via <code>brk</code>/<code>mmap</code> <em>need not allocate physical memory immediately</em> — it just reserves virtual address space. Physical frames arrive lazily on first access, via page faults (Topic 04!). Note <code>mmap</code> with <code>MAP_ANONYMOUS</code> gives blank memory; mapping a <em>named file</em> instead is how you get memory-mapped files.
       </div>
 
       <div class="callout">
@@ -85,9 +85,9 @@
       </div>
 
       <!-- ===== Stack in depth ===== -->
-      <h2 id="w5-stack">The stack in depth</h2>
+      <h2 id="t5-stack">The stack in depth</h2>
 
-      <p>Back to the stack — now in detail, because (a) you need it for the mini-project, and (b) <strong>many security exploits target it</strong>. When a function is called, a <strong>stack frame</strong> (or "activation record") is pushed. In the x86-64 scheme shown in the slides, the first two things in each frame are:</p>
+      <p>Back to the stack — now in detail, because (a) you need it for the mini-project, and (b) <strong>many security exploits target it</strong>. When a function is called, a <strong>stack frame</strong> (or "activation record") is pushed. In the x86-64 scheme shown in the lectures, the first two things in each frame are:</p>
       <ol>
         <li>The caller's <strong>return address</strong> (saved program counter — where to jump back to)</li>
         <li>The caller's <strong>frame pointer</strong> (saved <code>rbp</code>)</li>
@@ -110,7 +110,7 @@
       </div>
 
       <!-- ===== Buffer overflows ===== -->
-      <h2 id="w5-overflow">Buffer overflows &amp; stack smashing</h2>
+      <h2 id="t5-overflow">Buffer overflows &amp; stack smashing</h2>
 
       <p>Consider this innocent-looking program:</p>
       <div class="code-block">
@@ -135,7 +135,7 @@ return 0;
       </div>
 
       <!-- ===== STACK SMASH TOOL ===== -->
-      <h3 id="w5-smashtool">🛠️ Interactive: Stack-Smashing Demo</h3>
+      <h3 id="t5-smashtool">🛠️ Interactive: Stack-Smashing Demo</h3>
       <p>Type input of different lengths into a 10-byte buffer and watch it spill over the saved frame pointer and into the return address. See exactly how many characters it takes to hijack control flow — safely, in your browser.</p>
 
       <div class="tool" data-run="runSmash">
@@ -161,7 +161,7 @@ return 0;
       </div>
 
       <!-- ===== Files & handles ===== -->
-      <h2 id="w5-handles">Files, handles &amp; inter-process communication</h2>
+      <h2 id="t5-handles">Files, handles &amp; inter-process communication</h2>
 
       <p>Processes are inherently <strong>communicative</strong> — with the OS and with each other. They make requests in terms of identifiable <strong>objects</strong> ("write these bytes to <em>this file</em>", "listen on <em>this network interface</em>"), identified using <strong>handles</strong>.</p>
 
@@ -202,11 +202,11 @@ return 0;
 
       <div class="callout tip">
         <div class="callout-label">Avoiding slow user↔kernel crossings: shared memory</div>
-        Every <code>read</code>/<code>write</code> is a system call (slow-ish mode switch). To avoid them, processes can <strong>share memory directly</strong> using the MMU: <code>mmap()</code> the <em>same named file</em> with <code>MAP_SHARED</code> (not <code>MAP_PRIVATE</code>). Now both processes see the same physical frames and can communicate by simply reading/writing memory — no syscall per exchange. This ties paging (Week 3–4) directly to IPC.
+        Every <code>read</code>/<code>write</code> is a system call (slow-ish mode switch). To avoid them, processes can <strong>share memory directly</strong> using the MMU: <code>mmap()</code> the <em>same named file</em> with <code>MAP_SHARED</code> (not <code>MAP_PRIVATE</code>). Now both processes see the same physical frames and can communicate by simply reading/writing memory — no syscall per exchange. This ties paging (Topic 03–4) directly to IPC.
       </div>
 
       <!-- ===== I/O ===== -->
-      <h2 id="w5-io">How I/O works (intro)</h2>
+      <h2 id="t5-io">How I/O works (intro)</h2>
 
       <p>I/O devices are many and varied, so it's not workable for each program to know each device. <strong>Device drivers</strong> are the OS's code for talking to a specific device, exposing a higher-level, device-agnostic interface to the rest of the OS — which is then abstracted further to user programs via system calls. Devices must also be <strong>multiplexed</strong> securely and concurrently. There are three evolutionary approaches to actually moving the data:</p>
 
@@ -234,14 +234,14 @@ return 0;
 
       <div class="callout tip">
         <div class="callout-label">Full-circle: timer interrupts &amp; preemptive scheduling</div>
-        Interrupts aren't just for talking to the outside world. The <strong>timer</strong> is itself a device on an I/O bus, programmed to interrupt the CPU at a set frequency. When the timer interrupt fires, its handler <strong>calls the scheduler</strong> to pick another process — which is <em>exactly</em> how preemptive Round-Robin (Week 2) works, and how the OS guarantees it regains control (Week 1's "limited direct execution"). Everything connects.
+        Interrupts aren't just for talking to the outside world. The <strong>timer</strong> is itself a device on an I/O bus, programmed to interrupt the CPU at a set frequency. When the timer interrupt fires, its handler <strong>calls the scheduler</strong> to pick another process — which is <em>exactly</em> how preemptive Round-Robin (Topic 02) works, and how the OS guarantees it regains control (Topic 01's "limited direct execution"). Everything connects.
       </div>
 
       <!-- ===== Exam ===== -->
-      <h2 id="w5-exam">Exam-style takeaways</h2>
+      <h2 id="t5-exam">Exam-style takeaways</h2>
 
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 5</div>
+        <div class="callout-label">Key things to nail for Topic 05</div>
         <ol>
           <li><strong>malloc's job</strong> — parcel small pieces from a big OS-given chunk; it's <em>library code in the process</em>, not the OS.</li>
           <li><strong>Two layers of allocation/fragmentation</strong> — OS pages vs malloc's sub-allocation within the heap.</li>
@@ -257,6 +257,6 @@ return 0;
         </ol>
       </div>
 
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 5 notes. Send Week 6 slides whenever you're ready.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 05 notes. Send Topic 6 slides whenever you're ready.</p>
 
     </section>

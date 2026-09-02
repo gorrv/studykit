@@ -1,12 +1,12 @@
-<section id="week10" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 10 · Lectures 9.1 – 9.3</div>
+<section id="topic8" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 08 · Logic programming</div>
         <h1>Unification &amp; SLD-Resolution</h1>
-        <div class="week-subtitle">the machinery underneath every Prolog query</div>
+        <div class="topic-subtitle">the machinery underneath every Prolog query</div>
       </div>
-      <p>Week 9 described Prolog's behaviour informally — "look for a clause with the same predicate in the head, replace the goal by its body, replacing variables as required". <strong>This week gives both halves precisely:</strong> <em>unification</em> is how the replacing of variables is computed, and <em>SLD-resolution</em> is how the goals evolve.</p>
+      <p>Topic 07 described Prolog's behaviour informally — "look for a clause with the same predicate in the head, replace the goal by its body, replacing variables as required". <strong>This topic gives both halves precisely:</strong> <em>unification</em> is how the replacing of variables is computed, and <em>SLD-resolution</em> is how the goals evolve.</p>
       <!-- ===== HISTORY ===== -->
-      <h2 id="w10-unif">Unification: unifiers and the mgu</h2>
+      <h2 id="t8-unif">Unification: unifiers and the mgu</h2>
       <div class="callout">
         <div class="callout-label">A short history</div>
         <ul style="margin:6px 0 0 0;">
@@ -32,7 +32,7 @@
       </div>
       <p>Hence <strong>they are both unifiers</strong>. However <strong>σ is more general than ρ</strong>, because ρ <em>is an instance of</em> σ — applying γ = {Y ↦ a} after σ gives ρ — but <strong>ρ is not an instance of σ</strong> (we cannot get σ back from ρ). So σ is <strong>the most general unifier</strong>: no other unifier is more general.</p>
       <!-- ===== WHY IT MATTERS ===== -->
-      <h2 id="w10-why">Why the mgu is the one we want</h2>
+      <h2 id="t8-why">Why the mgu is the one we want</h2>
       <div class="callout exam">
         <div class="callout-label">The intuition — a very likely exam discussion point</div>
         Substitutions are applied to entire clauses to allow them to resolve. <strong>Substitutions that "commit" variables to specific terms (e.g. constants and function terms) prevent future substitutions being able to act as unifiers.</strong>
@@ -43,7 +43,7 @@
         </div>
       </div>
       <!-- ===== ALGORITHM ===== -->
-      <h2 id="w10-rules">The unification algorithm</h2>
+      <h2 id="t8-rules">The unification algorithm</h2>
       <ul>
         <li>It <strong>finds the mgu</strong> for a unification problem if a solution exists, or otherwise <strong>fails</strong>, indicating that there are no solutions.</li>
         <li>To find the mgu the algorithm <strong>simplifies the set of equations using a set of transformation rules</strong>.</li>
@@ -65,10 +65,10 @@
       <div class="callout warn">
         <div class="callout-label">Rule (6) is the occur-check</div>
         For example, <code>X = f(X)</code> is a failure case. <strong>This test is time consuming, and for this reason in some systems it is not implemented.</strong>
-        <p style="margin:10px 0 0 0;">Without it, unifying <code>X</code> with <code>f(X)</code> builds a <em>cyclic</em> term and most Prologs will loop or print something infinite. It comes back at the end of this week in the variable-renaming discussion.</p>
+        <p style="margin:10px 0 0 0;">Without it, unifying <code>X</code> with <code>f(X)</code> builds a <em>cyclic</em> term and most Prologs will loop or print something infinite. It comes back at the end of this topic in the variable-renaming discussion.</p>
       </div>
       <div class="callout tip">
-        <div class="callout-label">Three more things the slides say about the algorithm</div>
+        <div class="callout-label">Three more things the lectures say about the algorithm</div>
         <ul style="margin:6px 0 0 0;">
           <li>The rules are applied in a <strong>non-deterministic</strong> way until no rule can be applied or a failure arises.</li>
           <li>In the case of success, <strong>by changing each <code>=</code> in the final set of equations to <code>↦</code> we obtain the mgu</strong>.</li>
@@ -109,7 +109,7 @@
         </div>
       </div>
       <!-- ===== UNIF TOOL ===== -->
-      <h3 id="w10-uniftool">🛠️ Interactive: Unification Stepper</h3>
+      <h3 id="t8-uniftool">🛠️ Interactive: Unification Stepper</h3>
       <p>Runs the Martelli–Montanari rules on any unification problem, naming the rule and the equation used at each step — the exact format the exam asks for. It reproduces all three worked examples above.</p>
       <div class="tool" data-run="runUnify">
         <div class="tool-header">
@@ -136,7 +136,7 @@
         <div id="un-output" class="tool-output"></div>
       </div>
       <!-- ===== RESOLUTION ===== -->
-      <h2 id="w10-resolution">The Principle of Resolution</h2>
+      <h2 id="t8-resolution">The Principle of Resolution</h2>
       <div class="callout exam">
         <div class="callout-label">How a goal is proved</div>
         <ul style="margin:6px 0 0 0;">
@@ -148,9 +148,9 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Note the logic: this is proof by contradiction</div>
-        You don't prove the goal directly — you <em>negate</em> it, add it to the program, and derive a contradiction. That is why a query is a clause of <em>only negative</em> literals: <code>:- G₁,…,Gₙ</code> literally <strong>is</strong> ¬G₁ ∨ … ∨ ¬Gₙ. Week 9's definition of a goal was setting this up.
+        You don't prove the goal directly — you <em>negate</em> it, add it to the program, and derive a contradiction. That is why a query is a clause of <em>only negative</em> literals: <code>:- G₁,…,Gₙ</code> literally <strong>is</strong> ¬G₁ ∨ … ∨ ¬Gₙ. Topic 07's definition of a goal was setting this up.
       </div>
-      <h2 id="w10-sld">What S, L and D stand for</h2>
+      <h2 id="t8-sld">What S, L and D stand for</h2>
       <div class="concept-grid">
         <div class="concept-card" data-num="S">
           <h3>Selective</h3>
@@ -173,7 +173,7 @@
         </ol>
       </div>
       <!-- ===== RESOLVENTS ===== -->
-      <h2 id="w10-resolvents">Computing resolvents</h2>
+      <h2 id="t8-resolvents">Computing resolvents</h2>
       <div class="callout">
         <div class="callout-label">The recipe</div>
         <ul style="margin:6px 0 0 0;">
@@ -210,7 +210,7 @@
       </div>
       <p><strong>The composition of substitutions generated is</strong> <code>{X ↦ max, P ↦ prolog, Y ↦ logic, Z ↦ max}</code>, <strong>and the solution to the initial query is</strong> <code>{Z ↦ max}</code> — restricted to the variables of the query.</p>
       <!-- ===== TREES ===== -->
-      <h2 id="w10-trees">SLD-resolution trees</h2>
+      <h2 id="t8-trees">SLD-resolution trees</h2>
       <p>Each resolution step is drawn as a goal, an arrow labelled with the mgu, and the resolvent. Since <strong>several clauses may be usable</strong>, a goal may have several children — giving an <strong>SLD-resolution tree</strong>.</p>
       <div class="callout exam">
         <div class="callout-label">Three kinds of branch</div>
@@ -220,7 +220,7 @@
           <li>Thus an SLD-resolution tree may have <strong>success branches, failure branches, but also infinite branches</strong>.</li>
         </ul>
       </div>
-      <h2 id="w10-backtracking">Back-tracking</h2>
+      <h2 id="t8-backtracking">Back-tracking</h2>
       <div class="callout">
         <div class="callout-label">How Prolog explores the tree</div>
         <ul style="margin:6px 0 0 0;">
@@ -236,7 +236,7 @@
 (3) {<span class="v">X</span> ↦ [<span class="v">X1</span>, <span class="v">X2</span>], <span class="v">U</span> ↦ [<span class="v">X1</span>, <span class="v">X2</span>, 1, 2]}
 (4) ...</div>
       <!-- ===== NON-TERMINATION ===== -->
-      <h2 id="w10-nonterm">Non-termination: clause order matters</h2>
+      <h2 id="t8-nonterm">Non-termination: clause order matters</h2>
       <div class="callout warn">
         <div class="callout-label">The rule</div>
         Since Prolog searches the tree using the program clauses <strong>in the order in which they are written</strong>, and <strong>in a depth-first manner</strong>, it is important to <strong>put base clauses before recursive ones</strong>.
@@ -249,7 +249,7 @@
         The two programs are <strong>logically identical</strong>: a set of clauses has no order. Only <em>Prolog's search strategy</em> distinguishes them. This is the sharpest possible illustration of "SLD-resolution is complete, but Prolog's implementation is not": the solution is still there in the tree, depth-first search just never reaches it.
       </div>
       <!-- ===== CONSTRUCTING ===== -->
-      <h2 id="w10-constructing">Constructing an SLD-resolution tree</h2>
+      <h2 id="t8-constructing">Constructing an SLD-resolution tree</h2>
       <div class="callout exam">
         <div class="callout-label">The full checklist</div>
         <ul style="margin:6px 0 0 0;">
@@ -281,9 +281,9 @@
         <tr><td><code>:- s(2).</code></td><td><strong>false</strong> — a single failure node</td></tr>
         <tr><td><code>:- p(2), s(2).</code></td><td><strong>false</strong> — since <code>s(2)</code> fails</td></tr>
       </table>
-      <p>Build each of these in the tool below and compare with the slides.</p>
+      <p>Build each of these in the tool below and compare with the lectures.</p>
       <!-- ===== SLD TOOL ===== -->
-      <h3 id="w10-sldtool">🛠️ Interactive: SLD-Resolution Tree Builder</h3>
+      <h3 id="t8-sldtool">🛠️ Interactive: SLD-Resolution Tree Builder</h3>
       <p>Draws the complete tree: goals as nodes, the <strong>selected (left-most) literal highlighted</strong>, edges labelled with the <strong>clause number and mgu</strong>, success branches ending in <strong>□</strong> and dead ends marked <em>failure</em>. Infinite branches are cut off at a depth limit so you can see them growing.</p>
       <div class="tool" data-run="runSLD">
         <div class="tool-header">
@@ -336,7 +336,7 @@ p(X) :- q(X), Y is X+1, s(Y).</textarea>
         </div>
       </div>
       <!-- ===== RENAMING ===== -->
-      <h2 id="w10-renaming">A note on variable renaming</h2>
+      <h2 id="t8-renaming">A note on variable renaming</h2>
       <p>Consider this program clause and goal:</p>
       <div class="pl"><span class="cm">% in the program</span>
 <span class="at">myappend</span>([<span class="v">X</span>|<span class="v">Y</span>],<span class="v">Z</span>,[<span class="v">X</span>|<span class="v">W</span>]) <span class="op">:-</span> myappend(<span class="v">Y</span>,<span class="v">Z</span>,<span class="v">W</span>).
@@ -365,9 +365,9 @@ p(X) :- q(X), Y is X+1, s(Y).</textarea>
         Every time the SLD-tree builder below uses a clause, it renames that clause's variables apart first. That's not an implementation convenience — <strong>it is required for correctness</strong>, as this example shows. Try the "myappend (renaming)" preset in the unification tool to see the failure and the fix side by side.
       </div>
       <!-- ===== EXAM ===== -->
-      <h2 id="w10-exam">Exam-style takeaways</h2>
+      <h2 id="t8-exam">Exam-style takeaways</h2>
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 10</div>
+        <div class="callout-label">Key things to nail for Topic 08</div>
         <ol>
           <li><strong>Unification problem</strong> = a set of equations between terms; a <strong>unifier</strong> σ makes sᵢσ and tᵢσ <em>syntactically identical</em>; the <strong>mgu</strong> is a unifier of which every other unifier is an instance.</li>
           <li><strong>The f(X) = f(Y) comparison</strong> — why {X↦Y} is more general than {X↦a, Y↦a}: ρ is an instance of σ (compose with {Y↦a}) but not conversely.</li>
@@ -390,5 +390,5 @@ p(X) :- q(X), Y is X+1, s(Y).</textarea>
           <li><strong>Variable renaming</strong> — needed because <code>{[X|Y] = Y, …}</code> fails the occur-check. Renaming is legitimate because clause variables are universally quantified; it must be done <strong>uniformly within the clause</strong> and must not reuse symbols already in it. Carry the bindings back to the original goal's variables.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 10 — and the end of the taught material. 🎓 Week 11 is revision: use the cram sheet.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 08 — and the end of the taught material. 🎓 Topic 11 is revision: use the cram sheet.</p>
     </section>

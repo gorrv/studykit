@@ -1,8 +1,8 @@
-<section id="w8-ucb" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 08 · Part 3 · Reinforcement Learning</div>
+<section id="t8-ucb" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 08 · Part 3 · Reinforcement Learning</div>
         <h1>Upper Confidence Bound</h1>
-        <div class="week-subtitle">explore on purpose, not at random</div>
+        <div class="topic-subtitle">explore on purpose, not at random</div>
       </div>
 
       <!-- ===== WHY ===== -->
@@ -62,7 +62,7 @@
           <li><strong>If you have never pulled a machine, N = 0, and dividing by zero gives ∞.</strong> An infinite score always wins, so <strong>every machine gets tried once before any machine gets tried twice.</strong> A UCB trace therefore always starts a₁, a₂, a₃, … in order.</li>
           <li><strong>If two machines tie, take the lower-numbered one.</strong> a₁ beats a₂.</li>
         </ul>
-        <p style="margin:12px 0 0 0;"><strong>Careful:</strong> the greedy method breaks ties by <em>randomising</em>. UCB breaks them by <em>lowest index</em>. Two different rules in the same week, and swapping them wrecks a whole trace.</p>
+        <p style="margin:12px 0 0 0;"><strong>Careful:</strong> the greedy method breaks ties by <em>randomising</em>. UCB breaks them by <em>lowest index</em>. Two different rules in the same topic, and swapping them wrecks a whole trace.</p>
         <p style="margin:10px 0 0 0;">One nice consequence: because N = 0 forces a pull, <strong>UCB needs no starting value for Q</strong>, unlike greedy.</p>
       </div>
 
@@ -120,11 +120,11 @@ a3: 6, 0, 4, 4, 3</textarea></div>
       </div>
 
       <!-- ===== MDP ===== -->
-      <h2 id="uc-mdp">How this relates to Week 4</h2>
+      <h2 id="uc-mdp">How this relates to Topic 04</h2>
       <div class="callout exam">
         <div class="callout-label">Two differences, and the lecture names both</div>
         <table class="cmp-table">
-          <tr><th></th><th>Week 4 · MDPs</th><th>Week 8 · Bandits</th></tr>
+          <tr><th></th><th>Topic 04 · MDPs</th><th>Topic 08 · Bandits</th></tr>
           <tr><td><strong>Rewards</strong></td><td><strong>given to you</strong> — you can compute the answer up front</td><td><strong>unknown</strong> — you must estimate them by playing</td></tr>
           <tr><td><strong>States</strong></td><td>many; where you are matters</td><td><strong>only one</strong> — after every pull you face the same choice again</td></tr>
           <tr><td><strong>You estimate</strong></td><td>U(s), a value per square</td><td>q⋆(a), a value per machine</td></tr>

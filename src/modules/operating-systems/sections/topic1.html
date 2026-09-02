@@ -1,15 +1,15 @@
-<section id="week1" class="week-section active">
+<section id="topic1" class="topic-section active">
 
-      <div class="week-header">
-        <div class="week-eyebrow">Week 01 · Introductory Topics</div>
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 01 · Introductory Topics</div>
         <h1>The Operating System</h1>
-        <div class="week-subtitle">a program for running programs</div>
+        <div class="topic-subtitle">a program for running programs</div>
       </div>
 
-      <p>This week sets the scene: <em>what</em> an operating system is, <em>why</em> it exists, how to study it, and a preview of the five core concepts you'll use throughout the course. It's mostly conceptual — be patient with it, the practical stuff comes later.</p>
+      <p>This topic sets the scene: <em>what</em> an operating system is, <em>why</em> it exists, how to study it, and a preview of the five core concepts you'll use throughout the course. It's mostly conceptual — be patient with it, the practical stuff comes later.</p>
 
       <!-- ===== What is an OS ===== -->
-      <h2 id="w1-what-is-os">What is an Operating System?</h2>
+      <h2 id="t1-what-is-os">What is an Operating System?</h2>
 
       <p>You have a computer: a CPU, memory, a disk, a keyboard, a screen. You want to run multiple programs (Chrome, Spotify, VS Code) for one or more users, all sharing this hardware without stepping on each other's toes.</p>
 
@@ -38,7 +38,7 @@
       </div>
 
       <!-- ===== Jobs ===== -->
-      <h2 id="w1-jobs">What an OS actually handles</h2>
+      <h2 id="t1-jobs">What an OS actually handles</h2>
 
       <p>Before OSes existed, a human operator did this job — loading programs by hand, scheduling jobs, etc. The 1951 EDSAC film shows this. The OS is essentially software that takes over the human operator's role. Specifically, it must handle:</p>
 
@@ -60,7 +60,7 @@
       </div>
 
       <!-- ===== Good OS ===== -->
-      <h2 id="w1-good-os">What makes an OS "good"?</h2>
+      <h2 id="t1-good-os">What makes an OS "good"?</h2>
 
       <p>Seven qualities — and almost every pair of them <em>trades off against each other</em>:</p>
 
@@ -81,7 +81,7 @@
       </div>
 
       <!-- ===== Concurrency ===== -->
-      <h2 id="w1-concurrency">Concurrency vs Parallelism</h2>
+      <h2 id="t1-concurrency">Concurrency vs Parallelism</h2>
 
       <p>This trips people up. They're not the same thing.</p>
 
@@ -122,7 +122,7 @@
       </div>
 
       <!-- ===== Five Core Concepts ===== -->
-      <h2 id="w1-five">The Five Core Concepts</h2>
+      <h2 id="t1-five">The Five Core Concepts</h2>
 
       <p>These are the foundation everything else builds on. Memorise them.</p>
 
@@ -238,7 +238,7 @@ read(fd, buffer, 100);   <span style="color:#7eb892;">// looks like a function c
       </div>
 
       <h3>📘 Regaining control: cooperative vs non-cooperative (OSTEP)</h3>
-      <p>Here's a subtle problem the slides gloss over: if a process is running on the CPU, then by definition <strong>the OS is not running</strong>. So how can the OS ever take back control to switch processes? Two approaches:</p>
+      <p>Here's a subtle problem the lectures gloss over: if a process is running on the CPU, then by definition <strong>the OS is not running</strong>. So how can the OS ever take back control to switch processes? Two approaches:</p>
 
       <div class="compare-2">
         <div class="mode-box user" style="background:#ecf4e6; border-color:var(--accent-3);">
@@ -276,9 +276,9 @@ read(fd, buffer, 100);   <span style="color:#7eb892;">// looks like a function c
       </div>
 
       <!-- ===== Stack Recap ===== -->
-      <h2 id="w1-stack">Stack Recap (bonus)</h2>
+      <h2 id="t1-stack">Stack Recap (bonus)</h2>
 
-      <p>The slides include a stack refresher because system calls and procedure calls rely on it.</p>
+      <p>The lectures include a stack refresher because system calls and procedure calls rely on it.</p>
 
       <ul>
         <li>A <strong>stack</strong> is a memory region used like a stack of plates: <strong>last in, first out</strong>.</li>
@@ -304,8 +304,8 @@ read(fd, buffer, 100);   <span style="color:#7eb892;">// looks like a function c
       </div>
 
       <!-- ===== STACK VISUALISER ===== -->
-      <h3 id="w1-stacktool">🛠️ Interactive: Stack Push/Pop</h3>
-      <p>Get a feel for last-in-first-out. Push and pop values manually, or watch the recursive triangular-number example (from the slides) push a frame per call and unwind back.</p>
+      <h3 id="t1-stacktool">🛠️ Interactive: Stack Push/Pop</h3>
+      <p>Get a feel for last-in-first-out. Push and pop values manually, or watch the recursive triangular-number example (from the lectures) push a frame per call and unwind back.</p>
 
       <div class="tool" data-run="stkRender">
         <div class="tool-header">
@@ -331,10 +331,10 @@ read(fd, buffer, 100);   <span style="color:#7eb892;">// looks like a function c
       </div>
 
       <!-- ===== Exam ===== -->
-      <h2 id="w1-exam">Exam-style takeaways</h2>
+      <h2 id="t1-exam">Exam-style takeaways</h2>
 
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 1</div>
+        <div class="callout-label">Key things to nail for Topic 01</div>
         <ol>
           <li>Define <strong>"secure multiplexing"</strong> and explain why both words matter.</li>
           <li><strong>Concurrency vs parallelism</strong> — define each, give Rob Pike's framing.</li>
@@ -349,6 +349,6 @@ read(fd, buffer, 100);   <span style="color:#7eb892;">// looks like a function c
         </ol>
       </div>
 
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 1 notes. Send Week 2 slides whenever you're ready.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 01 notes. Send Topic 02 slides whenever you're ready.</p>
 
     </section>

@@ -43,7 +43,7 @@
         c: ['Blows up', 'Falls to zero', 'Stays roughly constant', 'Depends only on the error tolerance'],
         e: 'Figure 17.5(b): roughly 10–20 iterations at γ = 0.5, rising steeply near 1. Larger γ means distant rewards never fade, so information must cross the whole state space before anything settles. The error tolerance matters far less.' },
       { q: 'With R(s) = −1.65 on the standard grid, why does the policy at (3,2) point <em>into</em> the −1 terminal?', a: 'Every extra step costs more than the −1 penalty',
-        c: ['Every extra step costs more than the −1 penalty', 'The transition model makes Up impossible', 'It is a mistake in the slides', 'The +1 is unreachable from there'],
+        c: ['Every extra step costs more than the −1 penalty', 'The transition model makes Up impossible', 'It is a mistake in the lectures', 'The +1 is unreachable from there'],
         e: 'Life is agony, so ending it quickly is worth more than the penalty for ending it badly. As R rises from very negative to positive, the agent goes <strong>suicidal → hurried → cautious → immortal</strong> — with the algorithm untouched.' },
       { q: 'With R(s) &gt; 0, what does the optimal policy do?', a: 'Avoids both terminals and never ends',
         c: ['Avoids both terminals and never ends', 'Runs straight to the +1', 'Runs to whichever terminal is nearest', 'Is undefined'],

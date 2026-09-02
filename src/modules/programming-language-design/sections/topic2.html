@@ -1,10 +1,10 @@
-<section id="week2" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 02 · Imperative Languages — Informal Description</div>
+<section id="topic2" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 02 · Imperative Languages — Informal Description</div>
         <h1>Variables &amp; Flow of Control</h1>
-        <div class="week-subtitle">the informal pass, before SIMP makes it formal</div>
+        <div class="topic-subtitle">the informal pass, before SIMP makes it formal</div>
       </div>
-      <p>Week 1 ended with a promise: describe the constructs of imperative languages <em>informally</em> first, then give a <em>formal</em> specification using transition systems. <strong>This lecture is the informal half.</strong> Everything here gets a precise operational semantics in the lectures that follow, using the language <strong>SIMP</strong>.</p>
+      <p>Topic 01 ended with a promise: describe the constructs of imperative languages <em>informally</em> first, then give a <em>formal</em> specification using transition systems. <strong>This lecture is the informal half.</strong> Everything here gets a precise operational semantics in the lectures that follow, using the language <strong>SIMP</strong>.</p>
       <div class="callout">
         <div class="callout-label">The three aims of the lecture</div>
         <ol style="margin:6px 0 0 0;">
@@ -15,13 +15,13 @@
         <p style="margin:10px 0 0 0;">Aims 2 and 3 both say the same thing in different words: this lecture is a catalogue of <strong>design trade-offs</strong>. Exam questions here are rarely "what is X" — they're "what are the advantages and disadvantages of X", or "these two constructs look the same; how do they differ?"</p>
       </div>
       <!-- ===== Von Neumann ===== -->
-      <h2 id="w2-vonneumann">Imperative languages and the Von Neumann architecture</h2>
+      <h2 id="t2-vonneumann">Imperative languages and the Von Neumann architecture</h2>
       <div class="callout exam">
         <div class="callout-label">The founding sentence</div>
         <strong>Imperative languages are abstractions of the underlying Von Neumann computer architecture.</strong>
         <p style="margin:10px 0 0 0;">One of the main components of the computer is its <strong>memory</strong>, storing instructions and data. In imperative languages, <strong>variables represent memory cells</strong>.</p>
       </div>
-      <p>That one correspondence explains the shape of the whole paradigm. If a variable <em>is</em> a memory cell, then a program is a sequence of instructions that change the contents of cells — which is exactly the definition of "imperative" from Week 1 (<em>programs decomposed into computation steps, reflecting the computer architecture</em>).</p>
+      <p>That one correspondence explains the shape of the whole paradigm. If a variable <em>is</em> a memory cell, then a program is a sequence of instructions that change the contents of cells — which is exactly the definition of "imperative" from Topic 01 (<em>programs decomposed into computation steps, reflecting the computer architecture</em>).</p>
       <p>So to understand the behaviour of programs we need to know two things — and they are the two halves of this lecture:</p>
       <div class="compare-2">
         <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
@@ -34,7 +34,7 @@
         </div>
       </div>
       <!-- ===== Properties ===== -->
-      <h2 id="w2-properties">Variables: the four main properties</h2>
+      <h2 id="t2-properties">Variables: the four main properties</h2>
       <div class="concept-grid">
         <div class="concept-card" data-num="1">
           <h3>Name</h3>
@@ -55,10 +55,10 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Type does two jobs, not one</div>
-        Students routinely write "the type is the kind of value". The slide says <em>two</em> things: the range of <strong>values</strong> allowed <em>and</em> the <strong>operations</strong> that are available. Both halves earn marks. (It also explains Week 1's <code>1 + 'a'</code>: <code>+</code> is not among the operations available on characters.)
+        Students routinely write "the type is the kind of value". The slide says <em>two</em> things: the range of <strong>values</strong> allowed <em>and</em> the <strong>operations</strong> that are available. Both halves earn marks. (It also explains Topic 01's <code>1 + 'a'</code>: <code>+</code> is not among the operations available on characters.)
       </div>
       <!-- ===== l-value/r-value ===== -->
-      <h2 id="w2-lvalue">l-value vs r-value — the distinction that explains assignment</h2>
+      <h2 id="t2-lvalue">l-value vs r-value — the distinction that explains assignment</h2>
       <p>The names come from the two sides of an assignment. In <code>x = y</code>:</p>
       <div class="compare-2">
         <div class="mode-box" style="background:var(--tint-d); border-color:var(--accent-4);">
@@ -80,14 +80,14 @@
       <p style="text-align:center; font-style:italic; color:var(--ink-muted); font-size:13px;">After <code>x = y</code>: the r-value of y (7) is written to the l-value of x (0x1000).</p>
       <div class="callout">
         <div class="callout-label">Why "this association is not simple" matters</div>
-        Because the name→address link is <em>not</em> one-to-one in either direction, two of the hardest topics in the lecture follow directly from it:
+        Because the name→address link is <em>not</em> one-to-one in either direction, two of the hardest topics on the course follow directly from it:
         <ul style="margin:8px 0 0 0;">
           <li><strong>One name → many addresses</strong> (over the program, or over time): this is why we need <strong>lifetime</strong> and <strong>scope</strong>. Each recursive call of a procedure gives its local <code>x</code> a fresh address.</li>
           <li><strong>Many names → one address</strong> (aliasing): Pascal variant records, Fortran EQUIVALENCE — and, in modern terms, two references to the same object. Writing through one name silently changes the other.</li>
         </ul>
       </div>
       <!-- ===== Lifetime ===== -->
-      <h2 id="w2-lifetime">Lifetime: the four classes of variable</h2>
+      <h2 id="t2-lifetime">Lifetime: the four classes of variable</h2>
       <div class="callout exam">
         <div class="callout-label">Definition</div>
         <strong>Lifetime</strong> = the time during which the variable is <em>allocated a specific memory location</em> — between <strong>allocation</strong> and <strong>deallocation</strong>.
@@ -121,7 +121,7 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
       <div class="callout">
         <div class="callout-label">The Java variant — worth quoting</div>
         In Java, <strong>objects are explicit heap dynamic</strong> and are accessed through <strong>reference variables</strong>, but <em>there is no way to destroy them explicitly</em>: <strong>implicit garbage collection</strong> is used.
-        <p style="margin:8px 0 0 0; font-size:13px; color:var(--ink-soft);">Footnote from the slides: <em>garbage collection was first introduced in Lisp.</em></p>
+        <p style="margin:8px 0 0 0; font-size:13px; color:var(--ink-soft);">Footnote from the lectures: <em>garbage collection was first introduced in Lisp.</em></p>
       </div>
       <p style="font-size:14px;">Note the subtlety: the <em>cells</em> are nameless — <code>intnode</code> is not the heap cell, it's a pointer variable (itself typically stack dynamic) whose r-value is the address of the nameless cell. This is the l-value/r-value distinction doing real work.</p>
       <h3>4 · Implicit heap-dynamic variables</h3>
@@ -166,7 +166,7 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
         Read the four classes in order and you are watching a single dial being turned: <strong>binding time moves later and later</strong> — from before execution, to declaration-time, to explicit instruction, to first assignment. And with each step you trade the same two things: <strong>efficiency and checkability go down, flexibility goes up</strong>. If you can state that sentence you can answer almost any "advantages and disadvantages" question on this topic.
       </div>
       <!-- ===== Scope ===== -->
-      <h2 id="w2-scope">Scope: static vs dynamic</h2>
+      <h2 id="t2-scope">Scope: static vs dynamic</h2>
       <div class="callout exam">
         <div class="callout-label">Definitions</div>
         <strong>Scope</strong> = the <em>range of instructions in which the variable is visible</em> (can be used).
@@ -189,7 +189,7 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
         If <strong>no declaration is found</strong>, the compiler detects an <strong>error</strong>.
         <div class="caption">Static (lexical) scope resolution — it follows the nesting of the program text.</div>
       </div>
-      <p>The example from the slides, in Pascal:</p>
+      <p>The example from the lectures, in Pascal:</p>
       <div class="code-block">
 <span style="color:var(--code-kw);">program</span> main;
 <span style="color:var(--code-kw);">var</span> x : real;                <span style="color:var(--code-cm);">// main's x</span>
@@ -227,14 +227,14 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
         Some <strong>simple languages</strong> use dynamic scoping. Scripting languages such as <strong>Perl</strong> let the programmer <em>choose</em> static or dynamic scoping when defining a variable. <strong>Common Lisp</strong> did too — but later versions of Lisp (e.g. <strong>Scheme</strong>) are <em>statically</em> scoped.
       </div>
       <!-- ===== SCOPE TOOL ===== -->
-      <h3 id="w2-scopetool">🛠️ Interactive: Static vs Dynamic Scope Resolver</h3>
+      <h3 id="t2-scopetool">🛠️ Interactive: Static vs Dynamic Scope Resolver</h3>
       <p>This is the mechanic most likely to appear as a worked exam question. Build a call sequence and watch the <em>same</em> reference to <code>x</code> resolve to different declarations under the two disciplines. Note that static resolution never changes — only dynamic does.</p>
       <div class="tool" data-run="scReset">
         <div class="tool-header">
           <span class="tool-badge">Practice tool</span>
           <h3>Scope Resolution Explorer</h3>
         </div>
-        <div class="tool-desc">Uses the Pascal program from the slides: <code>main</code> declares <code>x : real</code>, <code>P1</code> declares <code>x : integer</code>, <code>P2</code> declares nothing. Build a call chain and resolve the reference to <code>x</code> in the <em>currently executing</em> procedure.</div>
+        <div class="tool-desc">Uses the Pascal program from the lectures: <code>main</code> declares <code>x : real</code>, <code>P1</code> declares <code>x : integer</code>, <code>P2</code> declares nothing. Build a call chain and resolve the reference to <code>x</code> in the <em>currently executing</em> procedure.</div>
         <div class="tool-controls">
           <button class="tool-btn" onclick="scCall('P1')">call P1</button>
           <button class="tool-btn" onclick="scCall('P2')">call P2</button>
@@ -244,7 +244,7 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
         <div id="sc-output" class="tool-output"></div>
       </div>
       <!-- ===== Assignment ===== -->
-      <h2 id="w2-assignment">Changing the values of variables: assignment</h2>
+      <h2 id="t2-assignment">Changing the values of variables: assignment</h2>
       <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:17px; margin:20px 0; color:var(--accent);">
         variable-name &nbsp;=&nbsp; expression
       </div>
@@ -267,7 +267,7 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
         <code>i++</code> is the cleanest small example of a <strong>side-effect</strong>: it is an <em>expression</em> (it has a value) that also <em>changes the state</em>. That dual nature is precisely what makes imperative semantics harder than functional semantics — and it's why, when we formalise SIMP, expressions and commands get treated separately.
       </div>
       <!-- ===== FLOW OF CONTROL ===== -->
-      <h2 id="w2-control">Flow of control: control statements</h2>
+      <h2 id="t2-control">Flow of control: control statements</h2>
       <p><strong>Programs in imperative languages are sequences of instructions.</strong> The next instruction that will be executed is the one that <em>follows in the text of the program</em> — <strong>unless a control statement is used</strong>.</p>
       <p>The main control statements are three:</p>
       <div class="compare-3">
@@ -285,7 +285,7 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
         This is the <strong>structured program theorem</strong> (Böhm–Jacopini, 1966) and it is the reason "goto considered harmful" was a winnable argument — the construct wasn't just ugly, it was provably unnecessary. Note the shape of the claim: it's about <em>expressive power</em>, not convenience. Everything beyond <code>if</code> and <code>while</code> is <em>syntactic sugar</em> — which is also why, when we come to define SIMP formally, the language can be tiny and still be interesting.
       </div>
       <!-- ===== SELECTION ===== -->
-      <h2 id="w2-selection">Selection statements</h2>
+      <h2 id="t2-selection">Selection statements</h2>
       <p>Used to choose between <strong>two or more execution paths</strong>. We distinguish <strong>two-way selectors</strong> and <strong>multiple selectors</strong>.</p>
       <h3>Two-way selectors (if-then-else) — and the dangling else</h3>
       <p><strong>Depending on the language, the semantics of nested selectors vary.</strong> The classic case, in Java:</p>
@@ -334,18 +334,18 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
         <strong>To obtain the latter semantics in Java we need to use extra syntax too</strong> — braces. Neither language escapes the problem; they differ only in what the <em>default</em> is when you don't disambiguate.
       </div>
       <div class="callout tip">
-        <div class="callout-label">📘 This is Week 1 coming back (background)</div>
+        <div class="callout-label">📘 This is Topic 01 coming back (background)</div>
         The dangling else is <strong>an ambiguous grammar</strong> — exactly the <code>1 - 2 - 3</code> problem, in a real language. One string of characters, two parse trees, two different meanings. Java resolves it by <em>fiat</em> ("most recent unpaired then"), which is a disambiguation rule bolted onto the concrete syntax. In <em>abstract</em> syntax the problem cannot arise: <code>if(b₁, if(b₂, c₁, c₂), skip)</code> and <code>if(b₁, if(b₂, c₁, skip), c₂)</code> are simply different trees.
       </div>
       <!-- ===== DANGLING ELSE TOOL ===== -->
-      <h3 id="w2-elsetool">🛠️ Interactive: Dangling Else</h3>
+      <h3 id="t2-elsetool">🛠️ Interactive: Dangling Else</h3>
       <p>Set <code>sum</code> and <code>count</code>, and see what <code>result</code> becomes under each pairing. The two readings genuinely disagree — and there are inputs where one leaves <code>result</code> untouched entirely.</p>
       <div class="tool" data-run="runDangling">
         <div class="tool-header">
           <span class="tool-badge">Practice tool</span>
           <h3>Nested Selector Associator</h3>
         </div>
-        <div class="tool-desc">The Java fragment from the slides. Reading A = Java's rule (else with the <em>inner</em> if). Reading B = what the indentation suggests (else with the <em>outer</em> if).</div>
+        <div class="tool-desc">The Java fragment from the lectures. Reading A = Java's rule (else with the <em>inner</em> if). Reading B = what the indentation suggests (else with the <em>outer</em> if).</div>
         <div class="tool-controls">
           <div class="tool-field">
             <label>sum</label>
@@ -362,7 +362,7 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
         <div id="de-output" class="tool-output"></div>
       </div>
       <!-- ===== MULTIPLE SELECTORS ===== -->
-      <h2 id="w2-multiple">Multiple selectors</h2>
+      <h2 id="t2-multiple">Multiple selectors</h2>
       <p>Multiple selectors are a <strong>generalisation of two-way selectors</strong>. In Java (and C, C++):</p>
       <div class="code-block">
 <span style="color:var(--code-kw);">switch</span> (expression) {
@@ -378,7 +378,7 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
         <p style="margin:10px 0 0 0;">C/C++/Java are the second kind — omit the <code>break</code> and control <em>falls through</em> into the next branch. This is a textbook example of the lecture's third aim: <em>apparently similar constructs that differ in meaning between languages</em>.</p>
       </div>
       <!-- ===== LOOPS ===== -->
-      <h2 id="w2-loops">Iterative statements (loops)</h2>
+      <h2 id="t2-loops">Iterative statements (loops)</h2>
       <p>Iterative constructs cause a statement or sequence of statements — the <strong>body of the loop</strong> — to be repeated. There are <strong>two independent classifications</strong>, and the exam likes both:</p>
       <div class="compare-2">
         <div class="mode-box" style="background:var(--tint-a); border-color:var(--accent);">
@@ -444,7 +444,7 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
         <p style="margin:10px 0 0 0;">So <code>do…while(e)</code> and <code>repeat…until(e)</code> are <em>both</em> post-test, but they are <strong>opposites</strong>: one continues while <em>e</em> is true, the other stops when <em>e</em> is true. Same shape, inverted meaning — precisely the "apparently similar constructs" the lecture warned about in its aims.</p>
       </div>
       <!-- ===== LOOP TOOL ===== -->
-      <h3 id="w2-looptool">🛠️ Interactive: Loop Tracer</h3>
+      <h3 id="t2-looptool">🛠️ Interactive: Loop Tracer</h3>
       <p>Run the same condition and body through four loop constructs at once. Watch the iteration counts diverge — especially when the condition is <em>false at the start</em>, which is where pre-test and post-test part company.</p>
       <div class="tool" data-run="runLoops">
         <div class="tool-header">
@@ -468,7 +468,7 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
         <div id="lp-output" class="tool-output"></div>
       </div>
       <!-- ===== STRUCTURING ===== -->
-      <h2 id="w2-structure">Structuring the program: blocks &amp; subprograms</h2>
+      <h2 id="t2-structure">Structuring the program: blocks &amp; subprograms</h2>
       <h3>Blocks</h3>
       <div class="callout">
         <div class="callout-label">Definition</div>
@@ -500,9 +500,9 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
         <strong>Different languages use different parameter passing mechanisms.</strong> The lecture explicitly defers this: <em>we will study these in more detail for functional languages.</em> So if a question asks about call-by-value vs call-by-name here, the expected answer is only the formal/actual distinction — the mechanisms come later.
       </div>
       <!-- ===== EXAM ===== -->
-      <h2 id="w2-exam">Exam-style takeaways</h2>
+      <h2 id="t2-exam">Exam-style takeaways</h2>
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 2</div>
+        <div class="callout-label">Key things to nail for Topic 02</div>
         <ol>
           <li><strong>The founding claim</strong> — imperative languages are abstractions of the Von Neumann architecture; <em>variables represent memory cells</em>. To understand programs we need the properties of variables + the flow of control.</li>
           <li><strong>The four properties of a variable</strong> — name, type (<em>range of values <strong>and</strong> available operations</em>), address (<em>l-value</em>), value (<em>r-value</em>).</li>
@@ -528,5 +528,5 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
           <li><strong>Subprograms</strong> — named blocks invoked explicitly; control returns to the calling point. Procedures (Pascal), functions (C), methods (Java). <strong>Formal</strong> parameters in the declaration vs <strong>actual</strong> parameters at invocation; actual values replace formal ones on invocation.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 2 notes. Next: giving precise meaning to these constructs, using the language <strong>SIMP</strong>.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 02 notes. Next: giving precise meaning to these constructs, using the language <strong>SIMP</strong>.</p>
     </section>

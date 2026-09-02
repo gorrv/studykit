@@ -1,5 +1,5 @@
   /* ============================================================
-     ADDRESS TRANSLATION (Week 3)
+     ADDRESS TRANSLATION (Topic 03)
 
      One virtual address, split into fields and walked through the page
      table. Single-level is the exam's worked example; two-level shows

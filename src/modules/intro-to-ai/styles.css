@@ -252,11 +252,11 @@
   @media print { .search-box, .search-results { display: none !important; } }
   @media print {
     aside, .tool, .no-print { display: none !important; }
-    .week-section { display: block !important; }
+    .topic-section { display: block !important; }
     main { padding: 0; max-width: 100%; }
     .cram-grid { grid-template-columns: 1fr 1fr; }
   }
-  .week-section { display: none; }
+  .topic-section { display: none; }
   @media (max-width: 900px) {
     .layout { grid-template-columns: 1fr; }
     aside { position: relative; height: auto; }

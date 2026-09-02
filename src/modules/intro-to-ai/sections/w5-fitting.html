@@ -1,8 +1,8 @@
-<section id="w5-fitting" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 05 · Part 3 · Introduction to Machine Learning</div>
+<section id="t5-fitting" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 05 · Part 3 · Introduction to Machine Learning</div>
         <h1>Underfitting &amp; Overfitting</h1>
-        <div class="week-subtitle">the two ways a model goes wrong</div>
+        <div class="topic-subtitle">the two ways a model goes wrong</div>
       </div>
       <!-- ===== GENERALISATION ===== -->
       <h2 id="g-gen">Generalisation error</h2>
@@ -43,7 +43,7 @@
       </div>
       <!-- ===== THREE PLOTS ===== -->
       <h2 id="g-three">The three plots</h2>
-      <p>The slides fit polynomials of increasing degree to the same noisy sample of a smooth curve:</p>
+      <p>The lectures fit polynomials of increasing degree to the same noisy sample of a smooth curve:</p>
       <table>
         <tr><th>Model</th><th>Train MSE</th><th>Validation MSE</th><th>Verdict</th></tr>
         <tr><td><strong>Degree 1</strong><br><span style="font-size:12.5px; color:var(--ink-muted);">a straight line</span></td>
@@ -67,7 +67,7 @@
         <div class="callout-label">Read the two columns separately — they tell opposite stories</div>
         <strong>Training MSE falls the whole way:</strong> 0.189 → 0.0069 → 0.0032. By that number alone, degree 29 is the best model of the three.
         <p style="margin:10px 0 0 0;"><strong>Validation MSE does not:</strong> 0.379 → 0.012 → <strong>1,760,000,000,000,000</strong>. Degree 29 is worse than a straight line by roughly <em>fifteen orders of magnitude</em>.</p>
-        <p style="margin:10px 0 0 0;">That is the single most important pair of rows in the week. <strong>Training error can only ever go down as you add complexity</strong> — a more flexible model can always reproduce whatever a simpler one did. So training error can never tell you when to stop. Only held-out error can.</p>
+        <p style="margin:10px 0 0 0;">That is the single most important pair of rows in the topic. <strong>Training error can only ever go down as you add complexity</strong> — a more flexible model can always reproduce whatever a simpler one did. So training error can never tell you when to stop. Only held-out error can.</p>
       </div>
       <div class="callout tip">
         <div class="callout-label">Where a number like 10<sup>15</sup> even comes from</div>
@@ -137,7 +137,7 @@
         </table>
       </div>
       <div class="callout tip">
-        <div class="callout-label">Note the vocabulary shift in the slides — it is deliberate</div>
+        <div class="callout-label">Note the vocabulary shift in the lectures — it is deliberate</div>
         Part 2 defined only <strong>training</strong> and <strong>test</strong>. Part 3's plots are all labelled "<strong>Validation MSE</strong>". That is not an inconsistency: as soon as the polynomial degree became something to <em>choose</em>, a set was needed to choose it with, and the test set could not be spent on that.
         <p style="margin:10px 0 0 0;"><strong>The rule in one line: train on the training set, choose on the validation set, report on the test set — once.</strong></p>
       </div>
@@ -145,7 +145,7 @@
       <h2 id="g-tool">Tool · Fitting explorer</h2>
       <div class="tool" data-run="runFit">
         <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Underfit it, fit it, then destroy it</h3></div>
-        <p class="tool-desc"><strong>Drag the degree slider and watch the curve go from a straight line to a scribble</strong> — or press play and let it sweep through every degree. Samples noisy points from <code>cos(1.5πx)</code> exactly as the slides do, splits them into training and validation, and plots both the fit and the U-shaped error curve.</p>
+        <p class="tool-desc"><strong>Drag the degree slider and watch the curve go from a straight line to a scribble</strong> — or press play and let it sweep through every degree. Samples noisy points from <code>cos(1.5πx)</code> exactly as the lectures do, splits them into training and validation, and plots both the fit and the U-shaped error curve.</p>
         <div id="ft-controls"></div>
         <div style="display:none;">
           <input type="text" id="ft-deg" value="4"><input type="text" id="ft-n" value="24">
@@ -158,7 +158,7 @@
       <div class="callout tip">
         <div class="callout-label">Things worth trying in it</div>
         <ul style="margin:6px 0 0 0;">
-          <li>The three defaults reproduce the slides' three plots. On the default sample:
+          <li>The three defaults reproduce the lectures' three plots. On the default sample:
             <table style="margin:8px 0 0 0;">
               <tr><th>Degree</th><th>Train</th><th>Validation</th><th></th></tr>
               <tr><td><strong>1</strong></td><td>9.97e−02</td><td>4.13e−01</td><td>underfitting — a straight line through a curve</td></tr>
@@ -182,12 +182,12 @@
           <li><strong>Underfitting</strong> = the model fails to capture the complexity of the training data. Too simple.</li>
           <li><strong>Overfitting</strong> = the model fits too much to the training data and fails to generalise. Too complex.</li>
           <li><strong>Be able to draw the two curves</strong> — training error monotonically decreasing then flat; validation error U-shaped.</li>
-          <li><strong>Choose the complexity at the minimum of the validation curve</strong> — in the slides' example, <strong>degree 4</strong>.</li>
+          <li><strong>Choose the complexity at the minimum of the validation curve</strong> — in the lectures' example, <strong>degree 4</strong>.</li>
           <li><strong>Know the three sets of numbers</strong> — degree 1: train 1.89e−01, validation 3.79e−01. Degree 4: 6.91e−03, 1.20e−02. Degree 29: 3.22e−03, <strong>1.76e+15</strong>.</li>
           <li><strong>Training error alone can never tell you when to stop</strong>, because it only ever goes down as complexity rises.</li>
           <li><strong>Diagnose from the gap</strong> — both errors high and close = underfitting; training near zero and validation climbing = overfitting.</li>
           <li><strong>"Why validation and not test?"</strong> — because choosing with a set means fitting to it, and the test error would then be an optimistic estimate rather than an honest one. Train / choose / report, on three separate sets.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 5.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 05.</p>
     </section>

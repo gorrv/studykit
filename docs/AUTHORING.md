@@ -56,18 +56,18 @@ paint, and without it a dark-theme reader gets a white flash on every page load.
 
 ## 2. Sections
 
-Content lives in `<section class="week-section">`. Exactly one carries `active`; the sidebar calls
-`showWeek(id)` to switch.
+Content lives in `<section class="topic-section">`. Exactly one carries `active`; the sidebar calls
+`showSection(id)` to switch.
 
 ```html
-<section id="w4-paging" class="week-section">
-  <div class="week-header">
-    <div class="week-eyebrow">Week 04</div>
+<section id="t4-paging" class="topic-section">
+  <div class="topic-header">
+    <div class="topic-eyebrow">Topic 04</div>
     <h1>Demand Paging</h1>
-    <div class="week-subtitle">faults as a feature</div>
+    <div class="topic-subtitle">faults as a feature</div>
   </div>
 
-  <h2 id="w4-replacement">Page replacement</h2>
+  <h2 id="t4-replacement">Page replacement</h2>
   <div class="callout exam">
     <div class="callout-label">The definition</div>
     …

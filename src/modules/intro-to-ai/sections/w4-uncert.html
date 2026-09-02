@@ -1,8 +1,8 @@
-<section id="w4-uncert" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 04 · Part 1 · Uncertainty in AI</div>
+<section id="t4-uncert" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 04 · Part 1 · Uncertainty in AI</div>
         <h1>Uncertainty in AI</h1>
-        <div class="week-subtitle">everything so far assumed the world does what it's told</div>
+        <div class="topic-subtitle">everything so far assumed the world does what it's told</div>
       </div>
       <!-- ===== SEARCH ===== -->
       <h2 id="q-search">Uncertainty in search</h2>
@@ -21,7 +21,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">You have seen these four words before</div>
-        They are two of the seven <strong>dimensions</strong> from Week 1. Every algorithm in Weeks 1–3 quietly sat at the easy end of both. This week we drop <em>one</em> of them — <strong>actions become stochastic</strong> — and keep full observability. Dropping the other gives you a POMDP, which is a much harder object and not on this course.
+        They are two of the seven <strong>dimensions</strong> from Topic 01. Every algorithm in Topics 1–3 quietly sat at the easy end of both. This topic we drop <em>one</em> of them — <strong>actions become stochastic</strong> — and keep full observability. Dropping the other gives you a POMDP, which is a much harder object and not on this course.
       </div>
       <!-- ===== ML ===== -->
       <h2 id="q-ml">Uncertainty in supervised learning</h2>
@@ -54,7 +54,7 @@
       <!-- ===== DIMENSIONS ===== -->
       <h2 id="q-dims">Where this sits</h2>
       <table>
-        <tr><th>Dimension</th><th>Weeks 1–3</th><th>Week 4 (MDPs)</th></tr>
+        <tr><th>Dimension</th><th>Topics 1–3</th><th>Topic 04 (MDPs)</th></tr>
         <tr><td>Environment observability</td><td>fully observable</td><td><strong>fully observable</strong> — unchanged</td></tr>
         <tr><td>Action outcomes</td><td>deterministic</td><td><strong>stochastic</strong> ← the change</td></tr>
         <tr><td>What a solution is</td><td>a <strong>sequence</strong> of actions (a plan)</td><td>a <strong>policy</strong> — an action for <em>every</em> state</td></tr>
@@ -62,7 +62,7 @@
       </table>
       <div class="callout warn">
         <div class="callout-label">The row that matters most</div>
-        <strong>A plan is no longer a useful answer.</strong> If your actions can go wrong, a fixed sequence stops being valid the moment one of them does — and you would have to replan. A <strong>policy</strong> says what to do in <em>every</em> state, so it is still valid no matter where you end up. That single shift is what the rest of the week is about.
+        <strong>A plan is no longer a useful answer.</strong> If your actions can go wrong, a fixed sequence stops being valid the moment one of them does — and you would have to replan. A <strong>policy</strong> says what to do in <em>every</em> state, so it is still valid no matter where you end up. That single shift is what the rest of the topic is about.
       </div>
       <!-- ===== EXAM ===== -->
       <h2 id="q-exam">Exam-style takeaways</h2>

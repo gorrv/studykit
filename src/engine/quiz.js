@@ -1,6 +1,6 @@
   /* ============================================================
      SELF-TEST QUIZ — driver.  Question generators get pushed into
-     QZ_GEN as each week's content is added.
+     QZ_GEN as each topic's content is added.
      Each generator: { topic:'key', make: () => ({
          topic, prompt, answer, check(input)->{ok,msg}, explain,
          kind:'choice'|undefined, choices:[], placeholder }) }
@@ -49,8 +49,8 @@
     html += '</div>';
     if (!QZ_GEN.length) {
       out.innerHTML = `<div class="quiz-prompt"><div class="qp-topic">no questions yet</div>
-        Questions are generated from the lecture material. Send the slides and this fills up —
-        one set of generators per week, marked automatically.</div>`;
+        Questions are generated from the lecture material. Send the lectures and this fills up —
+        one set of generators per topic, marked automatically.</div>`;
       return;
     }
     if (!qzCur) { out.innerHTML = html + '<div class="quiz-prompt">Press <strong>New question</strong> to start.</div>'; return; }

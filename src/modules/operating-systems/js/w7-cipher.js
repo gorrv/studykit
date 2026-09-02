@@ -1,5 +1,5 @@
   /* ============================================================
-     TOOL 7: CAESAR / ROT13 CIPHER (Week 7)
+     TOOL 7: CAESAR / ROT13 CIPHER (Topic 06)
      ============================================================ */
   function shiftCipher(s, k) {
     return Array.from(s).map(c => {

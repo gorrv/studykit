@@ -1,5 +1,5 @@
   /* ============================================================
-     CPU SCHEDULING (Week 2)
+     CPU SCHEDULING (Topic 02)
 
      Five algorithms, one simulator. Rather than a branch per algorithm,
      the loop below advances the clock one unit at a time and asks a

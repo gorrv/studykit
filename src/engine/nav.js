@@ -1,13 +1,13 @@
   /* ============================================================
      SECTION SWITCHING
-     Only one .week-section is visible at a time. A module that needs to
+     Only one .topic-section is visible at a time. A module that needs to
      do something when a particular section appears — build a paper, seed
      a tool — pushes a handler onto NAV.onShow rather than editing this.
      ============================================================ */
   var NAV = { onShow: [], current: null };
 
-  function showWeek(id) {
-    var all = document.querySelectorAll('.week-section');
+  function showSection(id) {
+    var all = document.querySelectorAll('.topic-section');
     for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
 
     var target = document.getElementById(id);

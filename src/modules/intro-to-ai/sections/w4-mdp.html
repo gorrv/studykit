@@ -1,18 +1,18 @@
-<section id="w4-mdp" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 04 · Part 2 · Uncertainty in AI</div>
+<section id="t4-mdp" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 04 · Part 2 · Uncertainty in AI</div>
         <h1>Markov Decision Processes</h1>
-        <div class="week-subtitle">stop planning a route; start deciding what to do everywhere</div>
+        <div class="topic-subtitle">stop planning a route; start deciding what to do everywhere</div>
       </div>
       <div class="callout tip">
         <div class="callout-label">Before this page</div>
-        If any of this stops making sense, go back to <a href="#w4-start" onclick="showWeek('w4-start')">MDPs, Slowly</a> — it builds the same ideas up from scratch with no notation. This page is the formal version.
+        If any of this stops making sense, go back to <a href="#t4-start" onclick="showSection('t4-start')">MDPs, Slowly</a> — it builds the same ideas up from scratch with no notation. This page is the formal version.
       </div>
 
       <!-- ===== THE GRID ===== -->
       <h2 id="k-maze">The grid everything runs on</h2>
       <div class="callout">
-        <div class="callout-label">One picture, used for the whole week</div>
+        <div class="callout-label">One picture, used for the whole topic</div>
         <p style="margin:0 0 10px 0;">A robot in a 4×3 grid. It starts bottom-left. There is a wall at (2,2). Two squares end the game: <strong>+1</strong> at the top right, and <strong>−1</strong> just below it.</p>
         <div class="gw-wrap"><table class="gw"><tbody>
           <tr><td>−0.04</td><td>−0.04</td><td>−0.04</td><td class="term-pos"><strong>+1</strong><span class="gw-label">end</span></td></tr>
@@ -24,7 +24,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Why this needs anything new</div>
-        As a plain search problem this maze is trivial — Week 1 would solve it in seconds. <strong>It only gets hard when the moves stop being reliable.</strong> That is the next section, and it is the whole reason Week 4 exists.
+        As a plain search problem this maze is trivial — Topic 01 would solve it in seconds. <strong>It only gets hard when the moves stop being reliable.</strong> That is the next section, and it is the whole reason Topic 04 exists.
       </div>
 
       <!-- ===== NON-DETERMINISM ===== -->
@@ -62,7 +62,7 @@
         </div>
       </div>
       <div class="callout warn">
-        <div class="callout-label">Why this kills the Week 1 answer</div>
+        <div class="callout-label">Why this kills the Topic 01 answer</div>
         <p style="margin:0 0 10px 0;">Search says: go <code>Up, Up, Right, Right, Right</code>. Five actions. The chance that <em>all five</em> do what you asked is</p>
         <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:10px 0;">0.8<sup>5</sup> = <strong>0.328</strong></div>
         <p style="margin:0;">So about a third of the time the sequence runs as written. The other two thirds, something slipped.</p>
@@ -140,7 +140,7 @@
       </div>
       <div class="callout warn">
         <div class="callout-label">And immediately, a problem</div>
-        In Week 1 an action had <em>an outcome</em>, so it had <em>a cost</em>, so you could compare actions. <strong>Here an action has a distribution over outcomes</strong>, so it has no single value, so there is nothing obvious to compare.
+        In Topic 01 an action had <em>an outcome</em>, so it had <em>a cost</em>, so you could compare actions. <strong>Here an action has a distribution over outcomes</strong>, so it has no single value, so there is nothing obvious to compare.
         <p style="margin:10px 0 0 0;">We need a way to turn "a spread of possible outcomes" into one number. That number is an <strong>expected value</strong>, and it is what Part 3 is about.</p>
       </div>
 
@@ -209,7 +209,7 @@
         <div class="callout-label">Look at the bottom-right arrow — that one arrow is the whole lecture</div>
         At <strong>(4,1)</strong>, directly below the −1, the policy says <strong>Left</strong>. That is <em>away</em> from the goal.
         <p style="margin:10px 0 0 0;">Going Up would be the short way round. But a 10% sideways slip while moving Up puts you in the −1 and ends the game badly. Going the long way costs a few more −0.04 fees and avoids that risk entirely.</p>
-        <p style="margin:10px 0 0 0;"><strong>Nobody programmed caution.</strong> It came out of the arithmetic, because the expected value of the long route is higher. This is the single most quotable thing in Week 4.</p>
+        <p style="margin:10px 0 0 0;"><strong>Nobody programmed caution.</strong> It came out of the arithmetic, because the expected value of the long route is higher. This is the single most quotable thing in Topic 04.</p>
       </div>
 
       <!-- ===== REGIMES ===== -->
@@ -226,9 +226,9 @@
         <p style="margin:12px 0 0 0;">Same grid, same probabilities, same algorithm. <strong>Only the reward changed.</strong></p>
       </div>
       <div class="callout warn">
-        <div class="callout-label">This is Week 1's value alignment problem, in numbers</div>
+        <div class="callout-label">This is Topic 01's value alignment problem, in numbers</div>
         <strong>Nobody wrote "die quickly" anywhere.</strong> They wrote R = −1.65 and asked for the sum to be maximised, and the arithmetic did the rest.
-        <p style="margin:10px 0 0 0;">The reward function <em>is</em> the specification of what you want. Get it slightly wrong and you get an agent that is behaving perfectly correctly and doing something you never intended. Use the <a href="#v-sweep" onclick="showWeek('w4-vi')">reward sweep tool</a> to watch the policy flip as R crosses each boundary.</p>
+        <p style="margin:10px 0 0 0;">The reward function <em>is</em> the specification of what you want. Get it slightly wrong and you get an agent that is behaving perfectly correctly and doing something you never intended. Use the <a href="#v-sweep" onclick="showSection('t4-vi')">reward sweep tool</a> to watch the policy flip as R crosses each boundary.</p>
       </div>
 
       <!-- ===== EXAM ===== -->

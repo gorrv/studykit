@@ -1,8 +1,8 @@
-<section id="w8-eps" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 08 · Part 2 · Reinforcement Learning</div>
+<section id="t8-eps" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 08 · Part 2 · Reinforcement Learning</div>
         <h1>Random, Greedy &amp; ε-Greedy</h1>
-        <div class="week-subtitle">three ways to pick an arm, and only one is a compromise</div>
+        <div class="topic-subtitle">three ways to pick an arm, and only one is a compromise</div>
       </div>
 
       <!-- ===== TESTBED ===== -->
@@ -28,7 +28,7 @@
           <li><strong>The average arm is worth 0.</strong> A method that hovers at zero has learned nothing.</li>
           <li><strong>The best arm is worth about 1.54</strong> — that is the expected largest of ten standard normal draws.</li>
         </ul>
-        <p style="margin:12px 0 0 0;">Every curve in Figure 8.4 lives between those two numbers. Knowing them turns <a href="#z-7" onclick="showWeek('w8-ex')">Exercise 7</a> from a guess into arithmetic.</p>
+        <p style="margin:12px 0 0 0;">Every curve in Figure 8.4 lives between those two numbers. Knowing them turns <a href="#z-7" onclick="showSection('t8-ex')">Exercise 7</a> from a guess into arithmetic.</p>
       </div>
 
       <!-- ===== RANDOM ===== -->
@@ -42,7 +42,7 @@
       <div class="callout warn">
         <div class="callout-label">What is wrong with it</div>
         <strong>It collects information perfectly and then ignores it.</strong> Its estimates converge nicely — it just never acts on them.
-        <p style="margin:10px 0 0 0;">Its chance of taking the best arm is <strong>1/k on every step, forever</strong>. After a million pulls it is still 1/k. For the 50-armed case in <a href="#z-4" onclick="showWeek('w8-ex')">Exercise 4</a> that is 2%.</p>
+        <p style="margin:10px 0 0 0;">Its chance of taking the best arm is <strong>1/k on every step, forever</strong>. After a million pulls it is still 1/k. For the 50-armed case in <a href="#z-4" onclick="showSection('t8-ex')">Exercise 4</a> that is 2%.</p>
       </div>
 
       <!-- ===== GREEDY ===== -->
@@ -81,7 +81,7 @@
         <p style="margin:0 0 10px 0;">So the chance of taking the greedy arm is not 1 − ε. It is:</p>
         <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:10px 0;">(1 − ε) + ε·(1/k)</div>
         <p style="margin:0;">And the chance of taking any one specific non-greedy arm is <strong>ε/k</strong> — not zero.</p>
-        <p style="margin:10px 0 0 0;">That extra <strong>ε/k</strong> is exactly what <a href="#z-5" onclick="showWeek('w8-ex')">Exercise 5</a> tests.</p>
+        <p style="margin:10px 0 0 0;">That extra <strong>ε/k</strong> is exactly what <a href="#z-5" onclick="showSection('t8-ex')">Exercise 5</a> tests.</p>
       </div>
       <div class="callout exam">
         <div class="callout-label">The general formula</div>
@@ -98,7 +98,7 @@
           <tr><td><strong>0</strong></td><td>the greedy method</td><td>the random branch never fires</td></tr>
           <tr><td><strong>1</strong></td><td>the random method</td><td>the greedy branch never fires</td></tr>
         </table>
-        <p style="margin:12px 0 0 0;">That is <a href="#z-6" onclick="showWeek('w8-ex')">Exercise 6</a>. It is why ε-greedy is presented as <em>the</em> compromise rather than a third option — <strong>it contains both of the others.</strong></p>
+        <p style="margin:12px 0 0 0;">That is <a href="#z-6" onclick="showSection('t8-ex')">Exercise 6</a>. It is why ε-greedy is presented as <em>the</em> compromise rather than a third option — <strong>it contains both of the others.</strong></p>
       </div>
 
       <!-- ===== EXPERIMENTS ===== -->

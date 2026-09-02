@@ -1,8 +1,8 @@
-<section id="w7-trees" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 07 · Part 2 · Supervised Learning</div>
+<section id="t7-trees" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 07 · Part 2 · Supervised Learning</div>
         <h1>Decision Trees</h1>
-        <div class="week-subtitle">Gini, Gini-Split, and choosing what to ask first</div>
+        <div class="topic-subtitle">Gini, Gini-Split, and choosing what to ask first</div>
       </div>
       <!-- ===== USING A TREE ===== -->
       <h2 id="d-use">Using a tree before building one</h2>
@@ -93,7 +93,7 @@
         <div class="callout-label">Three properties worth carrying into the exam</div>
         <ul style="margin:6px 0 0 0;">
           <li><strong>Gini = 0 exactly when the node is pure</strong> — one class has everything.</li>
-          <li><strong>Maximum is 1 − 1/k</strong>, reached when all k classes are equally represented. For k = 2 that is <strong>½</strong> (<a href="#y-4" onclick="showWeek('w7-ex')">Exercise 4</a>); for k = 3 it is ⅔; for k = 4, ¾.</li>
+          <li><strong>Maximum is 1 − 1/k</strong>, reached when all k classes are equally represented. For k = 2 that is <strong>½</strong> (<a href="#y-4" onclick="showSection('t7-ex')">Exercise 4</a>); for k = 3 it is ⅔; for k = 4, ¾.</li>
           <li><strong>Equivalently Gini(v) = 1 − Σ pᵢ²</strong>, since Σpᵢ = 1. Faster to compute under time pressure, and identical in value.</li>
         </ul>
       </div>
@@ -199,7 +199,7 @@
       </div>
       <div class="callout warn">
         <div class="callout-label">What happens when you run out of features before you run out of impurity</div>
-        Two rows with identical features but different classes can never be separated. The node becomes a <strong>leaf labelled with the majority class</strong> — impure, and accepting some training error. Table 7.4 in <a href="#y-5" onclick="showWeek('w7-ex')">Exercise 5</a> does this on purpose: with 3 binary features there are only 8 possible feature vectors but 20 rows and 4 classes, so <strong>no tree on those features can be perfect.</strong>
+        Two rows with identical features but different classes can never be separated. The node becomes a <strong>leaf labelled with the majority class</strong> — impure, and accepting some training error. Table 7.4 in <a href="#y-5" onclick="showSection('t7-ex')">Exercise 5</a> does this on purpose: with 3 binary features there are only 8 possible feature vectors but 20 rows and 4 classes, so <strong>no tree on those features can be perfect.</strong>
       </div>
       <!-- ===== TREE TOOL ===== -->
       <h2 id="d-ttool">Tool · Decision tree builder</h2>

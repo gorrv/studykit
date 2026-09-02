@@ -1,7 +1,7 @@
   /* ============================================================
      TOOL 22: SELF-TEST GENERATOR
      Questions are generated, and marked by the same engines the
-     week-by-week tools use.
+     topic-by-topic tools use.
      ============================================================ */
   /* parse a user-written substitution into a canonical string */
   function qzCanonSubst(txt) {

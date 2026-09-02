@@ -1,18 +1,18 @@
-<section id="week8" class="week-section">
+<section id="topic7" class="topic-section">
 
-      <div class="week-header">
-        <div class="week-eyebrow">Week 08 · Summary &amp; Advanced Topics</div>
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 07 · Summary &amp; Advanced Topics</div>
         <h1>Unix History &amp; Microkernels</h1>
-        <div class="week-subtitle">where operating systems came from — and where they didn't go</div>
+        <div class="topic-subtitle">where operating systems came from — and where they didn't go</div>
       </div>
 
       <div class="callout exam">
         <div class="callout-label">⚠ Examinability note</div>
-        Most of this week is <strong>reinforcement and context</strong> — fascinating, but <em>non-examinable</em>. Only two things here are examinable: <strong>fork() and exec()</strong> (OSTEP ch.5) and <strong>microkernels</strong>. Those two are marked with a ★ below. The rest is for your interest (and makes you a better-rounded engineer).
+        Most of this topic is <strong>reinforcement and context</strong> — fascinating, but <em>non-examinable</em>. Only two things here are examinable: <strong>fork() and exec()</strong> (OSTEP ch.5) and <strong>microkernels</strong>. Those two are marked with a ★ below. The rest is for your interest (and makes you a better-rounded engineer).
       </div>
 
       <!-- ===== Why Unix ===== -->
-      <h2 id="w8-unix">Why Unix matters <span class="context-badge">context</span></h2>
+      <h2 id="t7-unix">Why Unix matters <span class="context-badge">context</span></h2>
 
       <p>Unix was created at AT&amp;T Bell Labs in <strong>1969–71</strong> by Dennis Ritchie and Ken Thompson, as a deliberately simple reaction to the over-ambitious, delayed <strong>Multics</strong> project. Much of the technical vocabulary of OSes comes from Unix: <em>kernel, shell, inode, pipe, root</em>. It popularised concepts now taken for granted: hierarchical filesystem, byte-oriented files, shell commands as files, I/O redirection, forking processes. It became the basis of the <strong>POSIX</strong> standard.</p>
 
@@ -22,7 +22,7 @@
       </div>
 
       <!-- ===== fork/exec ===== -->
-      <h2 id="w8-fork">Big idea (1): fork() &amp; exec() <span class="examinable">★ examinable</span></h2>
+      <h2 id="t7-fork">Big idea (1): fork() &amp; exec() <span class="examinable">★ examinable</span></h2>
 
       <p>To create a new process in Unix, you don't build one from scratch — you <strong>fork()</strong> (duplicate) the current process, then optionally <strong>exec()</strong> (replace yourself with a different program).</p>
 
@@ -34,7 +34,7 @@
           <li>In the <strong>child</strong>: returns <strong>0</strong>.</li>
           <li>On <strong>failure</strong>: returns negative (no child created).</li>
         </ul>
-        <p style="margin:8px 0 0 0;">Both processes then continue from the <em>same point</em> (right after the fork), each with their <em>own copy</em> of memory — implemented efficiently with <strong>copy-on-write</strong> (Week 4!).</p>
+        <p style="margin:8px 0 0 0;">Both processes then continue from the <em>same point</em> (right after the fork), each with their <em>own copy</em> of memory — implemented efficiently with <strong>copy-on-write</strong> (Topic 04!).</p>
       </div>
 
       <div class="code-block">
@@ -75,7 +75,7 @@ if (rc &lt; 0) {
       </div>
 
       <!-- ===== FORK TOOL ===== -->
-      <h3 id="w8-forktool">🛠️ Interactive: fork() Return-Value Simulator</h3>
+      <h3 id="t7-forktool">🛠️ Interactive: fork() Return-Value Simulator</h3>
       <p>The "called once, returns twice" behaviour confuses everyone at first. Step through a small program with fork() calls and watch the process tree branch — each fork doubles the processes, and you can see exactly what each one prints.</p>
 
       <div class="tool" data-run="runFork">
@@ -105,7 +105,7 @@ if (rc &lt; 0) {
       </div>
 
       <!-- ===== Everything is a file ===== -->
-      <h2 id="w8-everything">Big idea (2): "Everything is a file" <span class="context-badge">context</span></h2>
+      <h2 id="t7-everything">Big idea (2): "Everything is a file" <span class="context-badge">context</span></h2>
 
       <p>Instead of separate categories (with separate interfaces) for system commands, devices, and files, Unix maximises use of the single <strong>file abstraction</strong>:</p>
       <ul>
@@ -120,7 +120,7 @@ if (rc &lt; 0) {
       </div>
 
       <!-- ===== Microkernels ===== -->
-      <h2 id="w8-microkernel">Microkernels <span class="examinable">★ examinable</span></h2>
+      <h2 id="t7-microkernel">Microkernels <span class="examinable">★ examinable</span></h2>
 
       <p>A traditional Unix/Linux kernel is a <strong>monolith</strong>: filesystems, network stack, device drivers, scheduling, and memory management all run together in kernel mode. What's wrong with that?</p>
 
@@ -170,7 +170,7 @@ if (rc &lt; 0) {
       </div>
 
       <!-- ===== Advanced ===== -->
-      <h2 id="w8-advanced">Advanced topics (interest only) <span class="context-badge">context</span></h2>
+      <h2 id="t7-advanced">Advanced topics (interest only) <span class="context-badge">context</span></h2>
 
       <p>Two big questions the course leaves you with:</p>
 
@@ -187,14 +187,14 @@ if (rc &lt; 0) {
 
       <div class="callout">
         <div class="callout-label">A modern echo: WebAssembly</div>
-        "Compile to the browser" (first JavaScript, now <strong>WebAssembly</strong>) is the same idea reborn: run code over a software-emulated memory ("memory" is a JS array) with JIT compilation for speed. Ironically, people end up re-implementing a POSIX-like OS <em>in the browser</em> — "that virus again," as the slides put it. Unix-style primitives remain endemic.
+        "Compile to the browser" (first JavaScript, now <strong>WebAssembly</strong>) is the same idea reborn: run code over a software-emulated memory ("memory" is a JS array) with JIT compilation for speed. Ironically, people end up re-implementing a POSIX-like OS <em>in the browser</em> — "that virus again," as the lectures put it. Unix-style primitives remain endemic.
       </div>
 
       <!-- ===== Exam ===== -->
-      <h2 id="w8-exam">Exam-style takeaways</h2>
+      <h2 id="t7-exam">Exam-style takeaways</h2>
 
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 8 (only ★ topics are examinable)</div>
+        <div class="callout-label">Key things to nail for Topic 07 (only ★ topics are examinable)</div>
         <ol>
           <li>★ <strong>fork()</strong> — called once, returns twice: child's PID in parent, 0 in child, negative on failure. Both continue from the same point with their own (copy-on-write) memory.</li>
           <li>★ <strong>exec()</strong> — replaces the current process with a new program. The <strong>fork-then-exec</strong> pattern, and why it's good (child sets itself up: pipes, fds, env — no mega-API needed).</li>
@@ -204,6 +204,6 @@ if (rc &lt; 0) {
         </ol>
       </div>
 
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">🎓 End of Week 8 — the end of the OS half of the module. The concurrency mini-course continues in Week 9.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">🎓 End of Topic 07 — the end of the OS half of the module. The concurrency mini-course continues in Topic 08.</p>
 
     </section>

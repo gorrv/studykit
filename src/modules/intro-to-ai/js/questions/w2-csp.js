@@ -25,7 +25,7 @@
         e: 'SA has <strong>five</strong> neighbours. Before: 3⁵ = 243. After removing blue from each: 2⁵ = <strong>32</strong>. That is the <strong>87%</strong> reduction the slide quotes.' },
       { q: 'How many constraints are in the Australia map-colouring CSP?', a: '9', c: ['9', '7', '5', '21'],
         e: 'SA≠WA, SA≠NT, SA≠Q, SA≠NSW, SA≠V, WA≠NT, NT≠Q, Q≠NSW, NSW≠V — <strong>nine</strong>. Five of them involve SA; T appears in none.' },
-      { q: 'Backtracking search is a variation of which Week 1 algorithm?', a: 'Depth-first search', c: ['Depth-first search', 'Breadth-first search', 'Uniform-cost search', 'A*'],
+      { q: 'Backtracking search is a variation of which Topic 01 algorithm?', a: 'Depth-first search', c: ['Depth-first search', 'Breadth-first search', 'Uniform-cost search', 'A*'],
         e: 'One variable assigned per level, dive down, back up on failure. All solutions sit at depth n, so there is nothing for BFS to gain.' }
     ];
     CSPQ.forEach(d => QZ_GEN.push({ topic: 'csp', make: () => ({

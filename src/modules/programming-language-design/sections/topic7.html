@@ -1,8 +1,8 @@
-<section id="week9" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 09 · Lectures 8.1 – 8.3</div>
+<section id="topic7" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 07 · Logic programming</div>
         <h1>Introduction to Logic Programming</h1>
-        <div class="week-subtitle">describe the problem; let inference find the answer</div>
+        <div class="topic-subtitle">describe the problem; let inference find the answer</div>
       </div>
       <div class="callout">
         <div class="callout-label">The founding idea</div>
@@ -11,10 +11,10 @@
           <li><strong>Logic</strong> is used to <em>express knowledge, describe the problem</em>, etc.</li>
           <li><strong>Inference</strong> is used to <em>compute, manipulate knowledge, and obtain a solution</em> to the problem.</li>
         </ul>
-        <p style="margin:10px 0 0 0;">Week 1 put it in one line: <em>"programs describe a problem rather than defining an algorithmic implementation."</em></p>
+        <p style="margin:10px 0 0 0;">Topic 01 put it in one line: <em>"programs describe a problem rather than defining an algorithmic implementation."</em></p>
       </div>
       <!-- ===== ADVANTAGES ===== -->
-      <h2 id="w9-intro">Advantages and disadvantages</h2>
+      <h2 id="t7-intro">Advantages and disadvantages</h2>
       <div class="callout exam">
         <div class="callout-label">Advantages — note which one is special</div>
         <ul style="margin:6px 0 0 0;">
@@ -27,7 +27,7 @@
         <p style="margin:10px 0 0 0;"><strong>The first points are shared with functional languages, but the last point is specific to logic programming languages.</strong> If an exam asks what distinguishes logic from functional programming, <em>this</em> is the answer — and the <code>reverse</code> example below is the evidence.</p>
       </div>
       <!-- ===== REVERSE ===== -->
-      <h2 id="w9-reverse">The example that makes the point</h2>
+      <h2 id="t7-reverse">The example that makes the point</h2>
       <div class="pl"><span class="at">reverse</span>([],[]).
 <span class="at">reverse</span>([<span class="v">H</span>|<span class="v">T</span>],<span class="v">List</span>) <span class="op">:-</span> reverse(<span class="v">T</span>,<span class="v">Z</span>), append(<span class="v">Z</span>,[<span class="v">H</span>],<span class="v">List</span>).</div>
       <div class="compare-3">
@@ -60,7 +60,7 @@ false.</div>
         </ul>
       </div>
       <!-- ===== PROLOG ===== -->
-      <h2 id="w9-prolog">Prolog</h2>
+      <h2 id="t7-prolog">Prolog</h2>
       <p>Several logic programming languages have been developed, but the most popular is <strong>Prolog</strong>.</p>
       <table>
         <tr><th>Aspect</th><th></th></tr>
@@ -72,7 +72,7 @@ false.</div>
       </table>
       <p style="font-size:14px;">The course suggests <strong>SWI-Prolog</strong> (open source, University of Amsterdam). At startup you get the goal prompt <code>?-</code>; load a program with <code>?- ['myprogram.pl'].</code></p>
       <!-- ===== TERMS ===== -->
-      <h2 id="w9-terms">Syntax basics: terms, atomic formulas, literals</h2>
+      <h2 id="t7-terms">Syntax basics: terms, atomic formulas, literals</h2>
       <div class="callout exam">
         <div class="callout-label">Domain of computation: terms</div>
         The set of terms is defined using:
@@ -122,7 +122,7 @@ snowy(<span class="v">X</span>)</div>
         </div>
       </div>
       <!-- ===== SYNTAX TOOL ===== -->
-      <h3 id="w9-syntaxtool">🛠️ Interactive: Term, Literal &amp; Clause Checker</h3>
+      <h3 id="t7-syntaxtool">🛠️ Interactive: Term, Literal &amp; Clause Checker</h3>
       <p>Declare a signature, then check any expression: is it a valid term? a literal? a Horn clause — and if so, is it a <strong>fact</strong>, a <strong>rule</strong> or a <strong>goal</strong>? Valid clauses are also rendered in Prolog syntax, which is exactly what the 8.2 exercise asks for.</p>
       <div class="tool" data-run="runLpCheck">
         <div class="tool-header">
@@ -156,7 +156,7 @@ snowy(<span class="v">X</span>)</div>
         <div id="lc-output" class="tool-output"></div>
       </div>
       <!-- ===== CLAUSES ===== -->
-      <h2 id="w9-clauses">Horn clauses</h2>
+      <h2 id="t7-clauses">Horn clauses</h2>
       <div class="callout exam">
         <div class="callout-label">Definition</div>
         A <strong>Horn clause</strong> is a <strong>disjunction of literals of which <em>at most one</em> may be positive</strong>. So it may have:
@@ -167,7 +167,7 @@ snowy(<span class="v">X</span>)</div>
         </ul>
         <p style="margin:10px 0 0 0;">A Horn clause with one positive literal (the first two cases) is called a <strong>definite clause</strong>. <em>Note: this terminology is not uniform — in some books all Horn clauses are called definite clauses.</em></p>
       </div>
-      <h2 id="w9-factsrules">Facts, rules, goals and programs</h2>
+      <h2 id="t7-factsrules">Facts, rules, goals and programs</h2>
       <div class="concept-grid">
         <div class="concept-card" data-num="1">
           <h3>Fact</h3>
@@ -218,7 +218,7 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
         <tr><td><strong>Only</strong> negative literals</td><td><strong>goal / query</strong> &nbsp;<code>:- snowy(X).</code></td></tr>
       </table>
       <!-- ===== MECHANISM ===== -->
-      <h2 id="w9-mechanism">The informal procedural mechanism</h2>
+      <h2 id="t7-mechanism">The informal procedural mechanism</h2>
       <p>Program: <code>rainy(tuesday).</code> &nbsp;<code>temperature(tuesday, celsius(0)).</code> &nbsp;<code>snowy(X) :- rainy(X), temperature(X, celsius(Y)), Y =&lt; 0.</code> &nbsp;&nbsp;Query: <code>:- snowy(X).</code></p>
       <div class="goal-trace">
         <div class="gt-row"><span class="gt-n">1</span><span class="gt-goal">:- snowy(X).<span class="gt-note">look for clauses with the same predicate in the head</span></span></div>
@@ -229,7 +229,7 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
       </div>
       <div class="callout tip">
         <div class="callout-label">What just happened, in Part-1 vocabulary</div>
-        That is a <strong>transition system</strong>: configurations are <em>goals</em>, and one transition replaces the selected literal by the body of a matching clause, under a substitution. Weeks 3–4 built exactly this machinery for SIMP. <strong>Week 10 will make it formal</strong> — it is called <em>SLD-resolution</em>.
+        That is a <strong>transition system</strong>: configurations are <em>goals</em>, and one transition replaces the selected literal by the body of a matching clause, under a substitution. Topics 3–4 built exactly this machinery for SIMP. <strong>Topic 08 will make it formal</strong> — it is called <em>SLD-resolution</em>.
       </div>
       <div class="exc">
         <div class="exc-n">Exercise · fact, rule, goal, or none?</div>
@@ -243,7 +243,7 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
         </div>
       </div>
       <!-- ===== SUBSTITUTIONS ===== -->
-      <h2 id="w9-subst">Variable substitutions</h2>
+      <h2 id="t7-subst">Variable substitutions</h2>
       <div class="callout exam">
         <div class="callout-label">Definition</div>
         Values are terms associated to variables by means of automatically generated substitutions.
@@ -254,7 +254,7 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
         <p style="margin:10px 0 0 0;">Notice that <strong>we always replace variables with terms (not the other way around)</strong>, because only variables can be replaced and <em>not all terms are variables</em>.</p>
       </div>
       <div class="callout warn">
-        <div class="callout-label">Application is <em>simultaneous</em> — the detail the slides dwell on</div>
+        <div class="callout-label">Application is <em>simultaneous</em> — the detail the lectures dwell on</div>
         A substitution σ is applied to a term t or literal L by <strong>simultaneously</strong> replacing each variable occurring in dom(σ) by the term associated to it. The result is written <strong>tσ</strong> or <strong>Lσ</strong>.
         <p style="margin:10px 0 0 0;">Consider σ = {X ↦ Y, Y ↦ a}. <em>σ is a set.</em> If we applied it in sequence, say left to right, we would effectively replace <strong>X by a</strong> in t. <strong>In fact, we need to replace X by Y at the same time that we replace Y by a.</strong></p>
       </div>
@@ -276,7 +276,7 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
       </div>
       <p style="font-size:14px;">The second example makes two points at once: <strong>variables that do not appear in the term are not affected</strong>, and the <code>Y ↦ Z</code> mapping does <em>not</em> then trigger <code>Z ↦ b</code> — simultaneity again.</p>
       <!-- ===== SUBST TOOL ===== -->
-      <h3 id="w9-substtool">🛠️ Interactive: Substitution Applier</h3>
+      <h3 id="t7-substtool">🛠️ Interactive: Substitution Applier</h3>
       <p>Apply a substitution and see the result — alongside what you would <em>wrongly</em> get by applying the mappings one after another. The difference is the whole point of the word "simultaneously".</p>
       <div class="tool" data-run="runSubst">
         <div class="tool-header">
@@ -309,7 +309,7 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
         <p style="margin:10px 0 0 0;">We would like to "resolve" the negative literal <code>r(a)</code> in the goal with an instance of the positive literal <code>r(X)</code>, but <strong>we need to "commit" to X being bound to the constant a first</strong>. This is done by applying σ = {X ↦ a} to the rule, giving the instance <code>r(a) :- p(a), q(a).</code></p>
       </div>
       <!-- ===== SUMMARY ===== -->
-      <h2 id="w9-summary">Summary of clauses in Prolog</h2>
+      <h2 id="t7-summary">Summary of clauses in Prolog</h2>
       <div class="callout exam">
         <div class="callout-label">Four facts that decide how a program behaves</div>
         <ul style="margin:6px 0 0 0;">
@@ -347,7 +347,7 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
         </ul>
       </div>
       <!-- ===== BUILT-INS ===== -->
-      <h2 id="w9-builtins">Built-in predicates</h2>
+      <h2 id="t7-builtins">Built-in predicates</h2>
       <p>The programmer can freely choose the names of variables, function symbols and predicate symbols. <strong>However, there are some built-in predicates with specific meanings.</strong></p>
       <table>
         <tr><th>Category</th><th>Predicates</th><th>Example</th></tr>
@@ -390,7 +390,7 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
         <p style="font-size:13px; color:var(--ink-soft);">Note the base case <code>heatwave(Day, Day)</code>: the <em>same variable twice in the head</em> forces the two arguments to be equal — a pattern with no direct equivalent in a functional language.</p>
       </div>
       <!-- ===== LISTS ===== -->
-      <h2 id="w9-lists">Lists in Prolog</h2>
+      <h2 id="t7-lists">Lists in Prolog</h2>
       <p>Like in functional programming, linked lists are a very important data structure and have their own special syntax.</p>
       <ul>
         <li>The constant <strong><code>[]</code></strong> denotes the <strong>empty list</strong>.</li>
@@ -436,7 +436,7 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
         <p style="font-size:13px; color:var(--ink-soft);"><strong>Change the names slightly before testing in Prolog</strong> — these are already pre-defined. Note <code>member/2</code> needs no arithmetic and no base-case failure clause: the first clause succeeds when X <em>is</em> the head, the second recurses; a query on the empty list simply matches nothing and fails.</p>
       </div>
       <!-- ===== PROLOG TOOL ===== -->
-      <h3 id="w9-prologtool">🛠️ Interactive: Prolog Interpreter</h3>
+      <h3 id="t7-prologtool">🛠️ Interactive: Prolog Interpreter</h3>
       <p>A working resolution engine: leftmost literal selection, clauses tried in <strong>program order</strong>, with automatic <strong>backtracking</strong>. It reports every solution with its bindings, and shows the goal sequence — the formal version of the "informal procedural mechanism" above.</p>
       <div class="tool" data-run="runProlog">
         <div class="tool-header">
@@ -472,7 +472,7 @@ likes(X, P) :- based(P, Y), likes(X, Y).</textarea>
         <div id="pr-output" class="tool-output"></div>
       </div>
       <!-- ===== NEGATION ===== -->
-      <h2 id="w9-negation">Language limitations: negation</h2>
+      <h2 id="t7-negation">Language limitations: negation</h2>
       <div class="callout exam">
         <div class="callout-label">What you cannot write</div>
         Prolog programs are composed of <strong>definite clauses</strong>, which contain <em>exactly one positive literal</em>. This means it is <strong>not possible to directly state facts involving negative statements, nor rules with a negative literal in the head</strong>:
@@ -481,7 +481,7 @@ likes(X, P) :- based(P, Y), likes(X, Y).</textarea>
   r(<span class="v">X</span>) :- p(<span class="v">X</span>).   <span class="cm">OK</span>
 ¬r(<span class="v">X</span>) :- p(<span class="v">X</span>).   <span class="cm">not allowed!</span></div>
       </div>
-      <h2 id="w9-resolution">Why the restriction? General resolution</h2>
+      <h2 id="t7-resolution">Why the restriction? General resolution</h2>
       <p>Computation is done in terms of the <strong>resolution rule</strong>:</p>
       <div class="deriv-box">
         <div class="inf">
@@ -512,10 +512,10 @@ likes(X, P) :- based(P, Y), likes(X, Y).</textarea>
           <li>The resolution of a program clause with a goal can be made <strong>unique and deterministic</strong> (if we use program order and employ a selection function) — <strong>"Selective"</strong>.</li>
           <li>The resolvent of two clauses will either be empty or generate a <strong>new goal</strong> — <strong>"Linear"</strong>.</li>
         </ul>
-        <p style="margin:10px 0 0 0;">Selective · Linear · <strong>Definite</strong> — <strong>SLD</strong>-resolution, the semantics named on the Prolog slide. Week 10 makes it formal. Notice this is an argument you can reconstruct: <em>the restriction to Horn clauses is not arbitrary, it is exactly what makes resolution deterministic enough to be a programming language.</em></p>
+        <p style="margin:10px 0 0 0;">Selective · Linear · <strong>Definite</strong> — <strong>SLD</strong>-resolution, the semantics named on the Prolog slide. Topic 08 makes it formal. Notice this is an argument you can reconstruct: <em>the restriction to Horn clauses is not arbitrary, it is exactly what makes resolution deterministic enough to be a programming language.</em></p>
       </div>
       <!-- ===== NAF ===== -->
-      <h2 id="w9-naf">Negation as failure</h2>
+      <h2 id="t7-naf">Negation as failure</h2>
       <div class="callout exam">
         <div class="callout-label">The principle</div>
         To mitigate the lack of logical negation, Prolog uses a weaker form called <strong>negation as failure</strong>. Informally: <strong>failure to prove a literal A is taken as proof that ¬A follows.</strong>
@@ -539,7 +539,7 @@ likes(X, P) :- based(P, Y), likes(X, Y).</textarea>
         <div class="callout-label">Negation as failure is <em>not</em> logical negation</div>
         It is negation relative to <em>what the program happens to say</em>. <code>\+ s(a)</code> succeeds not because the program asserts that s(a) is false, but because it fails to prove it — the <strong>closed-world assumption</strong>. Anything not derivable is treated as false. That's why the slide says these negative facts are "<em>indirectly assumed</em>".
       </div>
-      <h2 id="w9-disjunction">Language limitations: disjunction</h2>
+      <h2 id="t7-disjunction">Language limitations: disjunction</h2>
       <div class="callout warn">
         <div class="callout-label">Why A ∨ B cannot be represented faithfully</div>
         Each clause is a disjunction of literals of which <em>at most one</em> is positive, so a genuine disjunction of two positive literals is not expressible.
@@ -549,9 +549,9 @@ likes(X, P) :- based(P, Y), likes(X, Y).</textarea>
         </ul>
       </div>
       <!-- ===== EXAM ===== -->
-      <h2 id="w9-exam">Exam-style takeaways</h2>
+      <h2 id="t7-exam">Exam-style takeaways</h2>
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 9</div>
+        <div class="callout-label">Key things to nail for Topic 07</div>
         <ol>
           <li><strong>The core idea</strong> — logic expresses knowledge/describes the problem; inference computes and obtains a solution.</li>
           <li><strong>Advantages</strong> — knowledge-based; declarative (<em>what</em> not <em>how</em>); precise and simple semantics; one formalism for specification, program and proof; <strong>the same program can be used in many different ways</strong>. Know that only the <em>last</em> is specific to logic programming.</li>
@@ -579,5 +579,5 @@ likes(X, P) :- based(P, Y), likes(X, Y).</textarea>
           <li><strong>Disjunction</strong> — cannot be represented faithfully; adding both facts gives the stronger A ∧ B; rewriting via <code>\+</code> does not behave like true disjunction.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 9 notes. Next: the semantics of logic programming — SLD-resolution, formally.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 07 notes. Next: the semantics of logic programming — SLD-resolution, formally.</p>
     </section>

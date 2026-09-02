@@ -114,7 +114,7 @@
   .fe-log div { padding: 2px 0; border-bottom: 1px solid var(--rule); }
   .fe-log div:last-child { border-bottom: none; }
   .fe-out { font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: var(--code-bg); color: var(--code-cm); padding: 8px 12px; border-radius: 6px; margin-top: 8px; min-height: 20px; }
-  /* ===== Week 2 components ===== */
+  /* ===== Topic 2 components ===== */
   /* Memory cells / l-value r-value */
   .memcells { display: flex; flex-direction: column; max-width: 460px; margin: 22px auto; font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
   .memcell { display: grid; grid-template-columns: 90px 100px 1fr; border: 1px solid var(--ink); border-bottom: none; }
@@ -160,7 +160,7 @@
   .loop-card h5 { margin: 0 0 4px 0; font-family: 'Fraunces', serif; font-size: 16px; }
   .loop-card .lc-kind { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-muted); }
   .loop-card .lc-code { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; background: rgba(var(--accent-rgb), 0.07); padding: 5px 9px; border-radius: 4px; display: inline-block; margin: 6px 0; }
-  /* ===== Week 3 components ===== */
+  /* ===== Topic 3 components ===== */
   /* Transition rule tables */
   .rules { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; margin: 20px 0; box-shadow: var(--shadow); overflow-x: auto; }
   .rules table { margin: 0; box-shadow: none; background: transparent; border-radius: 0; }
@@ -199,7 +199,7 @@
   /* SIMP AST */
   .ast { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 20px; margin: 20px 0; box-shadow: var(--shadow); text-align: center; overflow-x: auto; }
   .ast-legend { font-size: 12px; color: var(--ink-muted); font-style: italic; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--rule); }
-  /* ===== Week 4 components ===== */
+  /* ===== Topic 4 components ===== */
   /* Inference-rule / derivation trees */
   .inf { display: inline-block; text-align: center; vertical-align: bottom; font-family: 'IBM Plex Mono', monospace; font-size: 12px; margin: 0 7px; }
   /* Rule reference blocks (SOS style) */
@@ -227,7 +227,7 @@
   .cat.term { border-top-color: var(--accent-3); } .cat.term h4 { color: var(--accent-3); }
   .cat.stuck { border-top-color: var(--accent-2); } .cat.stuck h4 { color: var(--accent-2); }
   .cat.div { border-top-color: var(--accent-4); } .cat.div h4 { color: var(--accent-4); }
-  /* ===== Week 6 components ===== */
+  /* ===== Topic 6 components ===== */
   .hs { background: var(--code-bg); color: var(--code-fg); padding: 16px 20px; border-radius: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.65; overflow-x: auto; margin: 16px 0; box-shadow: var(--shadow); white-space: pre; }
   .hs .kw { color: var(--code-kw); } .hs .cm { color: var(--code-cm); } .hs .ty { color: var(--code-ty); } .hs .fn { color: var(--highlight); } .hs .st { color: var(--code-st); }
   /* Reduction sequence display */
@@ -261,7 +261,7 @@
   /* Exercise cards */
   .exc { border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 18px 0; background: var(--surface); box-shadow: var(--shadow); }
   .exc .exc-sig { font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: rgba(var(--accent-rgb), 0.08); padding: 4px 9px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
-  /* ===== Week 9 components ===== */
+  /* ===== Topic 9 components ===== */
   .pl { background: var(--code-bg); color: var(--code-fg); padding: 16px 20px; border-radius: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.65; overflow-x: auto; margin: 16px 0; box-shadow: var(--shadow); white-space: pre; }
   .pl .v { color: var(--code-ty); } .pl .at { color: var(--code-cm); } .pl .op { color: var(--code-kw); } .pl .cm { color: var(--code-dim2); font-style: italic; } .pl .st { color: var(--code-st); }
   /* Goal-sequence trace */
@@ -291,7 +291,7 @@
   .subst-grid .sg-val { color: var(--ink); }
   .subst-grid .sg-val.res { color: var(--accent-3); font-weight: 600; }
   .subst-grid .sg-val.bad { color: var(--accent-2); }
-  /* ===== Week 10 components ===== */
+  /* ===== Topic 10 components ===== */
   /* Unification step table */
   .unif { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; margin: 14px 0; box-shadow: var(--shadow); overflow-x: auto; }
   .unif-row { display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding: 7px 14px; border-bottom: 1px dashed var(--rule); align-items: baseline; }
@@ -337,12 +337,12 @@
   @media print { .search-box, .search-results { display: none !important; } }
   @media print {
     aside, .tool, .no-print { display: none !important; }
-    .week-section { display: block !important; }
+    .topic-section { display: block !important; }
     main { padding: 0; max-width: 100%; }
     .cram-grid { grid-template-columns: 1fr 1fr; }
   }
   /* Section switching */
-  .week-section { display: none; }
+  .topic-section { display: none; }
   @media (max-width: 900px) {
     .layout { grid-template-columns: 1fr; }
     aside { position: relative; height: auto; }

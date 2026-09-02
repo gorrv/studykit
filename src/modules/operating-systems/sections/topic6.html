@@ -1,15 +1,15 @@
-<section id="week7" class="week-section">
+<section id="topic6" class="topic-section">
 
-      <div class="week-header">
-        <div class="week-eyebrow">Week 07 · Security</div>
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 06 · Security</div>
         <h1>Access Control, Authentication &amp; Cryptography</h1>
-        <div class="week-subtitle">a mindset of constant suspicion</div>
+        <div class="topic-subtitle">a mindset of constant suspicion</div>
       </div>
 
-      <p>This is the big security week. The core mindset: <strong>security means adversarial</strong> — someone is <em>actively trying</em> to break your system. This is different from mere <strong>fault-tolerance</strong> (protecting against accidental error/incompetence). C, Unix, and the Internet weren't really designed for adversaries — which is why security is hard.</p>
+      <p>This is the big security topic. The core mindset: <strong>security means adversarial</strong> — someone is <em>actively trying</em> to break your system. This is different from mere <strong>fault-tolerance</strong> (protecting against accidental error/incompetence). C, Unix, and the Internet weren't really designed for adversaries — which is why security is hard.</p>
 
       <!-- ===== Access control ===== -->
-      <h2 id="w7-accesscontrol">Access control basics</h2>
+      <h2 id="t6-accesscontrol">Access control basics</h2>
 
       <p>Most modern OSes are <strong>multi-user</strong>: they give each process a <strong>user identity</strong> (alice, bob, ...) — abstractly, a label denoting privilege. Access to shareable objects (like files) is controlled by the system according to a <strong>policy</strong>: "Alice can read Alice's mail, but Bob can't."</p>
 
@@ -42,7 +42,7 @@ int fd = open("/home/alice/mail", O_RDONLY);
       </div>
 
       <!-- ===== Matrix / ACL vs cap ===== -->
-      <h2 id="w7-matrix">The access control matrix: ACLs vs capabilities</h2>
+      <h2 id="t6-matrix">The access control matrix: ACLs vs capabilities</h2>
 
       <p>We can model <em>all</em> policy as one big table — the <strong>access control matrix</strong> — of who (subject) has what access to which object:</p>
 
@@ -88,7 +88,7 @@ int fd = open("/home/alice/mail", O_RDONLY);
       </table>
 
       <!-- ===== CIA ===== -->
-      <h2 id="w7-cia">Security properties (the CIA triad + more)</h2>
+      <h2 id="t6-cia">Security properties (the CIA triad + more)</h2>
 
       <div class="cia-grid">
         <div class="cia-card">
@@ -124,7 +124,7 @@ int fd = open("/home/alice/mail", O_RDONLY);
       <p style="text-align:center; font-style:italic; color:var(--ink-muted); font-size:13px; margin-top:24px;">Each slice is a distinct practice (defensive programming, static analysis, memory-safe languages, authentication, tight access control, firewalling, audit logging, user training...). An attack only gets through if the holes line up.</p>
 
       <!-- ===== Least privilege ===== -->
-      <h2 id="w7-leastpriv">Least privilege</h2>
+      <h2 id="t6-leastpriv">Least privilege</h2>
 
       <p>When you run a program, how much privilege does it get? Usually <strong>all of yours</strong> — it can access any of your files, run anything you can run. That's fine <em>if</em> the program is correct and trustworthy. But what about a big, complex program like a web server running as <strong>root</strong> (the superuser, who can do everything)?</p>
 
@@ -138,8 +138,8 @@ int fd = open("/home/alice/mail", O_RDONLY);
       <h3>Unix's "80% solution": setuid / setgid</h3>
       <p>Some programs genuinely need to <strong>combine multiple authorities</strong> (e.g. <code>submit</code> needs <em>your</em> permission on your coursework + <em>the system's</em> permission on the submission directory). Unix handles this with special permission bits:</p>
       <div class="code-block">
-$ ls -l /shared/5CCS2OSC/submit
--rwsrws--x 1 k2144518 k2144518 ... submit
+$ ls -l /shared/coursework/submit
+-rwsrws--x 1 grader grader ... submit
 <span style="color:#7eb892;">    ↑   ↑</span>
 <span style="color:#7eb892;">  first s : setuid — runs with the OWNER's uid, not the invoker's</span>
 <span style="color:#7eb892;">  second s: setgid — runs with the owner's gid</span>
@@ -148,7 +148,7 @@ $ ls -l /shared/5CCS2OSC/submit
       <p>A <code>setuid</code> program owned by root is <strong>setuid root</strong> — it runs as the all-powerful root user no matter who invokes it. <code>seteuid()</code> lets a program <em>drop</em> the owner's privileges and switch to the invoker's. Powerful, but "flexible" means "complex" means "liable to be got wrong."</p>
 
       <!-- ===== Confused deputy ===== -->
-      <h2 id="w7-confused">The confused deputy &amp; the PwnKit exploit</h2>
+      <h2 id="t6-confused">The confused deputy &amp; the PwnKit exploit</h2>
 
       <p>A <strong>confused deputy</strong> is a specific kind of privilege escalation: buggy code acting under <em>two or more authorities</em> is tricked by a crafty input/environment into doing something under <em>the wrong one</em>. The classic real-world example is <strong>PwnKit (CVE-2021-4034)</strong> in <code>pkexec</code> — a setuid-root program installed by default on every major Linux distro, vulnerable from its creation in 2009 until 2022.</p>
 
@@ -176,7 +176,7 @@ $ ls -l /shared/5CCS2OSC/submit
       </ul>
 
       <!-- ===== Authentication ===== -->
-      <h2 id="w7-auth">Authentication</h2>
+      <h2 id="t6-auth">Authentication</h2>
 
       <p>A new property: <strong>authenticity</strong> — communicated information (and communicating parties) are what/who they purport to be. <strong>Authentication</strong> is establishing trust in identity — and trust goes <em>both ways</em>: does the system trust the user's claimed identity, and does the user trust the system's? (Thinking adversarially: people lie about who they are, and software lies about what it is.)</p>
 
@@ -189,7 +189,7 @@ $ ls -l /shared/5CCS2OSC/submit
       <p>Combining these is <strong>multi-factor authentication</strong>. Passwords ("something you know") are by far the most popular — despite huge problems: they can be forgotten, guessed, or leaked (and once leaked, knowledge spreads and can't be confined).</p>
 
       <!-- ===== Passwords ===== -->
-      <h2 id="w7-passwords">Passwords &amp; hashing</h2>
+      <h2 id="t6-passwords">Passwords &amp; hashing</h2>
 
       <table>
         <tr><th>Attack</th><th>Defence</th></tr>
@@ -213,7 +213,7 @@ $ ls -l /shared/5CCS2OSC/submit
       <p>It goes the other way too: before you type your password, you should trust the machine is what it claims (not a fake fullscreen login). OS approach: an <strong>untrappable key combination</strong> (e.g. Ctrl+Alt+Delete) the OS guarantees apps can't intercept — so the login screen that appears must be genuine. Websites use <strong>cryptographic certificate verification</strong> instead (a chain of trusted authorities). Either way, phishing still defeats the human.</p>
 
       <!-- ===== Cryptography ===== -->
-      <h2 id="w7-crypto">Cryptography</h2>
+      <h2 id="t6-crypto">Cryptography</h2>
 
       <p><strong>Cryptography</strong> = techniques for secure communication in the presence of adversaries, using codes. (If your channel is <em>physically</em> secure — only intended parties can participate — you don't need it.) Interesting OS insight: operating systems <em>contain</em> lots of communication (and isolate processes), so they use relatively little crypto internally — but the layer above (browsers, networked apps) uses it heavily, because data paths <em>out</em> of the machine aren't controlled.</p>
 
@@ -259,7 +259,7 @@ plaintext P  →  ciphertext C       C = E(P)      P = D(C)
       </ul>
 
       <!-- ===== CIPHER TOOL ===== -->
-      <h3 id="w7-ciphertool">🛠️ Interactive: Caesar / ROT13 Cipher</h3>
+      <h3 id="t6-ciphertool">🛠️ Interactive: Caesar / ROT13 Cipher</h3>
       <p>Encrypt and decrypt with a shift cipher. Set the key to 13 for ROT13 and notice that encrypting twice gets you back to the start. Try frequency analysis on a longer message to see why it's trivially breakable.</p>
 
       <div class="tool" data-run="runCipher">
@@ -288,10 +288,10 @@ plaintext P  →  ciphertext C       C = E(P)      P = D(C)
       </div>
 
       <!-- ===== Exam ===== -->
-      <h2 id="w7-exam">Exam-style takeaways</h2>
+      <h2 id="t6-exam">Exam-style takeaways</h2>
 
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 7</div>
+        <div class="callout-label">Key things to nail for Topic 06</div>
         <ol>
           <li><strong>Security vs fault-tolerance</strong> — adversarial (malicious) vs accidental (incompetent).</li>
           <li><strong>Mechanism vs policy</strong> — OS provides mechanism, users define policy.</li>
@@ -309,6 +309,6 @@ plaintext P  →  ciphertext C       C = E(P)      P = D(C)
         </ol>
       </div>
 
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 7 notes.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 06 notes.</p>
 
     </section>

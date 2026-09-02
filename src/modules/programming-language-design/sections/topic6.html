@@ -1,12 +1,12 @@
-<section id="week8" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 08 · Lectures 7.1 – 7.4</div>
+<section id="topic6" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 06 · Functional programming</div>
         <h1>Functional Programming: Types &amp; Semantics</h1>
-        <div class="week-subtitle">what a type is, and what a functional program <em>means</em></div>
+        <div class="topic-subtitle">what a type is, and what a functional program <em>means</em></div>
       </div>
-      <p>Two halves that mirror Part 1 exactly. <strong>7.1–7.2</strong> are about <em>types</em> — Haskell's, polymorphic ones, and how they're inferred. <strong>7.3–7.4</strong> build a formal semantics for a small functional language <strong>SFUN</strong>, in the same structural operational style used for SIMP in Week 4.</p>
+      <p>Two halves that mirror Part 1 exactly. <strong>7.1–7.2</strong> are about <em>types</em> — Haskell's, polymorphic ones, and how they're inferred. <strong>7.3–7.4</strong> build a formal semantics for a small functional language <strong>SFUN</strong>, in the same structural operational style used for SIMP in Topic 04.</p>
       <!-- ===== 7.1 TYPING ===== -->
-      <h2 id="w8-typing">Typing: static vs dynamic</h2>
+      <h2 id="t6-typing">Typing: static vs dynamic</h2>
       <div class="callout exam">
         <div class="callout-label">What types are for</div>
         <strong>Types help to ensure that a program behaves in a precise, pre-determined way.</strong> Values are divided into classes, called <strong>types</strong>, and <strong>each type is associated with a set of operations</strong>.
@@ -24,8 +24,8 @@
         </div>
       </div>
       <div class="callout tip">
-        <div class="callout-label">Week 2 already told you this</div>
-        The static/dynamic typing distinction appeared in Week 2 as one of the four properties of a variable (<em>"some languages are untyped, others statically typed — Java, Haskell, ML, Scala — or dynamically typed — Python, Ruby"</em>). Same distinction, now with the consequences spelled out.
+        <div class="callout-label">Topic 02 already told you this</div>
+        The static/dynamic typing distinction appeared in Topic 02 as one of the four properties of a variable (<em>"some languages are untyped, others statically typed — Java, Haskell, ML, Scala — or dynamically typed — Python, Ruby"</em>). Same distinction, now with the consequences spelled out.
       </div>
       <div class="callout exam">
         <div class="callout-label">Static typing — the claims to quote</div>
@@ -38,7 +38,7 @@
         <p style="margin:10px 0 0 0;"><strong>A program that passes the type controls is not guaranteed to be correct, but it is free of type errors at runtime.</strong> — memorise this sentence; it's the honest statement of what types do and don't buy you.</p>
       </div>
       <!-- ===== TYPES IN HASKELL ===== -->
-      <h2 id="w8-hstypes">Types in Haskell</h2>
+      <h2 id="t6-hstypes">Types in Haskell</h2>
       <table>
         <tr><th>Kind</th><th>Examples</th></tr>
         <tr><td><strong>Basic data types</strong><br><span style="font-size:12px; color:var(--ink-muted);">Booleans, characters, numbers</span></td><td><code>Bool</code>, <code>Char</code>, <code>Int</code>, <code>Integer</code>, <code>Float</code>, <code>Double</code></td></tr>
@@ -47,11 +47,11 @@
       </table>
       <div class="callout warn">
         <div class="callout-label">The arrow type constructor associates to the right</div>
-        So <code>Int → Int → Int</code> means <code>Int → (Int → Int)</code>, which is <em>not</em> the same as <code>(Int → Int) → Int</code>. The first is a curried two-argument function; the second is a <em>higher-order</em> function taking a function as its argument. Week 6's currying rests entirely on this convention.
+        So <code>Int → Int → Int</code> means <code>Int → (Int → Int)</code>, which is <em>not</em> the same as <code>(Int → Int) → Int</code>. The first is a curried two-argument function; the second is a <em>higher-order</em> function taking a function as its argument. Topic 05's currying rests entirely on this convention.
       </div>
       <p><strong>The programmer can also define new types</strong> — the subject of §7.2 below.</p>
       <!-- ===== POLYMORPHISM ===== -->
-      <h2 id="w8-poly">Polymorphism</h2>
+      <h2 id="t6-poly">Polymorphism</h2>
       <div class="callout exam">
         <div class="callout-label">The definition</div>
         Type systems can be:
@@ -97,7 +97,7 @@ quad :: <span class="ty">Integer</span> → <span class="ty">Integer</span></div
 sqrt · square :: <span class="ty">Integer</span> → <span class="ty">Float</span></div>
         </div>
       </div>
-      <p style="font-size:14px;">Same <code>(.)</code>, two different instances. That's exactly what "<em>a polymorphic type represents the set of its instances</em>" means in practice. <em>(The composition type checker in Week 6 does this calculation for you.)</em></p>
+      <p style="font-size:14px;">Same <code>(.)</code>, two different instances. That's exactly what "<em>a polymorphic type represents the set of its instances</em>" means in practice. <em>(The composition type checker in Topic 05 does this calculation for you.)</em></p>
       <h3><code>error</code> is polymorphic too</h3>
       <div class="hs"><span class="fn">error</span> :: <span class="ty">String</span> → <span class="ty">a</span>
 
@@ -112,7 +112,7 @@ sqrt · square :: <span class="ty">Integer</span> → <span class="ty">Float</sp
         Every guarded branch of a definition must have the <em>same</em> type. The other two branches of <code>fact</code> return <code>Integer</code>, so the third must too. Since <code>error</code> never actually returns a value, it can honestly claim <em>any</em> result type — and the type variable <code>a</code> is instantiated to whatever the surrounding context needs.
       </div>
       <!-- ===== OVERLOADING ===== -->
-      <h2 id="w8-overload">Overloading (ad-hoc polymorphism)</h2>
+      <h2 id="t6-overload">Overloading (ad-hoc polymorphism)</h2>
       <div class="callout exam">
         <div class="callout-label">Definition</div>
         <strong>Overloading</strong> is a related notion (also called <strong>ad-hoc polymorphism</strong>) where <strong>several functions, with different types, share the same name</strong>. This is useful when we want to use the same operation for distinct types — which may even "look" similar but may be represented differently internally.
@@ -139,7 +139,7 @@ sqrt · square :: <span class="ty">Integer</span> → <span class="ty">Float</sp
         A type class is a <strong>constraint on a type variable</strong> — polymorphism that is general, but <em>not unrestrictedly</em> general. <code>a → a → a</code> allows characters; <code>Num a ⇒ a → a → a</code> allows exactly the types that have numeric operations.
       </div>
       <!-- ===== TYPE INFERENCE ===== -->
-      <h2 id="w8-inference">Type inference</h2>
+      <h2 id="t6-inference">Type inference</h2>
       <p><strong>Most modern functional languages do not require that the programmer provides the type for the expressions used. The compiler is able to infer a type, if one exists.</strong></p>
       <div class="callout exam">
         <div class="callout-label">How inference works — three bullets worth learning</div>
@@ -174,11 +174,11 @@ sqrt · square :: <span class="ty">Integer</span> → <span class="ty">Float</sp
         <p style="margin:10px 0 0 0;">So the first <code>square</code> expects an argument of type <code>Int</code>, but it is given an argument of type <code>(Int -&gt; Int)</code>, and <strong>the expression cannot be typed</strong>. This is because the constraint <strong>Int = (Int -&gt; Int)</strong> cannot be solved.</p>
       </div>
       <div class="callout tip">
-        <div class="callout-label">Week 6 flagged this exact expression</div>
+        <div class="callout-label">Topic 05 flagged this exact expression</div>
         There it was a <em>syntactic</em> trap about left-associativity. Here it's the same trap seen through the type system — and the type system is what actually <em>catches</em> it. Notice the shape of the failure: not "this looks wrong" but "<strong>this equation between types has no solution</strong>". That's what type inference always reduces to.
       </div>
       <!-- ===== 7.2 LISTS ===== -->
-            <h2 id="w8-mgt">Finding the most general type — the method</h2>
+            <h2 id="t6-mgt">Finding the most general type — the method</h2>
       <div class="callout exam">
         <div class="callout-label">The recipe, in five steps</div>
         <ol style="margin:6px 0 0 0;">
@@ -225,7 +225,7 @@ sqrt · square :: <span class="ty">Integer</span> → <span class="ty">Float</sp
         <div class="callout-label">A numeric literal is not an <code>Int</code></div>
         In Haskell <code>1 :: Num a ⇒ a</code>. That is why <code>\x -> x + 1</code> is <strong><code>Num a ⇒ a → a</code></strong> and not <code>Int → Int</code> — the literal is as polymorphic as the addition is. This catches almost everyone once.
       </div>
-      <h2 id="w8-mgtool">Tool · Most general type</h2>
+      <h2 id="t6-mgtool">Tool · Most general type</h2>
       <div class="tool" data-run="runMGT">
         <div class="tool-header"><span class="tool-badge">Practice tool</span><h3>Infer it, or be tested on it</h3></div>
         <p class="tool-desc"><strong>Type an expression and get its most general type with every constraint shown</strong> — or switch to <strong>★ test me</strong> and be asked for the type yourself, marked automatically (any variable letters accepted). Supports lambdas, definitions, sections like <code>(+1)</code>, lists, tuples and <code>if</code>.</p>
@@ -262,7 +262,7 @@ sqrt · square :: <span class="ty">Integer</span> → <span class="ty">Float</sp
           <li>Use the <strong>given</strong> box for exam questions that hand you a signature — <code>f :: (a -> b) -> [a] -> [b]</code> — then ask for the type of something built from it.</li>
         </ul>
       </div>
-      <h2 id="w8-lists">Lists</h2>
+      <h2 id="t6-lists">Lists</h2>
       <p><strong>Linked lists are an important primitive data type in most functional languages.</strong></p>
       <table>
         <tr><th>Operation</th><th>Type</th><th>Meaning</th></tr>
@@ -314,10 +314,10 @@ sqrt · square :: <span class="ty">Integer</span> → <span class="ty">Float</sp
 <span class="fn">take'</span> 0 l = []
 <span class="fn">take'</span> n [] = []
 <span class="fn">take'</span> n (x : xs) = x : (take' (n - 1) xs)</div>
-        <p style="font-size:13px; color:var(--ink-soft);">Both base cases are needed, and their <em>order</em> matters (Week 6): running out of elements and running out of count are different ways to stop.</p>
+        <p style="font-size:13px; color:var(--ink-soft);">Both base cases are needed, and their <em>order</em> matters (Topic 05): running out of elements and running out of count are different ways to stop.</p>
       </div>
       <!-- ===== USER-DEFINED TYPES ===== -->
-      <h2 id="w8-userdef">User-defined types</h2>
+      <h2 id="t6-userdef">User-defined types</h2>
       <div class="callout exam">
         <div class="callout-label">Definition</div>
         <strong>We can define our own new types by declaring the <em>data constructors</em> and <em>type constructors</em> of that type.</strong>
@@ -347,7 +347,7 @@ sqrt · square :: <span class="ty">Integer</span> → <span class="ty">Float</sp
         <div class="hs"><span class="fn">height</span> (<span class="fn">Branch</span> (<span class="fn">Leaf</span> 1) (<span class="fn">Branch</span> (<span class="fn">Leaf</span> 2) (<span class="fn">Leaf</span> 3))) →* 3</div>
       </div>
       <!-- ===== EVALUATOR TOOL ===== -->
-      <h3 id="w8-evaltool">🛠️ Interactive: Pattern-Matching Evaluator</h3>
+      <h3 id="t6-evaltool">🛠️ Interactive: Pattern-Matching Evaluator</h3>
       <p>A miniature Haskell with <strong>data constructors, list syntax and pattern matching</strong>. Watch <code>size</code>, <code>height</code> and <code>add</code> reduce step by step, and see which equation matches at each stage.</p>
       <div class="tool" data-run="runPatMatch">
         <div class="tool-header">
@@ -383,7 +383,7 @@ add (Succ x) y = Succ (add x y)</textarea>
         <div id="pm-output" class="tool-output"></div>
       </div>
       <!-- ===== STRUCTURAL INDUCTION ===== -->
-      <h2 id="w8-structural">Structural induction over recursive types</h2>
+      <h2 id="t6-structural">Structural induction over recursive types</h2>
       <div class="callout exam">
         <div class="callout-label">The principle, instantiated for Nat</div>
         To reason with recursive types we use the <strong>Principle of Structural Induction</strong>. For <code>Nat</code>, to prove a property P for all elements:
@@ -397,8 +397,8 @@ add (Succ x) y = Succ (add x y)</textarea>
         </div>
       </div>
       <div class="callout tip">
-        <div class="callout-label">This is Week 4, arriving from the other direction</div>
-        Week 4 derived structural induction <em>from</em> mathematical induction, by induction on the size of a tree. Here the point is made in reverse: the <code>data Nat = Zero | Succ Nat</code> declaration <em>is</em> Peano arithmetic, so induction over that type <strong>is</strong> mathematical induction. Once again: <strong>the data declaration gives you the induction principle</strong> — one case per constructor.
+        <div class="callout-label">This is Topic 04, arriving from the other direction</div>
+        Topic 04 derived structural induction <em>from</em> mathematical induction, by induction on the size of a tree. Here the point is made in reverse: the <code>data Nat = Zero | Succ Nat</code> declaration <em>is</em> Peano arithmetic, so induction over that type <strong>is</strong> mathematical induction. Once again: <strong>the data declaration gives you the induction principle</strong> — one case per constructor.
       </div>
       <h3>Worked example: <code>Zero</code> is a neutral element</h3>
       <p>Addition on Nat, by pattern matching:</p>
@@ -432,7 +432,7 @@ add (Succ x) y = Succ (add x y)</textarea>
         </div>
       </div>
       <!-- ===== 7.3 SFUN ===== -->
-      <h2 id="w8-sfun">SFUN: a small functional language</h2>
+      <h2 id="t6-sfun">SFUN: a small functional language</h2>
       <div class="callout">
         <div class="callout-label">The plan</div>
         We give a <strong>precise, formal description of the behaviour of functional programs using transition systems</strong>. The language is a small, <strong>first-order</strong> functional programming language working on integers and Booleans, called <strong>SFUN</strong>. We define its syntax, then give its semantics <strong>using the structural operational semantics approach</strong>.
@@ -446,7 +446,7 @@ add (Succ x) y = Succ (add x y)</textarea>
         <div class="g-note">where <strong>n</strong> represents an integer value, n ∈ ℤ, and <strong>b</strong> a Boolean value, b ∈ {True, False}.</div>
       </div>
       <div class="callout tip">
-        <div class="callout-label">Compare with SIMP (Week 3) — the differences are the point</div>
+        <div class="callout-label">Compare with SIMP (Topic 03) — the differences are the point</div>
         <ul style="margin:6px 0 0 0;">
           <li><strong>No commands, no assignment, no store.</strong> A configuration is <em>just a term</em>.</li>
           <li><strong>Variables are function parameters</strong>, not memory locations — so there is no <code>!l</code>, and no l-value/r-value distinction.</li>
@@ -484,7 +484,7 @@ mod(x, y)  = <span class="kw">if</span> x − y &lt; 0 <span class="kw">then</sp
 even(x)    = mod(x, 2) = 0
 collatz(x) = <span class="kw">if</span> x = 1 <span class="kw">then</span> 1 <span class="kw">else</span> <span class="kw">if</span> even(x) <span class="kw">then</span> x/2 <span class="kw">else</span> 3 ∗ x + 1</div>
       <!-- ===== CBV ===== -->
-      <h2 id="w8-cbv">Call-by-value semantics of SFUN</h2>
+      <h2 id="t6-cbv">Call-by-value semantics of SFUN</h2>
       <div class="callout">
         <div class="callout-label">The setup</div>
         <ul style="margin:6px 0 0 0;">
@@ -568,7 +568,7 @@ collatz(x) = <span class="kw">if</span> x = 1 <span class="kw">then</span> 1 <sp
       <div class="callout warn">
         <div class="callout-label">fortytwo(infinity) has <em>no value</em> under call-by-value</div>
         <strong>The term fortytwo(infinity) does not have a value, because the evaluation of the argument <em>infinity</em> gives no value.</strong> A derivation for <em>infinity</em> cannot be constructed because it <strong>recurses infinitely on the rule fn<sub>val</sub></strong>.
-        <p style="margin:10px 0 0 0;">Note the phrasing: not "the evaluation loops" but "<strong>a derivation cannot be constructed</strong>". This is Week 4's point about big-step semantics again — <em>divergence shows up as the absence of a finite proof tree</em>.</p>
+        <p style="margin:10px 0 0 0;">Note the phrasing: not "the evaluation loops" but "<strong>a derivation cannot be constructed</strong>". This is Topic 04's point about big-step semantics again — <em>divergence shows up as the absence of a finite proof tree</em>.</p>
       </div>
       <div class="deriv-box">
         <div class="db-title">square(2 + 1) ⇓<sub>P</sub> 9 &nbsp;— note 2 + 1 is evaluated <em>once</em></div>
@@ -596,7 +596,7 @@ collatz(x) = <span class="kw">if</span> x = 1 <span class="kw">then</span> 1 <sp
         </div>
       </div>
       <!-- ===== CBN ===== -->
-      <h2 id="w8-cbn">Call-by-name: one rule changes</h2>
+      <h2 id="t6-cbn">Call-by-name: one rule changes</h2>
       <p>fn<sub>val</sub> <strong>requires that the arguments given to the function are evaluated before the function is applied</strong>. That becomes <em>problematic or inefficient</em> for terms such as <code>fortytwo(infinity)</code> or <code>fortytwo(2354²)</code>. To model call-by-name we replace it with:</p>
       <div class="sos">
         <div class="sos-row">
@@ -658,11 +658,11 @@ collatz(x) = <span class="kw">if</span> x = 1 <span class="kw">then</span> 1 <sp
         </div>
       </div>
       <div class="callout tip">
-        <div class="callout-label">This is Week 6's trade-off, now as two proof trees</div>
-        Week 6 said <em>"call-by-name always finds the value, if there is one; call-by-value is in general more efficient"</em>, and <em>lazy = call-by-name + sharing</em>. Here you can <strong>see</strong> both halves: the CBN tree for <code>fortytwo(infinity)</code> exists where the CBV one doesn't, and the CBN tree for <code>square(2 + 1)</code> contains the sub-derivation <code>2 + 1 ⇓ 3</code> <em>twice</em>. Sharing is precisely what would collapse those two identical sub-trees into one.
+        <div class="callout-label">This is Topic 05's trade-off, now as two proof trees</div>
+        Topic 05 said <em>"call-by-name always finds the value, if there is one; call-by-value is in general more efficient"</em>, and <em>lazy = call-by-name + sharing</em>. Here you can <strong>see</strong> both halves: the CBN tree for <code>fortytwo(infinity)</code> exists where the CBV one doesn't, and the CBN tree for <code>square(2 + 1)</code> contains the sub-derivation <code>2 + 1 ⇓ 3</code> <em>twice</em>. Sharing is precisely what would collapse those two identical sub-trees into one.
       </div>
       <!-- ===== SFUN TOOL ===== -->
-      <h3 id="w8-sfuntool">🛠️ Interactive: SFUN Derivation Builder</h3>
+      <h3 id="t6-sfuntool">🛠️ Interactive: SFUN Derivation Builder</h3>
       <p>Enter an SFUN program and a closed term, and get the full <strong>⇓<sub>P</sub> derivation tree under both strategies</strong>, side by side. This reproduces every worked example and exercise in lectures 7.3 and 7.4 — including the two <code>max(3, square(2))</code> derivations.</p>
       <div class="tool" data-run="runSfun">
         <div class="tool-header">
@@ -694,7 +694,7 @@ max(x, y) = if x >= y then x else y</textarea>
         <div id="sf-output" class="tool-output"></div>
       </div>
       <!-- ===== DETERMINISM ===== -->
-      <h2 id="w8-determinism">Determinism: unicity of normal forms</h2>
+      <h2 id="t6-determinism">Determinism: unicity of normal forms</h2>
       <div class="callout exam">
         <div class="callout-label">Theorem</div>
         The evaluation strategy defined by the axioms and rules is <strong>deterministic</strong>: <strong>for any closed term t, t ⇓<sub>P</sub> v₁ and t ⇓<sub>P</sub> v₂ implies v₁ = v₂.</strong> &nbsp;<em>Proof: by rule induction.</em>
@@ -717,7 +717,7 @@ max(x, y) = if x >= y then x else y</textarea>
         It says a term has <em>at most one</em> value — not that it has one. <code>infinity</code> has none under either strategy; <code>fortytwo(infinity)</code> has none under CBV but 42 under CBN. Determinism is about <strong>uniqueness</strong>, and it holds for both strategies separately; it does <em>not</em> mean the two strategies agree.
       </div>
       <!-- ===== TYPES FOR SFUN ===== -->
-      <h2 id="w8-sfuntypes">Types for SFUN</h2>
+      <h2 id="t6-sfuntypes">Types for SFUN</h2>
       <p><strong>The grammar defining the syntax of SFUN allows us to build terms such as <code>1 + True</code> which do not make sense.</strong> In the definition of the semantics we only considered <em>well-typed</em> terms. The base types β and the types τ of SFUN:</p>
       <div class="grammar">
         <span class="nt">β</span> <span class="def">::=</span> <span class="term">int</span> <span class="bar">|</span> <span class="term">bool</span><br>
@@ -738,7 +738,7 @@ max(x, y) = if x >= y then x else y</textarea>
         <p style="margin:10px 0 0 0;">Read it as: <em>"If the variable x has type Γ(x) for each x ∈ dom(Γ), and the functions f₁,…,f<sub>k</sub> have types ε(f₁),…,ε(f<sub>k</sub>), then the term t has type τ."</em></p>
       </div>
       <!-- ===== TYPING RULES ===== -->
-      <h2 id="w8-typingrules">Typing rules</h2>
+      <h2 id="t6-typingrules">Typing rules</h2>
       <div class="sos">
         <div class="sos-row">
           <div class="inf"><div class="inf-rule"><span class="inf-line"></span></div><div class="inf-concl">Γ ⊢<sub>ε</sub> b : bool</div></div>
@@ -791,7 +791,7 @@ max(x, y) = if x >= y then x else y</textarea>
         </div>
       </div>
       <div class="callout tip">
-        <div class="callout-label">Two details the slides point out explicitly</div>
+        <div class="callout-label">Two details the lectures point out explicitly</div>
         <ul style="margin:6px 0 0 0;">
           <li>In the rule for applying a function f, <strong>if ⟨f⟩ = 0 the rule reduces to an axiom</strong>, because there are no arguments to check.</li>
           <li>In the <code>if</code> rule, <strong>both branches must have the <em>same</em> type τ</strong> — and τ can be either base type. That's the rule that made <code>error :: String → a</code> necessary back in §7.1.</li>
@@ -832,7 +832,7 @@ max(x, y) = if x >= y then x else y</textarea>
         </div>
       </div>
       <!-- ===== TYPING TOOL ===== -->
-      <h3 id="w8-typetool">🛠️ Interactive: Typing Derivation Builder</h3>
+      <h3 id="t6-typetool">🛠️ Interactive: Typing Derivation Builder</h3>
       <p>Build <strong>Γ ⊢<sub>ε</sub> t : τ</strong> derivations. Set the two environments and a term, and the tool constructs the tree — or shows exactly which rule fails and why.</p>
       <div class="tool" data-run="runTyping">
         <div class="tool-header">
@@ -867,7 +867,7 @@ max(x, y) = if x >= y then x else y</textarea>
         <div id="ty-output" class="tool-output"></div>
       </div>
       <!-- ===== TYPING PROGRAMS ===== -->
-      <h2 id="w8-progtyping">Typing SFUN programs</h2>
+      <h2 id="t6-progtyping">Typing SFUN programs</h2>
       <div class="callout exam">
         <div class="callout-label">Definition</div>
         Given a program P with equations fᵢ(x₁, …, x<sub>⟨fᵢ⟩</sub>) = tᵢ and a function environment ε, <strong>P is typeable</strong> if for each equation there exists an environment <strong>Γᵢ</strong> and a type <strong>τᵢ</strong> such that:
@@ -901,9 +901,9 @@ max(x, y) = if x >= y then x else y</textarea>
         <div class="pf-step">By the inductive hypothesis, this is equal to (n + 1) ∗ n!, <strong>which is simply (n + 1)!</strong></div>
       </div>
       <!-- ===== EXAM ===== -->
-      <h2 id="w8-exam">Exam-style takeaways</h2>
+      <h2 id="t6-exam">Exam-style takeaways</h2>
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 8</div>
+        <div class="callout-label">Key things to nail for Topic 06</div>
         <ol>
           <li><strong>What types are</strong> — values divided into classes, each type associated with <em>a set of operations</em>; given explicitly or inferred.</li>
           <li><strong>Static vs dynamic typing</strong> — checked before vs during execution. Static: C, C++, Java, Haskell. Dynamic: Python, JavaScript, PHP.</li>
@@ -932,5 +932,5 @@ max(x, y) = if x >= y then x else y</textarea>
           <li><strong>Prove <code>fact(n) = n!</code></strong> by induction directly on the SFUN program.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 8 notes. Next: introduction to logic programming.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 06 notes. Next: introduction to logic programming.</p>
     </section>

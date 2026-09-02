@@ -1,8 +1,8 @@
-<section id="w2-csp2" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 02 · Part 4 · CSPs</div>
+<section id="t2-csp2" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 02 · Part 4 · CSPs</div>
         <h1>Solving a CSP</h1>
-        <div class="week-subtitle">backtracking, heuristics, and inference</div>
+        <div class="topic-subtitle">backtracking, heuristics, and inference</div>
       </div>
       <!-- ===== SEARCH ===== -->
       <h2 id="sc-search">A CSP as a search problem</h2>
@@ -17,7 +17,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">The important word is "provided"</div>
-        Compare Week 1's search problem: there, actions were legal or not by the transition model, and the goal test happened at the end. Here <strong>the constraint check is folded into the action itself</strong> — you never even generate an inconsistent state. That's the first efficiency, and it's free.
+        Compare Topic 01's search problem: there, actions were legal or not by the transition model, and the goal test happened at the end. Here <strong>the constraint check is folded into the action itself</strong> — you never even generate an inconsistent state. That's the first efficiency, and it's free.
       </div>
       <div class="callout warn">
         <div class="callout-label">The size of the naïve tree</div>
@@ -129,7 +129,7 @@
         </ul>
         <p style="margin:10px 0 0 0;">Forward checking <strong>propagates information from assigned to unassigned variables</strong>.</p>
       </div>
-      <p>The slides' worked run, on the Australia map:</p>
+      <p>The lectures' worked run, on the Australia map:</p>
       <table class="dom-table">
         <tr><th class="steplab">after</th><th>WA</th><th>NT</th><th>Q</th><th>NSW</th><th>V</th><th>SA</th><th>T</th></tr>
         <tr><td class="steplab">— start —</td>
@@ -393,5 +393,5 @@ NSW != V</textarea>
           <li><strong>The 87% figure</strong> — {SA = blue} goes from 3⁵ = 243 to 2⁵ = 32 states for its five neighbours.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 2.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 02.</p>
     </section>

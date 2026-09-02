@@ -57,7 +57,7 @@
     html += '</div>';
     const seqStr = show(seq), simStr = show(sim);
     if (seqStr !== simStr) {
-      html += `<div class="verdict bad">💥 <strong>This is exactly the case the slides warn about.</strong> Applying the mappings <em>one after another</em>, left to right, would give
+      html += `<div class="verdict bad">💥 <strong>This is exactly the case the lectures warn about.</strong> Applying the mappings <em>one after another</em>, left to right, would give
         <br><br><code style="font-size:14px;">${esc(seqStr)}</code><br><br>
         which is <strong>wrong</strong>. σ is a <em>set</em>, and all the replacements must happen <strong>at the same time</strong>, giving <code style="font-size:14px;">${esc(simStr)}</code>.</div>`;
     } else {

@@ -1,10 +1,10 @@
-<section id="cram" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">★ Revision · One-Page Quick Reference</div>
+<section id="cram" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">★ Revision · One-Page Quick Reference</div>
         <h1>Exam Cram Sheet</h1>
-        <div class="week-subtitle">every core concept, condensed</div>
+        <div class="topic-subtitle">every core concept, condensed</div>
       </div>
-      <p class="no-print">A distilled summary of the whole module. Use <strong>Ctrl/Cmd+P</strong> to print it — the sidebar and tools are hidden in print. One card per week, added as the content goes in.</p>
+      <p class="no-print">A distilled summary of the whole module. Use <strong>Ctrl/Cmd+P</strong> to print it — the sidebar and tools are hidden in print. One card per topic, added as the content goes in.</p>
       <div class="cram-grid">
         <div class="cram-card">
           <h3>W1 · What AI is</h3>
@@ -414,11 +414,11 @@
             <li><span class="term">Everything is still search.</span> Minimax is a DFS. Backtracking is a DFS. Forward chaining is A*. Only the state and the successor rule change.</li>
             <li><span class="term">Fail first, cheaply.</span> Alpha-beta's β ≤ α, forward checking's empty domain and the RPG's fixpoint are all the same move: prove a branch is dead before paying to explore it.</li>
             <li><span class="term">Heuristics cost something.</span> W1's h was a lookup; W3's h is an entire sub-problem solved per node — worth it because the node saving is larger.</li>
-            <li><span class="term">The reward function is the specification.</span> Week 1's value alignment problem, made numeric: R(s) = −1.65 quietly means "please die quickly".</li>
+            <li><span class="term">The reward function is the specification.</span> Topic 01's value alignment problem, made numeric: R(s) = −1.65 quietly means "please die quickly".</li>
             <li><span class="term">When the world stops cooperating, the answer changes shape.</span> Deterministic ⇒ a plan. Stochastic ⇒ a policy. Adversarial (W2) ⇒ a strategy that assumes the worst.</li>
-            <li><span class="term">W1–4 are the model-based half; W5 is the data-driven half.</span> Weeks 1–4 all need you to write the world down first — that's what "without being explicitly programmed" rules out.</li>
-            <li><span class="term">Guarantees give way to measurement.</span> A*, alpha-beta, AC-3 and value iteration all come with proofs. Machine learning largely doesn't, so it substitutes held-out evaluation — which is why metrics and the train/validation/test split get two thirds of Week 5.</li>
-            <li><span class="term">Reinforcement learning is Week 4 with the model taken away.</span> Same rewards and policies; you're no longer given P(s′|s,a), so you must explore to find out.</li>
+            <li><span class="term">W1–4 are the model-based half; W5 is the data-driven half.</span> Topics 1–4 all need you to write the world down first — that's what "without being explicitly programmed" rules out.</li>
+            <li><span class="term">Guarantees give way to measurement.</span> A*, alpha-beta, AC-3 and value iteration all come with proofs. Machine learning largely doesn't, so it substitutes held-out evaluation — which is why metrics and the train/validation/test split get two thirds of Topic 05.</li>
+            <li><span class="term">Reinforcement learning is Topic 04 with the model taken away.</span> Same rewards and policies; you're no longer given P(s′|s,a), so you must explore to find out.</li>
           </ul>
         </div>
       </div>

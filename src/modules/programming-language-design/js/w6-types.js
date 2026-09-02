@@ -144,7 +144,7 @@
     }
     html += '</div>';
     if (err) {
-      html += `<div class="verdict bad">✗ ${err}<br><br>This is what the slides mean by "<em>multiple arguments can be passed as one in a tuple, but this does not allow partial application</em>": a tuple argument is <strong>one</strong> argument, so there is no intermediate stage to stop at.</div>`;
+      html += `<div class="verdict bad">✗ ${err}<br><br>This is what the lectures mean by "<em>multiple arguments can be passed as one in a tuple, but this does not allow partial application</em>": a tuple argument is <strong>one</strong> argument, so there is no intermediate stage to stop at.</div>`;
     } else if (cur.k === 'fun') {
       html += `<div class="verdict warn">⚠ <strong>Partially applied.</strong> After ${args.length} argument${args.length === 1 ? '' : 's'}, <code>${esc(expr)}</code> still has the function type <code>${esc(tyShow(cur, 0))}</code>. That is not an error — it is a perfectly good <em>value</em>, a new function built by partial application.</div>`;
     } else {

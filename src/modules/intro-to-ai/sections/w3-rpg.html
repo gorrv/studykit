@@ -1,8 +1,8 @@
-<section id="w3-rpg" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 03 · Part 4 · Automated planning</div>
+<section id="t3-rpg" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 03 · Part 4 · Automated planning</div>
         <h1>Forward Chaining &amp; RPG</h1>
-        <div class="week-subtitle">where a domain-independent heuristic comes from</div>
+        <div class="topic-subtitle">where a domain-independent heuristic comes from</div>
       </div>
       <!-- ===== FORWARD ===== -->
       <h2 id="r-fwd">Forward-chain planning</h2>
@@ -20,7 +20,7 @@
         </ul>
       </div>
       <div class="callout tip">
-        <div class="callout-label">This is Week 1's search, with the graph generated on the fly</div>
+        <div class="callout-label">This is Topic 01's search, with the graph generated on the fly</div>
         Node = a set of facts. Edge = a ground action. "Expand" means: find every action whose preconditions are in this fact set, and apply the delete-then-add rule.
         <p style="margin:10px 0 0 0;"><strong>Delete first, then add</strong> — the order matters when an action both deletes and adds the same fact. And note the <em>goal test is a subset test</em>, not equality: a goal state is any state <em>containing</em> the goal conditions, so many different full states can be goals.</p>
       </div>
@@ -64,12 +64,12 @@
       <h2 id="r-need">"How do we know this is the best state?"</h2>
       <div class="callout warn">
         <div class="callout-label">The question the lecture leaves hanging</div>
-        Forward chaining generates a tree of states. Fine — but which one should you expand next? Week 1's answer was <strong>A*</strong>, which needs <code>h(n)</code>. So: <strong>is it possible to define heuristics that work for <em>any</em> PDDL domain?</strong>
+        Forward chaining generates a tree of states. Fine — but which one should you expand next? Topic 01's answer was <strong>A*</strong>, which needs <code>h(n)</code>. So: <strong>is it possible to define heuristics that work for <em>any</em> PDDL domain?</strong>
         <p style="margin:10px 0 0 0;"><strong>Yes — domain-independent heuristics.</strong> No knowledge about the specific problem is used.</p>
       </div>
       <div class="callout tip">
         <div class="callout-label">Why this is harder than the Romania map</div>
-        In Week 1 you had straight-line distance handed to you — a <em>human</em> looked at the map and supplied it. A planner is given an arbitrary PDDL file it has never seen and must <strong>invent its own heuristic from the domain description alone</strong>. The recipe is the one from Week 1: <strong>relax the problem</strong>. The only question is which constraint to drop.
+        In Topic 01 you had straight-line distance handed to you — a <em>human</em> looked at the map and supplied it. A planner is given an arbitrary PDDL file it has never seen and must <strong>invent its own heuristic from the domain description alone</strong>. The recipe is the one from Topic 01: <strong>relax the problem</strong>. The only question is which constraint to drop.
       </div>
       <!-- ===== RPG ===== -->
       <h2 id="r-rpg">The Relaxed Planning Graph</h2>
@@ -85,7 +85,7 @@
       <div class="callout tip">
         <div class="callout-label">Ignoring deletes is the relaxation — and it's the perfect one</div>
         Drop the delete lists and <strong>facts can only ever become true, never false</strong>. Nothing you do can undo anything, so there is no such thing as a wrong move and no need to backtrack. The relaxed problem is solvable in polynomial time.
-        <p style="margin:10px 0 0 0;">And because the relaxed problem is <em>easier</em> — every real plan is still a valid relaxed plan — its optimal length can never exceed the real one. <strong>That's admissibility, straight from Week 1.</strong> (The relaxed plan that FF actually extracts isn't guaranteed optimal, so <em>h<sup>FF</sup></em> is not strictly admissible — but the idea is the same, and it works extremely well in practice.)</p>
+        <p style="margin:10px 0 0 0;">And because the relaxed problem is <em>easier</em> — every real plan is still a valid relaxed plan — its optimal length can never exceed the real one. <strong>That's admissibility, straight from Topic 01.</strong> (The relaxed plan that FF actually extracts isn't guaranteed optimal, so <em>h<sup>FF</sup></em> is not strictly admissible — but the idea is the same, and it works extremely well in practice.)</p>
       </div>
       <!-- ===== LAYERS ===== -->
       <h2 id="r-layers">Fact layers and action layers</h2>
@@ -230,7 +230,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Read that last bullet twice</div>
-        The heuristic is not a lookup — it is <strong>an entire sub-problem solved from scratch for every single node</strong>. That is enormously more expensive per node than Week 1's straight-line distance. It pays off anyway, because the reduction in nodes expanded is far larger than the extra cost per node — and it is the reason FF beat the field in 2000.
+        The heuristic is not a lookup — it is <strong>an entire sub-problem solved from scratch for every single node</strong>. That is enormously more expensive per node than Topic 01's straight-line distance. It pays off anyway, because the reduction in nodes expanded is far larger than the extra cost per node — and it is the reason FF beat the field in 2000.
       </div>
       <!-- ===== EXAM ===== -->
       <h2 id="r-exam">Exam-style takeaways</h2>
@@ -249,5 +249,5 @@
           <li><strong>Using it</strong> — A* with h from the RPG, recomputing the RPG for every node added to the open list.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 3.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 03.</p>
     </section>

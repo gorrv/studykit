@@ -1,8 +1,8 @@
-<section id="w1-search" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 01 · Part 2 · Search</div>
+<section id="t1-search" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 01 · Part 2 · Search</div>
         <h1>Search: BFS, DFS, UCS</h1>
-        <div class="week-subtitle">turning "what should I do?" into "find me a path"</div>
+        <div class="topic-subtitle">turning "what should I do?" into "find me a path"</div>
       </div>
       <!-- ===== PROBLEM ===== -->
       <h2 id="s-problem">What search is</h2>
@@ -26,7 +26,7 @@
       </div>
       <div class="callout warn">
         <div class="callout-label">A search problem does <em>not</em> come with the answer</div>
-        The five components describe a world. They don't say which sequence of actions is good — finding that is the algorithm's job. Different algorithms explore the same problem in different orders and give different answers, and that's the whole content of the rest of this week.
+        The five components describe a world. They don't say which sequence of actions is good — finding that is the algorithm's job. Different algorithms explore the same problem in different orders and give different answers, and that's the whole content of the rest of this topic.
       </div>
       <!-- ===== EXAMPLES ===== -->
       <h2 id="s-examples">Three example problems</h2>
@@ -36,7 +36,7 @@
       </div>
       <div class="callout">
         <div class="callout-label">2 · Navigation (Romania)</div>
-        <p style="margin:6px 0 0 0;">The running example for the rest of the week. <strong>States</strong> = cities, <strong>actions</strong> = roads, <strong>costs</strong> = distances. Here the costs are <em>not</em> all equal, which is exactly what separates the algorithms below.</p>
+        <p style="margin:6px 0 0 0;">The running example for the rest of the topic. <strong>States</strong> = cities, <strong>actions</strong> = roads, <strong>costs</strong> = distances. Here the costs are <em>not</em> all equal, which is exactly what separates the algorithms below.</p>
       </div>
       <div class="callout">
         <div class="callout-label">3 · Self-service checkout — giving change</div>
@@ -111,7 +111,7 @@
       <h2 id="s-best">Best-first search — the general framework</h2>
       <div class="callout exam">
         <div class="callout-label">The idea that unifies everything</div>
-        Keep the frontier in a <strong>priority queue</strong> ordered by an <strong>evaluation function <code>f(n)</code></strong>. Always expand the node with the <strong>lowest <code>f</code></strong>. Every algorithm this week is just a different choice of <code>f</code>.
+        Keep the frontier in a <strong>priority queue</strong> ordered by an <strong>evaluation function <code>f(n)</code></strong>. Always expand the node with the <strong>lowest <code>f</code></strong>. Every algorithm this topic is just a different choice of <code>f</code>.
       </div>
       <table>
         <tr><th>Algorithm</th><th><code>f(n)</code></th><th>Effect</th></tr>
@@ -156,7 +156,7 @@
       <h2 id="s-tool">Tool · Search explorer</h2>
       <div class="tool" data-run="runSearch">
         <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Search explorer</h3></div>
-        <p class="tool-desc"><strong>The graph is drawn for you — drag the nodes apart, shift-click to move the start or goal, and step through the expansions one pop at a time</strong> watching the frontier light up. Switch between BFS, DFS, UCS, Greedy and A* with one click. Defaults to the Romania map from the slides.</p>
+        <p class="tool-desc"><strong>The graph is drawn for you — drag the nodes apart, shift-click to move the start or goal, and step through the expansions one pop at a time</strong> watching the frontier light up. Switch between BFS, DFS, UCS, Greedy and A* with one click. Defaults to the Romania map from the lectures.</p>
         <div class="tool-field" style="width:100%;">
           <label for="sx-graph">Graph — one edge per line: <code>FROM - TO : COST</code> (undirected)</label>
           <textarea id="sx-graph" rows="9" spellcheck="false">ARAD - A : 118

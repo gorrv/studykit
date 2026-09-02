@@ -155,13 +155,13 @@ async function checkStructure(s, m) {
   s.ok('every tool booted', bootErrors.length === 0, bootErrors.slice(0, 4).join(' | '));
 
   // Every section must be reachable through the nav without throwing.
-  if (typeof m.window.showWeek === 'function') {
-    m.$$('.week-section').forEach(sec => {
+  if (typeof m.window.showSection === 'function') {
+    m.$$('.topic-section').forEach(sec => {
       try {
-        m.window.showWeek(sec.id);
-        s.ok(`showWeek(${sec.id})`, m.doc.getElementById(sec.id).classList.contains('active'));
+        m.window.showSection(sec.id);
+        s.ok(`showSection(${sec.id})`, m.doc.getElementById(sec.id).classList.contains('active'));
       } catch (e) {
-        s.ok(`showWeek(${sec.id})`, false, e.message);
+        s.ok(`showSection(${sec.id})`, false, e.message);
       }
     });
   }

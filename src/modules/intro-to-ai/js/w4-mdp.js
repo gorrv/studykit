@@ -16,7 +16,7 @@
     const W = Math.max.apply(null, cells.map(r => r.length));
     cells.forEach((r, i) => { if (r.length !== W) errs.push(`row ${i + 1} has ${r.length} cells but row 1 has ${W}`); });
     const H = cells.length;
-    // grid[x][y] with y=0 at the BOTTOM row (so (1,1) is bottom-left, matching the slides)
+    // grid[x][y] with y=0 at the BOTTOM row (so (1,1) is bottom-left, matching the lectures)
     const g = [];
     for (let x = 0; x < W; x++) { g[x] = []; for (let y = 0; y < H; y++) g[x][y] = null; }
     let start = null;

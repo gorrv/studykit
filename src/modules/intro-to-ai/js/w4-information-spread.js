@@ -110,7 +110,7 @@
         <strong>Good news spreads visibly; bad news only shows up once it starts closing off routes.</strong>`;
     }
     html += `<div class="verdict ${informed === live ? 'safe' : 'warn'}" style="margin-top:12px;">${note}</div>`;
-    html += `<p class="ix-hint">The grid, R, γ and the slip probability all come from the <a href="#v-tool" onclick="showWeek('w4-vi')">solver below</a> — change them there and this picture follows.
+    html += `<p class="ix-hint">The grid, R, γ and the slip probability all come from the <a href="#v-tool" onclick="showSection('t4-vi')">solver below</a> — change them there and this picture follows.
       <strong>The thing to watch is the outlined ring</strong> — the squares whose value moved for the first time this sweep. It spreads out from the <strong>+1</strong> one square per sweep, like a stone dropped in water.</p>`;
     out.innerHTML = html;
   }

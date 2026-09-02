@@ -17,7 +17,7 @@ module.exports = async function run() {
   await checkStructure(s, m);
   checkQuestionBank(s, m, 3000);
 
-  // ---------------------------------------------------------------- Week 1
+  // ---------------------------------------------------------------- Topic 1
   // A* on the Romania graph must find ARAD → SIBIU → RV → PITESTI → BUCHAREST
   // at a cost of 418, and must never expand B (Zerind) — the cheapest first
   // step, and the whole point of the worked example.
@@ -42,7 +42,7 @@ module.exports = async function run() {
     zeroed === w.AL.frames.map(f => f.pick).join(','));
   w.alSetKey('f'); w.alReset();
 
-  // ---------------------------------------------------------------- Week 4
+  // ---------------------------------------------------------------- Topic 4
   // One Bellman sweep must move information exactly one square, and the first
   // interesting value must be U₁(3,3) = −0.04 + 0.8×1 = 0.76.
   const SP = w.SP;
@@ -67,7 +67,7 @@ module.exports = async function run() {
     `${violations} violations across ${checked} checks`);
   s.ok('that guarantee was actually exercised', checked > 0, String(checked));
 
-  // ---------------------------------------------------------------- Week 7
+  // ---------------------------------------------------------------- Topic 7
   // Decision tree: HasJob must win the root split, at 8/27 against OwnsHome's 64/135.
   s.ok('root splits on HasJob', w.DT.tree.featName === 'HasJob', w.DT.tree.featName);
   s.near('Gini-Split(HasJob) = 8/27', w.DT.tree.score, 8 / 27);
@@ -85,7 +85,7 @@ module.exports = async function run() {
   s.has('least squares reports 6/7', m.text('ls-output'), '6/7');
   s.has('least squares reports −4/7', m.text('ls-output'), /−4\/7|-4\/7/);
 
-  // ---------------------------------------------------------------- Week 8
+  // ---------------------------------------------------------------- Topic 8
   // Exercise 8's UCB trace, with c = 2.
   s.same('UCB pulls a1 a2 a3 a3 a1 a1 a1 a2',
     w.UC.trace.map(r => w.UC.names[r.pick]),
@@ -106,18 +106,18 @@ module.exports = async function run() {
   s.ok('c = 0 makes UCB behave greedily', greedyLike);
   w.ucSet('c', 2);
 
-  // ---------------------------------------------------------------- Week 9
+  // ---------------------------------------------------------------- Topic 9
   s.ok('seven harm categories', w.HARMS.length === 7);
   s.same('only world bias is not the developer\'s fault',
     w.BIAS.filter(b => !b.dev).map(b => b.k), ['world']);
 
   // ------------------------------------------------------------ Mock exam
-  // Every week must be able to produce a paper containing only its own topics.
-  w.EX_WEEKS.forEach(week => {
-    w.exRestart(); w.exAll(false); w.exWeek(week.w); w.exSet('n', 12); w.exStart();
-    s.ok(`exam: week ${week.w} builds a paper`, w.EX.phase === 'run' && w.EX.qs.length > 0);
-    s.ok(`exam: week ${week.w} draws only its own topics`,
-      w.EX.qs.every(q => q.week === week.w));
+  // Every topic must be able to produce a paper containing only its own topics.
+  w.EX_TOPICS.forEach(topic => {
+    w.exRestart(); w.exAll(false); w.exTopic(topic.w); w.exSet('n', 12); w.exStart();
+    s.ok(`exam: topic ${topic.w} builds a paper`, w.EX.phase === 'run' && w.EX.qs.length > 0);
+    s.ok(`exam: topic ${topic.w} draws only its own topics`,
+      w.EX.qs.every(q => q.topic === topic.w));
     w.exFinish();
   });
 

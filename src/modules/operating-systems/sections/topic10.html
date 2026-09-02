@@ -1,18 +1,18 @@
-<section id="week11" class="week-section">
+<section id="topic10" class="topic-section">
 
-      <div class="week-header">
-        <div class="week-eyebrow">Week 11 · Concurrency (Ian's material) · Final week</div>
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 10 · Concurrency</div>
         <h1>Deadlock &amp; Semaphores</h1>
-        <div class="week-subtitle">when locks turn against you — and finer-grained control</div>
+        <div class="topic-subtitle">when locks turn against you — and finer-grained control</div>
       </div>
 
       <div class="callout">
         <div class="callout-label">The final piece</div>
-        Week 10 used <code>synchronized</code> to fix races. But locking itself can cause new problems — most notably <strong>deadlock</strong>. This week covers explicit locks (the <code>Lock</code> interface / <code>ReentrantLock</code>), the four conditions for deadlock, the famous Dining Philosophers problem, how to avoid deadlock, and <strong>semaphores</strong> for when you want to allow <em>several</em> threads through, not just one.
+        Topic 09 used <code>synchronized</code> to fix races. But locking itself can cause new problems — most notably <strong>deadlock</strong>. This topic covers explicit locks (the <code>Lock</code> interface / <code>ReentrantLock</code>), the four conditions for deadlock, the famous Dining Philosophers problem, how to avoid deadlock, and <strong>semaphores</strong> for when you want to allow <em>several</em> threads through, not just one.
       </div>
 
       <!-- ===== Lock interface ===== -->
-      <h2 id="w11-lock">The Lock interface &amp; ReentrantLock</h2>
+      <h2 id="t10-lock">The Lock interface &amp; ReentrantLock</h2>
 
       <p><code>synchronized</code> is convenient but a <strong>blunt tool</strong> — it can only lock entire methods or blocks <em>within</em> a method, and the lock is released automatically. Java also offers explicit locks implementing the <strong>Lock interface</strong>, which you must create, lock, and unlock yourself. That's the price for more flexibility. The basic implementation is <code>ReentrantLock</code>:</p>
 
@@ -37,7 +37,7 @@ private void addToCounter(int amount) {
       </div>
 
       <!-- ===== Reentrancy ===== -->
-      <h2 id="w11-reentrancy">Reentrancy</h2>
+      <h2 id="t10-reentrancy">Reentrancy</h2>
 
       <p>A lock is <strong>reentrant</strong> if a thread that already holds it can acquire it <em>again</em> without blocking. Java's <code>synchronized</code> blocks/methods are reentrant, and so is <code>ReentrantLock</code> (hence the name).</p>
 
@@ -54,7 +54,7 @@ public synchronized void g() { }
       </div>
 
       <!-- ===== synchronized vs ReentrantLock ===== -->
-      <h2 id="w11-vs">synchronized vs ReentrantLock</h2>
+      <h2 id="t10-vs">synchronized vs ReentrantLock</h2>
 
       <p>They behave similarly, so when would you choose the explicit lock? <code>ReentrantLock</code> offers several things <code>synchronized</code> can't:</p>
 
@@ -68,7 +68,7 @@ public synchronized void g() { }
       </table>
 
       <!-- ===== Deadlock ===== -->
-      <h2 id="w11-deadlock">Deadlock &amp; the four conditions</h2>
+      <h2 id="t10-deadlock">Deadlock &amp; the four conditions</h2>
 
       <p>If you only lock within one object you're usually fine. But realistic programs have <strong>multiple threads acquiring multiple locks</strong>, and if there are dependencies, you can get <strong>deadlock</strong>: thread A holds lock X and needs Y; thread B holds Y and needs X. Both are stuck forever, each waiting on a lock the other holds.</p>
 
@@ -110,7 +110,7 @@ public static void transfer(BankAccount from, BankAccount to, double amount) {
       <p>The threads call <code>transfer</code> with accounts in <strong>different orders</strong>. Thread 1 grabs Sid's lock; Thread 2 grabs Doris's lock — then each needs the lock the <em>other</em> holds. Deadlock. (All four conditions are present, including the fatal circular wait.)</p>
 
       <!-- ===== Dining Philosophers ===== -->
-      <h2 id="w11-philosophers">The Dining Philosophers problem</h2>
+      <h2 id="t10-philosophers">The Dining Philosophers problem</h2>
 
       <p>The classic illustration. <strong>Five philosophers</strong> sit around a table, alternating between thinking and eating. There are <strong>five forks</strong>, one between each pair. To eat, a philosopher needs <em>both</em> adjacent forks. They're selfish and uncoordinated: each picks up its <strong>left fork, then its right fork</strong>, eats, then puts both down.</p>
 
@@ -133,7 +133,7 @@ public void run() {
       </div>
 
       <!-- ===== PHILOSOPHERS TOOL ===== -->
-      <h3 id="w11-philtool">🛠️ Interactive: Dining Philosophers</h3>
+      <h3 id="t10-philtool">🛠️ Interactive: Dining Philosophers</h3>
       <p>Watch all five philosophers reach for their left fork. In <strong>naive</strong> mode they deadlock (circular wait). Flip to the <strong>fixed</strong> mode — where the last philosopher reaches right-first — and the cycle breaks, so someone can always eat.</p>
 
       <div class="tool" data-run="runPhil">
@@ -161,7 +161,7 @@ public void run() {
       </div>
 
       <!-- ===== Avoidance ===== -->
-      <h2 id="w11-avoidance">Deadlock avoidance</h2>
+      <h2 id="t10-avoidance">Deadlock avoidance</h2>
 
       <p>The best approach is to <strong>design so deadlock can't occur</strong> — by breaking one of the four conditions. (You can also do <em>deadlock detection</em>: spot it after it happens and break it, but prevention is cleaner.) Since you usually can't eliminate mutual exclusion, the most practical target is the <strong>circular wait</strong>.</p>
 
@@ -179,10 +179,10 @@ synchronized (first) { synchronized (second) { ... } }</div>
 
       <div class="callout tip">
         <div class="callout-label">Or use ReentrantLock's tryLock()</div>
-        A more flexible fix: with <code>tryLock()</code>, a philosopher attempts the right fork but <strong>doesn't block</strong> if it's unavailable — they just put the left fork back down and try again later. No thread ever holds-and-waits indefinitely, so deadlock is avoided (this breaks the <em>hold and wait</em> condition). Verified in Ian's program: all philosophers get to both think <em>and</em> eat.
+        A more flexible fix: with <code>tryLock()</code>, a philosopher attempts the right fork but <strong>doesn't block</strong> if it's unavailable — they just put the left fork back down and try again later. No thread ever holds-and-waits indefinitely, so deadlock is avoided (this breaks the <em>hold and wait</em> condition). Verified in the reference implementation: all philosophers get to both think <em>and</em> eat.
       </div>
 
-      <h3 id="w11-bankertool">🛠️ Interactive: Banker's algorithm</h3>
+      <h3 id="t10-bankertool">🛠️ Interactive: Banker's algorithm</h3>
 
       <p>Lock ordering prevents deadlock by construction. The <strong>Banker's algorithm</strong> takes the other
       route: allow any allocation pattern, but check every request before granting it, and refuse anything that
@@ -257,7 +257,7 @@ synchronized (first) { synchronized (second) { ... } }</div>
       </div>
 
       <!-- ===== Semaphores ===== -->
-      <h2 id="w11-semaphores">Semaphores</h2>
+      <h2 id="t10-semaphores">Semaphores</h2>
 
       <p>So far, locks allow <strong>one</strong> thread at a time. But sometimes you want to allow <strong>N</strong> threads — e.g. a database that supports only 5 concurrent connections. A <strong>semaphore</strong> handles this.</p>
 
@@ -293,10 +293,10 @@ public void disconnect() {
       </div>
 
       <!-- ===== Exam ===== -->
-      <h2 id="w11-exam">Exam-style takeaways</h2>
+      <h2 id="t10-exam">Exam-style takeaways</h2>
 
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 11</div>
+        <div class="callout-label">Key things to nail for Topic 10</div>
         <ol>
           <li><strong>Lock interface / ReentrantLock</strong> — explicit lock/unlock; always unlock in a <code>finally</code> block.</li>
           <li><strong>Reentrancy</strong> — a thread holding a lock can re-acquire it; essential for nested synchronized calls on the same object (else self-deadlock).</li>
@@ -310,6 +310,6 @@ public void disconnect() {
         </ol>
       </div>
 
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">🎓 End of Week 11 — and the end of the entire module. Both the OS and concurrency courses are now complete. Best of luck in the exam!</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">🎓 End of Topic 10 — and the end of the entire module. Both the OS and concurrency courses are now complete. Best of luck in the exam!</p>
 
     </section>

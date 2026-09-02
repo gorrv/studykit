@@ -1,8 +1,8 @@
-<section id="w1-astar" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 01 · Part 3 · Heuristic search</div>
+<section id="t1-astar" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 01 · Part 3 · Heuristic search</div>
         <h1>A* &amp; Heuristics</h1>
-        <div class="week-subtitle">using an estimate of what's ahead</div>
+        <div class="topic-subtitle">using an estimate of what's ahead</div>
       </div>
       <!-- ===== BACKWARDS ===== -->
       <h2 id="a-backwards">The problem with UCS: it looks backwards</h2>
@@ -113,13 +113,13 @@
           true road = D → E → G → BUCHAREST = 80 + 97 + 101 = <strong>278</strong><br>
           253 ≤ 278 &nbsp;&nbsp;<span style="color:var(--accent-3);">the estimate is 25 too low, as it must be</span>
         </div>
-        <p style="margin:12px 0 0 0;">Never too high. That one-sided error is exactly the <a href="#a-admissible" onclick="showWeek('w1-astar')">admissibility</a> condition, and it is the whole reason A* can be trusted to return the cheapest path.</p>
+        <p style="margin:12px 0 0 0;">Never too high. That one-sided error is exactly the <a href="#a-admissible" onclick="showSection('t1-astar')">admissibility</a> condition, and it is the whole reason A* can be trusted to return the cheapest path.</p>
       </div>
       <div class="callout tip">
         <div class="callout-label">Two things worth knowing for the exam</div>
         <ul style="margin:6px 0 0 0;">
           <li><strong>You never compute h yourself.</strong> It is given to you in a table, exactly as in the worked example above. Computing it is the map-maker's job, not the search algorithm's.</li>
-          <li><strong>When there are no coordinates to measure</strong> — an 8-puzzle, a planning problem — you get h by <strong>relaxing the problem</strong>: solve an easier version and use its cost as the estimate. Counting misplaced tiles is the relaxation "any tile may teleport". <a href="#r-rpg" onclick="showWeek('w3-rpg')">Week 3's RPG</a> is the relaxation "actions have no delete effects". Same trick, twice.</li>
+          <li><strong>When there are no coordinates to measure</strong> — an 8-puzzle, a planning problem — you get h by <strong>relaxing the problem</strong>: solve an easier version and use its cost as the estimate. Counting misplaced tiles is the relaxation "any tile may teleport". <a href="#r-rpg" onclick="showSection('t3-rpg')">Topic 03's RPG</a> is the relaxation "actions have no delete effects". Same trick, twice.</li>
         </ul>
       </div>
       <!-- ===== A* LAB ===== -->
@@ -219,5 +219,5 @@ G:100  H:160  I:244  L:241  M:242  BUCHAREST:0</textarea>
           <li><strong>The key challenge</strong> — admissible <em>and</em> informative; obtained by <strong>relaxing the constraints of the problem</strong>.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 1.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 01.</p>
     </section>

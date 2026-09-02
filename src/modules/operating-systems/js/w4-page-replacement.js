@@ -1,5 +1,5 @@
   /* ============================================================
-     PAGE REPLACEMENT (Week 4)
+     PAGE REPLACEMENT (Topic 04)
 
      The policy is a pure function of (reference string, frame count,
      algorithm), which is what lets the same code drive both the

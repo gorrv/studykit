@@ -426,7 +426,7 @@
     s += `<text x="${W - R}" y="${H - 6}" text-anchor="end" font-family="IBM Plex Sans" font-size="10.5" fill="var(--ink-muted)">p (share of the first class) →</text>`;
     html += `<div class="ix-canvas" style="margin-top:14px;"><svg width="100%" viewBox="0 0 ${W} ${H}" role="img" xmlns="http://www.w3.org/2000/svg"><title>Gini for two classes</title><desc>Gini = 2p(1−p) rises from zero at p = 0 to one half at p = a half and back to zero at p = 1.</desc>${s}</svg></div>`;
     html += `<p class="ix-hint">For <strong>k = 2</strong>, Gini = p(1−p) + (1−p)p = <strong>2p(1−p)</strong>, a downward parabola with vertex at p = ½ and value <strong>½</strong>.
-      That is <a href="#y-4" onclick="showWeek('w7-ex')">Exercise 4</a>. In general the maximum is <strong>1 − 1/k</strong>, reached when every class is equally represented — try <code>5 5 5 5</code> above and watch it land on 0.75.</p>`;
+      That is <a href="#y-4" onclick="showSection('t7-ex')">Exercise 4</a>. In general the maximum is <strong>1 − 1/k</strong>, reached when every class is equally represented — try <code>5 5 5 5</code> above and watch it land on 0.75.</p>`;
     const presets = [['6 5 4', 'root of Fig. 7.5'], ['6 0 0', 'a pure node'], ['0 5 4', 'HasJob = Yes'], ['2 0 4', 'OwnsHome = No'], ['5 5 5 5', 'four equal classes'], ['1 1', 'the k = 2 maximum']];
     html += '<div class="ix-bar"><span class="ix-lab">try</span>' + presets.map(p => `<button class="ix-btn" onclick="giLoad('${p[0]}')">${p[0]} <span style="opacity:.6;">· ${p[1]}</span></button>`).join('') + '</div>';
     out.innerHTML = html;

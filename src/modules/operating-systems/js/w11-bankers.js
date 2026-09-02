@@ -1,5 +1,5 @@
   /* ============================================================
-     BANKER'S ALGORITHM (Week 11)
+     BANKER'S ALGORITHM (Topic 10)
 
      Deadlock avoidance. The philosophers next door show deadlock
      happening; this shows the system refusing to let it happen, by

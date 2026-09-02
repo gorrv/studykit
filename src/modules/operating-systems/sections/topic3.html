@@ -1,12 +1,12 @@
-<section id="week3" class="week-section">
+<section id="topic3" class="topic-section">
 
-      <div class="week-header">
-        <div class="week-eyebrow">Week 03 · Memory Management</div>
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 03 · Memory Management</div>
         <h1>Virtual Memory &amp; Address Translation</h1>
-        <div class="week-subtitle">how every process gets the illusion of its own private memory</div>
+        <div class="topic-subtitle">how every process gets the illusion of its own private memory</div>
       </div>
 
-      <p>This is one of the deepest topics in the course. It solves a single problem in progressively cleverer ways. The whole week is a story: each solution fixes a flaw in the one before. Understanding <em>why</em> each step happens is the key to the entire topic.</p>
+      <p>This is one of the deepest topics in the course. It solves a single problem in progressively cleverer ways. The whole topic is a story: each solution fixes a flaw in the one before. Understanding <em>why</em> each step happens is the key to the entire topic.</p>
 
       <div class="callout">
         <div class="callout-label">The evolution at a glance</div>
@@ -14,7 +14,7 @@
       </div>
 
       <!-- ===== The problem ===== -->
-      <h2 id="w3-problem">The address-binding problem</h2>
+      <h2 id="t3-problem">The address-binding problem</h2>
 
       <p>Recall the OS gives each process the illusion of its own computer — <em>including its own memory</em>. We need this for:</p>
       <ul>
@@ -46,7 +46,7 @@ be 0d 3f 00 00  mov    <span style="color:#e89b6d;">$0x003f0d</span>,%esi   <spa
       </table>
 
       <!-- ===== Load-time relocation ===== -->
-      <h2 id="w3-relocation">Solution 1 · Load-time relocation</h2>
+      <h2 id="t3-relocation">Solution 1 · Load-time relocation</h2>
 
       <p>We already have to <em>copy</em> a program into memory to run it. <strong>Idea:</strong> while copying, <em>rewrite</em> all its embedded addresses to point to wherever we actually placed it.</p>
 
@@ -85,7 +85,7 @@ mov   <span style="color:#7eb892;">$0x403f0d</span>,%esi
       </div>
 
       <!-- ===== Base & limit ===== -->
-      <h2 id="w3-baselimit">Solution 2 · Base &amp; limit registers (a simple MMU)</h2>
+      <h2 id="t3-baselimit">Solution 2 · Base &amp; limit registers (a simple MMU)</h2>
 
       <p>Add hardware to the CPU: a <strong>Memory Management Unit (MMU)</strong> with two special registers:</p>
       <ul>
@@ -187,7 +187,7 @@ mov   <span style="color:#7eb892;">$0x403f0d</span>,%esi
       </div>
 
       <!-- ===== BASE/LIMIT CHECKER ===== -->
-      <h4 id="w3-bltool" style="font-family:'Fraunces',serif; font-size:18px; margin-top:28px;">🛠️ Try it: Base &amp; Limit Checker</h4>
+      <h4 id="t3-bltool" style="font-family:'Fraunces',serif; font-size:18px; margin-top:28px;">🛠️ Try it: Base &amp; Limit Checker</h4>
       <p style="font-size:14px;">Set a base and limit, then feed in virtual addresses and watch the hardware either translate (base + address) or trap. The bar shows where the address lands relative to the allowed window.</p>
 
       <div class="tool" data-run="blCheck">
@@ -233,7 +233,7 @@ mov   <span style="color:#7eb892;">$0x403f0d</span>,%esi
       </div>
 
       <!-- ===== Segmentation ===== -->
-      <h2 id="w3-segmentation">Solution 3 · Segmentation</h2>
+      <h2 id="t3-segmentation">Solution 3 · Segmentation</h2>
 
       <p>A natural evolution: instead of <em>one</em> (base, limit) pair per process, support <strong>many</strong>. Each pair is a <strong>segment</strong> — a logical chunk like the stack, code, or data.</p>
 
@@ -265,7 +265,7 @@ mov   <span style="color:#7eb892;">$0x403f0d</span>,%esi
       </div>
 
       <!-- ===== Paging ===== -->
-      <h2 id="w3-paging">Solution 4 · Paged virtual addressing</h2>
+      <h2 id="t3-paging">Solution 4 · Paged virtual addressing</h2>
 
       <p>The key insight: <em>"What if we had lots and lots of segments, but all the same small size?"</em></p>
 
@@ -288,7 +288,7 @@ mov   <span style="color:#7eb892;">$0x403f0d</span>,%esi
       <p>Programs only ever use <strong>virtual addresses</strong> (p, o). The MMU's job is to translate the page number <strong>p</strong> into a physical frame number <strong>f</strong>, leaving the offset <strong>o</strong> untouched.</p>
 
       <!-- ===== Translation ===== -->
-      <h2 id="w3-translation">Address translation &amp; the page table</h2>
+      <h2 id="t3-translation">Address translation &amp; the page table</h2>
 
       <p>Each process has its own <strong>page table</strong>: conceptually an array mapping page number → frame number. The <strong>PTBR (page table base register)</strong> tells the MMU where the current process's page table lives.</p>
 
@@ -396,7 +396,7 @@ PT size = m × 2ⁿ
       </div>
 
       <!-- ===== INTERACTIVE TRANSLATOR ===== -->
-      <h3 id="w3-translator">🛠️ Interactive: Address Translator</h3>
+      <h3 id="t3-translator">🛠️ Interactive: Address Translator</h3>
       <p>Practice the mechanic that's almost guaranteed to appear in the exam. Enter a virtual address and page size, and watch it split into page number + offset, look up the frame, and combine into the physical address. The page table is editable — change any frame number.</p>
 
       <div class="tool" data-run="runTranslate">
@@ -460,7 +460,7 @@ PT size = m × 2ⁿ
       </table>
 
       <!-- ===== Multi-level ===== -->
-      <h2 id="w3-multilevel">Solution 5 · Multi-level page tables</h2>
+      <h2 id="t3-multilevel">Solution 5 · Multi-level page tables</h2>
 
       <p>The insight: <strong>most processes don't use all 2ⁿ pages</strong>, so most page-table entries are invalid (empty). Why store a giant array that's mostly empty? Use a data structure that handles <em>sparseness</em> better — a <strong>tree</strong> (of fixed depth, since hardware isn't recursive).</p>
 
@@ -511,10 +511,10 @@ PT size = m × 2ⁿ
       </div>
 
       <!-- ===== Exam ===== -->
-      <h2 id="w3-exam">Exam-style takeaways</h2>
+      <h2 id="t3-exam">Exam-style takeaways</h2>
 
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 3</div>
+        <div class="callout-label">Key things to nail for Topic 03</div>
         <ol>
           <li><strong>State the address-binding problem</strong> — programs embed fixed addresses but must run in shared physical memory, reliably and securely.</li>
           <li><strong>Walk the evolution</strong>: relocation → base/limit → segmentation → paging → multi-level. Know what flaw each step fixes.</li>
@@ -533,6 +533,6 @@ PT size = m × 2ⁿ
         </ol>
       </div>
 
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 3 notes. Send Week 4 slides whenever you're ready.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 03 notes. Send Topic 04 slides whenever you're ready.</p>
 
     </section>

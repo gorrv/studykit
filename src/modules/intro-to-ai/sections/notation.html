@@ -1,8 +1,8 @@
-<section id="notation" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">★ Start here if a formula blocks you</div>
+<section id="notation" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">★ Start here if a formula blocks you</div>
         <h1>Reading the Notation</h1>
-        <div class="week-subtitle">every symbol in the module, said out loud</div>
+        <div class="topic-subtitle">every symbol in the module, said out loud</div>
       </div>
       <div class="callout">
         <div class="callout-label">What this page is for</div>
@@ -60,7 +60,7 @@
           <tr><td><strong>arg min</strong></td><td>"arg min"</td><td>the <em>thing</em> that gave the smallest value</td><td>arg min = <strong>the first item</strong></td></tr>
           <tr><td><strong>arg max</strong></td><td>"arg max"</td><td>the <em>thing</em> that gave the largest value</td><td>arg max = <strong>the second item</strong></td></tr>
         </table>
-        <p style="margin:12px 0 0 0;"><strong>min/max give a number. arg min/arg max give a name.</strong> That is the entire difference, and it is worth marks in Weeks 4, 7 and 8.</p>
+        <p style="margin:12px 0 0 0;"><strong>min/max give a number. arg min/arg max give a name.</strong> That is the entire difference, and it is worth marks in Topics 4, 7 and 8.</p>
         <p style="margin:10px 0 0 0;">If a question says "which action?" or "which feature?", it wants an <strong>arg</strong>. If it says "what is the value?", it wants the plain min or max.</p>
       </div>
 
@@ -110,7 +110,7 @@
           <tr><td><strong>ε<sub>i</sub></strong></td><td>epsilon</td><td>a residual — one point's error</td><td>W7</td></tr>
           <tr><td><strong>Σ</strong></td><td>sigma (capital)</td><td>add up. <strong>Different job from lowercase σ.</strong></td><td>everywhere</td></tr>
         </table>
-        <p style="margin:12px 0 0 0;">Note that <strong>β and ε each get used for two different things</strong> in different weeks, and <strong>σ and Σ are the same letter in different cases</strong>. Context tells you which; nobody expects you to guess from the glyph alone.</p>
+        <p style="margin:12px 0 0 0;">Note that <strong>β and ε each get used for two different things</strong> in different topics, and <strong>σ and Σ are the same letter in different cases</strong>. Context tells you which; nobody expects you to guess from the glyph alone.</p>
       </div>
 
       <!-- ===== OTHER ===== -->
@@ -133,7 +133,7 @@
       <h2 id="nt-decoded">The five worst formulas, decoded</h2>
 
       <div class="callout exam">
-        <div class="callout-label">1 · Single-linkage &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Week 6)</span></div>
+        <div class="callout-label">1 · Single-linkage &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Topic 06)</span></div>
         <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
           dist<sub>SL</sub>(C₁, C₂) := min<sub>p∈C₁, q∈C₂</sub> ‖p − q‖</div>
         <table class="cmp-table">
@@ -147,7 +147,7 @@
       </div>
 
       <div class="callout exam">
-        <div class="callout-label">2 · Within-cluster variance &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Week 6)</span></div>
+        <div class="callout-label">2 · Within-cluster variance &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Topic 06)</span></div>
         <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
           V(C<sub>k</sub>) = (1 / |C<sub>k</sub>|) &nbsp;Σ<sub>i,i′ ∈ C<sub>k</sub></sub> &nbsp;d(p<sub>i</sub>, p<sub>i′</sub>)²</div>
         <table class="cmp-table">
@@ -160,7 +160,7 @@
       </div>
 
       <div class="callout exam">
-        <div class="callout-label">3 · The Bellman update &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Week 4)</span></div>
+        <div class="callout-label">3 · The Bellman update &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Topic 04)</span></div>
         <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
           U<sub>i+1</sub>(s) = R(s) + γ &nbsp;max<sub>a</sub> &nbsp;Σ<sub>s′</sub> P(s′ | s, a) U<sub>i</sub>(s′)</div>
         <table class="cmp-table">
@@ -176,7 +176,7 @@
       </div>
 
       <div class="callout exam">
-        <div class="callout-label">4 · Upper Confidence Bound &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Week 8)</span></div>
+        <div class="callout-label">4 · Upper Confidence Bound &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Topic 08)</span></div>
         <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
           A<sub>t</sub> = arg max<sub>a</sub> [ Q<sub>t</sub>(a) + c √( ln t / N<sub>t</sub>(a) ) ]</div>
         <table class="cmp-table">
@@ -190,7 +190,7 @@
       </div>
 
       <div class="callout exam">
-        <div class="callout-label">5 · Gini-Split &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Week 7)</span></div>
+        <div class="callout-label">5 · Gini-Split &nbsp;<span style="font-weight:400; color:var(--ink-muted);">(Topic 07)</span></div>
         <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">
           Gini-Split(A<sub>i</sub>) = Σ<sub>j=1</sub><sup>a</sup> (n<sub>j</sub> / n) · Gini(v<sub>j</sub>)</div>
         <table class="cmp-table">

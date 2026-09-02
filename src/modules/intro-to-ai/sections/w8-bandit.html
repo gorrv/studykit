@@ -1,8 +1,8 @@
-<section id="w8-bandit" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 08 · Part 1 · Reinforcement Learning</div>
+<section id="t8-bandit" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 08 · Part 1 · Reinforcement Learning</div>
         <h1>Bandits &amp; Action Values</h1>
-        <div class="week-subtitle">two numbers per machine, and that is the whole algorithm</div>
+        <div class="topic-subtitle">two numbers per machine, and that is the whole algorithm</div>
       </div>
 
       <!-- ===== INTRO ===== -->
@@ -13,9 +13,9 @@
         <p style="margin:10px 0 0 0;">That is the lecture's own phrasing: <strong>by repeatedly attempting to solve a problem, the agent learns about it and about the result of each of their actions.</strong></p>
       </div>
       <div class="callout tip">
-        <div class="callout-label">How it differs from Week 4</div>
-        In Week 4 you were <em>told</em> the rewards. You could sit down and compute the answer before moving.
-        <p style="margin:10px 0 0 0;"><strong>Here nobody tells you anything.</strong> The only way to find out what an action is worth is to do it and see. That is the entire difference, and everything in Week 8 follows from it.</p>
+        <div class="callout-label">How it differs from Topic 04</div>
+        In Topic 04 you were <em>told</em> the rewards. You could sit down and compute the answer before moving.
+        <p style="margin:10px 0 0 0;"><strong>Here nobody tells you anything.</strong> The only way to find out what an action is worth is to do it and see. That is the entire difference, and everything in Topic 08 follows from it.</p>
       </div>
 
       <!-- ===== THE SETUP ===== -->
@@ -29,7 +29,7 @@
       <div class="callout">
         <div class="callout-label">Example 8.1 — two machines</div>
         <p style="margin:0 0 10px 0;">Two machines, <strong>A</strong> and <strong>B</strong>. You press one and get whatever it pays. You can do this as often as you like.</p>
-        <p style="margin:0;"><strong>Should you keep pressing the one that has done well so far, or try the other?</strong> That question is the whole week.</p>
+        <p style="margin:0;"><strong>Should you keep pressing the one that has done well so far, or try the other?</strong> That question is the whole topic.</p>
         <p style="margin:10px 0 0 0;">The notes suggest <strong>A ∼ N(10, 1)</strong> and <strong>B ∼ N(11, 4)</strong> for experimenting. Careful: <strong>N(11, 4) means variance 4, so σ = 2</strong>. B is better on average but twice as noisy, which is exactly why it takes a while to tell them apart.</p>
       </div>
 <div class="callout">

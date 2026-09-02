@@ -1,29 +1,29 @@
   /* ============================================================
-     MOCK EXAM — a scored, optionally timed test over any set of weeks
+     MOCK EXAM — a scored, optionally timed test over any set of topics
      ============================================================ */
-  const EX_WEEKS = [
-    { w: 1, label: 'W1 · Intro, search &amp; A*', topics: ['ai-intro', 'search', 'astar'] },
-    { w: 2, label: 'W2 · Adversarial &amp; CSP', topics: ['minimax', 'csp'] },
-    { w: 3, label: 'W3 · Planning', topics: ['planning'] },
-    { w: 4, label: 'W4 · MDPs', topics: ['mdp'] },
-    { w: 5, label: 'W5 · Machine learning', topics: ['ml'] },
-    { w: 6, label: 'W6 · Clustering', topics: ['clustering'] },
-    { w: 7, label: 'W7 · Regression &amp; trees', topics: ['supervised'] },
-    { w: 8, label: 'W8 · Reinforcement learning', topics: ['rl'] },
-    { w: 9, label: 'W9 · AI ethics', topics: ['ethics'] }
+  const EX_TOPICS = [
+    { w: 1, label: 'T1 · Intro, search &amp; A*', topics: ['ai-intro', 'search', 'astar'] },
+    { w: 2, label: 'T2 · Adversarial &amp; CSP', topics: ['minimax', 'csp'] },
+    { w: 3, label: 'T3 · Planning', topics: ['planning'] },
+    { w: 4, label: 'T4 · MDPs', topics: ['mdp'] },
+    { w: 5, label: 'T5 · Machine learning', topics: ['ml'] },
+    { w: 6, label: 'T6 · Clustering', topics: ['clustering'] },
+    { w: 7, label: 'T7 · Regression &amp; trees', topics: ['supervised'] },
+    { w: 8, label: 'T8 · Reinforcement learning', topics: ['rl'] },
+    { w: 9, label: 'T9 · AI ethics', topics: ['ethics'] }
   ];
   const EX_TOPIC_W = {};
-  EX_WEEKS.forEach(x => x.topics.forEach(t => EX_TOPIC_W[t] = x.w));
-  const EX = { phase: 'setup', weeks: {}, n: 20, limit: 0, qs: [], answers: [], i: 0,
+  EX_TOPICS.forEach(x => x.topics.forEach(t => EX_TOPIC_W[t] = x.w));
+  const EX = { phase: 'setup', topics: {}, n: 20, limit: 0, qs: [], answers: [], i: 0,
                endsAt: 0, timer: null, reveal: false, err: '', requested: 20, short: false };
-  EX_WEEKS.forEach(x => EX.weeks[x.w] = true);
+  EX_TOPICS.forEach(x => EX.topics[x.w] = true);
 
-  function exWeek(w) { EX.weeks[w] = !EX.weeks[w]; EX.err = ''; exRender(); }
-  function exAll(on) { EX_WEEKS.forEach(x => EX.weeks[x.w] = on); EX.err = ''; exRender(); }
+  function exTopic(w) { EX.topics[w] = !EX.topics[w]; EX.err = ''; exRender(); }
+  function exAll(on) { EX_TOPICS.forEach(x => EX.topics[x.w] = on); EX.err = ''; exRender(); }
   function exSet(k, v) { EX[k] = Number(v); exRender(); }
   function exPool() {
     const topics = [];
-    EX_WEEKS.forEach(x => { if (EX.weeks[x.w]) topics.push.apply(topics, x.topics); });
+    EX_TOPICS.forEach(x => { if (EX.topics[x.w]) topics.push.apply(topics, x.topics); });
     return QZ_GEN.filter(g => topics.indexOf(g.topic) >= 0);
   }
   function exBuild() {
@@ -40,13 +40,13 @@
       const sig = String(q.prompt).replace(/\s+/g, ' ') + '||' + String(q.answer);
       if (seen[sig]) continue;
       seen[sig] = 1;
-      q.gtopic = g.topic; q.week = EX_TOPIC_W[g.topic];
+      q.gtopic = g.topic; q.topic = EX_TOPIC_W[g.topic];
       qs.push(q);
     }
     return qs;
   }
   function exStart() {
-    if (!EX_WEEKS.some(x => EX.weeks[x.w])) { EX.err = 'Pick at least one week first.'; exRender(); return; }
+    if (!EX_TOPICS.some(x => EX.topics[x.w])) { EX.err = 'Pick at least one topic first.'; exRender(); return; }
     const qs = exBuild();
     if (!qs.length) { EX.err = 'No questions available for that selection.'; exRender(); return; }
     EX.err = ''; EX.qs = qs; EX.answers = qs.map(() => null); EX.i = 0;
@@ -118,14 +118,14 @@
     let html = '';
     if (EX.phase === 'setup') {
       const pool = exPool();
-      html += '<div class="ix-bar"><span class="ix-lab"><strong>which weeks?</strong></span>'
+      html += '<div class="ix-bar"><span class="ix-lab"><strong>which topics?</strong></span>'
         + `<button class="ix-btn" onclick="exAll(true)">all</button><button class="ix-btn" onclick="exAll(false)">none</button></div>`;
       html += '<div class="concept-grid" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:8px; margin-top:0;">';
-      EX_WEEKS.forEach(x => {
-        const on = EX.weeks[x.w], cnt = QZ_GEN.filter(g => x.topics.indexOf(g.topic) >= 0).length;
+      EX_TOPICS.forEach(x => {
+        const on = EX.topics[x.w], cnt = QZ_GEN.filter(g => x.topics.indexOf(g.topic) >= 0).length;
         html += `<label style="display:flex; align-items:center; gap:8px; border:1px solid ${on ? 'var(--accent)' : 'var(--rule)'};
           border-radius:8px; padding:9px 11px; cursor:pointer; background:${on ? 'var(--tint-a)' : 'var(--surface-2)'};">
-          <input type="checkbox" ${on ? 'checked' : ''} onchange="exWeek(${x.w})" style="accent-color:var(--accent); cursor:pointer;">
+          <input type="checkbox" ${on ? 'checked' : ''} onchange="exTopic(${x.w})" style="accent-color:var(--accent); cursor:pointer;">
           <span style="flex:1;"><span style="font-size:13px;">${x.label}</span>
           <span style="display:block; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-muted);">${cnt} generators</span></span></label>`;
       });
@@ -136,13 +136,13 @@
         + [[0, 'none'], [600, '10 min'], [1200, '20 min'], [2700, '45 min'], [5400, '90 min']]
             .map(t => `<button class="${EX.limit === t[0] ? 'on' : ''}" onclick="exSet('limit',${t[0]})">${t[1]}</button>`).join('')
         + '</span></div>';
-      html += `<div class="metrics"><div class="metric"><div class="mn">question pool</div><div class="mv">${pool.length}</div><div class="mf">generators across the weeks you picked</div></div>
+      html += `<div class="metrics"><div class="metric"><div class="mn">question pool</div><div class="mv">${pool.length}</div><div class="mf">generators across the topics you picked</div></div>
         <div class="metric"><div class="mn">paper length</div><div class="mv">${EX.n}</div><div class="mf">${EX.limit ? 'in ' + exMMSS(EX.limit) : 'untimed'}</div></div>
         <div class="metric dim"><div class="mn">per question</div><div class="mv">${EX.limit ? Math.round(EX.limit / EX.n) + 's' : '—'}</div><div class="mf">${EX.limit ? 'average budget' : 'take as long as you like'}</div></div></div>`;
       if (EX.err) html += `<div class="tool-error">${EX.err}</div>`;
       html += `<div class="tool-controls" style="margin-top:12px;"><button class="tool-btn green" onclick="exStart()">Start the paper ▶</button></div>`;
       html += `<p class="ix-hint">Questions are drawn from the same generators as the self-test, but <strong>numbers are freshly randomised every time</strong>, so you cannot learn the answers.
-        Nothing is graded until you finish, you can move back and forth, and at the end you get a <strong>per-week breakdown</strong> and every question you got wrong with its explanation.</p>`;
+        Nothing is graded until you finish, you can move back and forth, and at the end you get a <strong>per-topic breakdown</strong> and every question you got wrong with its explanation.</p>`;
       out.innerHTML = html; return;
     }
     if (EX.phase === 'run') {
@@ -164,9 +164,9 @@
           style="width:18px; height:8px; border-radius:3px; border:none; padding:0; cursor:pointer; background:${col};"></button>`;
       });
       html += '</div>';
-      const wk = EX_WEEKS.filter(x => x.w === q.week)[0];
+      const wk = EX_TOPICS.filter(x => x.w === q.topic)[0];
       if (EX.short && EX.i === 0) html += `<div class="verdict warn" style="margin:10px 0;">You asked for ${EX.requested} questions but this selection only has
-        <strong>${n} distinct ones</strong> — the generators for these weeks run out before that. Tick more weeks, or sit a shorter paper and re-sit it.</div>`;
+        <strong>${n} distinct ones</strong> — the generators for these topics run out before that. Tick more topics, or sit a shorter paper and re-sit it.</div>`;
       html += `<div class="quiz-prompt"><div class="qp-topic">${wk ? wk.label : q.gtopic}</div>${q.prompt}</div>`;
       if (q.kind === 'choice') {
         html += '<div class="quiz-choices">';
@@ -194,32 +194,32 @@
     const skipped = EX.answers.filter(x => x.skipped).length;
     const byW = {};
     EX.qs.forEach((q, i) => {
-      const k = q.week || 0;
+      const k = q.topic || 0;
       if (!byW[k]) byW[k] = { r: 0, t: 0 };
       byW[k].t++; if (EX.answers[i].ok) byW[k].r++;
     });
     html += `<div class="metrics">
       <div class="metric"><div class="mn">score</div><div class="mv">${right} / ${n}</div><div class="mf">${skipped ? skipped + ' skipped' : 'nothing skipped'}</div></div>
-      <div class="metric"><div class="mn">percentage</div><div class="mv" style="color:${pct >= 70 ? 'var(--accent-3)' : pct >= 50 ? 'var(--accent)' : 'var(--accent-2)'};">${pct}%</div><div class="mf">${pct >= 70 ? 'comfortable' : pct >= 50 ? 'passable — tighten the weak weeks' : 'go back to the notes first'}</div></div>
-      <div class="metric dim"><div class="mn">weeks covered</div><div class="mv">${Object.keys(byW).length}</div><div class="mf">${EX.limit ? 'timed paper' : 'untimed'}</div></div>
+      <div class="metric"><div class="mn">percentage</div><div class="mv" style="color:${pct >= 70 ? 'var(--accent-3)' : pct >= 50 ? 'var(--accent)' : 'var(--accent-2)'};">${pct}%</div><div class="mf">${pct >= 70 ? 'comfortable' : pct >= 50 ? 'passable — tighten the weak topics' : 'go back to the notes first'}</div></div>
+      <div class="metric dim"><div class="mn">topics covered</div><div class="mv">${Object.keys(byW).length}</div><div class="mf">${EX.limit ? 'timed paper' : 'untimed'}</div></div>
     </div>`;
     if (EX.short) html += `<div class="verdict warn" style="margin-top:12px;">This paper was <strong>${n} questions, not the ${EX.requested} you asked for</strong> — that selection has no more distinct questions in it.</div>`;
-    html += '<table><tr><th>week</th><th>score</th><th></th><th>verdict</th></tr>';
+    html += '<table><tr><th>topic</th><th>score</th><th></th><th>verdict</th></tr>';
     Object.keys(byW).sort((a, b) => a - b).forEach(k => {
       const s = byW[k], p = Math.round(100 * s.r / s.t);
-      const wk = EX_WEEKS.filter(x => x.w === Number(k))[0];
+      const wk = EX_TOPICS.filter(x => x.w === Number(k))[0];
       const col = p >= 70 ? 'var(--accent-3)' : p >= 50 ? 'var(--accent)' : 'var(--accent-2)';
-      html += `<tr><td><strong>${wk ? wk.label : 'week ' + k}</strong></td><td><code>${s.r}/${s.t}</code></td>
+      html += `<tr><td><strong>${wk ? wk.label : 'topic ' + k}</strong></td><td><code>${s.r}/${s.t}</code></td>
         <td><span style="display:inline-block; height:9px; border-radius:3px; background:${col}; width:${Math.max(3, p * 1.4).toFixed(0)}px;"></span> ${p}%</td>
         <td style="color:${col};">${p >= 70 ? 'solid' : p >= 50 ? 'shaky' : 'revise this'}</td></tr>`;
     });
     html += '</table>';
     const weak = Object.keys(byW).filter(k => byW[k].r / byW[k].t < 0.5);
     if (weak.length) {
-      const names = weak.map(k => (EX_WEEKS.filter(x => x.w === Number(k))[0] || {}).label || k);
-      html += `<div class="verdict bad" style="margin-top:12px;">Below half on ${names.join(', ')}. Re-run the paper with <strong>only those weeks ticked</strong> until they come up green.</div>`;
+      const names = weak.map(k => (EX_TOPICS.filter(x => x.w === Number(k))[0] || {}).label || k);
+      html += `<div class="verdict bad" style="margin-top:12px;">Below half on ${names.join(', ')}. Re-run the paper with <strong>only those topics ticked</strong> until they come up green.</div>`;
     } else if (n) {
-      html += `<div class="verdict safe" style="margin-top:12px;">No week below 50%. Widen the selection or lengthen the paper.</div>`;
+      html += `<div class="verdict safe" style="margin-top:12px;">No topic below 50%. Widen the selection or lengthen the paper.</div>`;
     }
     html += `<div class="ix-bar" style="margin-top:14px;">
       <button class="ix-btn" onclick="exToggleReveal()">${EX.reveal ? 'hide' : 'show'} every question</button>
@@ -228,7 +228,7 @@
     const list = EX.qs.map((q, i) => ({ q: q, a: EX.answers[i], i: i })).filter(o => EX.reveal || !o.a.ok);
     if (!list.length) html += '<div class="verdict safe">Everything correct.</div>';
     list.forEach(o => {
-      const wk = EX_WEEKS.filter(x => x.w === o.q.week)[0];
+      const wk = EX_TOPICS.filter(x => x.w === o.q.topic)[0];
       html += `<div class="kmstep" style="border-color:${o.a.ok ? 'var(--accent-3)' : 'var(--accent-2)'};">
         <h5>${o.a.ok ? '✓' : '✗'} &nbsp;Q${o.i + 1} · ${wk ? wk.label : o.q.gtopic}</h5>
         <div style="margin:0 0 10px 0;">${o.q.prompt}</div>

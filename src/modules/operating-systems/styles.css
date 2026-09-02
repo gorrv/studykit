@@ -71,8 +71,8 @@
   }
 
   nav ul { list-style: none; padding: 0; margin: 0; }
-  nav li.week { margin-bottom: 18px; }
-  nav .week-label {
+  nav li.topic { margin-bottom: 18px; }
+  nav .topic-label {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
     text-transform: uppercase;
@@ -81,7 +81,7 @@
     margin-bottom: 6px;
     padding-left: 4px;
   }
-  nav .week-title {
+  nav .topic-title {
     font-family: 'Fraunces', serif;
     font-weight: 500;
     font-size: 15px;
@@ -93,7 +93,7 @@
     margin-bottom: 6px;
     transition: all 0.15s;
   }
-  nav .week-title:hover { background: rgba(30,77,139,0.08); color: var(--accent); }
+  nav .topic-title:hover { background: rgba(30,77,139,0.08); color: var(--accent); }
   nav .subsection {
     list-style: none;
     padding-left: 12px;
@@ -126,12 +126,12 @@
     max-width: 920px;
   }
 
-  .week-header {
+  .topic-header {
     margin-bottom: 48px;
     padding-bottom: 24px;
     border-bottom: 2px solid var(--ink);
   }
-  .week-eyebrow {
+  .topic-eyebrow {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     text-transform: uppercase;
@@ -148,7 +148,7 @@
     margin: 0 0 12px 0;
     color: var(--ink);
   }
-  .week-subtitle {
+  .topic-subtitle {
     font-family: 'Fraunces', serif;
     font-style: italic;
     font-size: 20px;
@@ -485,7 +485,7 @@
     color: var(--rule);
   }
 
-  /* ===== Week 2 components ===== */
+  /* ===== Topic 2 components ===== */
 
   /* Gantt chart for scheduling */
   .gantt {
@@ -625,7 +625,7 @@
   }
   @media (max-width: 700px) { .compare-2, .proc-mem { grid-template-columns: 1fr; } }
 
-  /* ===== Week 3 components ===== */
+  /* ===== Topic 3 components ===== */
 
   /* Physical memory column visual */
   .mem-map {
@@ -910,7 +910,7 @@
     margin-top: 8px;
   }
 
-  /* ===== Base & Limit MMU diagram (Week 3) ===== */
+  /* ===== Base & Limit MMU diagram (Topic 3) ===== */
   .mmu-diagram {
     background: var(--surface);
     border: 1px solid var(--rule);
@@ -1018,7 +1018,7 @@
   .ram-cell.other { background: repeating-linear-gradient(45deg, var(--surface), var(--surface) 5px, var(--paper-2) 5px, var(--paper-2) 10px); color: var(--ink-muted); }
   .ram-cell .ram-addr { position: absolute; left: -62px; color: var(--accent-2); font-size: 10px; }
 
-  /* ===== Week 4 components ===== */
+  /* ===== Topic 4 components ===== */
 
   /* Page fault flow */
   .fault-flow {
@@ -1215,7 +1215,7 @@
   .tlb-acc.hit { background: var(--tint-c); border-color: var(--accent-3); }
   .tlb-acc .vpn { font-size: 8px; color: var(--ink-muted); display: block; }
 
-  /* ===== Week 5 components ===== */
+  /* ===== Topic 5 components ===== */
   /* Free list visual */
   .freelist { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 20px 0; }
   .fl-node {
@@ -1261,7 +1261,7 @@
   .io-stage h4 { margin: 0 0 6px 0; font-family: 'Fraunces', serif; font-size: 16px; }
   .io-stage p { margin: 0; font-size: 13px; }
 
-  /* ===== Week 7 components ===== */
+  /* ===== Topic 7 components ===== */
   /* Access control matrix */
   .acm { border-collapse: collapse; margin: 20px 0; font-size: 13px; }
   .acm th, .acm td { border: 1px solid var(--rule); padding: 8px 12px; text-align: center; }
@@ -1313,7 +1313,7 @@
   .factor p { margin: 0; font-size: 12px; color: var(--ink-soft); }
   @media (max-width: 700px) { .factors { grid-template-columns: 1fr; } }
 
-  /* ===== Week 8 components ===== */
+  /* ===== Topic 8 components ===== */
   /* fork process tree */
   .fork-tree { display: flex; flex-direction: column; align-items: center; margin: 20px 0; font-family: 'IBM Plex Mono', monospace; }
   .fork-proc { border: 2px solid var(--accent); background: var(--tint-a); border-radius: 8px; padding: 10px 16px; font-size: 13px; text-align: center; }
@@ -1351,12 +1351,12 @@
   .cram-card .term { font-weight: 600; color: var(--ink); }
   @media print {
     aside, .tool, .no-print { display: none !important; }
-    .week-section { display: block !important; }
+    .topic-section { display: block !important; }
     main { padding: 0; max-width: 100%; }
     .cram-grid { grid-template-columns: 1fr 1fr; }
   }
 
-  /* ===== Week 9 components ===== */
+  /* ===== Topic 9 components ===== */
   /* JVM thread state machine */
   .jvm-states { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 20px 0; align-items: center; }
   .jvm-state { padding: 10px 16px; border-radius: 22px; font-family: 'Fraunces', serif; font-weight: 600; font-size: 13px; border: 2px solid; background: var(--surface-2); }
@@ -1389,7 +1389,7 @@
   /* code annotation tags */
   .way-tag { display: inline-block; background: var(--accent); color: #fff; font-size: 10px; font-family: 'IBM Plex Mono', monospace; padding: 2px 8px; border-radius: 10px; margin-right: 6px; }
 
-  /* ===== Week 10 components ===== */
+  /* ===== Topic 10 components ===== */
   /* lock acquisition flow */
   .lock-flow { display: flex; flex-direction: column; gap: 8px; margin: 20px 0; max-width: 520px; }
   .lock-step { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--rule); background: var(--surface); font-size: 13px; }
@@ -1423,7 +1423,7 @@
   .prob-vis { border-color: var(--accent-2); background: var(--tint-b2); }
   .prob-card h4 { margin: 0 0 6px 0; font-family: 'Fraunces', serif; font-size: 16px; }
 
-  /* ===== Week 11 components ===== */
+  /* ===== Topic 11 components ===== */
   /* deadlock 4 conditions */
   .dl-conditions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
   @media (max-width: 700px) { .dl-conditions { grid-template-columns: 1fr; } }
@@ -1493,9 +1493,9 @@
   .mock-progress-fill { height: 100%; background: var(--accent-3); width: 0; transition: width 0.3s; }
   .mock-tag { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 1px 7px; border-radius: 8px; background: var(--tint-n); color: var(--ink-muted); margin-left: 6px; }
 
-  /* Hide weeks by default, show via JS */
-  .week-section { display: none; }
-  .week-section.active { display: block; }
+  /* Hide topics by default, show via JS */
+  .topic-section { display: none; }
+  .topic-section.active { display: block; }
 
   /* Mobile */
   @media (max-width: 900px) {

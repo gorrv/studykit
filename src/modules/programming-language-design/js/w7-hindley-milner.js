@@ -2,7 +2,7 @@
      TOOL: MOST GENERAL TYPE  (Hindley–Milner inference)
      Infers the principal type of a Haskell-subset expression or
      definition, showing the constraints exactly the way the
-     Week 8 worked examples do.
+     Topic 06 worked examples do.
      ============================================================ */
   /* ---------- types ---------- */
   function tv(n) { return { k: 'v', n: n }; }

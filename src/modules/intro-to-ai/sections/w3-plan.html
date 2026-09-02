@@ -1,8 +1,8 @@
-<section id="w3-plan" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 03 · Part 1 · Automated planning</div>
+<section id="t3-plan" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 03 · Part 1 · Automated planning</div>
         <h1>Classical Planning</h1>
-        <div class="week-subtitle">describing a world well enough that a general solver can act in it</div>
+        <div class="topic-subtitle">describing a world well enough that a general solver can act in it</div>
       </div>
       <!-- ===== WHAT ===== -->
       <h2 id="p-what">What AI planning is</h2>
@@ -30,7 +30,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">How this differs from everything so far</div>
-        In Week 1 you were handed a graph. In Week 2's CSPs you were handed variables and constraints. Here <strong>you are handed nothing but a description in a language</strong>, and the state space is generated from it — the graph is implicit and astronomically large.
+        In Topic 01 you were handed a graph. In Topic 02's CSPs you were handed variables and constraints. Here <strong>you are handed nothing but a description in a language</strong>, and the state space is generated from it — the graph is implicit and astronomically large.
         <p style="margin:10px 0 0 0;">That's what "more powerful than CSP" means: a CSP has a fixed set of variables to fill in, whereas a planning problem has an unbounded sequence of actions to choose, and the same fact can be made true, destroyed and made true again.</p>
       </div>
       <!-- ===== LOGISTICS ===== -->
@@ -84,7 +84,7 @@
         </ul>
       </div>
       <div class="callout">
-        <div class="callout-label">The slides' instance — 2 trucks, 3 cargos, 8 locations</div>
+        <div class="callout-label">The lectures' instance — 2 trucks, 3 cargos, 8 locations</div>
         <pre><code>at(c1,l3)   at(c2,l4)   at(c3,l8)
 at(t1,l1)   at(t2,l5)
 connected(l1,l2)  connected(l2,l3)  connected(l3,l4)  connected(l3,l8)

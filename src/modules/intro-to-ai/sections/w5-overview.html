@@ -1,8 +1,8 @@
-<section id="w5-overview" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 05 · Part 1 · Introduction to Machine Learning</div>
+<section id="t5-overview" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 05 · Part 1 · Introduction to Machine Learning</div>
         <h1>Machine Learning: Overview</h1>
-        <div class="week-subtitle">the other half of the field, finally</div>
+        <div class="topic-subtitle">the other half of the field, finally</div>
       </div>
       <!-- ===== WHAT ===== -->
       <h2 id="o-what">What machine learning is</h2>
@@ -12,8 +12,8 @@
         <p style="margin:8px 0 0 0; color:var(--ink-muted);">— Arthur Samuel, 1959</p>
       </div>
       <div class="callout tip">
-        <div class="callout-label">This is the right-hand column of Week 1, at last</div>
-        Week 1 split AI into <strong>model-based</strong> (explicit knowledge, symbolic, classical — <em>"pretends to think"</em>) and <strong>data-driven</strong> (tacit knowledge, machine learning — <em>"pretends to learn"</em>). Weeks 1–4 were <em>entirely</em> the left-hand column: search, adversarial search, CSPs, planning, MDPs — all of them require you to write the world down first.
+        <div class="callout-label">This is the right-hand column of Topic 01, at last</div>
+        Topic 01 split AI into <strong>model-based</strong> (explicit knowledge, symbolic, classical — <em>"pretends to think"</em>) and <strong>data-driven</strong> (tacit knowledge, machine learning — <em>"pretends to learn"</em>). Topics 1–4 were <em>entirely</em> the left-hand column: search, adversarial search, CSPs, planning, MDPs — all of them require you to write the world down first.
         <p style="margin:10px 0 0 0;">Samuel's phrase "<strong>without being explicitly programmed</strong>" is precisely the boundary. In a PDDL domain <em>you</em> state that loading a cargo deletes <code>at(c,l)</code>. In machine learning nobody states anything; the rule is extracted from examples.</p>
       </div>
       <div class="callout">
@@ -53,8 +53,8 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Why this matters more than it sounds</div>
-        Everything in Weeks 1–4 came with <strong>guarantees</strong>: A* is optimal if <em>h</em> is admissible; alpha-beta returns exactly the minimax value; AC-3 terminates; value iteration converges to the unique fixpoint. You could prove all of them.
-        <p style="margin:10px 0 0 0;">Machine learning largely cannot offer that. So the field replaces <em>proof</em> with <strong>measurement</strong> — you cannot show the model is right, so you must show it performs well on data it has never seen. That substitution is what Parts 2 and 3 are about, and it's why they take up two thirds of the week.</p>
+        Everything in Topics 1–4 came with <strong>guarantees</strong>: A* is optimal if <em>h</em> is admissible; alpha-beta returns exactly the minimax value; AC-3 terminates; value iteration converges to the unique fixpoint. You could prove all of them.
+        <p style="margin:10px 0 0 0;">Machine learning largely cannot offer that. So the field replaces <em>proof</em> with <strong>measurement</strong> — you cannot show the model is right, so you must show it performs well on data it has never seen. That substitution is what Parts 2 and 3 are about, and it's why they take up two thirds of the topic.</p>
       </div>
       <!-- ===== TYPES ===== -->
       <h2 id="o-types">Three types of machine learning</h2>
@@ -76,12 +76,12 @@
       </div>
       <div class="callout warn">
         <div class="callout-label">You have already met reinforcement learning's world — from the other side</div>
-        Reward, punishment, actions, past experience, exploration versus exploitation: this is <strong>Week 4's MDP vocabulary exactly</strong>. The difference is what you're given.
+        Reward, punishment, actions, past experience, exploration versus exploitation: this is <strong>Topic 04's MDP vocabulary exactly</strong>. The difference is what you're given.
         <ul style="margin:8px 0 0 0;">
           <li>In an <strong>MDP</strong> you are handed <code>P(s′|s,a)</code> and <code>R(s)</code> and you <em>compute</em> the optimal policy with value iteration.</li>
           <li>In <strong>reinforcement learning</strong> you are handed <em>neither</em>. You must learn the policy by acting and observing what happens.</li>
         </ul>
-        <p style="margin:10px 0 0 0;">And that's why <strong>exploration vs exploitation</strong> exists in RL but never appeared in Week 4: when you already know the transition model, there is nothing to explore.</p>
+        <p style="margin:10px 0 0 0;">And that's why <strong>exploration vs exploitation</strong> exists in RL but never appeared in Topic 04: when you already know the transition model, there is nothing to explore.</p>
       </div>
       <!-- ===== CLASSES ===== -->
       <h2 id="o-classes">Four classes of learning problem</h2>
@@ -117,7 +117,7 @@
           <li><strong>Classification and regression are supervised; clustering and dimensionality reduction are unsupervised.</strong> Be able to state what each does.</li>
           <li><strong>Classification vs regression</strong> — label versus number. <strong>Classification vs clustering</strong> — the classes are given versus the groups are discovered.</li>
           <li><strong>Many ML algorithms have no mathematical proof that they work</strong> — which is why empirical evaluation on held-out data is so central.</li>
-          <li><strong>Where this sits</strong> — this is the <em>data-driven / tacit knowledge</em> half of Week 1's split, after four weeks entirely in the model-based half.</li>
+          <li><strong>Where this sits</strong> — this is the <em>data-driven / tacit knowledge</em> half of Topic 01's split, after four topics entirely in the model-based half.</li>
         </ol>
       </div>
       <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Part 1. Next: if you can't prove it works, how do you tell?</p>

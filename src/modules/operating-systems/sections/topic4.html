@@ -1,12 +1,12 @@
-<section id="week4" class="week-section">
+<section id="topic4" class="topic-section">
 
-      <div class="week-header">
-        <div class="week-eyebrow">Week 04 · Memory Management II</div>
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 04 · Memory Management II</div>
         <h1>Demand Paging &amp; Virtual Memory</h1>
-        <div class="week-subtitle">turning page faults from errors into superpowers</div>
+        <div class="topic-subtitle">turning page faults from errors into superpowers</div>
       </div>
 
-      <p>Week 3 built page tables that map virtual pages to physical frames. This week's big idea: <strong>a page fault isn't necessarily an error — it's an opportunity.</strong> When a process touches an unmapped page, the hardware traps into the OS. Instead of just killing the process, the OS can do something clever and then resume. This single hook enables a whole family of "useful illusions."</p>
+      <p>Topic 03 built page tables that map virtual pages to physical frames. This topic's big idea: <strong>a page fault isn't necessarily an error — it's an opportunity.</strong> When a process touches an unmapped page, the hardware traps into the OS. Instead of just killing the process, the OS can do something clever and then resume. This single hook enables a whole family of "useful illusions."</p>
 
       <div class="callout">
         <div class="callout-label">The illusions, in order of ambition</div>
@@ -14,7 +14,7 @@
       </div>
 
       <!-- ===== Page faults ===== -->
-      <h2 id="w4-faults">Page faults as a point of interposition</h2>
+      <h2 id="t4-faults">Page faults as a point of interposition</h2>
 
       <p>Recall: most of a process's virtual address space is <strong>unmapped</strong> (unused). The MMU translates addresses; accessing an unmapped address causes a <strong>page fault</strong> — a hardware interrupt that hands control to the OS.</p>
 
@@ -50,7 +50,7 @@
       </div>
 
       <!-- ===== Lazy ===== -->
-      <h2 id="w4-lazy">Lazy allocation &amp; lazy zeroing</h2>
+      <h2 id="t4-lazy">Lazy allocation &amp; lazy zeroing</h2>
 
       <p>The first illusion: reserve virtual address space <em>without</em> actually allocating physical memory. Run the process as if memory is there. When it touches that "memory," a fault fires, and only <em>then</em> does the OS allocate a real frame. This is <strong>lazy allocation</strong> — work deferred until actually needed.</p>
 
@@ -76,7 +76,7 @@
       </div>
 
       <!-- ===== CoW ===== -->
-      <h2 id="w4-cow">Copy-on-Write (CoW)</h2>
+      <h2 id="t4-cow">Copy-on-Write (CoW)</h2>
 
       <p>Lazy zeroing is really a special case of a more general idea: <strong>copy-on-write</strong>. Any shared data (not just zeroes) can be shared via many-to-one <strong>read-only</strong> mappings. You only make a private copy at the moment someone writes — <em>if that ever happens</em>.</p>
 
@@ -108,7 +108,7 @@
       </div>
 
       <!-- ===== Virtual memory ===== -->
-      <h2 id="w4-vm">Virtual memory: swapping to disk</h2>
+      <h2 id="t4-vm">Virtual memory: swapping to disk</h2>
 
       <p>So far we've lazily <em>given out</em> memory. Now the reverse: <strong>taking it back</strong>. Memory is scarce, so can we create the illusion of having <em>more</em> than we physically do — to run more or bigger processes?</p>
 
@@ -116,13 +116,13 @@
 
       <div class="callout">
         <div class="callout-label">Precise terminology</div>
-        <strong>"Virtual memory"</strong> properly refers to <em>this specific illusion</em>: that the machine has more memory available than its physical DRAM. (That's why the slides carefully said "virtual <em>address space</em>" / "virtual <em>addressing</em>" earlier — those are different things from "virtual memory.") Data is moved to a <strong>swap device</strong> — a disk further down the storage hierarchy.
+        <strong>"Virtual memory"</strong> properly refers to <em>this specific illusion</em>: that the machine has more memory available than its physical DRAM. (That's why the lectures carefully said "virtual <em>address space</em>" / "virtual <em>addressing</em>" earlier — those are different things from "virtual memory.") Data is moved to a <strong>swap device</strong> — a disk further down the storage hierarchy.
       </div>
 
       <p style="font-size:14px; color:var(--ink-muted);">Notice the resemblance to a <strong>cache</strong>: not-recently-used pages get replaced, just like cache lines. The difference is that this cache is managed by <em>software</em> (the OS), not hardware.</p>
 
       <!-- ===== Hierarchy ===== -->
-      <h2 id="w4-hierarchy">The storage hierarchy</h2>
+      <h2 id="t4-hierarchy">The storage hierarchy</h2>
 
       <p>For the best performance-per-£, systems mix technologies: small/fast/expensive at the top, big/slow/cheap at the bottom.</p>
 
@@ -147,7 +147,7 @@
       </div>
 
       <!-- ===== Tracking ===== -->
-      <h2 id="w4-tracking">Tracking swapped-out pages</h2>
+      <h2 id="t4-tracking">Tracking swapped-out pages</h2>
 
       <p>Problem: hardware page tables only know how to map a page to <em>a frame</em> or <em>"invalid."</em> But now we need richer states like "swapped out to disk block 42," "load deferred," or "treat as copy-on-write." Two approaches:</p>
 
@@ -178,7 +178,7 @@
       </div>
 
       <!-- ===== Replacement ===== -->
-      <h2 id="w4-replacement">Page replacement</h2>
+      <h2 id="t4-replacement">Page replacement</h2>
 
       <p>When physical memory is full and a process needs more, the OS must <strong>evict</strong> a page to free a frame. <em>Which</em> page? This is <strong>page replacement</strong> — analogous to cache replacement, but done in software. Common policies:</p>
 
@@ -252,7 +252,7 @@
       </div>
 
       <!-- ===== PAGE REPLACEMENT SIMULATOR ===== -->
-      <h3 id="w4-prsim">🛠️ Interactive: Page Replacement Simulator</h3>
+      <h3 id="t4-prsim">🛠️ Interactive: Page Replacement Simulator</h3>
       <p>The classic exam question: given a reference string and N frames, trace the evictions and count page faults. Step through it one access at a time, or run it all at once. Try comparing FIFO vs LRU on the same string.</p>
 
       <div class="tool" data-run="prRunAll">
@@ -296,7 +296,7 @@
       </div>
 
       <!-- ===== Allocation ===== -->
-      <h2 id="w4-allocation">Frame allocation &amp; thrashing</h2>
+      <h2 id="t4-allocation">Frame allocation &amp; thrashing</h2>
 
       <p>The other big decision: <strong>how many frames does each process get?</strong> The key concept is the <strong>working set</strong>.</p>
 
@@ -336,10 +336,10 @@
       </div>
 
       <!-- ===== Exam ===== -->
-      <h2 id="w4-exam">Exam-style takeaways</h2>
+      <h2 id="t4-exam">Exam-style takeaways</h2>
 
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 4</div>
+        <div class="callout-label">Key things to nail for Topic 04</div>
         <ol>
           <li><strong>Page fault as interposition</strong> — the 4-step flow (access → trap → handler → resume). Why it's a feature, not just an error.</li>
           <li><strong>Lazy allocation</strong> — reserve address space, allocate frames only on first fault.</li>
@@ -357,6 +357,6 @@
         </ol>
       </div>
 
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 4 notes. Send Week 5 slides whenever you're ready.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 04 notes. Send Topic 05 slides whenever you're ready.</p>
 
     </section>

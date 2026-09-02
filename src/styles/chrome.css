@@ -34,12 +34,12 @@
     letter-spacing: -0.02em; margin-bottom: 4px; color: var(--ink); }
   .brand .accent { color: var(--accent-2); font-style: italic; }
   nav ul { list-style: none; padding: 0; margin: 0; }
-  nav li.week { margin-bottom: 18px; }
-  nav .week-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase;
+  nav li.topic { margin-bottom: 18px; }
+  nav .topic-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase;
     letter-spacing: 0.16em; color: var(--ink-muted); margin-bottom: 6px; padding-left: 4px; }
-  nav .week-title { font-family: 'Fraunces', serif; font-weight: 500; font-size: 15px; color: var(--ink);
+  nav .topic-title { font-family: 'Fraunces', serif; font-weight: 500; font-size: 15px; color: var(--ink);
     text-decoration: none; display: block; padding: 4px 8px; border-radius: 4px; margin-bottom: 6px; transition: all 0.15s; }
-  nav .week-title:hover { background: rgba(var(--accent-rgb), 0.08); color: var(--accent); }
+  nav .topic-title:hover { background: rgba(var(--accent-rgb), 0.08); color: var(--accent); }
   nav .subsection { list-style: none; padding-left: 12px; margin: 4px 0 0 0; border-left: 1px solid var(--rule); }
   nav .subsection a { font-size: 13px; color: var(--ink-soft); text-decoration: none; display: block;
     padding: 3px 10px; border-left: 2px solid transparent; margin-left: -1px; transition: all 0.15s; }
@@ -47,12 +47,12 @@
   .placeholder { font-style: italic; color: var(--ink-muted); font-size: 13px; padding: 4px 8px; }
   /* Main */
   main { padding: 56px 64px 120px 64px; max-width: 920px; }
-  .week-header { margin-bottom: 48px; padding-bottom: 24px; border-bottom: 2px solid var(--ink); }
-  .week-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase;
+  .topic-header { margin-bottom: 48px; padding-bottom: 24px; border-bottom: 2px solid var(--ink); }
+  .topic-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase;
     letter-spacing: 0.2em; color: var(--accent-2); margin-bottom: 12px; }
   h1 { font-family: 'Fraunces', serif; font-weight: 900; font-size: 52px; line-height: 1;
     letter-spacing: -0.025em; margin: 0 0 12px 0; color: var(--ink); }
-  .week-subtitle { font-family: 'Fraunces', serif; font-style: italic; font-size: 20px; color: var(--ink-soft); font-weight: 400; }
+  .topic-subtitle { font-family: 'Fraunces', serif; font-style: italic; font-size: 20px; color: var(--ink-soft); font-weight: 400; }
   h2 { font-family: 'Fraunces', serif; font-weight: 700; font-size: 30px; line-height: 1.2;
     letter-spacing: -0.015em; margin: 56px 0 16px 0; color: var(--ink); scroll-margin-top: 24px; }
   h2::before { content: "§"; color: var(--accent-2); margin-right: 12px; font-weight: 400; font-style: italic; }
@@ -290,7 +290,7 @@
   .sr-snip mark, mark.ns-mark { background: rgba(var(--highlight-rgb), 0.6); color: var(--ink);
     padding: 0 1px; border-radius: 2px; }
   .search-flash { animation: nsFlash 2.4s ease-out; border-radius: 4px; }
-  .week-section.active { display: block; }
+  .topic-section.active { display: block; }
 
   /* A short aside under a tool's output: what the numbers mean, or what to
      try next. Muted so it reads as commentary, not as part of the result. */

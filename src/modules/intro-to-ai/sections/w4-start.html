@@ -1,11 +1,11 @@
-<section id="w4-start" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 04 · Start here</div>
+<section id="t4-start" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 04 · Start here</div>
         <h1>MDPs, Slowly</h1>
-        <div class="week-subtitle">read this before the other three parts — no equations until the end</div>
+        <div class="topic-subtitle">read this before the other three parts — no equations until the end</div>
       </div>
       <div class="callout">
-        <div class="callout-label">If Week 4 is not going in, it is almost always one of four things</div>
+        <div class="callout-label">If Topic 04 is not going in, it is almost always one of four things</div>
         <ol style="margin:6px 0 0 0;">
           <li>Not seeing <strong>what problem</strong> any of this solves.</li>
           <li>Thinking <strong>U(s)</strong> means the reward of a square. It does not.</li>
@@ -25,14 +25,14 @@
           <strong>0.1</strong> &nbsp;you veer left instead<br>
           <strong>0.1</strong> &nbsp;you veer right instead
         </div>
-        <p style="margin:12px 0 0 0;">That is the <strong>only</strong> new ingredient in Week 4. Everything else — policies, utilities, Bellman, value iteration — is a consequence of it. If you keep that one line in your head, the rest has somewhere to attach.</p>
+        <p style="margin:12px 0 0 0;">That is the <strong>only</strong> new ingredient in Topic 04. Everything else — policies, utilities, Bellman, value iteration — is a consequence of it. If you keep that one line in your head, the rest has somewhere to attach.</p>
       </div>
       <div class="callout warn">
         <div class="callout-label">Why that one change breaks everything you already know</div>
         A <strong>plan</strong> is a list: <em>Up, Up, Right, Right</em>. It only works if step 1 lands you where you expected, so that step 2 still makes sense. <strong>With slipping, step 1 might not.</strong> Two squares in you are somewhere the list never anticipated, and the rest of it is nonsense.
         <p style="margin:10px 0 0 0;">So you cannot answer <em>“what should I do?”</em> once. You have to answer it <strong>for every square you might end up standing on</strong>. That answer — one action per state — is a <strong>policy</strong>, written π(s).</p>
         <table class="cmp-table" style="margin-top:12px;">
-          <tr><th></th><th>Plan (Weeks 1–3)</th><th>Policy (Week 4)</th></tr>
+          <tr><th></th><th>Plan (Topics 1–3)</th><th>Policy (Topic 04)</th></tr>
           <tr><td><strong>Shape</strong></td><td>a sequence of actions</td><td>an action for <em>every</em> state</td></tr>
           <tr><td><strong>Read it</strong></td><td>from the start, in order</td><td>look up wherever you are</td></tr>
           <tr><td><strong>Survives a surprise?</strong></td><td>no</td><td><strong>yes</strong> — that is the point</td></tr>
@@ -157,19 +157,19 @@
         <p style="margin:12px 0 0 0;">So the pipeline is: <strong>guess zeros → sweep until still → read off the arrows.</strong> Value iteration computes numbers; policy extraction turns them into behaviour.</p>
       </div>
       <div class="callout warn">
-        <div class="callout-label">The one genuinely surprising result in Week 4</div>
+        <div class="callout-label">The one genuinely surprising result in Topic 04</div>
         Change R and the optimal policy changes <em>shape</em>, not just slightly. Make the step fee harsh enough and the best policy is to <strong>run at the nearest terminal — including the −1</strong> — because dying quickly beats paying the fee forever.
-        <p style="margin:10px 0 0 0;">That is Week 1's <strong>value alignment problem</strong> arriving as arithmetic. <strong>The reward function is the specification</strong>: you did not tell it to survive, you told it to maximise a sum, and R = −1.65 quietly means "please die quickly". The <a href="#v-sweep" onclick="showWeek('w4-vi')">reward sweep tool</a> shows exactly where the policy flips.</p>
+        <p style="margin:10px 0 0 0;">That is Topic 01's <strong>value alignment problem</strong> arriving as arithmetic. <strong>The reward function is the specification</strong>: you did not tell it to survive, you told it to maximise a sum, and R = −1.65 quietly means "please die quickly". The <a href="#v-sweep" onclick="showSection('t4-vi')">reward sweep tool</a> shows exactly where the policy flips.</p>
       </div>
       <div class="callout tip">
         <div class="callout-label">Where to go next</div>
         <ol style="margin:6px 0 0 0;">
-          <li><a href="#w4-uncert" onclick="showWeek('w4-uncert')">Part 1 · Uncertainty</a> — why the earlier weeks' methods stop working.</li>
-          <li><a href="#k-def" onclick="showWeek('w4-mdp')">Part 2 · What an MDP is</a> — the formal definition, now that you know what it is for.</li>
-          <li><a href="#e-value" onclick="showWeek('w4-prob')">Part 3 · Expected value</a> — the coin-flip version of the sum you just did by hand.</li>
-          <li><a href="#v-eu" onclick="showWeek('w4-vi')">Part 4 · The Bellman calculator</a> — click any square and it prints the table from step 5 for you, for any sweep.</li>
+          <li><a href="#t4-uncert" onclick="showSection('t4-uncert')">Part 1 · Uncertainty</a> — why the earlier topics' methods stop working.</li>
+          <li><a href="#k-def" onclick="showSection('t4-mdp')">Part 2 · What an MDP is</a> — the formal definition, now that you know what it is for.</li>
+          <li><a href="#e-value" onclick="showSection('t4-prob')">Part 3 · Expected value</a> — the coin-flip version of the sum you just did by hand.</li>
+          <li><a href="#v-eu" onclick="showSection('t4-vi')">Part 4 · The Bellman calculator</a> — click any square and it prints the table from step 5 for you, for any sweep.</li>
         </ol>
         <p style="margin:12px 0 0 0;">If Part 3's <code>E[U | s, a] = Σ P(s′|s,a) U(s′)</code> still looks alien, it is exactly the "expected value of taking Right" column you already computed. Same sum, formal name.</p>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Now the rest of Week 4 should read like notes.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">Now the rest of Topic 04 should read like notes.</p>
     </section>

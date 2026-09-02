@@ -1,8 +1,8 @@
-<section id="practice" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">★ Revision · Weeks 5 &amp; 11 · Selected questions from past exams</div>
+<section id="practice" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">★ Revision · Topics 5 &amp; 11 · Selected questions from past exams</div>
         <h1>Past-Exam Practice</h1>
-        <div class="week-subtitle">attempt first — the solutions are folded away</div>
+        <div class="topic-subtitle">attempt first — the solutions are folded away</div>
       </div>
       <div class="callout">
         <div class="callout-label">How to use this page</div>
@@ -11,7 +11,7 @@
       </div>
       <!-- ===== SELF TEST ===== -->
       <h2 id="pr-selftest">🛠️ Self-test generator</h2>
-      <p>Randomly generated questions, computed and marked by the same engines used in the week-by-week tools. Pick a topic or leave it on <em>everything</em> and keep going until your score stops embarrassing you.</p>
+      <p>Randomly generated questions, computed and marked by the same engines used in the topic-by-topic tools. Pick a topic or leave it on <em>everything</em> and keep going until your score stops embarrassing you.</p>
       <div class="tool" data-run="qzNext">
         <div class="tool-header">
           <span class="tool-badge">Practice tool</span>
@@ -26,7 +26,7 @@
               <option value="imp">Imperative &amp; semantics (W1–4)</option>
               <option value="fun">Functional (W6, W8)</option>
               <option value="log">Logic (W9–10)</option>
-              <option value="concept">Concept recall (all weeks)</option>
+              <option value="concept">Concept recall (all topics)</option>
             </select>
           </div>
           <button class="tool-btn green" onclick="qzNext()">New question ▶</button>
@@ -36,8 +36,8 @@
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div id="qz-output" class="tool-output"></div>
       </div>
-      <!-- ===== WEEK 5 ===== -->
-      <h2 id="pr-w5">Week 5 · selected questions from past exams</h2>
+      <!-- ===== TOPIC 5 ===== -->
+      <h2 id="pr-w5">Topic 5 · selected questions from past exams</h2>
       <div class="qcard" id="pr-w5e1">
         <div class="q-n">Exercise 1 · the RBT robot language</div>
         <h4>Ambiguity, abstract syntax, big-step semantics, and an "optimisation"</h4>
@@ -82,7 +82,7 @@ end</div>
         <div class="q-part">4. A student's compiler "optimises" any subtree <code>seq(N(i), N(j))</code> into <code>N(i+j)</code>. Is this optimisation correct? Prove it, or give a counter-example.</div>
         <p class="attempt-note">Parts 1–3 are mechanical once you see them; part 4 is the one that carries the marks. Attempt it before opening.</p>
         <details class="reveal"><summary>Show solution</summary><div class="rev-body">
-          <p><strong>1 · Ambiguity.</strong> The culprit is <code>StatList ::= Stat | StatList ; StatList</code> — recursive on <em>both</em> sides, exactly like <code>Exp ::= Exp Op Exp</code> in Week 1. The statement list <code>init; north(5); east(5)</code> has two distinct parse trees:</p>
+          <p><strong>1 · Ambiguity.</strong> The culprit is <code>StatList ::= Stat | StatList ; StatList</code> — recursive on <em>both</em> sides, exactly like <code>Exp ::= Exp Op Exp</code> in Topic 01. The statement list <code>init; north(5); east(5)</code> has two distinct parse trees:</p>
           <div class="pl">StatList(StatList(init ; north(5)) ; StatList(east(5)))
 StatList(StatList(init) ; StatList(north(5) ; east(5)))</div>
           <p>i.e. <code>(init; north(5)); east(5)</code> versus <code>init; (north(5); east(5))</code>. Two parse trees for one string ⇒ <strong>the grammar is ambiguous</strong>.</p>
@@ -118,7 +118,7 @@ N(i+j)           gives   min( y+i+j , m )</div>
         <h4>A post-test loop: <code>do C while B</code></h4>
         <div class="q-part">1. Give a formal definition of the semantics of <code>do C while B</code>, where the body C is repeated until B evaluates to <strong>False</strong>. (Abstract machine, small-step or big-step — your choice.)</div>
         <div class="q-part">2. Show the extension does not change the computational power of the language, by translating <code>do C while B</code> into existing SIMP constructs. Show your translation is correct.</div>
-        <a class="try-link" href="#w4-bstool" onclick="showWeek('week4')">→ check your rules against the big-step prover (Week 4)</a>
+        <a class="try-link" href="#t4-bstool" onclick="showSection('topic4')">→ check your rules against the big-step prover (Topic 04)</a>
         <details class="reveal"><summary>Show solution</summary><div class="rev-body">
           <p><strong>1 · Big-step rules.</strong> Two rules, mirroring <code>whileT</code>/<code>whileF</code> but with the body run <em>first</em>:</p>
           <div class="sos">
@@ -142,7 +142,7 @@ N(i+j)           gives   min( y+i+j , m )</div>
             </div>
           </div>
           <p>Note the body appears as a premise in <em>both</em> rules — that is precisely what makes it a <strong>post-test</strong> loop: C runs at least once, whatever B says.</p>
-          <p><strong>Small-step alternative</strong> (a single axiom, in the style of Week 4's <code>while</code>):</p>
+          <p><strong>Small-step alternative</strong> (a single axiom, in the style of Topic 04's <code>while</code>):</p>
           <div class="pl">⟨do C while B, s⟩ → ⟨C ; while B do C, s⟩</div>
           <p><strong>2 · Translation.</strong></p>
           <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:15px; margin:12px 0; color:var(--accent-3);">
@@ -157,7 +157,7 @@ N(i+j)           gives   min( y+i+j , m )</div>
           <p><em>(⇐)</em> Symmetric: any derivation of <code>⟨C; while B do C, s⟩ ⇓ ⟨skip, s_f⟩</code> begins with <code>seq</code>, whose second premise is a <code>while</code> derivation ending in <code>whileF</code>; peeling the <code>whileT</code>/<code>whileF</code> layers off reconstructs a do<sub>T</sub>/do<sub>F</sub> derivation of the same length.</p>
           <p>Since every terminating run of one is a terminating run of the other <em>producing the same final store</em>, the constructs are equivalent — so <code>do</code> is <strong>syntactic sugar</strong> and adds no computational power.</p>
           <div class="callout tip" style="margin-top:12px;">
-            <div class="callout-label">Sanity check with the Week 2 tool</div>
+            <div class="callout-label">Sanity check with the Topic 02 tool</div>
             The loop tracer showed that a post-test loop runs its body <em>at least once</em>. The translation reflects that literally: the <code>C ;</code> sitting in front of the <code>while</code> <strong>is</strong> that guaranteed first iteration.
           </div>
         </div></details>
@@ -208,7 +208,7 @@ N(i+j)           gives   min( y+i+j , m )</div>
             <div class="callout-label">Lemma</div>
             For every integer expression E and every store s₁ with s₁(x) = 1: &nbsp;<code>⟨E, s₁⟩ ⇓ ⟨n, s₁⟩ &nbsp;iff&nbsp; ⟨E′, s₁⟩ ⇓ ⟨n, s₁⟩</code>, where E′ = E{!x ↦ 1}.
           </div>
-          <p><strong>By structural induction on E</strong> (Week 4's principle — one case per constructor of the grammar <code>E ::= !l | n | E op E</code>):</p>
+          <p><strong>By structural induction on E</strong> (Topic 04's principle — one case per constructor of the grammar <code>E ::= !l | n | E op E</code>):</p>
           <ul style="font-size:14px;">
             <li><strong>E = n.</strong> Then E′ = n and both give n by the constant axiom. ✓</li>
             <li><strong>E = !x.</strong> Then E′ = 1. Left: the (var) rule gives <code>⟨!x, s₁⟩ ⇓ ⟨s₁(x), s₁⟩ = ⟨1, s₁⟩</code>. Right: <code>⟨1, s₁⟩ ⇓ ⟨1, s₁⟩</code>. Same value. ✓ <em>(This is the only case that uses the hypothesis s₁(x) = 1.)</em></li>
@@ -226,7 +226,7 @@ N(i+j)           gives   min( y+i+j , m )</div>
             <tr><td><code>x := 1; x := 2; y := 1</code></td><td>x ↦ 2, <strong>y ↦ 1</strong></td></tr>
           </table>
           <p>Different results, so the programs are not equivalent.</p>
-          <a class="try-link" href="#w3-simptool" onclick="showWeek('week3')">→ run both in the SIMP machine (Week 3)</a>
+          <a class="try-link" href="#t3-simptool" onclick="showSection('topic3')">→ run both in the SIMP machine (Topic 03)</a>
         </div></details>
       </div>
       <div class="qcard" id="pr-w5e5">
@@ -254,7 +254,7 @@ N(i+j)           gives   min( y+i+j , m )</div>
         <div class="q-part">2. What are the possible results of &nbsp;<code>(x := 1) || (if !x = 0 then y := !y + 1 else skip)</code>&nbsp; when x = 0 and y = 1 initially?</div>
         <details class="reveal"><summary>Show solution</summary><div class="rev-body">
           <p><strong>1 · Behaviour.</strong> <code>||</code> is <strong>parallel (interleaved) composition</strong>. At each step the machine may advance <em>either</em> component by one small step — the two rules have the same left-hand side, so <strong>both are always applicable</strong> and the choice between them is free. The composite terminates only when <em>both</em> components have been reduced to <code>skip</code>, at which point the first axiom collapses <code>skip || skip</code> to <code>skip</code>.</p>
-          <p>Crucially, this makes the transition relation <strong>non-deterministic</strong>: a configuration can step to two different configurations. Everything in Weeks 3–4 was deterministic; here the same program can have <em>several</em> distinct terminating runs, and — because the two components share the store — they can yield <em>different final stores</em>. That is exactly the model of a race condition.</p>
+          <p>Crucially, this makes the transition relation <strong>non-deterministic</strong>: a configuration can step to two different configurations. Everything in Topics 3–4 was deterministic; here the same program can have <em>several</em> distinct terminating runs, and — because the two components share the store — they can yield <em>different final stores</em>. That is exactly the model of a race condition.</p>
           <p><strong>2 · Possible results,</strong> starting from s = {x ↦ 0, y ↦ 1}. Everything hinges on <strong>whether the assignment <code>x := 1</code> completes before the condition <code>!x = 0</code> reads x</strong>.</p>
           <table>
             <tr><th>Interleaving</th><th>What happens</th><th>Final store</th></tr>
@@ -272,12 +272,12 @@ N(i+j)           gives   min( y+i+j , m )</div>
           <p>So there are <strong>two possible results</strong>: <code>{x ↦ 1, y ↦ 2}</code> and <code>{x ↦ 1, y ↦ 1}</code>. x is 1 either way — only the second component's behaviour depends on the interleaving.</p>
           <div class="callout tip" style="margin-top:12px;">
             <div class="callout-label">The point of the question</div>
-            The result is <strong>not determined by the program alone</strong>. This is precisely the "unicity of normal forms" property from Week 6 <em>failing</em>: with shared mutable state and interleaving, an expression's value depends on the reduction order. It is also why Week 4's determinism theorem had to be proved rather than assumed.
+            The result is <strong>not determined by the program alone</strong>. This is precisely the "unicity of normal forms" property from Topic 05 <em>failing</em>: with shared mutable state and interleaving, an expression's value depends on the reduction order. It is also why Topic 04's determinism theorem had to be proved rather than assumed.
           </div>
         </div></details>
       </div>
-      <!-- ===== WEEK 11 ===== -->
-      <h2 id="pr-w11">Week 11 · revision exercises</h2>
+      <!-- ===== TOPIC 11 ===== -->
+      <h2 id="pr-w11">Topic 11 · revision exercises</h2>
       <div class="qcard" id="pr-w11e1">
         <div class="q-n">Exercise 1 · Prolog</div>
         <h4>Glorious days</h4>
@@ -289,7 +289,7 @@ N(i+j)           gives   min( y+i+j , m )</div>
 <span class="at">glorious</span>(<span class="v">Day</span>) <span class="op">:-</span> sunny(<span class="v">Day</span>), warm(<span class="v">Day</span>).</div>
         <div class="q-part">1. Write down <em>all</em> the responses Prolog gives to <code>:- glorious(Day).</code>, <strong>in the order they are given</strong>.</div>
         <div class="q-part">2. Draw the SLD-tree Prolog builds for that query.</div>
-        <a class="try-link" href="#w10-sldtool" onclick="showWeek('week10')">→ check both parts with the SLD-tree builder (Week 10)</a>
+        <a class="try-link" href="#t8-sldtool" onclick="showSection('topic8')">→ check both parts with the SLD-tree builder (Topic 08)</a>
         <details class="reveal"><summary>Show solution</summary><div class="rev-body">
           <p><strong>1 · The responses, in order.</strong> Prolog selects the left-most literal and tries clauses top to bottom, so it enumerates <code>sunny(Day)</code> in program order and checks <code>warm(Day)</code> for each:</p>
           <div class="sols">
@@ -324,8 +324,8 @@ N(i+j)           gives   min( y+i+j , m )</div>
     | otherwise = until' f p (f x)</div>
           <p><strong>2 · The type.</strong></p>
           <div class="hs"><span class="fn">until'</span> :: (<span class="ty">a</span> -> <span class="ty">a</span>) -> (<span class="ty">a</span> -> <span class="ty">Bool</span>) -> <span class="ty">a</span> -> <span class="ty">a</span></div>
-          <p>Read it with Week 6's conventions: the arrow associates to the right, so this is a <em>curried</em> function of three arguments returning an <code>a</code>. It is <strong>polymorphic</strong> — <code>a</code> is a type variable, and the definition never inspects the element, only passes it to <code>f</code> and <code>p</code>.</p>
-          <p><strong>Why the recursion terminates (or doesn't).</strong> Nothing in the type guarantees termination: <code>until' (+1) (&lt;0) 5</code> never stops. This is Week 8's point that a program passing the type checks is <em>free of type errors</em>, not correct.</p>
+          <p>Read it with Topic 05's conventions: the arrow associates to the right, so this is a <em>curried</em> function of three arguments returning an <code>a</code>. It is <strong>polymorphic</strong> — <code>a</code> is a type variable, and the definition never inspects the element, only passes it to <code>f</code> and <code>p</code>.</p>
+          <p><strong>Why the recursion terminates (or doesn't).</strong> Nothing in the type guarantees termination: <code>until' (+1) (&lt;0) 5</code> never stops. This is Topic 06's point that a program passing the type checks is <em>free of type errors</em>, not correct.</p>
           <p style="font-size:13.5px; color:var(--ink-soft);">Named <code>until'</code> because <code>until</code> is already in the Prelude — with its arguments the other way round, <code>until :: (a -&gt; Bool) -&gt; (a -&gt; a) -&gt; a -&gt; a</code>. The exercise asks for f first, so follow the exercise.</p>
         </div></details>
       </div>
@@ -338,7 +338,7 @@ N(i+j)           gives   min( y+i+j , m )</div>
         <div class="q-part">3. With lists written <code>nil</code> and <code>x : l</code>, explain the behaviour of <code>map</code> below, and describe a call-by-name evaluation of <code>map double list</code>.</div>
         <div class="pl">map f nil       = nil
 map f (x : l)   = (f x) : (map f l)</div>
-        <a class="try-link" href="#w8-sfuntool" onclick="showWeek('week8')">→ compare the two derivations in the SFUN tool (Week 8)</a>
+        <a class="try-link" href="#t6-sfuntool" onclick="showSection('topic6')">→ compare the two derivations in the SFUN tool (Topic 06)</a>
         <details class="reveal"><summary>Show solution</summary><div class="rev-body">
           <p><strong>1 · Induction on n.</strong> We show <code>double(n) ⇓ v</code> and <code>n + n ⇓ v</code> for the same v.</p>
           <div class="proof">
@@ -380,7 +380,7 @@ map f (x : l)   = (f x) : (map f l)</div>
         <div class="q-part">1. Describe the SLD-resolution tree for <code>:- even(4).</code> and for <code>:- even(3).</code>, using the leftmost computation rule. (Assume <code>N &gt; 1</code> succeeds when N is instantiated to a number greater than 1, and fails otherwise.)</div>
         <div class="q-part">2. What answers does Prolog give?</div>
         <div class="q-part">3. Now replace the second clause by <code>even(N) :- N1 is N-2, even(N1), N &gt; 1.</code> How does Prolog behave with the same goals, and what are the answers?</div>
-        <a class="try-link" href="#w10-sldtool" onclick="showWeek('week10')">→ build all four trees in the SLD-tree builder (Week 10)</a>
+        <a class="try-link" href="#t8-sldtool" onclick="showSection('topic8')">→ build all four trees in the SLD-tree builder (Topic 08)</a>
         <details class="reveal"><summary>Show solution</summary><div class="rev-body">
           <p><strong>1 &amp; 2 · The original program.</strong></p>
           <p><code>:- even(4).</code> — clause 1 (<code>even(0)</code>) does not unify with <code>even(4)</code>, so the only child uses clause 2 with {N ↦ 4}:</p>

@@ -362,7 +362,7 @@
         e: 'This is the bridge to Q-learning and everything beyond the course: the same machinery, indexed by state as well as action.' },
       { q: 'Why is the optimal action in the 10-armed testbed safe to assume unique?', a: 'The probability of two exactly equal values from a normal distribution is null',
         c: ['The probability of two exactly equal values from a normal distribution is null', 'Because the means are integers', 'Because ties are broken by index', 'Because k = 10 is small'],
-        e: 'Normal distributions are continuous, so any specific value has probability zero — including the event that two arms coincide. (The same continuity fact as Week 7\'s P(exact value) = 0.)' },
+        e: 'Normal distributions are continuous, so any specific value has probability zero — including the event that two arms coincide. (The same continuity fact as Topic 07\'s P(exact value) = 0.)' },
       { q: 'B ∼ N(11, 4). What is B\'s standard deviation?', a: '2',
         c: ['2', '4', '16', '11'],
         e: 'N(µ, σ²) carries the <strong>variance</strong>, so σ² = 4 and σ = 2. Figure 8.1 confirms it: B\'s peak density is about 0.20 = 1/(2√(2π)).' }
@@ -711,9 +711,9 @@
     /* computed: diagnose under/overfitting from two errors */
     QZ_GEN.push({ topic: 'ml', make: () => {
       const cases = [
-        { tr: '1.89e−01', va: '3.79e−01', a: 'Underfitting', e: 'Both errors are high and of a similar size — the model is too simple to capture the pattern at all. This is the slides\' degree-1 straight line.' },
-        { tr: '6.91e−03', va: '1.20e−02', a: 'About right', e: 'Both errors are low and close to each other. This is the bottom of the U — the slides\' degree 4.' },
-        { tr: '3.22e−03', va: '1.76e+15', a: 'Overfitting', e: 'The <em>best</em> training error of the three, and a validation error fifteen orders of magnitude worse than a straight line. This is the slides\' degree 29.' },
+        { tr: '1.89e−01', va: '3.79e−01', a: 'Underfitting', e: 'Both errors are high and of a similar size — the model is too simple to capture the pattern at all. This is the lectures\' degree-1 straight line.' },
+        { tr: '6.91e−03', va: '1.20e−02', a: 'About right', e: 'Both errors are low and close to each other. This is the bottom of the U — the lectures\' degree 4.' },
+        { tr: '3.22e−03', va: '1.76e+15', a: 'Overfitting', e: 'The <em>best</em> training error of the three, and a validation error fifteen orders of magnitude worse than a straight line. This is the lectures\' degree 29.' },
         { tr: '2.0e−04', va: '9.1e−01', a: 'Overfitting', e: 'Training error near zero with validation error high is the signature of memorising the noise.' },
         { tr: '4.4e−01', va: '4.6e−01', a: 'Underfitting', e: 'Both high, both close: the model is not even fitting the data it was given.' }
       ];

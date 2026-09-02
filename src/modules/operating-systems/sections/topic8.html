@@ -1,20 +1,20 @@
-<section id="week9" class="week-section">
+<section id="topic8" class="topic-section">
 
-      <div class="week-header">
-        <div class="week-eyebrow">Week 09 · Concurrency (Ian's material)</div>
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 08 · Concurrency</div>
         <h1>Java Threads &amp; the Memory Model</h1>
-        <div class="week-subtitle">where shared data meets uncontrolled interleaving</div>
+        <div class="topic-subtitle">where shared data meets uncontrolled interleaving</div>
       </div>
 
       <div class="callout">
         <div class="callout-label">Where this fits</div>
-        This begins the <strong>concurrency mini-course</strong> that runs alongside the OS material (and makes up ~40% of the exam). It builds directly on the <strong>threads</strong> ideas from Week 2 — especially the crucial fact that <em>threads share the heap but each has its own stack</em>. That sharing is exactly what makes concurrency powerful <em>and</em> dangerous.
+        This begins the <strong>concurrency mini-course</strong> that runs alongside the OS material (and makes up ~40% of the exam). It builds directly on the <strong>threads</strong> ideas from Topic 02 — especially the crucial fact that <em>threads share the heap but each has its own stack</em>. That sharing is exactly what makes concurrency powerful <em>and</em> dangerous.
       </div>
 
       <!-- ===== Multithreading basics ===== -->
-      <h2 id="w9-multithreading">Multithreading basics</h2>
+      <h2 id="t8-multithreading">Multithreading basics</h2>
 
-      <p>A <strong>single-threaded</strong> program has one thread of execution — the traditional style. A <strong>multithreaded</strong> program has multiple threads executing "at the same time." Whether that's <em>literally</em> the same time depends on cores: one core → multithreading creates the <em>illusion</em> of simultaneity (interleaving); multiple cores → threads can run <em>truly</em> in parallel. (Same concurrency-vs-parallelism distinction from Week 1.)</p>
+      <p>A <strong>single-threaded</strong> program has one thread of execution — the traditional style. A <strong>multithreaded</strong> program has multiple threads executing "at the same time." Whether that's <em>literally</em> the same time depends on cores: one core → multithreading creates the <em>illusion</em> of simultaneity (interleaving); multiple cores → threads can run <em>truly</em> in parallel. (Same concurrency-vs-parallelism distinction from Topic 01.)</p>
 
       <div class="callout tip">
         <div class="callout-label">All Java programs are threaded</div>
@@ -22,7 +22,7 @@
       </div>
 
       <!-- ===== Creating threads ===== -->
-      <h2 id="w9-creating">Creating threads — three ways</h2>
+      <h2 id="t8-creating">Creating threads — three ways</h2>
 
       <p>The work a thread does lives in its <code>run()</code> method (like a <code>main()</code> for threads). Crucially: <strong>you never call <code>run()</code> yourself — you call <code>start()</code></strong>, and the JVM calls <code>run()</code> at some point. When a thread reaches the end of <code>run()</code>, it terminates.</p>
 
@@ -76,7 +76,7 @@ t.start();
       </div>
 
       <!-- ===== Lifecycle ===== -->
-      <h2 id="w9-lifecycle">Thread lifecycle: sleep, stop, join</h2>
+      <h2 id="t8-lifecycle">Thread lifecycle: sleep, stop, join</h2>
 
       <h3>Pausing — Thread.sleep()</h3>
       <p>A static method that pauses the current thread for ~N milliseconds (timings are approximate), relinquishing the CPU. Used for cooperative behaviour (a low-priority background task acknowledging it doesn't need much CPU) or for timing. Must be wrapped in try/catch for <code>InterruptedException</code>.</p>
@@ -111,7 +111,7 @@ System.out.println("t has terminated");
       </div>
 
       <!-- ===== States ===== -->
-      <h2 id="w9-states">JVM thread states</h2>
+      <h2 id="t8-states">JVM thread states</h2>
       <p>The JVM defines its <em>own</em> thread states that don't map directly to OS states (notably, <strong>RUNNABLE</strong> means "is running" or ready to run):</p>
 
       <div class="jvm-states">
@@ -137,13 +137,13 @@ System.out.println("t has terminated");
 
       <div class="callout tip">
         <div class="callout-label">Order is not guaranteed</div>
-        Threads don't start or run in the order you create them. The OS uses <strong>preemptive scheduling</strong> (Week 2!) — it interrupts one thread to run another, and execution is <strong>interleaved</strong>. Two threads started "in order" may print their output in any order, and even interleave mid-output.
+        Threads don't start or run in the order you create them. The OS uses <strong>preemptive scheduling</strong> (Topic 02!) — it interrupts one thread to run another, and execution is <strong>interleaved</strong>. Two threads started "in order" may print their output in any order, and even interleave mid-output.
       </div>
 
       <!-- ===== Memory model ===== -->
-      <h2 id="w9-memory">The Java Memory Model</h2>
+      <h2 id="t8-memory">The Java Memory Model</h2>
 
-      <p>To understand concurrency bugs, you must know <em>where Java puts things</em>. Recall from Week 2: each thread gets its <strong>own stack</strong>, but all threads <strong>share the heap</strong> of their process.</p>
+      <p>To understand concurrency bugs, you must know <em>where Java puts things</em>. Recall from Topic 02: each thread gets its <strong>own stack</strong>, but all threads <strong>share the heap</strong> of their process.</p>
 
       <table>
         <tr><th>What</th><th>Where</th></tr>
@@ -181,7 +181,7 @@ System.out.println("t has terminated");
       </div>
 
       <!-- ===== Race conditions ===== -->
-      <h2 id="w9-race">Race conditions</h2>
+      <h2 id="t8-race">Race conditions</h2>
 
       <p>Consider two threads each incrementing a shared <code>counter</code> 100,000 times. You'd expect 200,000. <strong>You won't get it.</strong> Why? Because <code>counter++</code> <em>looks</em> atomic but isn't — it's <strong>three operations</strong>:</p>
 
@@ -216,15 +216,15 @@ counter++   <span style="color:#7eb892;">// actually:</span>
       </div>
 
       <!-- ===== RACE TOOL ===== -->
-      <h3 id="w9-racetool">🛠️ Interactive: Race Condition Demo</h3>
-      <p>Watch two threads increment a shared counter. Run them <em>interleaved</em> (realistic, lossy) versus <em>sequentially</em> (the naive expectation) and see the lost updates accumulate. This is the single most important concept of the week.</p>
+      <h3 id="t8-racetool">🛠️ Interactive: Race Condition Demo</h3>
+      <p>Watch two threads increment a shared counter. Run them <em>interleaved</em> (realistic, lossy) versus <em>sequentially</em> (the naive expectation) and see the lost updates accumulate. This is the single most important concept of the topic.</p>
 
       <div class="tool" data-run="runRace">
         <div class="tool-header">
           <span class="tool-badge">Concurrency demo</span>
           <h3>Lost Update Simulator</h3>
         </div>
-        <div class="tool-desc">Each thread does <code>counter++</code> (READ→INC→WRITE) a number of times. Interleaving the steps causes lost updates — and the <strong>🔒 synchronized</strong> mode (from Week 10) shows the fix.</div>
+        <div class="tool-desc">Each thread does <code>counter++</code> (READ→INC→WRITE) a number of times. Interleaving the steps causes lost updates — and the <strong>🔒 synchronized</strong> mode (from Topic 09) shows the fix.</div>
 
         <div class="tool-controls">
           <div class="tool-field">
@@ -255,10 +255,10 @@ counter++   <span style="color:#7eb892;">// actually:</span>
       </div>
 
       <!-- ===== Exam ===== -->
-      <h2 id="w9-exam">Exam-style takeaways</h2>
+      <h2 id="t8-exam">Exam-style takeaways</h2>
 
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 9</div>
+        <div class="callout-label">Key things to nail for Topic 08</div>
         <ol>
           <li><strong>Three ways to make a thread</strong> — extend Thread, implement Runnable, lambda. Call <code>start()</code> (not <code>run()</code>!).</li>
           <li><strong>Runnable vs Thread</strong> — prefer Runnable: leaves inheritance free + lets you share one behaviour object across threads.</li>
@@ -271,6 +271,6 @@ counter++   <span style="color:#7eb892;">// actually:</span>
         </ol>
       </div>
 
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 9 notes. Next: synchronisation (locks, <code>synchronized</code>) to fix these races.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 08 notes. Next: synchronisation (locks, <code>synchronized</code>) to fix these races.</p>
 
     </section>

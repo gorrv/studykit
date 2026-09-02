@@ -1,5 +1,5 @@
   /* ============================================================
-     TOOL 6: STACK-SMASHING DEMO (Week 5)
+     TOOL 6: STACK-SMASHING DEMO (Topic 05)
      ============================================================ */
   function runSmash() {
     const input = document.getElementById('smash-input').value;

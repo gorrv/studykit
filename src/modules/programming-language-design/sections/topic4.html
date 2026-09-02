@@ -1,10 +1,10 @@
-<section id="week4" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 04 · Imperative Languages — Structural Operational Semantics</div>
+<section id="topic4" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 04 · Imperative Languages — Structural Operational Semantics</div>
         <h1>Induction, Small-Step &amp; Big-Step</h1>
-        <div class="week-subtitle">the answer to the abstract machine's disadvantage</div>
+        <div class="topic-subtitle">the answer to the abstract machine's disadvantage</div>
       </div>
-      <p>Week 3 ended with a complaint: the abstract machine works, but <em>"many transitions are doing just phrase analysis; only a few really perform computations."</em> This lecture gives the alternative — <strong>an operational semantics where the execution of programs is defined by induction</strong>.</p>
+      <p>Topic 03 ended with a complaint: the abstract machine works, but <em>"many transitions are doing just phrase analysis; only a few really perform computations."</em> This lecture gives the alternative — <strong>an operational semantics where the execution of programs is defined by induction</strong>.</p>
       <div class="callout">
         <div class="callout-label">Aims &amp; structure</div>
         <ol style="margin:6px 0 0 0;">
@@ -14,7 +14,7 @@
         <p style="margin:10px 0 0 0;">Three parts: <strong>revision of induction</strong> → <strong>small-step</strong> semantics (a <em>reduction</em> relation) → <strong>big-step</strong> semantics (an <em>evaluation</em> relation).</p>
       </div>
       <!-- ===== PART 1: INDUCTION ===== -->
-      <h2 id="w4-induction">Part 1 · The principle of mathematical induction</h2>
+      <h2 id="t4-induction">Part 1 · The principle of mathematical induction</h2>
       <div class="callout exam">
         <div class="callout-label">The principle</div>
         For any property <strong>P(n)</strong> of natural numbers (n ∈ ℕ = {0, 1, 2, …}), to prove <strong>∀n ∈ ℕ. P(n)</strong> it is sufficient to show:
@@ -32,7 +32,7 @@
         <div class="pf-step" style="margin-top:6px;">Σ<sub>i=1..n+1</sub> (2i − 1) &nbsp;=&nbsp; Σ<sub>i=1..n</sub> (2i − 1) + 2(n + 1) − 1 &nbsp;=&nbsp; n² + 2n + 1 &nbsp;=&nbsp; (n + 1)²</div>
       </div>
       <!-- ===== STRUCTURAL INDUCTION ===== -->
-      <h2 id="w4-structural">Structural induction</h2>
+      <h2 id="t4-structural">Structural induction</h2>
       <p>Induction generalises from numbers to <em>structures</em>. First, lists. We denote an empty list by <strong>nil</strong>, and a non-empty list by <strong>cons(h, l)</strong> where <em>h</em> is the head element and <em>l</em> is the tail.</p>
       <div class="callout exam">
         <div class="callout-label">Structural induction on lists</div>
@@ -53,7 +53,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Why this is <em>exactly</em> the shape of a SIMP grammar</div>
-        Look back at Week 3: the leaves of a SIMP tree are ℤ ∪ {True, False} ∪ L ∪ {skip}, and the non-leaves are operators and commands. So the abstract syntax <em>hands you</em> the base cases and the induction steps — one base case per leaf kind, one induction step per constructor. <strong>The grammar is the induction principle.</strong> That is the deepest idea of the week and it's why abstract syntax was set up as trees in Week 1.
+        Look back at Topic 03: the leaves of a SIMP tree are ℤ ∪ {True, False} ∪ L ∪ {skip}, and the non-leaves are operators and commands. So the abstract syntax <em>hands you</em> the base cases and the induction steps — one base case per leaf kind, one induction step per constructor. <strong>The grammar is the induction principle.</strong> That is the deepest idea of the topic and it's why abstract syntax was set up as trees in Topic 01.
       </div>
       <h3>Example: proving a property of SIMP integer expressions</h3>
       <p>To prove that a property P holds for all integer expressions in SIMP:</p>
@@ -71,7 +71,7 @@
         <p style="margin:10px 0 0 0;">Formally: let <strong>P′(n)</strong> be the property <em>"for all expressions E of size at most n, P(E) holds"</em>. Then <strong>∀E. P(E)</strong> is equivalent to <strong>∀n. P′(n)</strong> — and the latter is ordinary mathematical induction.</p>
       </div>
       <!-- ===== APPLICATION ===== -->
-      <h2 id="w4-application">Application: expressions with defined locations always have a value</h2>
+      <h2 id="t4-application">Application: expressions with defined locations always have a value</h2>
       <p>The lecture proves a real theorem about SIMP with this machinery. Informally:</p>
       <div class="callout exam">
         <div class="callout-label">The property, in words</div>
@@ -95,10 +95,10 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Notice what the "∀c. ∀r." is doing</div>
-        This is precisely the Week 3 observation that expression evaluation <em>leaves the rest of the stacks alone</em>, now stated as a formal property and <em>used as an induction hypothesis</em>. Because P(E₁) holds for <strong>any</strong> control stack, we can instantiate it with the stack <code>E₂ · op · c</code> — which is exactly what the second line of the induction step does. Without the universal quantifiers the proof wouldn't go through.
+        This is precisely the Topic 03 observation that expression evaluation <em>leaves the rest of the stacks alone</em>, now stated as a formal property and <em>used as an induction hypothesis</em>. Because P(E₁) holds for <strong>any</strong> control stack, we can instantiate it with the stack <code>E₂ · op · c</code> — which is exactly what the second line of the induction step does. Without the universal quantifiers the proof wouldn't go through.
       </div>
       <!-- ===== INDUCTIVE DEFINITIONS ===== -->
-      <h2 id="w4-inductive">Inductive definitions: axioms and rules</h2>
+      <h2 id="t4-inductive">Inductive definitions: axioms and rules</h2>
       <p>Induction isn't only a proof method — <strong>we can also use it to <em>define</em> subsets of a given set T</strong>. Inductive definitions are written using <strong>axioms</strong> (the base case) and <strong>rules</strong> (the induction step).</p>
       <div class="callout exam">
         <div class="callout-label">Definition</div>
@@ -167,7 +167,7 @@
         </div>
       </div>
       <!-- ===== RULE INDUCTION ===== -->
-      <h2 id="w4-ruleinduction">Rule induction</h2>
+      <h2 id="t4-ruleinduction">Rule induction</h2>
       <p>Once a set is <em>defined</em> by axioms and rules, we get a matching induction principle for free.</p>
       <div class="callout exam">
         <div class="callout-label">Principle of rule induction</div>
@@ -211,13 +211,13 @@
         </ul>
       </div>
       <!-- ===== PART 2: SMALL-STEP ===== -->
-      <h2 id="w4-smallstep">Part 2 · Small-step semantics: configurations</h2>
+      <h2 id="t4-smallstep">Part 2 · Small-step semantics: configurations</h2>
       <p>We define a transition system with configurations</p>
       <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:18px; margin:18px 0; color:var(--accent);">⟨P, s⟩</div>
       <p>where <strong>P is a SIMP program</strong> and <strong>s is a store</strong> (memory) represented by a partial function from locations to integers.</p>
       <div class="callout exam">
         <div class="callout-label">Compare with the abstract machine — the configuration got smaller</div>
-        Week 3 used a <em>triple</em> ⟨control, results, memory⟩ with two explicit stacks. Here a configuration is just a <strong>pair</strong>: the program itself, and the store. There are no stacks — <strong>the remaining work is represented by the program text that is left</strong>. Each transition rewrites the program into a slightly-more-evaluated program.
+        Topic 03 used a <em>triple</em> ⟨control, results, memory⟩ with two explicit stacks. Here a configuration is just a <strong>pair</strong>: the program itself, and the store. There are no stacks — <strong>the remaining work is represented by the program text that is left</strong>. Each transition rewrites the program into a slightly-more-evaluated program.
       </div>
       <p><strong>Notation:</strong> <code>s[l ↦ n]</code> denotes the function s′ that coincides with s except that it associates to <em>l</em> the value <em>n</em>:</p>
       <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:12px 0; line-height:1.9;">
@@ -231,10 +231,10 @@
           <li>The expression <strong>E has the value n in the memory state s</strong> if ⟨E, s⟩ →* ⟨n, s′⟩.</li>
           <li>The command <strong>C has a successful execution in the memory state s</strong> if ⟨C, s⟩ →* ⟨skip, s′⟩. We say that <em>C in s produces s′</em>.</li>
         </ul>
-        <p style="margin:10px 0 0 0;">Note the shift: in Week 3 success meant <em>empty stacks</em>; here it means the program has been <strong>rewritten into the value itself</strong> — into a numeral, a boolean, or <code>skip</code>.</p>
+        <p style="margin:10px 0 0 0;">Note the shift: in Topic 03 success meant <em>empty stacks</em>; here it means the program has been <strong>rewritten into the value itself</strong> — into a numeral, a boolean, or <code>skip</code>.</p>
       </div>
       <!-- ===== SS EXPRESSIONS ===== -->
-      <h2 id="w4-ss-exp">Small-step rules: expressions</h2>
+      <h2 id="t4-ss-exp">Small-step rules: expressions</h2>
       <div class="sos">
         <div class="sos-grp">Axioms — actually computing</div>
         <div class="sos-row">
@@ -312,7 +312,7 @@
       <div class="callout exam">
         <div class="callout-label">The pattern — and where evaluation order is hiding</div>
         Each operator gets an <strong>axiom</strong> (both operands are already values → compute) plus <strong>congruence rules</strong> (an operand isn't a value yet → reduce it in place).
-        <p style="margin:10px 0 0 0;">The <strong>L</strong> rule has a general <code>E₁</code> on the left; the <strong>R</strong> rule requires <strong>n₁</strong> — an <em>already-evaluated</em> left operand. That single detail forces <strong>left-to-right evaluation</strong>: you may only start on E₂ once E₁ has become a value. This is the formal answer to the <code>f(i++, --i)</code> problem from Week 3 — <em>the rules leave nothing unspecified</em>.</p>
+        <p style="margin:10px 0 0 0;">The <strong>L</strong> rule has a general <code>E₁</code> on the left; the <strong>R</strong> rule requires <strong>n₁</strong> — an <em>already-evaluated</em> left operand. That single detail forces <strong>left-to-right evaluation</strong>: you may only start on E₂ once E₁ has become a value. This is the formal answer to the <code>f(i++, --i)</code> problem from Topic 03 — <em>the rules leave nothing unspecified</em>.</p>
       </div>
       <h3>Worked example: <code>!z + 1</code></h3>
       <p>Let <em>s</em> be a state such that <strong>s(z) = 0</strong> and let <strong>E = !z + 1</strong>. The expression E evaluates to 1 in s, since</p>
@@ -339,7 +339,7 @@
         </div>
       </div>
       <!-- ===== SS COMMANDS ===== -->
-      <h2 id="w4-ss-cmd">Small-step rules: commands</h2>
+      <h2 id="t4-ss-cmd">Small-step rules: commands</h2>
       <div class="sos">
         <div class="sos-row">
           <div class="inf">
@@ -390,7 +390,7 @@
       <div class="callout exam">
         <div class="callout-label">The <code>while</code> rule is the star of this lecture</div>
         <strong>⟨while B do C, s⟩ → ⟨if B then (C ; while B do C) else skip, s⟩</strong>
-        <p style="margin:10px 0 0 0;">It is an <em>axiom</em> — no premise, no test evaluated, the store unchanged. The loop simply <strong>unfolds itself once into an <code>if</code></strong>, and everything else follows from the rules we already have. Compare Week 3, where <code>while</code> needed three separate rules and had to save B and C on the results stack. Here, one rewriting does the job, because the <em>program text itself</em> is the machine's memory of what remains.</p>
+        <p style="margin:10px 0 0 0;">It is an <em>axiom</em> — no premise, no test evaluated, the store unchanged. The loop simply <strong>unfolds itself once into an <code>if</code></strong>, and everything else follows from the rules we already have. Compare Topic 03, where <code>while</code> needed three separate rules and had to save B and C on the results stack. Here, one rewriting does the job, because the <em>program text itself</em> is the machine's memory of what remains.</p>
       </div>
       <h3>Worked example: the swap program</h3>
       <p>Let P be <code>z := !x; x := !y; y := !z</code> and s a state such that s(z) = 0, s(x) = 1, s(y) = 2.</p>
@@ -407,10 +407,10 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Read the rhythm of that trace</div>
-        Every assignment takes <strong>two</strong> steps — one to evaluate the right-hand side (<code>:=R</code>, via <code>var</code>), one to actually store it (<code>:=</code>) — and then a third (<code>skip</code>) to discard the leftover <code>skip;</code>. Eight transitions for three assignments. Compare Week 3's abstract machine, which took considerably more, most of them pure syntax shuffling.
+        Every assignment takes <strong>two</strong> steps — one to evaluate the right-hand side (<code>:=R</code>, via <code>var</code>), one to actually store it (<code>:=</code>) — and then a third (<code>skip</code>) to discard the leftover <code>skip;</code>. Eight transitions for three assignments. Compare Topic 03's abstract machine, which took considerably more, most of them pure syntax shuffling.
       </div>
       <!-- ===== SS TOOL ===== -->
-      <h3 id="w4-sstool">🛠️ Interactive: Small-Step Reducer</h3>
+      <h3 id="t4-sstool">🛠️ Interactive: Small-Step Reducer</h3>
       <p>Reduce any SIMP program one step at a time and see the <strong>derivation tree that justifies each step</strong> — because, as the lecture stresses, a reduction is only valid if you can prove it. The tree is what an exam wants when it says "justify this transition".</p>
       <div class="tool" data-run="ssRunAll">
         <div class="tool-header">
@@ -440,7 +440,7 @@
         <div id="ss-output" class="tool-output"></div>
       </div>
       <!-- ===== TERMINAL ===== -->
-      <h2 id="w4-terminal">Terminal and blocked configurations</h2>
+      <h2 id="t4-terminal">Terminal and blocked configurations</h2>
       <div class="callout exam">
         <div class="callout-label">The remark — know this list</div>
         <strong>There is no axiom or rule for programs of the form:</strong>
@@ -454,10 +454,10 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Terminal ≠ successful</div>
-        A blocked configuration is terminal in the Week 1 sense — <em>no c′ with c → c′</em> — but it is <strong>not</strong> a result. The first three cases are values and <code>skip</code> is successful termination; the blocked case is a failure that just happens to look the same from the outside. This is the same distinction the Week 3 tool made between "final" and "stuck".
+        A blocked configuration is terminal in the Topic 01 sense — <em>no c′ with c → c′</em> — but it is <strong>not</strong> a result. The first three cases are values and <code>skip</code> is successful termination; the blocked case is a failure that just happens to look the same from the outside. This is the same distinction the Topic 03 tool made between "final" and "stuck".
       </div>
       <!-- ===== COMPARISON ===== -->
-      <h2 id="w4-comparison">Comparison with the abstract machine</h2>
+      <h2 id="t4-comparison">Comparison with the abstract machine</h2>
       <div class="compare-2">
         <div class="mode-box" style="background:var(--tint-c); border-color:var(--accent-3);">
           <h4 style="color:var(--accent-3);">1 · Better</h4>
@@ -493,7 +493,7 @@
         We have defined a transition system for SIMP where <strong>the transition relation is defined by induction</strong>. Transition steps represent steps of computation; the result of a program P in a memory state s can be found by performing transition steps starting from ⟨P, s⟩ <strong>until a terminal configuration is obtained</strong> — <em>not all configurations reach a terminal configuration</em>.
       </div>
       <!-- ===== PART 3: BIG-STEP ===== -->
-      <h2 id="w4-sequences">Part 3 · Determinism and evaluation sequences</h2>
+      <h2 id="t4-sequences">Part 3 · Determinism and evaluation sequences</h2>
       <div class="callout exam">
         <div class="callout-label">Remark: determinism</div>
         <strong>The previous system is deterministic:</strong> given a configuration ⟨P, s⟩ there is a <strong>unique sequence of transitions from ⟨P, s⟩ with maximal length</strong>. This is called the <strong>evaluation sequence</strong> for ⟨P, s⟩.
@@ -517,7 +517,7 @@
           <code>⟨while True do skip, s⟩</code>
         </div>
       </div>
-      <h2 id="w4-bigstep">Big-step semantics</h2>
+      <h2 id="t4-bigstep">Big-step semantics</h2>
       <div class="callout exam">
         <div class="callout-label">The goal, and the notation</div>
         Define a binary relation between configurations which associates a configuration with <strong>its corresponding terminal one</strong> (if it exists). That is, define <em>by induction</em> the relation ⟨P, s⟩ →* ⟨P′, s′⟩ such that ⟨P′, s′⟩ is terminal. The usual notation is <strong>⟨P, s⟩ ⇓ ⟨P′, s′⟩</strong>:
@@ -683,7 +683,7 @@
         </div>
       </div>
       <!-- ===== BIG STEP TOOL ===== -->
-      <h3 id="w4-bstool">🛠️ Interactive: Big-Step Derivation Prover</h3>
+      <h3 id="t4-bstool">🛠️ Interactive: Big-Step Derivation Prover</h3>
       <p>Enter a program and a store and get the <strong>complete ⇓ derivation tree</strong>, drawn the way you'd write it by hand. This is the classic exam task ("prove that P ⇓ ⟨skip, s′⟩").</p>
       <div class="tool" data-run="runBigStep">
         <div class="tool-header">
@@ -712,11 +712,11 @@
         <div id="bs-output" class="tool-output"></div>
       </div>
       <!-- ===== BLOCKS ===== -->
-      <h2 id="w4-blocks">Adding variable declarations to SIMP</h2>
+      <h2 id="t4-blocks">Adding variable declarations to SIMP</h2>
       <div class="callout">
         <div class="callout-label">The idea</div>
         We can add <strong>local declarations</strong> to SIMP by using a <em>local state</em> in which <strong>the scope of a newly created location corresponds precisely with the block where the location is created and initialised</strong> — that is, <strong>static scope</strong>. For this we need a <em>stack-based implementation of the state</em>.
-        <p style="margin:10px 0 0 0;">This is Week 2's static scoping, now given a formal rule.</p>
+        <p style="margin:10px 0 0 0;">This is Topic 02's static scoping, now given a formal rule.</p>
       </div>
       <p><strong>Syntax.</strong> We extend the syntax of SIMP with blocks:</p>
       <div class="grammar">
@@ -741,7 +741,7 @@
       <div class="callout exam">
         <div class="callout-label">Read the conclusion's store very carefully</div>
         The second premise ends in <strong>s″[l ↦ n′]</strong> but the conclusion is just <strong>s″</strong>. The fresh location <em>l</em> — with whatever final value n′ it ended up holding — is <strong>discarded</strong> when the block exits. <em>That deletion is the whole meaning of "local"</em>: the block's variable does not exist outside the block, which is exactly static scope, expressed as a side-condition on a store.
-        <p style="margin:10px 0 0 0;">And the freshness condition plus the renaming <code>C{x ↦ l}</code> is how the rule prevents a local <code>x</code> from clashing with an <code>x</code> elsewhere in the program — the formal counterpart of Week 2's Pascal example where P1's <code>x</code> shadows main's.</p>
+        <p style="margin:10px 0 0 0;">And the freshness condition plus the renaming <code>C{x ↦ l}</code> is how the rule prevents a local <code>x</code> from clashing with an <code>x</code> elsewhere in the program — the formal counterpart of Topic 02's Pascal example where P1's <code>x</code> shadows main's.</p>
       </div>
       <h3>Example: swap using a local variable</h3>
       <div class="code-block">
@@ -770,8 +770,8 @@
       </div>
       <p style="font-size:14px;">Notice the final store is <strong>s′</strong>, not s″ — <em>l</em> has vanished, exactly as the rule prescribes.</p>
       <!-- ===== COMPARISON TOOL ===== -->
-      <h3 id="w4-cmptool">🛠️ Interactive: Three Semantics, One Program</h3>
-      <p>Aim 3 of the lecture is to <em>understand the differences between alternative semantic descriptions</em>. Run one program through all three — Week 3's abstract machine, small-step, and big-step — and compare what each produces.</p>
+      <h3 id="t4-cmptool">🛠️ Interactive: Three Semantics, One Program</h3>
+      <p>Aim 3 of the lecture is to <em>understand the differences between alternative semantic descriptions</em>. Run one program through all three — Topic 03's abstract machine, small-step, and big-step — and compare what each produces.</p>
       <div class="tool" data-run="runCompare">
         <div class="tool-header">
           <span class="tool-badge">Comparison tool</span>
@@ -793,9 +793,9 @@
         <div id="cm-output" class="tool-output"></div>
       </div>
       <!-- ===== EXAM ===== -->
-      <h2 id="w4-exam">Exam-style takeaways</h2>
+      <h2 id="t4-exam">Exam-style takeaways</h2>
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 4</div>
+        <div class="callout-label">Key things to nail for Topic 04</div>
         <ol>
           <li><strong>Mathematical induction</strong> — base P(0), step ∀n. P(n) ⇒ P(n+1). Be able to run the Σ(2i − 1) = n² proof.</li>
           <li><strong>Structural induction on lists</strong> — base P(nil), step P(l) ⇒ P(cons(h, l)).</li>
@@ -825,5 +825,5 @@
           <li><strong>Variable declarations</strong> — syntax <code>C ::= begin loc x := E; C end</code>; the rule with its two side conditions (l fresh, C{x ↦ l} renaming); and the fact that <em>l is dropped from the store</em> in the conclusion, which is what makes scoping static.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 4 notes. Send Week 5 slides whenever you're ready.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 04 notes. Send Topic 5 slides whenever you're ready.</p>
     </section>

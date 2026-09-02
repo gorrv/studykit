@@ -1,8 +1,8 @@
-<section id="w7-linreg" class="week-section">
-      <div class="week-header">
-        <div class="week-eyebrow">Week 07 · Part 1 · Supervised Learning</div>
+<section id="t7-linreg" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 07 · Part 1 · Supervised Learning</div>
         <h1>Linear Regression</h1>
-        <div class="week-subtitle">the one algorithm in this course whose optimum you can prove</div>
+        <div class="topic-subtitle">the one algorithm in this course whose optimum you can prove</div>
       </div>
       <!-- ===== SUPERVISED ===== -->
       <h2 id="r-super">Supervised learning, and the two tasks inside it</h2>
@@ -18,9 +18,9 @@
           <tr><td><strong>What you predict</strong></td><td>a <strong>continuous number</strong></td><td>which of a fixed set of <strong>classes</strong> C a point belongs to</td></tr>
           <tr><td><strong>Example in this chapter</strong></td><td>the value of a house; y at x = 5</td><td>credit risk ∈ {High, Low, Medium}</td></tr>
           <tr><td><strong>Algorithm covered</strong></td><td><strong>Linear Regression</strong></td><td><strong>Decision Trees</strong></td></tr>
-          <tr><td><strong>Error measured by</strong></td><td>SSE / MSE / MAE (Week 5)</td><td>accuracy, precision, recall, F1 (Week 5)</td></tr>
+          <tr><td><strong>Error measured by</strong></td><td>SSE / MSE / MAE (Topic 05)</td><td>accuracy, precision, recall, F1 (Topic 05)</td></tr>
         </table>
-        <p style="margin:12px 0 0 0;">Both are <em>supervised</em>: both need labels. The contrast with Week 6 is that clustering had none.</p>
+        <p style="margin:12px 0 0 0;">Both are <em>supervised</em>: both need labels. The contrast with Topic 06 is that clustering had none.</p>
       </div>
       <div class="callout tip">
         <div class="callout-label">Where the boundary is not where you expect</div>
@@ -182,7 +182,7 @@
         <div class="callout-label">The trap in the word “linear” — this is exam material</div>
         <strong>“Linear” refers to the parameters β<sub>i</sub>, not to the variables x<sub>i</sub>.</strong> So <strong>polynomial regression</strong>,
         <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:14px; margin:10px 0;">ŷ<sub>j</sub> = h(x<sub>j</sub>) = β₀ + β₁x<sub>j</sub> + β₂x<sub>j</sub>² + ⋯ + β<sub>D</sub>x<sub>j</sub><sup>D</sup></div>
-        <p style="margin:0;">— a curve, obviously — <strong>is a special case of linear regression.</strong> Treat x, x², x³ as D separate features and Definition 7.1 applies unchanged. This is also the honest answer to “why did the degree-9 curve in Week 5 still count as a <em>linear</em> model”.</p>
+        <p style="margin:0;">— a curve, obviously — <strong>is a special case of linear regression.</strong> Treat x, x², x³ as D separate features and Definition 7.1 applies unchanged. This is also the honest answer to “why did the degree-9 curve in Topic 05 still count as a <em>linear</em> model”.</p>
       </div>
       <!-- ===== THEOREM ===== -->
       <h2 id="r-theorem">Theorem 7.3 — and why it is remarkable</h2>

@@ -1,14 +1,14 @@
-<section id="week10" class="week-section">
+<section id="topic9" class="topic-section">
 
-      <div class="week-header">
-        <div class="week-eyebrow">Week 10 · Concurrency (Ian's material)</div>
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 09 · Concurrency</div>
         <h1>Java Synchronization</h1>
-        <div class="week-subtitle">fixing races — and the deeper memory problems beneath them</div>
+        <div class="topic-subtitle">fixing races — and the deeper memory problems beneath them</div>
       </div>
 
       <div class="callout">
         <div class="callout-label">The mission</div>
-        Week 9 showed that sharing data between threads causes <strong>race conditions</strong> (because operations like <code>counter++</code> aren't atomic). This week is the fix. But there are actually <strong>two distinct problems</strong> to solve — and most people only notice the first:
+        Topic 08 showed that sharing data between threads causes <strong>race conditions</strong> (because operations like <code>counter++</code> aren't atomic). This topic is the fix. But there are actually <strong>two distinct problems</strong> to solve — and most people only notice the first:
       </div>
 
       <div class="twoprob">
@@ -23,12 +23,12 @@
       </div>
 
       <!-- ===== Critical sections ===== -->
-      <h2 id="w10-critical">Critical sections &amp; mutual exclusion</h2>
+      <h2 id="t9-critical">Critical sections &amp; mutual exclusion</h2>
 
-      <p>The shared-counter program from Week 9 contains a <strong>critical section</strong>: a sequence of instructions that <em>only one thread at a time</em> should execute, or you get incorrect/unpredictable behaviour. We protect critical sections with <strong>mutual exclusion</strong> — one thread at a time gets exclusive access — generally enforced with <strong>locks</strong>.</p>
+      <p>The shared-counter program from Topic 08 contains a <strong>critical section</strong>: a sequence of instructions that <em>only one thread at a time</em> should execute, or you get incorrect/unpredictable behaviour. We protect critical sections with <strong>mutual exclusion</strong> — one thread at a time gets exclusive access — generally enforced with <strong>locks</strong>.</p>
 
       <!-- ===== synchronized methods ===== -->
-      <h2 id="w10-synchronized">synchronized methods</h2>
+      <h2 id="t9-synchronized">synchronized methods</h2>
 
       <p>The deceptively simple fix: declare the method that touches shared state as <code>synchronized</code>. The JVM then guarantees only one thread at a time can be inside it — making the whole method a critical section.</p>
 
@@ -44,7 +44,7 @@ private <span style="color:#e89b6d;">synchronized</span> void incCounter() {
       </div>
 
       <!-- ===== Locks ===== -->
-      <h2 id="w10-locks">Locks &amp; intrinsic locks</h2>
+      <h2 id="t9-locks">Locks &amp; intrinsic locks</h2>
 
       <p>A <strong>lock</strong> lets you declare a critical section accessible by one thread at a time. Just before entering, a thread tries to <strong>acquire</strong> the lock; on exit it <strong>releases</strong> it. If thread A holds the lock and thread B tries to acquire it, <strong>B blocks until A releases</strong> — and if A never releases, B blocks forever.</p>
 
@@ -65,7 +65,7 @@ private <span style="color:#e89b6d;">synchronized</span> void incCounter() {
       </div>
 
       <!-- ===== synchronized blocks ===== -->
-      <h2 id="w10-blocks">synchronized blocks — lock only what you need</h2>
+      <h2 id="t9-blocks">synchronized blocks — lock only what you need</h2>
 
       <p>A <code>synchronized</code> <em>method</em> locks the whole method — even parts that don't need it. If only part touches shared state, use a <strong>synchronized block</strong> to make just that part the critical section (and acquire the lock later / hold it for less time):</p>
 
@@ -93,7 +93,7 @@ public void run() {
       </div>
 
       <!-- ===== Thread safety ===== -->
-      <h2 id="w10-threadsafe">Thread safety &amp; immutability</h2>
+      <h2 id="t9-threadsafe">Thread safety &amp; immutability</h2>
 
       <div class="callout warn">
         <div class="callout-label">The fragility of external locking</div>
@@ -106,7 +106,7 @@ public void run() {
       </div>
 
       <!-- ===== Visibility ===== -->
-      <h2 id="w10-visibility">Visibility &amp; memory levels</h2>
+      <h2 id="t9-visibility">Visibility &amp; memory levels</h2>
 
       <p>Now the second, subtler problem. We've assumed that when one thread updates a variable, others immediately see the new value. <strong>That's not guaranteed.</strong> To understand why, you need the real memory hierarchy the CPU uses:</p>
 
@@ -148,7 +148,7 @@ public void run() {
       <p>CPUs have mechanisms to <strong>flush</strong> caches/registers back to main RAM, but only after a flush can all threads be guaranteed to see the same value. Crucially: <strong>mutual exclusion alone doesn't fix this</strong> — it's not about interleaving, it's about stale cached copies.</p>
 
       <!-- ===== volatile ===== -->
-      <h2 id="w10-volatile">volatile</h2>
+      <h2 id="t9-volatile">volatile</h2>
 
       <p>Java's keyword for variables that might be cached locally and go stale. Marking a variable <code>volatile</code> signals that it must be <strong>flushed to main memory when changed, and read back from main memory when accessed</strong> — bypassing stale cached copies.</p>
 
@@ -158,7 +158,7 @@ private <span style="color:#e89b6d;">volatile</span> boolean newDataAvailable;
 
       <div class="callout tip">
         <div class="callout-label">Java's visibility guarantee — you only need ONE volatile</div>
-        Remarkably, if you just need the latest values flushed/read, <strong>you only need to mark one variable volatile</strong>. By Java's visibility guarantee: when a volatile variable is flushed to RAM, <em>all</em> variables visible to that thread are flushed too. (This is also why the boolean stop-flag from Week 9 should be volatile.)
+        Remarkably, if you just need the latest values flushed/read, <strong>you only need to mark one variable volatile</strong>. By Java's visibility guarantee: when a volatile variable is flushed to RAM, <em>all</em> variables visible to that thread are flushed too. (This is also why the boolean stop-flag from Topic 08 should be volatile.)
       </div>
 
       <div class="callout">
@@ -167,7 +167,7 @@ private <span style="color:#e89b6d;">volatile</span> boolean newDataAvailable;
       </div>
 
       <!-- ===== Reordering ===== -->
-      <h2 id="w10-reorder">Instruction reordering &amp; happens-before</h2>
+      <h2 id="t9-reorder">Instruction reordering &amp; happens-before</h2>
 
       <p>One more twist. The JVM, the Java compiler, the HotSpot JIT compiler, <em>and</em> the CPU can all <strong>reorder instructions</strong> in your program — e.g. to exploit CPU pipelining by parallelising independent instructions for throughput. Statements that <em>appear</em> independent are candidates for reordering.</p>
 
@@ -186,10 +186,10 @@ buffer.addToBuffer(data, ...); <span style="color:#7eb892;">// ...but data isn't
       </div>
 
       <!-- ===== Exam ===== -->
-      <h2 id="w10-exam">Exam-style takeaways</h2>
+      <h2 id="t9-exam">Exam-style takeaways</h2>
 
       <div class="callout exam">
-        <div class="callout-label">Key things to nail for Week 10</div>
+        <div class="callout-label">Key things to nail for Topic 09</div>
         <ol>
           <li><strong>Two distinct problems:</strong> mutual exclusion (atomicity) AND visibility. Know which tool fixes which.</li>
           <li><strong>Critical section</strong> = code only one thread should run at a time; protected by <strong>mutual exclusion</strong> via <strong>locks</strong>.</li>
@@ -204,6 +204,6 @@ buffer.addToBuffer(data, ...); <span style="color:#7eb892;">// ...but data isn't
         </ol>
       </div>
 
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Week 10 notes.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 09 notes.</p>
 
     </section>

@@ -42,7 +42,7 @@ module.exports = async function run() {
 
     const mod = await loadModule(file, 1500);
     const actual = {
-      sections: mod.$$('.week-section').length,
+      sections: mod.$$('.topic-section').length,
       tools: mod.$$('.tool[data-run]').length,
       'question generators': (mod.window.QZ_GEN || []).length,
       figures: (mod.raw.match(/<svg/g) || []).length,
