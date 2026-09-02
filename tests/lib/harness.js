@@ -154,6 +154,58 @@ async function checkStructure(s, m) {
   const bootErrors = m.window.TOOL_BOOT_ERRORS || [];
   s.ok('every tool booted', bootErrors.length === 0, bootErrors.slice(0, 4).join(' | '));
 
+  // Every handler a tool wires up must actually exist.
+  //
+  // A tool can render perfectly and still be dead: IX.player generates
+  // onclick="<id>Step(...)" from the id you hand it, so a module that never
+  // defines that function, or that already uses the name for something else,
+  // ships buttons which throw the moment anyone presses them. Rendering tests
+  // cannot see this, because nothing is wrong until a click happens.
+  {
+    const missing = new Set();
+    m.$$('[onclick]').forEach(el => {
+      // Blank out string arguments first. A handler like
+      // setExpr('map f xs') carries source code in a literal, and every
+      // identifier in it would otherwise look like a call.
+      const src = (el.getAttribute('onclick') || '')
+        .replace(/'(\\.|[^'\\])*'/g, "''")
+        .replace(/"(\\.|[^"\\])*"/g, '""');
+      let call;
+      const names = /(^|[^\w.])([A-Za-z_$][\w$]*)\s*\(/g;
+      while ((call = names.exec(src))) {
+        const fn = call[2];
+        if (['if', 'return', 'for', 'while', 'typeof', 'new', 'Number', 'String', 'parseInt', 'parseFloat'].includes(fn)) continue;
+        if (typeof m.window[fn] !== 'function') missing.add(fn);
+      }
+    });
+    s.ok('every onclick handler resolves to a function',
+      missing.size === 0, [...missing].join(', '));
+  }
+
+  // Every transport bar must actually transport.
+  //
+  // The check above only notices a handler that is *absent*. It cannot notice
+  // one that exists but is the wrong function — which is the more likely
+  // mistake, because IX.player derives the handler name from the id you give
+  // it, so any module that already uses that name silently wires the buttons
+  // to something else. The only way to tell is to press the button and see
+  // whether anything moved.
+  m.$$('.tool[data-run]').forEach(tool => {
+    const name = tool.getAttribute('data-run');
+    const out = tool.querySelector('.tool-output');
+    const next = tool.querySelector('.ix-bar .ix-btn.nav[title="Next step"]');
+    if (!out || !next || next.hasAttribute('disabled')) return;
+
+    const before = out.innerHTML;
+    try {
+      next.dispatchEvent(new m.window.Event('click', { bubbles: true }));
+    } catch (e) {
+      return s.ok(`${name}: the transport bar steps forward`, false, e.message);
+    }
+    s.ok(`${name}: the transport bar steps forward`, out.innerHTML !== before,
+      'pressing ▶ changed nothing — the handler is probably wired to the wrong function');
+  });
+
   // Every section must be reachable through the nav without throwing.
   if (typeof m.window.showSection === 'function') {
     m.$$('.topic-section').forEach(sec => {
