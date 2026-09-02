@@ -228,8 +228,28 @@
 
   var TM = { res: null, frame: 0, m: null };
 
+  /** The transport bar's handler — IX.player emits onclick="tmStep(...)". */
+  function tmStep(d, fromSlider) {
+    if (!TM.res) return;
+    var total = TM.res.configs.length;
+    if (d === 'play') {
+      IX.play('tm', total, function () { return TM.frame; },
+        function (f) { TM.frame = f; tmPaint(); }, 380);
+      tmPaint();
+      return;
+    }
+    IX.stop('tm');
+    if (d === 'first') TM.frame = 0;
+    else if (d === 'last') TM.frame = total - 1;
+    else if (typeof d === 'number' && fromSlider) TM.frame = d;
+    else TM.frame = Math.max(0, Math.min(total - 1, TM.frame + d));
+    tmPaint();
+  }
+
+  /** Jump straight to a configuration by clicking it. */
   function tmSet(i) {
     if (!TM.res) return;
+    IX.stop('tm');
     TM.frame = Math.max(0, Math.min(i, TM.res.configs.length - 1));
     tmPaint();
   }
@@ -254,8 +274,9 @@
 
     var html = tmTapeHtml(c);
     html += IX.player('tm', TM.frame, r.configs.length,
-      'Step ' + c.step + ' of ' + r.steps,
-      '(' + esc(c.state) + ', ' + esc(c.left || 'ε') + ', ' + esc(c.right || 'ε') + ')');
+      'step <strong>' + c.step + '</strong> of ' + r.steps,
+      [c.state === TM.m.accept ? 'done' : 'assign',
+       '(' + esc(c.state) + ', ' + esc(c.left || 'ε') + ', ' + esc(c.right || 'ε') + ')']);
 
     html += '<div class="fa-configs">';
     var from = Math.max(0, TM.frame - 6), to = Math.min(r.configs.length, from + 13);
@@ -307,6 +328,7 @@
   }
 
   window.TM = TM;
+  window.tmStep = tmStep;
   window.tmSet = tmSet;
   window.tmParse = tmParse;
   window.tmRun = tmRun;

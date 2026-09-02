@@ -106,7 +106,7 @@
   }
 
   /** Every state reachable from `q` on `sym`; empty when the machine is stuck. */
-  function faStep(m, q, sym) {
+  function faMove(m, q, sym) {
     var row = m.delta[q];
     return (row && row[sym]) || [];
   }
@@ -119,7 +119,7 @@
     var out = set.slice(), queue = set.slice();
     while (queue.length) {
       var q = queue.shift();
-      var next = faStep(m, q, FA_EPS);
+      var next = faMove(m, q, FA_EPS);
       for (var i = 0; i < next.length; i++) {
         if (out.indexOf(next[i]) < 0) { out.push(next[i]); queue.push(next[i]); }
       }
@@ -172,7 +172,7 @@
     var configs = [{ state: q, read: null, rest: syms.slice() }];
 
     for (var i = 0; i < syms.length; i++) {
-      var next = faStep(m, q, syms[i]);
+      var next = faMove(m, q, syms[i]);
       if (!next.length) {
         return { verdict: 'stuck', configs: configs, at: q, stuckOn: syms[i], read: i };
       }
@@ -224,7 +224,7 @@
       var moved = false;
 
       // Epsilon moves first: they branch without consuming input.
-      var eps = faStep(m, state, FA_EPS);
+      var eps = faMove(m, state, FA_EPS);
       for (var e = 0; e < eps.length; e++) {
         var keyE = eps[e] + '@' + at;
         if (seen.indexOf(keyE) >= 0) continue;         // a loop that eats nothing
@@ -233,7 +233,7 @@
       }
 
       if (at < syms.length) {
-        var next = faStep(m, state, syms[at]);
+        var next = faMove(m, state, syms[at]);
         for (var i = 0; i < next.length; i++) {
           var keyN = next[i] + '@' + (at + 1);
           var childN = node(next[i], at + 1, seen.concat([keyN]), depth + 1);
@@ -290,7 +290,7 @@
       for (var i = 0; i < m.alphabet.length; i++) {
         var sym = m.alphabet[i], reached = [];
         for (var s = 0; s < set.length; s++) {
-          var next = faStep(m, set[s], sym);
+          var next = faMove(m, set[s], sym);
           for (var k = 0; k < next.length; k++) {
             if (reached.indexOf(next[k]) < 0) reached.push(next[k]);
           }
@@ -388,7 +388,7 @@
   function faTable(m, live) {
     var html = '<table class="results-table fa-delta"><tr><th>State</th>';
     for (var a = 0; a < m.alphabet.length; a++) html += '<th>' + esc(m.alphabet[a]) + '</th>';
-    var anyEps = m.states.some(function (q) { return faStep(m, q, FA_EPS).length; });
+    var anyEps = m.states.some(function (q) { return faMove(m, q, FA_EPS).length; });
     if (anyEps) html += '<th>' + FA_EPS + '</th>';
     html += '</tr>';
 
@@ -398,11 +398,11 @@
       html += '<tr' + (live === q ? ' class="fa-live"' : '') + '><td><strong>' + esc(q) +
         '</strong> <span class="fa-mark">' + mark + '</span></td>';
       for (var s = 0; s < m.alphabet.length; s++) {
-        var to = faStep(m, q, m.alphabet[s]);
+        var to = faMove(m, q, m.alphabet[s]);
         html += '<td>' + (to.length ? esc(to.join(', ')) : '<span class="fa-none">—</span>') + '</td>';
       }
       if (anyEps) {
-        var e = faStep(m, q, FA_EPS);
+        var e = faMove(m, q, FA_EPS);
         html += '<td>' + (e.length ? esc(e.join(', ')) : '<span class="fa-none">—</span>') + '</td>';
       }
       html += '</tr>';
@@ -410,10 +410,34 @@
     return html + '</table><div class="fa-key">▸ start &nbsp; ◉ accepting</div>';
   }
 
-  var FA = { res: null, frame: 0 };
+  var FA = { res: null, frame: 0, m: null };
 
+  /**
+   * The transport bar's handler. IX.player emits onclick="faStep(...)",
+   * so this name is fixed by that convention — which is why the
+   * transition lookup above is called faMove.
+   */
+  function faStep(d, fromSlider) {
+    if (!FA.res || !FA.res.configs) return;
+    var total = FA.res.configs.length;
+    if (d === 'play') {
+      IX.play('fa', total, function () { return FA.frame; },
+        function (f) { FA.frame = f; faPaint(); }, 650);
+      faPaint();
+      return;
+    }
+    IX.stop('fa');
+    if (d === 'first') FA.frame = 0;
+    else if (d === 'last') FA.frame = total - 1;
+    else if (typeof d === 'number' && fromSlider) FA.frame = d;
+    else FA.frame = Math.max(0, Math.min(total - 1, FA.frame + d));
+    faPaint();
+  }
+
+  /** Jump straight to a configuration by clicking it in the sequence. */
   function faSet(i) {
     if (!FA.res || !FA.res.configs) return;
+    IX.stop('fa');
     FA.frame = Math.max(0, Math.min(i, FA.res.configs.length - 1));
     faPaint();
   }
@@ -426,9 +450,11 @@
     var syms = r.configs[0].rest;
 
     var html = faTape(syms, syms.length - c.rest.length, false);
+    var last = FA.frame === r.configs.length - 1;
     html += IX.player('fa', FA.frame, r.configs.length,
-      'Configuration ' + (FA.frame + 1) + ' of ' + r.configs.length,
-      '(' + esc(c.state) + ', ' + (c.rest.join('') || 'ε') + ')');
+      'configuration <strong>' + (FA.frame + 1) + '</strong> of ' + r.configs.length,
+      [last && r.verdict === 'accept' ? 'done' : 'assign',
+       '(' + esc(c.state) + ', ' + (c.rest.join('') || 'ε') + ')']);
 
     html += '<div class="fa-configs">';
     for (var i = 0; i < r.configs.length; i++) {
@@ -553,6 +579,7 @@
   }
 
   window.FA = FA;
+  window.faStep = faStep;
   window.faSet = faSet;
   window.faParse = faParse;
   window.faClosure = faClosure;

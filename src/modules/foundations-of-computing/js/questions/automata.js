@@ -29,7 +29,7 @@
     while (queue.length) {
       var q = queue.shift();
       ['0', '1'].forEach(function (sym) {
-        faStep(p.m, q, sym).forEach(function (t) {
+        faMove(p.m, q, sym).forEach(function (t) {
           if (seen.indexOf(t) < 0) { seen.push(t); queue.push(t); }
         });
       });
@@ -45,7 +45,7 @@
     m.states.forEach(function (q) {
       var mark = (q === m.start ? ' ▸' : '') + (m.accept.indexOf(q) >= 0 ? ' ◉' : '');
       h += '<tr><td><strong>' + q + '</strong>' + mark + '</td><td>' +
-        faStep(m, q, '0').join(', ') + '</td><td>' + faStep(m, q, '1').join(', ') + '</td></tr>';
+        faMove(m, q, '0').join(', ') + '</td><td>' + faMove(m, q, '1').join(', ') + '</td></tr>';
     });
     return h + '</table><div class="fa-key">▸ start &nbsp; ◉ accepting</div>';
   }
@@ -157,7 +157,7 @@
     var table = '<table class="results-table"><tr><th>State</th><th>a</th><th>b</th></tr>';
     p.m.states.forEach(function (q) {
       table += '<tr><td><strong>' + q + '</strong>' + (p.m.accept.indexOf(q) >= 0 ? ' ◉' : '') + '</td><td>' +
-        (faStep(p.m, q, 'a').join(', ') || '—') + '</td><td>' + (faStep(p.m, q, 'b').join(', ') || '—') + '</td></tr>';
+        (faMove(p.m, q, 'a').join(', ') || '—') + '</td><td>' + (faMove(p.m, q, 'b').join(', ') || '—') + '</td></tr>';
     });
     table += '</table>';
 
