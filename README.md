@@ -18,6 +18,7 @@ No runtime dependencies. No server. It works offline.
 | Introduction to AI | 40 | 33 | 230 | 44 |
 | Programming Language Design | 11 | 24 | 10 | 4 |
 | Operating Systems | 13 | 12 | 10 | 1 |
+| Foundations of Computing | 3 | 6 | 11 | — |
 
 Operating Systems also carries a hand-written bank of 123 exam questions behind its mock paper.
 
@@ -88,13 +89,14 @@ any code moved. See [`docs/AUTHORING.md`](docs/AUTHORING.md) to add a module.
 ## Running the tests
 
 ```
-  running build.test.js …                       25 passed (72ms)
-  running intro-to-ai.test.js …                230 passed (3704ms)
-  running landing.test.js …                      6 passed (424ms)
-  running operating-systems.test.js …          110 passed (1861ms)
-  running programming-language-design.test.js … 130 passed (3094ms)
+  running build.test.js …                             32 passed (80ms)
+  running foundations-of-computing.test.js …          99 passed (4136ms)
+  running intro-to-ai.test.js …                      230 passed (3790ms)
+  running landing.test.js …                           20 passed (7676ms)
+  running operating-systems.test.js …                110 passed (1829ms)
+  running programming-language-design.test.js …      130 passed (3132ms)
 
-501 / 501 assertions passed across 5 suites in 10.3s
+621 / 621 assertions passed across 6 suites in 21.7s
 ```
 
 Run one suite with `node tests/run.js intro` (after a build).

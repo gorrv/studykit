@@ -6,7 +6,6 @@ in `dist/modules/`. Nothing is fetched at runtime, so a built module works offli
 ```
 src/modules/<id>/
   index.html     the template — the only file that lists includes
-  module.json    id, which engine files it uses, which scripts
   nav.html       sidebar: brand, theme toggle, search box, section links
   sections/      one .html per section
   js/            one .js per tool
