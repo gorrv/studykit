@@ -63,6 +63,13 @@
   a { color: var(--accent); }
   code { font-family: 'IBM Plex Mono', monospace; font-size: 0.88em; background: rgba(var(--accent-rgb), 0.08);
     padding: 1px 6px; border-radius: 3px; color: var(--accent); }
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: rgba(var(--accent-rgb), 0.04);
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 6px 6px 0;
+  }
   .callout-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase;
     letter-spacing: 0.18em; color: var(--accent); font-weight: 600; margin-bottom: 6px; }
   .callout.warn { border-left-color: var(--accent-2); background: rgba(var(--accent2-rgb), 0.05); }

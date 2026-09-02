@@ -199,13 +199,6 @@
   }
 
   /* Callout boxes */
-  .callout {
-    border-left: 4px solid var(--accent);
-    background: rgba(30,77,139,0.04);
-    padding: 16px 20px;
-    margin: 20px 0;
-    border-radius: 0 6px 6px 0;
-  }
   .callout-label {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;

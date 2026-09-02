@@ -2,8 +2,6 @@
   .brand-sub { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase;
     letter-spacing: 0.16em; color: var(--ink-muted); margin-bottom: 18px; line-height: 1.5; }
   /* Callouts */
-  .callout { border-left: 4px solid var(--accent); background: rgba(var(--accent-rgb), 0.04);
-    padding: 16px 20px; margin: 20px 0; border-radius: 0 6px 6px 0; }
   /* Code, pseudocode, diagrams */
   .code-block, .pseudo { background: var(--code-bg); color: var(--code-fg); padding: 20px 24px; border-radius: 8px;
     font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.6; overflow-x: auto;

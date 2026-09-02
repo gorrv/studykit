@@ -3,7 +3,6 @@
   nav .subsection li { margin: 0; }
   em { font-style: italic; }
   /* Callout boxes */
-  .callout { border-left: 4px solid var(--accent); background: rgba(var(--accent-rgb), 0.04); padding: 16px 20px; margin: 20px 0; border-radius: 0 6px 6px 0; }
   /* Diagrams */
   .diagram { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 24px; margin: 24px 0; box-shadow: var(--shadow); font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.6; overflow-x: auto; }
   /* Code blocks */
