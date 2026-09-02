@@ -1,0 +1,50 @@
+    <div class="brand">Foundations <span class="accent">Notes</span></div>
+    <div class="brand-sub">Automata &amp; Computability</div>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Switch between light and dark theme">
+      <span class="tt-dot" aria-hidden="true"></span><span class="tt-label" id="tt-label">Light</span>
+    </button>
+    <div class="search-box" id="ns-box">
+      <span class="s-ico" aria-hidden="true">&#9906;</span>
+      <input type="search" id="ns-input" placeholder="Search these notes…" autocomplete="off"
+             spellcheck="false" aria-label="Search these notes"
+             oninput="nsInput()" onkeydown="nsKey(event)" onfocus="nsInput()">
+      <button class="s-clr" onclick="nsClear()" title="Clear search" aria-label="Clear search">&times;</button>
+    </div>
+    <div class="search-results" id="ns-results" hidden></div>
+
+    <nav>
+      <ul>
+        <li class="topic">
+          <div class="topic-label">Topic 01</div>
+          <a class="topic-title" href="#" onclick="showSection('topic1'); return false;">Machines, Languages and Their Limits</a>
+          <ul class="subsection">
+            <li><a href="#t1-languages" onclick="showSection('topic1')">Alphabets, words, languages</a></li>
+            <li><a href="#t1-dfa" onclick="showSection('topic1')">Deterministic finite automata</a></li>
+            <li><a href="#t1-fatool" onclick="showSection('topic1')">🛠️ Automaton simulator</a></li>
+            <li><a href="#t1-nfa" onclick="showSection('topic1')">Non-determinism</a></li>
+            <li><a href="#t1-subset" onclick="showSection('topic1')">🛠️ Subset construction</a></li>
+            <li><a href="#t1-regex" onclick="showSection('topic1')">Regular expressions</a></li>
+            <li><a href="#t1-retool" onclick="showSection('topic1')">🛠️ Expression explorer</a></li>
+            <li><a href="#t1-notregular" onclick="showSection('topic1')">Not every language is regular</a></li>
+            <li><a href="#t1-pumping" onclick="showSection('topic1')">The pumping lemma</a></li>
+            <li><a href="#t1-pltool" onclick="showSection('topic1')">🛠️ Play the game</a></li>
+            <li><a href="#t1-tm" onclick="showSection('topic1')">Turing machines</a></li>
+            <li><a href="#t1-tmtool" onclick="showSection('topic1')">🛠️ Turing machine</a></li>
+            <li><a href="#t1-ndtm" onclick="showSection('topic1')">NDTMs &amp; Church–Turing</a></li>
+            <li><a href="#t1-exam" onclick="showSection('topic1')">Exam takeaways</a></li>
+          </ul>
+        </li>
+
+        <li class="topic">
+          <div class="topic-label">★ Revision</div>
+          <a class="topic-title" href="#" onclick="showSection('cram'); return false;" style="color:var(--accent-2);">Cram Sheet</a>
+          <div class="placeholder">Every definition, one page</div>
+        </li>
+
+        <li class="topic">
+          <div class="topic-label">★ Practice</div>
+          <a class="topic-title" href="#" onclick="showSection('practice'); return false;" style="color:var(--accent-2);">Self-test</a>
+          <div class="placeholder">Generated, never the same twice</div>
+        </li>
+      </ul>
+    </nav>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function(){
+  var t = null;
+  try { t = localStorage.getItem('studykit-theme'); } catch (e) {}
+  if (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
+  document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+})();
+</script>
+<title>Foundations of Computing — Automata and Computability</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+<!--@include @/styles/theme.css-->
+<!--@include @/styles/chrome.css-->
+<!--@include styles.css--></style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside>
+<!--@include nav.html--></aside>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+
+    <!-- ============ TOPIC 1 ============ -->
+    <!--@include sections/topic1.html-->
+
+    <!-- ============ CRAM SHEET ============ -->
+    <!--@include sections/cram.html-->
+
+    <!-- ============ SELF-TEST ============ -->
+    <!--@include sections/practice.html-->
+
+  </main>
+</div>
+
+<script>
+  <!--@include @/engine/helpers.js-->
+  <!--@include @/engine/theme.js-->
+  <!--@include @/engine/nav.js-->
+  <!--@include @/engine/ix.js-->
+  <!--@include @/engine/tools.js-->
+  <!--@include @/engine/quiz.js-->
+  <!--@include @/engine/search.js-->
+  <!--@include js/t1-automata.js-->
+  <!--@include js/t1-regex.js-->
+  <!--@include js/t1-turing.js-->
+  <!--@include js/t1-pumping.js-->
+  <!--@include js/questions/automata.js-->
+  <!--@include js/questions/languages.js-->
+  <!--@include @/engine/boot.js--></script>
+
+</body>
+</html>

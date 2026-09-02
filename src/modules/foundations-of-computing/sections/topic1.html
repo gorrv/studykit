@@ -1,0 +1,565 @@
+<section id="topic1" class="topic-section active">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 01 · Automata and Computability</div>
+        <h1>Machines, Languages and Their Limits</h1>
+        <div class="topic-subtitle">from three states to the halting problem, in one topic</div>
+      </div>
+
+      <p>This topic asks one question in four increasingly ambitious forms: <strong>what can a machine
+      recognise?</strong> Start with a machine that has nothing but a handful of states, and find out
+      exactly what that buys you. Then find a language it provably cannot handle. Then give the machine
+      a writable tape, watch its power jump, and discover that the new power comes with a price —
+      it might never stop.</p>
+
+      <div class="callout">
+        <div class="callout-label">The shape of the argument</div>
+        Finite automata recognise exactly the <strong>regular</strong> languages, which is also exactly
+        what regular expressions describe. Some perfectly simple languages are not regular, and the
+        <strong>pumping lemma</strong> is the tool for proving it. Turing machines lift the ceiling, and
+        the Church&ndash;Turing thesis claims they lift it as high as it goes — but a Turing machine may
+        run forever, so "recognise" and "decide" stop meaning the same thing.
+      </div>
+
+      <!-- ===== Languages ===== -->
+      <h2 id="t1-languages">Alphabets, words, languages</h2>
+
+      <p>Three definitions, and they are almost aggressively simple. The work is in remembering that
+      a <em>language</em> here is just a set of strings — it carries no meaning, no grammar, no
+      interpretation.</p>
+
+      <table>
+        <tr><th>Term</th><th>Definition</th><th>Example</th></tr>
+        <tr><td><strong>Alphabet</strong> &Sigma;</td><td>Any finite set of symbols</td><td>{0, 1}</td></tr>
+        <tr><td><strong>Word</strong></td><td>Any finite string of symbols from &Sigma;</td><td><code>1001</code></td></tr>
+        <tr><td><strong>&Sigma;*</strong></td><td>The set of <em>all</em> finite words over &Sigma;</td><td>ε, 0, 1, 00, 01, …</td></tr>
+        <tr><td><strong>ε</strong></td><td>The empty word — length zero, always in &Sigma;*</td><td></td></tr>
+        <tr><td><strong>Language</strong> L</td><td>Any subset of &Sigma;*, finite or infinite</td><td>{ w : w has even length }</td></tr>
+      </table>
+
+      <div class="callout warn">
+        <div class="callout-label">Two that trip people up</div>
+        <strong>ε is not the same as ∅.</strong> The language {ε} contains one word (the empty one);
+        the language ∅ contains no words at all. A machine that accepts {ε} accepts something; a
+        machine that accepts ∅ accepts nothing.<br><br>
+        <strong>"Any subset" really means any.</strong> The set of binary strings encoding prime
+        numbers is a language. So is the set of programs that halt. Nothing so far says a machine can
+        recognise either.
+      </div>
+
+      <!-- ===== DFA ===== -->
+      <h2 id="t1-dfa">Deterministic finite automata</h2>
+
+      <p>A DFA is a machine with a fixed, finite number of states and no memory beyond which state it
+      is in. It reads its input once, left to right, and never writes anything down.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">The definition to memorise</div>
+        A DFA is a five-tuple <strong>A = ⟨ &Sigma;, Q, q<sub>init</sub>, F, δ ⟩</strong>:
+        an alphabet &Sigma;; a finite set of states Q; a start state q<sub>init</sub> ∈ Q; a set of
+        accepting states F ⊆ Q; and a transition function
+        <strong>δ : Q × &Sigma; → Q</strong>.<br><br>
+        The word "function" is doing all the work. A function gives <em>exactly one</em> answer for
+        every input, so from any state, on any symbol, there is exactly one place to go. That is what
+        "deterministic" means, and it is why the computation below is a line rather than a tree.
+      </div>
+
+      <p>A <strong>configuration</strong> is everything you would need to resume the machine: the state
+      it is in, and the input it has not read yet. Written <code>(q, w)</code>. A
+      <strong>computation</strong> is the sequence of configurations you pass through, and the machine
+      <strong>accepts</strong> when that sequence ends in an accepting state with nothing left to read.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">A worked example worth knowing by heart</div>
+        Three states, alphabet {0,1}, and the state <em>is</em> the value of the input so far modulo 3.
+        Reading a bit doubles the number and adds the bit, so from state <em>r</em> on bit <em>b</em>
+        you go to (2r + b) mod 3. Make q<sub>0</sub> accepting and the machine recognises exactly the
+        binary strings divisible by three — with three states and no arithmetic. Load it into the tool
+        below and step through <code>1001</code> (that's 9).
+      </div>
+
+      <h3 id="t1-fatool">🛠️ Interactive: run a machine, step by step</h3>
+
+      <p>Type a transition table and a word. If the table is deterministic you get the single
+      computation, one configuration at a time; if it is not, you get the whole tree. Both are the
+      real thing — the verdict comes from running the machine, not from a lookup.</p>
+
+      <div class="tool" data-run="runAutomaton">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Finite Automaton Simulator</h3>
+        </div>
+        <div class="tool-desc">One line per transition: <code>state symbol target</code>. Give several
+          targets to make it non-deterministic, or use <code>eps</code> for an ε-move. The tool works
+          out for itself which kind of machine you have written.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 320px;">
+            <label for="fa-machine">The machine</label>
+            <textarea id="fa-machine" rows="9" spellcheck="false" style="width:100%; font-family:'IBM Plex Mono', monospace; font-size:13px;">start: q0
+accept: q0
+q0 0 q0
+q0 1 q1
+q1 0 q2
+q1 1 q0
+q2 0 q1
+q2 1 q2</textarea>
+          </div>
+          <div class="tool-field">
+            <label for="fa-word">Input word</label>
+            <input type="text" id="fa-word" value="1001" spellcheck="false" style="width:150px;">
+          </div>
+        </div>
+
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="runAutomaton()">Run</button>
+          <button class="tool-btn secondary" onclick="document.getElementById('fa-word').value='10001'; runAutomaton();">Try 10001</button>
+          <button class="tool-btn secondary" onclick="document.getElementById('fa-machine').value='start: s\naccept: q\ns a q\ns b q f\nq a f\nf a f\nf b s f'; document.getElementById('fa-word').value='aaabbb'; runAutomaton();">Load an NFA</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="fa-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== NFA ===== -->
+      <h2 id="t1-nfa">Non-determinism</h2>
+
+      <p>Change one thing: let δ return a <em>set</em> of states instead of one.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">NFA versus DFA — the only difference</div>
+        <strong>δ : Q × (&Sigma; ∪ {ε}) → 𝒫(Q)</strong><br><br>
+        The tuple is otherwise identical. Two consequences follow. A configuration can have several
+        successors, so the computation is a <strong>tree</strong>. And the machine may move on ε,
+        changing state without reading anything.<br><br>
+        <strong>Accept criterion:</strong> the word is accepted if <em>any</em> branch of the tree
+        finishes in an accepting state with the whole word read. Not all of them — any.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The mistake this causes in exams</div>
+        Students reject a word because they followed one branch, hit a dead end, and stopped. A dead
+        branch means nothing on its own. You have to show that <em>every</em> branch fails before you
+        can reject — which is exactly why the tool draws the whole tree rather than one path.
+      </div>
+
+      <p>Non-determinism looks like it should be more powerful. It is not — only more convenient.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">Theorem</div>
+        Every NFA can be converted into a DFA accepting the same language. So NFAs and DFAs recognise
+        exactly the same class of languages, and you may use whichever is easier to write down.
+      </div>
+
+      <p>The proof is a construction, and it is the reason the theorem is believable: a state of the
+      new machine is a <em>set</em> of old states — "everywhere the NFA could be right now". Since
+      there are finitely many subsets, the new machine is still finite. Its start state is the ε-closure
+      of the old start state, and a subset accepts exactly when it contains any old accepting state.</p>
+
+      <h3 id="t1-subset">🛠️ Interactive: the subset construction</h3>
+
+      <div class="tool" data-run="runSubset">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>NFA → DFA</h3>
+        </div>
+        <div class="tool-desc">Builds only the reachable subsets, which is nearly always far fewer than
+          2<sup>n</sup>. Then it runs both machines on every word up to length 9 and reports whether
+          they agreed — the construction is checked, not asserted.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 320px;">
+            <label for="sc-machine">An NFA</label>
+            <textarea id="sc-machine" rows="7" spellcheck="false" style="width:100%; font-family:'IBM Plex Mono', monospace; font-size:13px;">start: s
+accept: q
+s a q
+s b q f
+q a f
+f a f
+f b s f</textarea>
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="runSubset()">Construct</button>
+          <button class="tool-btn secondary" onclick="document.getElementById('sc-machine').value='start: s\naccept: f\ns eps a\ns eps b\na 0 a\na eps f\nb 1 b\nb eps f\nf 0 f'; runSubset();">One with ε-moves</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="sc-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== Regular expressions ===== -->
+      <h2 id="t1-regex">Regular expressions</h2>
+
+      <p>The same class of languages, described from the other end. Instead of building a machine that
+      recognises the words, you write a pattern that generates them.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">Three operations, and that is the lot</div>
+        <table style="margin:8px 0 0;">
+          <tr><th>Concatenation</th><td><code>wv</code></td><td>w then v</td></tr>
+          <tr><th>Alternation</th><td><code>(w ∪ v)</code></td><td>either w or v</td></tr>
+          <tr><th>Kleene star</th><td><code>w*</code></td><td>zero or more copies of w</td></tr>
+        </table>
+        A language is <strong>regular</strong> if some regular expression describes it.
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">The equivalence that ties the topic together</div>
+        <strong>L is regular ⟺ some DFA (equivalently, some NFA) recognises L.</strong><br><br>
+        Left to right is Thompson's construction: build one little NFA gadget per operator and glue
+        them together. Right to left turns a machine back into an expression by eliminating states one
+        at a time. The tool below does the first direction for real — it compiles your expression into
+        an NFA and answers membership by <em>running</em> it.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Star binds tighter than you think</div>
+        <code>ab*</code> is <em>a</em> followed by any number of <em>b</em>: a, ab, abb, abbb…<br>
+        <code>(ab)*</code> is any number of copies of <em>ab</em>: ε, ab, abab, ababab…<br>
+        These differ at the second word. The enumeration in the tool makes the mistake obvious
+        immediately, which is why it is there.
+      </div>
+
+      <h3 id="t1-retool">🛠️ Interactive: regular expression explorer</h3>
+
+      <div class="tool" data-run="runRegex">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Expression → machine → language</h3>
+        </div>
+        <div class="tool-desc">Type an expression. It gets compiled to an NFA by Thompson's construction,
+          tested against your word by running that NFA, and its language is listed shortest-first.
+          Write union as <code>∪</code>, or <code>|</code> if that is easier to type.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="re-expr">Expression</label>
+            <input type="text" id="re-expr" value="(0|1(01*0)*1)*" spellcheck="false" style="width:100%; font-family:'IBM Plex Mono', monospace;">
+          </div>
+          <div class="tool-field">
+            <label for="re-word">Test a word</label>
+            <input type="text" id="re-word" value="1001" spellcheck="false" style="width:130px;">
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="runRegex()">Compile and run</button>
+          <button class="tool-btn secondary" onclick="document.getElementById('re-expr').value='1(1|0)*0'; runRegex();">starts 1, ends 0</button>
+          <button class="tool-btn secondary" onclick="document.getElementById('re-expr').value='(ab)*'; runRegex();">(ab)*</button>
+          <button class="tool-btn secondary" onclick="document.getElementById('re-expr').value='ab*'; runRegex();">ab*</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="re-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why the default expression is worth a minute</div>
+        <code>(0 ∪ 1(01*0)*1)*</code> describes the binary multiples of three — the same language as
+        the three-state machine further up. Compile it, note the DFA it produces has the same behaviour,
+        and you have watched both directions of the equivalence theorem happen on one example.
+      </div>
+
+      <!-- ===== Not regular ===== -->
+      <h2 id="t1-notregular">Not every language is regular</h2>
+
+      <p>Here is a language a five-year-old could check and no finite automaton can recognise:</p>
+
+      <div class="callout exam">
+        <div class="callout-label">Theorem</div>
+        L = { a<sup>n</sup>b<sup>n</sup> : n ≥ 0 } is <strong>not regular</strong>.
+      </div>
+
+      <p>The argument is pigeonhole, and it is worth following once slowly because every later
+      non-regularity proof is this one in disguise.</p>
+
+      <div class="xl-walk">
+        <div class="xl-step"><span class="xl-step-n">1</span><span class="xl-step-body">
+          <strong>Suppose it were.</strong> Then some DFA A recognises it. Let <em>p</em> be A's number
+          of states — a fixed, finite number, whatever it is.</span></div>
+        <div class="xl-step"><span class="xl-step-n">2</span><span class="xl-step-body">
+          <strong>Feed it a long word.</strong> Run A on a<sup>k</sup>b<sup>k</sup> for some k &gt; p.
+          While reading the a's, A visits k + 1 states.</span></div>
+        <div class="xl-step"><span class="xl-step-n">3</span><span class="xl-step-body">
+          <strong>Pigeonhole.</strong> k + 1 visits, only p different states available, and k &gt; p.
+          So some state is visited <em>twice</em> while reading a's.
+          <span class="tool-note">This is the whole proof. Everything after it is bookkeeping.</span></span></div>
+        <div class="xl-step"><span class="xl-step-n">4</span><span class="xl-step-body">
+          <strong>Cut out the loop.</strong> Say A is in state <em>q</em> after i a's and again after
+          j a's, with i &lt; j. The machine went round a loop reading (j − i) a's and came back to
+          exactly where it was.</span></div>
+        <div class="xl-step"><span class="xl-step-n">5</span><span class="xl-step-body">
+          <strong>A shorter word looks identical.</strong> Now run A on
+          a<sup>k−(j−i)</sup>b<sup>k</sup>. It reaches the same state <em>q</em>, and from there the
+          remaining input is the same b<sup>k</sup>. A cannot tell the two words apart — it ends in the
+          same state on both.</span></div>
+        <div class="xl-step miss"><span class="xl-step-n">×</span><span class="xl-step-body">
+          <strong>Contradiction.</strong> So A accepts both or rejects both. But
+          a<sup>k</sup>b<sup>k</sup> is in L and a<sup>k−(j−i)</sup>b<sup>k</sup> is not — fewer a's
+          than b's. No such A exists.
+          <span class="tool-note">The machine failed because it could not count past p. A finite state
+          set is a finite memory, and remembering "how many a's so far" needs unbounded memory.</span></span></div>
+      </div>
+
+      <!-- ===== Pumping lemma ===== -->
+      <h2 id="t1-pumping">The pumping lemma</h2>
+
+      <p>That argument generalises. Rather than redo the pigeonhole every time, the pumping lemma
+      packages it once.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">The statement</div>
+        Let L be an infinite language. <strong>If L is regular</strong>, then there is some
+        <strong>p &gt; 0</strong> such that every word w ∈ L with |w| ≥ p can be written
+        <strong>w = xyz</strong> where
+        <ul style="margin:6px 0 0;">
+          <li><strong>|xy| ≤ p</strong> — the loop happens near the start</li>
+          <li><strong>|y| &gt; 0</strong> — the loop is not empty</li>
+          <li><strong>xy<sup>n</sup>z ∈ L for every n ≥ 0</strong> — going round it any number of times stays in L</li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Read the quantifiers as a turn order</div>
+        ∃p ∀w ∃xyz ∀n. Whoever picks a variable gets to see everything picked before it, so the
+        alternation is a game:
+        <ol style="margin:6px 0 0;">
+          <li>They pick <strong>p</strong>. You do not get to choose it, so your argument must work for any p.</li>
+          <li>You pick <strong>w</strong> ∈ L with |w| ≥ p. This is your only real freedom — choose well.</li>
+          <li>They pick the split <strong>x, y, z</strong>. You must beat <em>every</em> legal split, not just one.</li>
+          <li>You pick <strong>n</strong> with xy<sup>n</sup>z ∉ L.</li>
+        </ol>
+        Win however they play and L is not regular.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The lemma is one-directional</div>
+        It says <em>regular ⟹ pumpable</em>. It does <strong>not</strong> say pumpable ⟹ regular.
+        Failing to win the game tells you nothing at all — there are non-regular languages that pump
+        perfectly happily. Use it only to prove a language is <em>not</em> regular, and never the
+        other way round.
+      </div>
+
+      <h3 id="t1-pltool">🛠️ Interactive: play the game</h3>
+
+      <div class="tool" data-run="runPumping">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>You versus the opponent</h3>
+        </div>
+        <div class="tool-desc">They have already picked p. You pick w. Then they search every legal
+          split and play the one that is worst for you — so if you win here, you have genuinely won.
+          Two of the languages on offer are regular, and you will not be able to beat those. That is
+          the point of including them.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="pl-lang">Language</label>
+            <select id="pl-lang" onchange="runPumping()">
+              <option value="anbn">aⁿbⁿ</option>
+              <option value="anbm">aⁿbᵐ with n &lt; m</option>
+              <option value="ww">ww</option>
+              <option value="squares">aⁿ, n a perfect square</option>
+              <option value="evenLen">even length (regular!)</option>
+              <option value="endsAB">ends in ab (regular!)</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="pl-p">They picked p =</label>
+            <input type="number" id="pl-p" value="4" min="1" max="8" style="width:70px;">
+          </div>
+          <div class="tool-field">
+            <label for="pl-w">Your word w</label>
+            <input type="text" id="pl-w" value="aaaabbbb" spellcheck="false" style="width:180px;">
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="runPumping()">Play it</button>
+          <button class="tool-btn secondary" onclick="document.getElementById('pl-w').value='aabb'; runPumping();">Try a word that is too short</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="pl-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== Turing machines ===== -->
+      <h2 id="t1-tm">Turing machines</h2>
+
+      <p>The finite automaton failed because it had nowhere to write anything down. Give it a tape it
+      can write on and move around freely, and almost everything changes.</p>
+
+      <div class="callout">
+        <div class="callout-label">Where the machines sit relative to each other</div>
+        <table style="margin:8px 0 0;">
+          <tr><th>Machine</th><th>Memory it has</th></tr>
+          <tr><td>Finite automaton</td><td>The state, and nothing else</td></tr>
+          <tr><td>Pushdown automaton</td><td>A stack — enough for aⁿbⁿ, not for ww</td></tr>
+          <tr><td>Linear bounded automaton</td><td>A writable tape, but only as long as the input</td></tr>
+          <tr><td><strong>Turing machine</strong></td><td>A writable tape, unbounded in both directions</td></tr>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The definition</div>
+        <strong>M = ⟨ &Sigma;, Q, q<sub>init</sub>, q<sub>accept</sub>, q<sub>reject</sub>, δ ⟩</strong>
+        with
+        <strong>δ : Q × (&Sigma; ∪ {␣}) → Q × (&Sigma; ∪ {␣}) × {←, →}</strong><br><br>
+        Read as: seeing this symbol in this state, go to that state, write that symbol, and move one
+        cell that way. Two changes from a DFA are worth naming. The blank symbol ␣ is part of the tape
+        alphabet, because the tape is infinite and mostly empty. And there are now two named halting
+        states rather than a set F — the machine says <em>accept</em> or <em>reject</em> and stops,
+        rather than being asked at the end.
+      </div>
+
+      <p>A configuration needs one more piece than before, because the head can move backwards:
+      <code>(state, everything left of the head, everything from the head rightwards)</code>. The
+      machine <strong>accepts w</strong> when the computation starting from
+      <code>(q<sub>init</sub>, ε, w)</code> <em>terminates</em> in q<sub>accept</sub>.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">That word "terminates" is the whole topic</div>
+        A DFA always stops: it reads n symbols and it is done. A Turing machine need not. It can move
+        back and forth forever, and nothing in the definition prevents it. So there are now
+        <strong>three</strong> possible outcomes, not two:
+        <table style="margin:8px 0 0;">
+          <tr><td><code>M(w) = 1</code></td><td>M halts in q<sub>accept</sub></td></tr>
+          <tr><td><code>M(w) = 0</code></td><td>M halts in q<sub>reject</sub></td></tr>
+          <tr><td><code>M(w) = ↑</code></td><td>M never halts at all</td></tr>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Deciding versus recognising</div>
+        M <strong>decides</strong> L when it is
+        <strong>sound</strong> (if M(w) = 1 then w ∈ L),
+        <strong>complete</strong> (if w ∈ L then M(w) = 1), and
+        <strong>terminating</strong> (M halts on every input, in L or not).<br><br>
+        Drop the third condition and M merely <strong>recognises</strong> L: it says yes to every word
+        of L eventually, but on a word outside L it may simply never answer. Every decidable language
+        is recognisable; the converse is false, and that gap is where the halting problem lives.
+      </div>
+
+      <h3 id="t1-tmtool">🛠️ Interactive: run a Turing machine</h3>
+
+      <p>The machine loaded below decides { aⁿbⁿ } — the language no finite automaton could manage. It
+      works by crossing off the first a, walking right to the last unmatched b, crossing that off, and
+      walking back. Step through it and watch the tape empty from both ends.</p>
+
+      <div class="tool" data-run="runTuring">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Tape, head and configurations</h3>
+        </div>
+        <div class="tool-desc">One instruction per line:
+          <code>state read newstate write move</code>, with <code>_</code> for the blank and
+          <code>&gt;</code> / <code>&lt;</code> for the moves. The simulator distinguishes halting,
+          provably looping, and simply running out of patience — because those are three different
+          claims.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 340px;">
+            <label for="tm-machine">The machine</label>
+            <textarea id="tm-machine" rows="13" spellcheck="false" style="width:100%; font-family:'IBM Plex Mono', monospace; font-size:13px;">start: qinit
+accept: qacc
+reject: qrej
+qinit a q1 _ >
+qinit b qrej _ >
+qinit _ qacc _ >
+q1 a q1 a >
+q1 b q1 b >
+q1 _ q2 _ <
+q2 b q3 _ <
+q2 a qrej _ >
+q2 _ qrej _ >
+q3 a q3 a <
+q3 b q3 b <
+q3 _ qinit _ ></textarea>
+          </div>
+          <div class="tool-field">
+            <label for="tm-word">Input</label>
+            <input type="text" id="tm-word" value="aabb" spellcheck="false" style="width:130px;">
+            <label for="tm-cap" style="margin-top:10px;">Give up after</label>
+            <input type="number" id="tm-cap" value="500" min="10" max="20000" style="width:100px;">
+          </div>
+        </div>
+
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="runTuring()">Run</button>
+          <button class="tool-btn secondary" onclick="document.getElementById('tm-word').value='aaabbb'; runTuring();">aaabbb</button>
+          <button class="tool-btn secondary" onclick="document.getElementById('tm-word').value='aaab'; runTuring();">aaab</button>
+          <button class="tool-btn secondary" onclick="document.getElementById('tm-machine').value='start: q0\naccept: qacc\nreject: qrej\nq0 a q0 a >\nq0 _ q0 _ >'; document.getElementById('tm-word').value='aa'; runTuring();">One that never stops</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+        <div id="tm-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Press the last button</div>
+        That machine walks right forever. The simulator will not tell you it loops — it will tell you
+        it gave up after 500 steps, which is the only honest thing it can say. Raise the cap and it
+        gives up later. No setting makes it decide, and no cleverer program would do better: whether
+        an arbitrary machine halts is <strong>undecidable</strong>.
+      </div>
+
+      <!-- ===== NDTM ===== -->
+      <h2 id="t1-ndtm">Non-deterministic Turing machines, and Church&ndash;Turing</h2>
+
+      <p>Do to a Turing machine what an NFA does to a DFA: let δ return a set of possible instructions.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">NDTM</div>
+        <strong>δ : Q × (&Sigma; ∪ {␣}) → 𝒫( Q × (&Sigma; ∪ {␣}) × {←, →} )</strong><br><br>
+        Configurations are unchanged; the computations now form a tree, exactly as with an NFA. M
+        accepts w if <strong>any</strong> branch reaches q<sub>accept</sub>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Theorem, and its one-line proof</div>
+        Every language recognised by a non-deterministic Turing machine is recognised by a
+        deterministic one.<br><br>
+        <strong>Why:</strong> build M′ which writes out the configurations of M's computation tree,
+        breadth-first, and accepts as soon as it writes one whose state is q<sub>accept</sub>. Nothing
+        is lost — but note it must go <em>breadth</em>-first. Depth-first would risk diving down an
+        infinite branch and never reaching the accepting one next to it.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Same power, not same speed</div>
+        The simulation is exponentially slower — M′ explores a tree that M merely guesses its way
+        through. Non-determinism costs nothing in <em>what</em> can be computed and a great deal in
+        <em>how long</em> it takes. That gap, made precise, is the P versus NP question.
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">The Church&ndash;Turing thesis</div>
+        Any language that can be computed by <em>some finite mechanical process</em> can be recognised
+        by a Turing machine.<br><br>
+        This is not a theorem and cannot be one — "finite mechanical process" is an informal idea, so
+        there is nothing to prove it against. It is a claim about the world that has survived every
+        attempt to beat it: λ-calculus, register machines, cellular automata, every programming
+        language ever written, all turn out to recognise exactly the same class. Calling it a thesis
+        rather than a theorem is deliberate, and examiners like you to notice.
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="t1-exam">Exam takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The eight things worth having cold</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>Both tuples.</strong> DFA ⟨&Sigma;, Q, q<sub>init</sub>, F, δ⟩ and TM ⟨&Sigma;, Q, q<sub>init</sub>, q<sub>accept</sub>, q<sub>reject</sub>, δ⟩, and the type of δ in each case. Marks are given for these verbatim.</li>
+          <li><strong>NFA accepts if <em>any</em> branch does.</strong> Never reject on one dead branch.</li>
+          <li><strong>Subset construction.</strong> States are sets of states; a subset is accepting if it contains any accepting state; up to 2<sup>n</sup> but usually far fewer.</li>
+          <li><strong>Regular ⟺ recognised by a finite automaton.</strong> Both directions, and which construction proves which.</li>
+          <li><strong>aⁿbⁿ is not regular,</strong> by pigeonhole on the states visited while reading the a's.</li>
+          <li><strong>The pumping lemma's quantifier order,</strong> and that it only ever proves non-regularity.</li>
+          <li><strong>Deciding = sound + complete + terminating.</strong> Recognising drops termination.</li>
+          <li><strong>Church&ndash;Turing is a thesis,</strong> not a theorem, and why that distinction is forced.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Three answers that lose easy marks</div>
+        Writing δ : Q × &Sigma; → Q for an <em>NFA</em> (it returns a set).
+        Concluding a language is regular because you failed to pump it.
+        Saying a Turing machine "rejects" when it actually never halts — those are different outcomes
+        and the difference is the examinable point.
+      </div>
+
+    </section>

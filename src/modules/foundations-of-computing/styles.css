@@ -1,0 +1,192 @@
+/* ============================================================
+   Foundations of Computing — module-specific styling.
+
+   Everything here is about showing a machine mid-computation: a
+   tape with a head over it, a sequence of configurations, a tree of
+   branches. Colours come from the shared palette so both themes get
+   them for free.
+   ============================================================ */
+
+/* ---------- tapes ---------- */
+
+.fa-tape, .tm-cells {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  margin: 4px 0 14px;
+}
+
+.fa-cell, .tm-cell {
+  min-width: 30px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--rule);
+  border-radius: 5px;
+  background: var(--surface-2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.fa-cell.read { opacity: .4; }
+.fa-cell.blank, .tm-cell:empty { background: var(--surface-3); }
+
+.fa-cell.here, .tm-cell.here {
+  border-color: var(--accent);
+  background: var(--tint-hl);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.tm-tape { margin: 4px 0 14px; }
+
+.tm-head {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+.tm-head::after { content: ' ▾'; }
+
+/* ---------- configuration sequences ---------- */
+
+.fa-configs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 10px 0 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+}
+
+.fa-config {
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.fa-config:hover { border-color: var(--accent); }
+.fa-config.on {
+  background: var(--tint-hl);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.fa-arrow { color: var(--ink-soft); }
+
+/* ---------- transition tables ---------- */
+
+.fa-delta td, .fa-delta th { font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+.fa-delta tr.fa-live td { background: var(--tint-hl); }
+.fa-mark { color: var(--accent); font-weight: 700; }
+.fa-none { color: var(--ink-soft); font-style: italic; }
+.fa-key { font-size: 12px; color: var(--ink-muted); margin: -8px 0 14px; }
+
+/* ---------- NFA computation trees ---------- */
+
+.fa-tree { margin: 8px 0 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+.fa-tree ul { list-style: none; margin: 0; padding-left: 18px; }
+.fa-tree > ul { padding-left: 0; }
+.fa-tree li {
+  margin: 3px 0;
+  padding-left: 10px;
+  border-left: 1px solid var(--rule);
+}
+.fa-tree > ul > li { border-left: none; padding-left: 0; }
+
+.fa-node {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--rule);
+}
+.fa-node.ok { background: var(--tint-c); border-color: var(--accent-3); font-weight: 600; }
+
+.fa-via {
+  display: inline-block;
+  min-width: 16px;
+  color: var(--accent-2);
+  font-size: 11px;
+  font-weight: 700;
+}
+.fa-via::after { content: '→'; color: var(--ink-soft); margin: 0 3px; }
+
+.fa-leaf { font-size: 11px; font-family: 'IBM Plex Sans', sans-serif; margin-left: 6px; }
+.fa-leaf.ok { color: var(--val-g); font-weight: 600; }
+.fa-leaf.no { color: var(--ink-soft); }
+
+/* ---------- regular expressions ---------- */
+
+.re-read {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  padding: 8px 10px;
+  background: var(--surface-2);
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.re-words-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--ink-muted);
+  margin-bottom: 6px;
+}
+
+.re-words { margin: 12px 0; }
+
+.re-word {
+  display: inline-block;
+  margin: 0 4px 4px 0;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--rule);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+}
+.re-word.on { background: var(--tint-hl); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+.re-build { margin: 14px 0; }
+.re-gadgets { margin: 0; padding-left: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; }
+.re-gadgets li { margin: 2px 0; }
+
+/* ---------- the pumping lemma game ---------- */
+
+.pl-lang {
+  font-size: 14px;
+  padding: 8px 10px;
+  background: var(--surface-2);
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.pl-split-head { font-size: 13px; color: var(--ink-muted); margin-bottom: 6px; }
+
+.pl-split {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 20px;
+  letter-spacing: .04em;
+  margin-bottom: 4px;
+}
+.pl-split span { padding: 4px 2px; border-radius: 4px; }
+
+.pl-x { color: var(--ink-muted); }
+.pl-y { background: var(--tint-hl); color: var(--accent); font-weight: 700; }
+.pl-z { color: var(--ink-muted); }
+
+.pl-legend { display: flex; gap: 14px; font-size: 11.5px; margin-bottom: 14px; }
+.pl-legend .pl-y { background: none; }
+
+/* ---------- results ---------- */
+
+.xl-result.warn { color: var(--warn-text); }

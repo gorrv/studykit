@@ -1,0 +1,71 @@
+    <section id="cram" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Revision</div>
+        <h1>Cram sheet</h1>
+        <div class="topic-subtitle">everything in this topic on one page</div>
+      </div>
+
+      <h2 id="cr-defs">The definitions, verbatim</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        <table style="margin:8px 0 0;">
+          <tr><th>DFA</th><td>⟨&Sigma;, Q, q<sub>init</sub>, F, δ⟩</td><td>δ : Q × &Sigma; → Q</td></tr>
+          <tr><th>NFA</th><td>⟨&Sigma;, Q, q<sub>init</sub>, F, δ⟩</td><td>δ : Q × (&Sigma; ∪ {ε}) → 𝒫(Q)</td></tr>
+          <tr><th>TM</th><td>⟨&Sigma;, Q, q<sub>init</sub>, q<sub>acc</sub>, q<sub>rej</sub>, δ⟩</td><td>δ : Q × (&Sigma;∪{␣}) → Q × (&Sigma;∪{␣}) × {←,→}</td></tr>
+          <tr><th>NDTM</th><td>as TM</td><td>δ : Q × (&Sigma;∪{␣}) → 𝒫( Q × (&Sigma;∪{␣}) × {←,→} )</td></tr>
+        </table>
+      </div>
+
+      <h2 id="cr-configs">Configurations</h2>
+
+      <table>
+        <tr><th>Machine</th><th>A configuration is</th><th>Accepts when</th></tr>
+        <tr><td>DFA</td><td>(state, input not yet read)</td><td>the <em>unique</em> computation ends in F</td></tr>
+        <tr><td>NFA</td><td>(state, input not yet read)</td><td><em>any</em> branch ends in F</td></tr>
+        <tr><td>TM</td><td>(state, left of head, head rightwards)</td><td>it <em>halts</em> in q<sub>acc</sub></td></tr>
+      </table>
+
+      <h2 id="cr-facts">Facts to quote</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Six one-liners</div>
+        <ul style="margin:6px 0 0;">
+          <li>NFA ≡ DFA, by the subset construction. n states become at most 2<sup>n</sup>.</li>
+          <li>Regular ⟺ recognised by a finite automaton. Thompson's construction one way, state elimination the other.</li>
+          <li>aⁿbⁿ is not regular. Pigeonhole on states visited while reading the a's.</li>
+          <li>Pumping lemma proves non-regularity only, never regularity.</li>
+          <li>NDTM ≡ TM, by breadth-first simulation of the computation tree. Exponentially slower.</li>
+          <li>Church&ndash;Turing is a thesis, not a theorem — "finite mechanical process" is informal.</li>
+        </ul>
+      </div>
+
+      <h2 id="cr-pumping">The pumping lemma, as a procedure</h2>
+
+      <div class="xl-walk">
+        <div class="xl-step"><span class="xl-step-n">1</span><span class="xl-step-body">
+          "Suppose L is regular. Let p be the pumping length." — you do not choose p.</span></div>
+        <div class="xl-step"><span class="xl-step-n">2</span><span class="xl-step-body">
+          Choose w ∈ L written <em>in terms of p</em>, e.g. w = a<sup>p</sup>b<sup>p</sup>, and check |w| ≥ p.</span></div>
+        <div class="xl-step"><span class="xl-step-n">3</span><span class="xl-step-body">
+          "Since |xy| ≤ p, y lies entirely within the first p symbols" — that is the sentence that does the work.</span></div>
+        <div class="xl-step"><span class="xl-step-n">4</span><span class="xl-step-body">
+          Pump with n = 0 or n = 2 and show the result leaves L. Cover every legal y, not one example.</span></div>
+        <div class="xl-step"><span class="xl-step-n">5</span><span class="xl-step-body">
+          "Contradiction, so L is not regular." ∎</span></div>
+      </div>
+
+      <h2 id="cr-traps">Traps</h2>
+
+      <div class="callout warn">
+        <div class="callout-label">Cost you marks last year</div>
+        <ul style="margin:6px 0 0;">
+          <li>ε ≠ ∅. {ε} has one word; ∅ has none.</li>
+          <li>Rejecting an NFA word after one dead branch.</li>
+          <li>Giving δ : Q × &Sigma; → Q for an NFA.</li>
+          <li><code>ab*</code> vs <code>(ab)*</code>.</li>
+          <li>"Not pumpable ⟹ not regular" is right; "pumpable ⟹ regular" is wrong.</li>
+          <li>Calling a non-halting machine "rejecting". It is neither — that is the point.</li>
+        </ul>
+      </div>
+    </section>
