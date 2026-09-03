@@ -88,6 +88,24 @@
           sels[q].addEventListener('change', rerun);
         }
 
+        // Say that the tool is live.
+        //
+        // Most tools used to carry a button whose only job was to run them
+        // again. They were removed, because the tool had already re-run by the
+        // time anyone could press one. That leaves a reader wondering what to
+        // press, so tell them: nothing. Added here rather than written into
+        // every tool, so it cannot drift out of step with the behaviour.
+        if (fields.length) {
+          var controls = tool.querySelectorAll('.tool-controls');
+          var last = controls[controls.length - 1];
+          if (last && !tool.querySelector('.tool-live')) {
+            var note = document.createElement('div');
+            note.className = 'tool-live';
+            note.textContent = 'Updates as you type.';
+            last.parentNode.insertBefore(note, last.nextSibling);
+          }
+        }
+
         // Acknowledge every re-render, even when nothing changed.
         //
         // Because tools are live, pressing "Run" usually recomputes an

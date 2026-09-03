@@ -304,7 +304,6 @@ HALT</textarea>
             <label>Expression</label>
             <input type="text" id="pt-expr" value="1 - 2 - 3" style="width:100%;">
           </div>
-          <button class="tool-btn" onclick="runParse()">Parse ▶</button>
           <button class="tool-btn secondary" onclick="document.getElementById('pt-expr').value='2 + 3 * 4'; runParse();">Try 2 + 3 * 4</button>
         </div>
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
@@ -553,7 +552,6 @@ c3 -> c4</textarea>
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn" onclick="runTS()">Analyse ▶</button>
           <button class="tool-btn danger" onclick="tsPreset('nondet')">Load a non-deterministic one</button>
           <button class="tool-btn secondary" onclick="tsPreset('loop')">Load a non-terminating one</button>
         </div>

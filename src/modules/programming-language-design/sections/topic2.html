@@ -355,7 +355,6 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
             <label>count</label>
             <input type="number" id="de-count" value="1" style="width:90px;">
           </div>
-          <button class="tool-btn" onclick="runDangling()">Evaluate ▶</button>
           <button class="tool-btn secondary" onclick="document.getElementById('de-sum').value=1;document.getElementById('de-count').value=0;runDangling();">Try sum=1, count=0</button>
         </div>
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
@@ -461,7 +460,6 @@ intnode = <span style="color:var(--code-kw);">new</span> int;   <span style="col
             <label>limit N</label>
             <input type="number" id="lp-n" value="3" style="width:90px;">
           </div>
-          <button class="tool-btn" onclick="runLoops()">Trace ▶</button>
           <button class="tool-btn danger" onclick="document.getElementById('lp-init').value=5;document.getElementById('lp-n').value=3;runLoops();">Try i=5, N=3 (condition false at start)</button>
         </div>
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>

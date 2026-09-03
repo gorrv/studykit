@@ -234,7 +234,6 @@ sqrt · square :: <span class="ty">Integer</span> → <span class="ty">Float</sp
             <label for="mg-expr">expression or definition</label>
             <input type="text" id="mg-expr" value="\x y z -> x + y + z" style="width:100%;">
           </div>
-          <button class="tool-btn" onclick="runMGT()">Infer</button>
         </div>
         <div class="tool-controls">
           <div class="tool-field" style="flex:1; min-width:280px;">
@@ -372,7 +371,6 @@ add (Succ x) y = Succ (add x y)</textarea>
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn" onclick="runPatMatch()">Reduce ▶</button>
           <button class="tool-btn secondary" onclick="pmPreset('size')">size</button>
           <button class="tool-btn secondary" onclick="pmPreset('height')">height (tree)</button>
           <button class="tool-btn secondary" onclick="pmPreset('add')">add n Zero</button>
@@ -684,7 +682,6 @@ max(x, y) = if x >= y then x else y</textarea>
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn" onclick="runSfun()">Build derivations ▶</button>
           <button class="tool-btn secondary" onclick="sfPreset('max')">max(3, square(2))</button>
           <button class="tool-btn secondary" onclick="sfPreset('sq')">square(2 + 1)</button>
           <button class="tool-btn danger" onclick="sfPreset('inf')">fortytwo(infinity)</button>
@@ -855,7 +852,6 @@ max(x, y) = if x >= y then x else y</textarea>
             <label>term t</label>
             <input type="text" id="ty-term" value="max(3, square(2))" style="width:100%;">
           </div>
-          <button class="tool-btn" onclick="runTyping()">Type it ▶</button>
         </div>
         <div class="tool-controls">
           <button class="tool-btn secondary" onclick="tyPreset('max')">max(3, square(2))</button>

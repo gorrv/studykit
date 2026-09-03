@@ -181,6 +181,8 @@
     .tool-output.just-ran { animation: none; }
   }
   .tool-error { color: var(--accent-2); font-size: 13px; font-family: 'IBM Plex Mono', monospace; margin-top: 8px; }
+  .tool-live { font-size: 11.5px; color: var(--ink-soft); margin: -2px 0 8px 2px;
+    font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em; }
   .tool-reset { display: flex; justify-content: flex-end; margin: 4px 0 10px 0; }
   .qcard .q-n { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase;
     letter-spacing: 0.14em; color: var(--accent); font-weight: 600; }

@@ -145,7 +145,6 @@ snowy(<span class="v">X</span>)</div>
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn" onclick="runLpCheck()">Check ▶</button>
           <button class="tool-btn secondary" onclick="lpPreset('t1')">g(f)</button>
           <button class="tool-btn secondary" onclick="lpPreset('t2')">f(X,f(X,g(f(Y,a))))</button>
           <button class="tool-btn secondary" onclick="lpPreset('l1')">¬p(q(g(Y),g(a)))</button>
@@ -293,7 +292,6 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
             <label>substitution σ</label>
             <input type="text" id="sb-sigma" value="X -> g(Y), Y -> a" style="width:100%;">
           </div>
-          <button class="tool-btn" onclick="runSubst()">Apply ▶</button>
         </div>
         <div class="tool-controls">
           <button class="tool-btn secondary" onclick="sbPreset('ex1')">slide example 1</button>
@@ -460,7 +458,6 @@ likes(X, P) :- based(P, Y), likes(X, Y).</textarea>
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn" onclick="runProlog()">Solve ▶</button>
           <button class="tool-btn secondary" onclick="prPreset('likes')">likes</button>
           <button class="tool-btn secondary" onclick="prPreset('snowy')">snowy</button>
           <button class="tool-btn secondary" onclick="prPreset('rev')">reverse (3 ways)</button>

@@ -196,7 +196,6 @@ fact n = n * fact (n - 1)</textarea>
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn" onclick="runReduce()">Reduce ▶</button>
           <button class="tool-btn secondary" onclick="fpPreset('square6')">square 6</button>
           <button class="tool-btn secondary" onclick="fpPreset('sharing')">square (3+1)</button>
           <button class="tool-btn secondary" onclick="fpPreset('plus')">(3+1)+(2+1)</button>
@@ -439,7 +438,6 @@ fact n = n * fact (n - 1)</textarea>
             <label>g ::</label>
             <input type="text" id="cp-g" value="[Int] -> Int" style="width:190px;">
           </div>
-          <button class="tool-btn" onclick="runCompose()">Check f · g ▶</button>
           <button class="tool-btn danger" onclick="document.getElementById('cp-f').value='[Int] -> Int';document.getElementById('cp-g').value='Int -> Int';runCompose();">Try the error case</button>
         </div>
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
@@ -496,7 +494,6 @@ plus 3       :: <span class="ty">Int</span> → <span class="ty">Int</span>
             <label>arguments (space separated)</label>
             <input type="text" id="cu-args" value="3 2" style="width:150px;">
           </div>
-          <button class="tool-btn" onclick="runCurry()">Apply ▶</button>
         </div>
         <div class="tool-controls">
           <button class="tool-btn secondary" onclick="cuPreset('plus')">plus 3 2</button>

@@ -127,7 +127,7 @@
       <div class="tool" data-run="runALab">
         <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Drag the heuristics, switch the ranking rule, watch B wait</h3></div>
         <p class="tool-desc">The towns sit at their real map positions, so the <strong>dashed lines are literally what h measures</strong>. Switch the ranking rule between <code>g</code>, <code>h</code> and <code>g + h</code> and step through — with <code>g</code> the dashed lines vanish, because UCS has no idea where the goal is. <strong>Drag any h slider</strong> and the search re-runs; push one above its true remaining distance and it turns red, because A* has stopped being safe. <strong>Set every h to 0</strong> and A* collapses into UCS in front of you.</p>
-        <div class="tool-controls" style="margin-top:4px;"><button class="tool-btn" onclick="runALab()">Open the lab</button></div>
+        <div class="tool-controls" style="margin-top:4px;"></div>
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div id="al-output" class="tool-output"></div>
       </div>
@@ -176,7 +176,6 @@
         <div class="tool-controls">
           <div class="tool-field"><label for="ca-start">Start</label><input type="text" id="ca-start" value="ARAD" size="10"></div>
           <div class="tool-field"><label for="ca-goal">Goal</label><input type="text" id="ca-goal" value="BUCHAREST" size="12"></div>
-          <button class="tool-btn" onclick="runCompareAlgos()">Compare</button>
         </div>
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
         <div id="ca-output" class="tool-output"></div>
@@ -192,7 +191,6 @@ G:100  H:160  I:244  L:241  M:242  BUCHAREST:0</textarea>
         </div>
         <div class="tool-controls" style="margin-top:12px;">
           <div class="tool-field"><label for="ad-goal">Goal</label><input type="text" id="ad-goal" value="BUCHAREST" size="12"></div>
-          <button class="tool-btn" onclick="runAdmissible()">Check</button>
         </div>
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
         <div id="ad-output" class="tool-output"></div>
