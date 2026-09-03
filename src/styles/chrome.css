@@ -168,7 +168,18 @@
   .tool-btn.ghost { background: transparent; color: var(--ink-muted); border: 1px dashed var(--rule); padding: 6px 12px; }
   .tool-btn.ghost:hover { background: rgba(var(--accent2-rgb), 0.07); color: var(--accent-2);
     border-color: var(--accent-2); transform: none; }
-  .tool-output { margin-top: 8px; }
+  .tool-output { margin-top: 8px; border-radius: 6px; }
+  /* A tool that recomputes the same answer replaces its output with identical
+     HTML, so without this the button looks dead. Brief, and skipped entirely
+     for readers who have asked for less motion. */
+  .tool-output.just-ran { animation: toolRan 0.6s ease-out; }
+  @keyframes toolRan {
+    0%   { background: rgba(var(--accent-rgb), 0.14); box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0.14); }
+    100% { background: transparent; box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tool-output.just-ran { animation: none; }
+  }
   .tool-error { color: var(--accent-2); font-size: 13px; font-family: 'IBM Plex Mono', monospace; margin-top: 8px; }
   .tool-reset { display: flex; justify-content: flex-end; margin: 4px 0 10px 0; }
   .qcard .q-n { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase;

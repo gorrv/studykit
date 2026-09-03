@@ -87,6 +87,27 @@
           if (sels[q].getAttribute('data-nolive') !== null) continue;
           sels[q].addEventListener('change', rerun);
         }
+
+        // Acknowledge every re-render, even when nothing changed.
+        //
+        // Because tools are live, pressing "Run" usually recomputes an
+        // identical answer and replaces the output with the same HTML. The
+        // tool did exactly what it was asked; it just left no trace, so the
+        // button reads as broken. Watching the output pane for replaced
+        // children catches every re-render — from a click, a keystroke or a
+        // reset — and flashes it, which is the difference between "nothing
+        // happened" and "nothing changed".
+        var pane = tool.querySelector('.tool-output');
+        if (pane && typeof MutationObserver === 'function') {
+          var clear = null;
+          new MutationObserver(function () {
+            pane.classList.remove('just-ran');
+            void pane.offsetWidth;                 // restart the animation
+            pane.classList.add('just-ran');
+            if (clear) clearTimeout(clear);
+            clear = setTimeout(function () { pane.classList.remove('just-ran'); }, 700);
+          }).observe(pane, { childList: true });
+        }
       })(tools[i]);
     }
   }
