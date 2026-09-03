@@ -91,7 +91,7 @@
         </div>
         <div class="tool-desc">One line per transition: <code>state symbol target</code>. Give several
           targets to make it non-deterministic, or use <code>eps</code> for an ε-move. The tool works
-          out for itself which kind of machine you have written.</div>
+          out for itself which kind of machine you have written. <strong>It updates as you type</strong> — there is nothing to press.</div>
 
         <div class="tool-controls">
           <div class="tool-field" style="flex:1 1 320px;">
@@ -112,7 +112,6 @@ q2 1 q2</textarea>
         </div>
 
         <div class="tool-controls">
-          <button class="tool-btn" onclick="runAutomaton()">Run</button>
           <button class="tool-btn secondary" onclick="document.getElementById('fa-word').value='10001'; runAutomaton();">Try 10001</button>
           <button class="tool-btn secondary" onclick="document.getElementById('fa-machine').value='start: s\naccept: q\ns a q\ns b q f\nq a f\nf a f\nf b s f'; document.getElementById('fa-word').value='aaabbb'; runAutomaton();">Load an NFA</button>
         </div>
@@ -164,7 +163,7 @@ q2 1 q2</textarea>
         </div>
         <div class="tool-desc">Builds only the reachable subsets, which is nearly always far fewer than
           2<sup>n</sup>. Then it runs both machines on every word up to length 9 and reports whether
-          they agreed — the construction is checked, not asserted.</div>
+          they agreed — the construction is checked, not asserted. <strong>It updates as you type</strong> — there is nothing to press.</div>
 
         <div class="tool-controls">
           <div class="tool-field" style="flex:1 1 320px;">
@@ -179,7 +178,6 @@ f b s f</textarea>
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn" onclick="runSubset()">Construct</button>
           <button class="tool-btn secondary" onclick="document.getElementById('sc-machine').value='start: s\naccept: f\ns eps a\ns eps b\na 0 a\na eps f\nb 1 b\nb eps f\nf 0 f'; runSubset();">One with ε-moves</button>
         </div>
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
@@ -228,7 +226,7 @@ f b s f</textarea>
         </div>
         <div class="tool-desc">Type an expression. It gets compiled to an NFA by Thompson's construction,
           tested against your word by running that NFA, and its language is listed shortest-first.
-          Write union as <code>∪</code>, or <code>|</code> if that is easier to type.</div>
+          Write union as <code>∪</code>, or <code>|</code> if that is easier to type. <strong>It updates as you type</strong> — there is nothing to press.</div>
 
         <div class="tool-controls">
           <div class="tool-field" style="flex:1 1 260px;">
@@ -241,7 +239,6 @@ f b s f</textarea>
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn" onclick="runRegex()">Compile and run</button>
           <button class="tool-btn secondary" onclick="document.getElementById('re-expr').value='1(1|0)*0'; runRegex();">starts 1, ends 0</button>
           <button class="tool-btn secondary" onclick="document.getElementById('re-expr').value='(ab)*'; runRegex();">(ab)*</button>
           <button class="tool-btn secondary" onclick="document.getElementById('re-expr').value='ab*'; runRegex();">ab*</button>
@@ -347,7 +344,7 @@ f b s f</textarea>
         <div class="tool-desc">They have already picked p. You pick w. Then they search every legal
           split and play the one that is worst for you — so if you win here, you have genuinely won.
           Two of the languages on offer are regular, and you will not be able to beat those. That is
-          the point of including them.</div>
+          the point of including them. <strong>It updates as you type</strong> — there is nothing to press.</div>
 
         <div class="tool-controls">
           <div class="tool-field">
@@ -371,7 +368,6 @@ f b s f</textarea>
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn" onclick="runPumping()">Play it</button>
           <button class="tool-btn secondary" onclick="document.getElementById('pl-w').value='aabb'; runPumping();">Try a word that is too short</button>
         </div>
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
@@ -450,7 +446,7 @@ f b s f</textarea>
           <code>state read newstate write move</code>, with <code>_</code> for the blank and
           <code>&gt;</code> / <code>&lt;</code> for the moves. The simulator distinguishes halting,
           provably looping, and simply running out of patience — because those are three different
-          claims.</div>
+          claims. <strong>It updates as you type</strong> — there is nothing to press.</div>
 
         <div class="tool-controls">
           <div class="tool-field" style="flex:1 1 340px;">
@@ -480,7 +476,6 @@ q3 _ qinit _ ></textarea>
         </div>
 
         <div class="tool-controls">
-          <button class="tool-btn" onclick="runTuring()">Run</button>
           <button class="tool-btn secondary" onclick="document.getElementById('tm-word').value='aaabbb'; runTuring();">aaabbb</button>
           <button class="tool-btn secondary" onclick="document.getElementById('tm-word').value='aaab'; runTuring();">aaab</button>
           <button class="tool-btn secondary" onclick="document.getElementById('tm-machine').value='start: q0\naccept: qacc\nreject: qrej\nq0 a q0 a >\nq0 _ q0 _ >'; document.getElementById('tm-word').value='aa'; runTuring();">One that never stops</button>
