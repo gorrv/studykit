@@ -12,6 +12,8 @@
   /* The commonest marker: accept the stated answer, ignoring case and spacing. */
   const textCheck = ans => v => ({ ok: qzNorm(v) === qzNorm(ans) });
   let qzCur = null, qzScore = { right: 0, total: 0 }, qzAnswered = false;
+  /* Set when a press could not be acted on, and cleared by the next render. */
+  let qzNudge = null;
   function qzNext() {
     const sel = document.getElementById('qz-topic');
     const topic = sel ? sel.value : 'all';
@@ -26,7 +28,10 @@
   function qzChoose(i) { if (!qzAnswered && qzCur) qzSubmit(qzCur.choices[i]); }
   function qzSubmitText() { if (qzCur && !qzAnswered) qzSubmit(document.getElementById('qz-answer').value); }
   function qzSubmit(val) {
-    if (!qzCur || qzAnswered || !String(val).trim()) return;
+    if (!qzCur || qzAnswered) return;
+    // Pressing Check with an empty box used to return in silence, which reads
+    // as a broken button. Say what is missing instead.
+    if (!String(val).trim()) { qzNudge = 'Type an answer first, then press Check.'; qzRender(); return; }
     let res;
     try { res = qzCur.check(val); } catch (e) { res = { ok: false, msg: 'Could not read that answer.' }; }
     qzAnswered = true; qzCur.given = val; qzCur.result = res;
@@ -55,6 +60,7 @@
     }
     if (!qzCur) { out.innerHTML = html + '<div class="quiz-prompt">Press <strong>New question</strong> to start.</div>'; return; }
     html += `<div class="quiz-prompt"><div class="qp-topic">${qzCur.topic}</div>${qzCur.prompt}</div>`;
+    if (qzNudge) { html += `<div class="tool-error">${qzNudge}</div>`; qzNudge = null; }
     if (qzCur.kind === 'choice') {
       html += '<div class="quiz-choices">';
       qzCur.choices.forEach((c, i) => {
