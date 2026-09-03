@@ -206,6 +206,52 @@ async function checkStructure(s, m) {
       'pressing ▶ changed nothing — the handler is probably wired to the wrong function');
   });
 
+  // Every button in a tool must do something when pressed.
+  //
+  // "Does something" cannot mean "changes the output", because a live tool
+  // asked to recompute an unchanged input correctly produces the same answer.
+  // What it must do is re-render — replace the children of the output pane —
+  // which a MutationObserver can see even when the HTML is identical. A button
+  // that neither re-renders nor throws is wired to nothing.
+  m.$$('.tool[data-run]').forEach(tool => {
+    const name = tool.getAttribute('data-run');
+    const pane = tool.querySelector('.tool-output');
+    if (!pane) return;
+
+    const label = b => b.textContent.trim();
+    const labels = Array.from(tool.querySelectorAll('button.tool-btn'))
+      .filter(b => !/reset tool/i.test(b.textContent))
+      .map(label);
+    if (!labels.length) return;
+
+    // MutationObserver callbacks are delivered asynchronously, so a counter
+    // would still be zero when this loop read it. takeRecords() drains the
+    // queue synchronously, which is what makes click-then-check work.
+    const obs = new m.window.MutationObserver(() => {});
+    obs.observe(pane, { childList: true });
+
+    const dead = [];
+    labels.forEach(text => {
+      // Buttons rendered inside the output pane are destroyed and rebuilt by
+      // the previous click, so the node captured above is detached and
+      // clicking it does nothing. Find the live one each time.
+      const b = Array.from(tool.querySelectorAll('button.tool-btn')).find(x => label(x) === text);
+      if (!b || b.hasAttribute('disabled')) return;
+
+      obs.takeRecords();
+      try {
+        b.dispatchEvent(new m.window.Event('click', { bubbles: true }));
+      } catch (e) {
+        return dead.push(`${text} threw: ${e.message}`);
+      }
+      if (obs.takeRecords().length === 0) dead.push(text);
+    });
+    obs.disconnect();
+
+    s.ok(`${name}: all ${labels.length} buttons re-render the output`,
+      dead.length === 0, `did nothing: ${dead.join(' | ')}`);
+  });
+
   // Every section must be reachable through the nav without throwing.
   if (typeof m.window.showSection === 'function') {
     m.$$('.topic-section').forEach(sec => {
