@@ -1,5 +1,5 @@
 
-  .brand-sub { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--ink-muted); margin-bottom: 28px; line-height: 1.5; }
+  .brand-sub { margin-bottom: 28px; }
   nav .subsection li { margin: 0; }
   em { font-style: italic; }
   /* Callout boxes */

@@ -88,6 +88,21 @@ class Suite {
     return this.ok(label, good, `expected ≈ ${expected}, got ${actual}`);
   }
 
+  /**
+   * Assert `actual === expected`, for exact values.
+   *
+   * `same` would do the job via JSON, but it reports mismatches as quoted
+   * blobs; for a count or a single string this reads better and puts the
+   * two values side by side. `detail` is appended when a failure needs
+   * more context than the two values give.
+   */
+  is(label, actual, expected, detail) {
+    const good = actual === expected;
+    return this.ok(label, good,
+      `expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}` +
+      (detail ? ` — ${detail}` : ''));
+  }
+
   /** Assert `actual` deep-equals `expected` by JSON shape. */
   same(label, actual, expected) {
     const a = JSON.stringify(actual), b = JSON.stringify(expected);
@@ -123,6 +138,37 @@ async function checkStructure(s, m) {
 
   s.ok('no NUL bytes in source', m.raw.indexOf('\u0000') < 0);
   s.ok('has a title', !!m.doc.title, m.doc.title);
+
+  /* Every class on the page has a rule somewhere in the page.
+   *
+   * Modules are built by concatenating a shared stylesheet with a
+   * module-local one, so a class defined in *another* module's local sheet
+   * looks fine in the source tree and renders unstyled here. That is not a
+   * cosmetic nitpick: it is how the non-regularity walkthrough came to draw
+   * with no borders, no step numbers and no spacing, and how a grid-world
+   * wall came to look like an ordinary empty square. Both were invisible to
+   * every other check in this file, because the markup was perfectly valid.
+   *
+   * A class may legitimately carry no rule of its own when it only ever
+   * selects other things — ix-mode-dim is the default reveal mode, and the
+   * dimming comes from .ix-future — so those are named rather than waved
+   * through in bulk.
+   */
+  const STYLELESS_BY_DESIGN = new Set(['ix-mode-dim']);
+  const sheets = [...m.doc.querySelectorAll('style')].map(t => t.textContent).join('\n');
+  const defined = new Set([...sheets.matchAll(/\.([a-zA-Z][a-zA-Z0-9_-]*)/g)].map(x => x[1]));
+  const applied = new Map();
+  m.$$('[class]').forEach(el => {
+    String(el.getAttribute('class')).split(/\s+/).filter(Boolean).forEach(c => {
+      if (!applied.has(c)) applied.set(c, el.tagName.toLowerCase());
+    });
+  });
+  const unstyled = [...applied.keys()]
+    .filter(c => !defined.has(c) && !STYLELESS_BY_DESIGN.has(c))
+    .sort();
+  s.ok('every class used on the page has a rule in the page',
+    unstyled.length === 0,
+    unstyled.map(c => `${c} <${applied.get(c)}>`).join(', '));
 
   // Every registered tool must be callable and must render without erroring.
   const runners = m.$$('.tool[data-run]').map(t => t.getAttribute('data-run'));

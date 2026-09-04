@@ -180,6 +180,71 @@
   @media (prefers-reduced-motion: reduce) {
     .tool-output.just-ran { animation: none; }
   }
+  /* The sidebar subtitle.
+
+     Was copy-pasted into three module stylesheets and missing from the
+     fourth, so Foundations of Computing rendered its subtitle as ordinary
+     body text with no spacing beneath it. Shared chrome belongs here. */
+  .brand-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.17em;
+    color: var(--ink-muted);
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+
+  /* A numbered walkthrough: one bordered step per line, each with a
+     circled number, and an optional .miss variant that recolours the
+     step to mark the branch that failed.
+
+     Named xl-* because it began life in the address-translation tool,
+     but Foundations of Computing uses it for the non-regularity
+     walkthrough — and, since the rules lived in the Operating Systems
+     stylesheet, was drawing that walkthrough with no borders, no
+     numbers and no spacing at all. */
+  .xl-walk { margin: 14px 0; display: flex; flex-direction: column; gap: 8px; }
+  .xl-step {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 10px 12px;
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    background: var(--surface-3);
+    font-size: 13px;
+  }
+  .xl-step.miss { border-left-color: var(--accent-2); }
+  .xl-step-n {
+    flex: 0 0 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--accent); color: var(--surface-2);
+    font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .xl-step.miss .xl-step-n { background: var(--accent-2); }
+  .xl-step-body { flex: 1; font-family: 'IBM Plex Mono', monospace; }
+  .xl-step-body .tool-note { margin: 2px 0 0; font-family: 'IBM Plex Sans', sans-serif; }
+  .xl-result {
+    margin: 12px 0 0; padding: 12px 14px;
+    border-radius: 8px;
+    background: var(--tint-c); color: var(--ink);
+    font-family: 'IBM Plex Mono', monospace; font-size: 13.5px;
+  }
+  .xl-result.miss { background: var(--tint-bad); }
+
+  /* Result tables inside tools.
+
+     This lived in the Operating Systems stylesheet, but Foundations of
+     Computing uses .results-table too — so its tables were rendering
+     without the spacing and without the highlighted row, in a module
+     whose stylesheet had never heard of the class. Same failure as the
+     missing .callout base rule: a shared class defined in one module
+     only. Shared classes belong here. */
+  .results-table { margin-top: 16px; }
+  .results-table .awt-row td { background: var(--ink); color: var(--paper); font-weight: 700; }
+
   .tool-error { color: var(--accent-2); font-size: 13px; font-family: 'IBM Plex Mono', monospace; margin-top: 8px; }
   .tool-live { font-size: 11.5px; color: var(--ink-soft); margin: -2px 0 8px 2px;
     font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em; }

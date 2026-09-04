@@ -61,15 +61,6 @@
     color: var(--ink);
   }
   .brand .accent { color: var(--accent-2); font-style: italic; }
-  .brand-sub {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--ink-muted);
-    margin-bottom: 28px;
-  }
-
   nav ul { list-style: none; padding: 0; margin: 0; }
   nav li.topic { margin-bottom: 18px; }
   nav .topic-label {
@@ -893,9 +884,6 @@
   .live-gantt-cell:last-child { border-right: 1px solid var(--ink); }
   .live-gantt-axis { display: flex; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ink-muted); margin-top: 2px; }
 
-  .results-table { margin-top: 16px; }
-  .results-table .awt-row td { background: var(--ink); color: var(--paper); font-weight: 700; }
-
   .tool-error {
     color: var(--accent-2);
     font-size: 13px;
@@ -1552,36 +1540,6 @@
   }
 
   /* ---- address-translation walk ---- */
-  .xl-walk { margin: 14px 0; display: flex; flex-direction: column; gap: 8px; }
-  .xl-step {
-    display: flex; gap: 10px; align-items: flex-start;
-    padding: 10px 12px;
-    border: 1px solid var(--rule);
-    border-left: 3px solid var(--accent);
-    border-radius: 6px;
-    background: var(--surface-3);
-    font-size: 13px;
-  }
-  .xl-step.miss { border-left-color: var(--accent-2); }
-  .xl-step-n {
-    flex: 0 0 20px; height: 20px;
-    border-radius: 50%;
-    background: var(--accent); color: var(--surface-2);
-    font-size: 11px; font-weight: 600;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'IBM Plex Mono', monospace;
-  }
-  .xl-step.miss .xl-step-n { background: var(--accent-2); }
-  .xl-step-body { flex: 1; font-family: 'IBM Plex Mono', monospace; }
-  .xl-step-body .tool-note { margin: 2px 0 0; font-family: 'IBM Plex Sans', sans-serif; }
-  .xl-result {
-    margin: 12px 0 0; padding: 12px 14px;
-    border-radius: 8px;
-    background: var(--tint-c); color: var(--ink);
-    font-family: 'IBM Plex Mono', monospace; font-size: 13.5px;
-  }
-  .xl-result.miss { background: var(--tint-bad); }
-
   /* ---- Banker's algorithm ---- */
   .bk-grids {
     display: grid;
