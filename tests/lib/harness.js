@@ -170,6 +170,28 @@ async function checkStructure(s, m) {
     unstyled.length === 0,
     unstyled.map(c => `${c} <${applied.get(c)}>`).join(', '));
 
+  /* The reset control is the same control in every module, so it should be
+   * the same markup in every module.
+   *
+   * Putting class="tool-reset" straight on the button looks right and passes
+   * the check above -- .tool-reset is a real rule -- but it is the rule for
+   * the *wrapper*, so the button loses .tool-btn.ghost and renders as a bare
+   * browser button. The result is one module whose reset looks nothing like
+   * the others, which is the kind of thing a reader notices immediately and
+   * a test suite never does.
+   */
+  const resets = m.$$('[onclick*="toolReset"]');
+  const malformed = resets.filter(el => {
+    const cls = String(el.getAttribute('class') || '').split(/\s+/);
+    return el.tagName !== 'BUTTON' ||
+           !cls.includes('tool-btn') || !cls.includes('ghost') ||
+           !el.parentElement ||
+           !String(el.parentElement.getAttribute('class') || '').split(/\s+/).includes('tool-reset');
+  });
+  s.ok('every reset control is a .tool-btn.ghost button inside a .tool-reset wrapper',
+    malformed.length === 0,
+    malformed.map(el => `<${el.tagName.toLowerCase()} class="${el.getAttribute('class')}">`).join(', '));
+
   // Every registered tool must be callable and must render without erroring.
   const runners = m.$$('.tool[data-run]').map(t => t.getAttribute('data-run'));
   const unreachable = runners.filter(r =>

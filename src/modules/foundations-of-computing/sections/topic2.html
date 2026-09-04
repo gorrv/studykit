@@ -100,13 +100,13 @@
         </div>
 
         <div class="tool-controls">
-          <button class="tool-btn" onclick="gwPreset('3n^2 + 500n + 9000','n^2')">Constants don’t matter</button>
-          <button class="tool-btn" onclick="gwPreset('n log n','n^2')">n log n vs n²</button>
-          <button class="tool-btn" onclick="gwPreset('2^n','n^3')">Exponential vs cubic</button>
-          <button class="tool-btn" onclick="gwPreset('n!','2^n')">Factorial vs exponential</button>
-          <button class="tool-btn" onclick="gwPreset('n','n!')">A true but useless bound</button>
-          <button class="tool-reset" onclick="toolReset(this)">Reset tool</button>
+          <button class="tool-btn secondary" onclick="gwPreset('3n^2 + 500n + 9000','n^2')">Constants don’t matter</button>
+          <button class="tool-btn secondary" onclick="gwPreset('n log n','n^2')">n log n vs n²</button>
+          <button class="tool-btn secondary" onclick="gwPreset('2^n','n^3')">Exponential vs cubic</button>
+          <button class="tool-btn secondary" onclick="gwPreset('n!','2^n')">Factorial vs exponential</button>
+          <button class="tool-btn secondary" onclick="gwPreset('n','n!')">A true but useless bound</button>
         </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
 
         <div class="tool-output" id="gw-output"></div>
       </div>
@@ -250,13 +250,13 @@
         </div>
 
         <div class="tool-controls">
-          <button class="tool-btn" onclick="ttPreset('(P | ~R) -> ~(~Q | R)')">Worked example</button>
-          <button class="tool-btn" onclick="ttPreset('~(P -> Q) &amp; ~(P | ~R)')">Unsatisfiable</button>
-          <button class="tool-btn" onclick="ttPreset('P | ~P')">A tautology</button>
-          <button class="tool-btn" onclick="ttPreset('(P -> Q) &amp; (Q -> R) -> (P -> R)')">Transitivity</button>
-          <button class="tool-btn" onclick="ttPreset('(P | ~Q | R) &amp; (~P | ~Q | ~R) &amp; (P | Q | ~R)')">The CNF used below</button>
-          <button class="tool-reset" onclick="toolReset(this)">Reset tool</button>
+          <button class="tool-btn secondary" onclick="ttPreset('(P | ~R) -> ~(~Q | R)')">Worked example</button>
+          <button class="tool-btn secondary" onclick="ttPreset('~(P -> Q) &amp; ~(P | ~R)')">Unsatisfiable</button>
+          <button class="tool-btn secondary" onclick="ttPreset('P | ~P')">A tautology</button>
+          <button class="tool-btn secondary" onclick="ttPreset('(P -> Q) &amp; (Q -> R) -> (P -> R)')">Transitivity</button>
+          <button class="tool-btn secondary" onclick="ttPreset('(P | ~Q | R) &amp; (~P | ~Q | ~R) &amp; (P | Q | ~R)')">The CNF used below</button>
         </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
 
         <div class="tool-output" id="tt-output"></div>
       </div>
@@ -388,12 +388,12 @@
         </div>
 
         <div class="tool-controls">
-          <button class="tool-btn" onclick="rdPreset('(P | ~Q | R) &amp; (~P | ~Q | ~R) &amp; (P | Q | ~R)')">Worked example</button>
-          <button class="tool-btn" onclick="rdPreset('(P) &amp; (~P)')">Unsatisfiable</button>
-          <button class="tool-btn" onclick="rdPreset('(P | Q) &amp; (~P | Q) &amp; (P | ~Q) &amp; (~P | ~Q)')">Four clauses, no model</button>
-          <button class="tool-btn" onclick="rdPreset('(P | ~Q) &amp; (~P | ~R)')">Two clauses</button>
-          <button class="tool-reset" onclick="toolReset(this)">Reset tool</button>
+          <button class="tool-btn secondary" onclick="rdPreset('(P | ~Q | R) &amp; (~P | ~Q | ~R) &amp; (P | Q | ~R)')">Worked example</button>
+          <button class="tool-btn secondary" onclick="rdPreset('(P) &amp; (~P)')">Unsatisfiable</button>
+          <button class="tool-btn secondary" onclick="rdPreset('(P | Q) &amp; (~P | Q) &amp; (P | ~Q) &amp; (~P | ~Q)')">Four clauses, no model</button>
+          <button class="tool-btn secondary" onclick="rdPreset('(P | ~Q) &amp; (~P | ~R)')">Two clauses</button>
         </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
 
         <div class="tool-output" id="rd-output"></div>
       </div>
@@ -484,9 +484,7 @@ b d</textarea>
           </div>
         </div>
 
-        <div class="tool-controls">
-          <button class="tool-reset" onclick="toolReset(this)">Reset tool</button>
-        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
 
         <div class="tool-output" id="gp-output"></div>
       </div>
