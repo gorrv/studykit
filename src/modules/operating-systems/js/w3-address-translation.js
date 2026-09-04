@@ -93,7 +93,10 @@
     var width = parseInt((document.getElementById('xl-width') || {}).value, 10) || 32;
     var levels = parseInt((document.getElementById('xl-levels') || {}).value, 10) || 1;
 
-    var vaddr = parseInt(raw.trim().replace(/^0x/i, ''), 16);
+    // Whole-string check: parseInt('12xyz', 16) is 0x12, so a bare parseInt
+    // would silently translate an address the reader never typed.
+    var hex = raw.trim().toLowerCase().replace(/^0x/, '');
+    var vaddr = /^[0-9a-f]+$/.test(hex) ? parseInt(hex, 16) : NaN;
     if (isNaN(vaddr) || vaddr < 0) {
       out.innerHTML = '<div class="tool-error">Could not read that address. Use hex, e.g. 0x5123.</div>';
       return;

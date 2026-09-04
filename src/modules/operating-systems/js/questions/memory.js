@@ -1,11 +1,20 @@
   /* ---------- W3 · address translation, W4 · page replacement ---------- */
 
+  /**
+   * Mark a hex answer.
+   *
+   * The whole string has to be hex digits. parseInt would happily read a
+   * valid prefix and discard the rest — parseInt('banana', 16) is 0xba —
+   * so a marker built on parseInt alone accepts nonsense whenever the
+   * right answer happens to be 0xba. That is rare enough to pass hundreds
+   * of test runs and still be wrong, which is exactly why it is worth
+   * rejecting the trailing junk explicitly.
+   */
   function qmHex(target) {
     return function (v) {
       var s = String(v).trim().toLowerCase().replace(/^0x/, '');
-      var x = parseInt(s, 16);
-      if (isNaN(x)) return { ok: false, msg: 'Give a hex number, e.g. 0x1f.' };
-      return { ok: x === target };
+      if (!/^[0-9a-f]+$/.test(s)) return { ok: false, msg: 'Give a hex number, e.g. 0x1f.' };
+      return { ok: parseInt(s, 16) === target };
     };
   }
 

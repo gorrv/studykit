@@ -34,6 +34,29 @@ module.exports = async function run() {
   const w = m.window;
 
   await checkStructure(s, m);
+  /* ---------------- hex input, and a bug that hid in the noise ----------------
+
+     parseInt reads the longest valid prefix and throws the rest away, so
+     parseInt('banana', 16) is 0xba = 186. A marker built on parseInt alone
+     therefore accepts "banana" — but only when the generated answer happens
+     to be 186, which is roughly one question in a few thousand. It showed up
+     as a single intermittent failure in the random bank check and vanished
+     on every rerun. These assertions are deterministic, so it cannot hide
+     again. */
+  {
+    const mark = w.qmHex(0xba);
+    s.ok('a hex marker accepts the right answer', mark('0xba').ok);
+    s.ok('  with or without the 0x prefix', mark('ba').ok);
+    s.ok('  and in either case', mark('BA').ok);
+    s.ok('but rejects "banana", which parseInt reads as 0xba', !mark('banana').ok);
+    s.ok('and rejects a valid prefix with junk after it', !w.qmHex(0x12)('12xyz').ok);
+    s.ok('and rejects an empty answer', !mark('').ok);
+
+    s.ok('the base/limit parser rejects nonsense too', Number.isNaN(w.parseHex('banana')));
+    s.ok('  and trailing junk', Number.isNaN(w.parseHex('deadbeef!!')));
+    s.ok('  while still reading real hex', w.parseHex('0xdead') === 0xdead);
+  }
+
   checkQuestionBank(s, m, 3000);
   s.ok('has content sections', m.$$('section').length >= 5, `${m.$$('section').length} sections`);
 

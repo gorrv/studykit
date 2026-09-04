@@ -1,7 +1,14 @@
   /* ============================================================
      TOOL 4: BASE & LIMIT CHECKER (Topic 03)
      ============================================================ */
-  function parseHex(s) { s = s.trim().toLowerCase(); return s.startsWith('0x') ? parseInt(s,16) : parseInt(s,16); }
+  /* The whole string must be hex. parseInt stops at the first character it
+     does not recognise and returns what it has, so 'deadbeef!!' and even
+     'banana' come back as numbers — silently checking an address nobody
+     entered. NaN here means the caller shows an error instead. */
+  function parseHex(s) {
+    var t = String(s).trim().toLowerCase().replace(/^0x/, '');
+    return /^[0-9a-f]+$/.test(t) ? parseInt(t, 16) : NaN;
+  }
 
   function blCheck() {
     const out = document.getElementById('bl-output');
