@@ -370,3 +370,107 @@
   }
 
   function fmClausesShow(clauses) { return fmCnfShow(clauses); }
+
+  /* ---------- rendering ---------- */
+
+  /** Fill the formula box and re-run. Used by the preset buttons. */
+  function ttPreset(src) {
+    var box = document.getElementById('tt-formula');
+    if (box) box.value = src;
+    runTruth();
+  }
+
+  function ttCell(v) {
+    return '<td class="tt-' + (v ? 't' : 'f') + '">' + (v ? 'T' : 'F') + '</td>';
+  }
+
+  function runTruth() {
+    var out = document.getElementById('tt-output');
+    if (!out) return;
+
+    var src = ((document.getElementById('tt-formula') || {}).value || '').trim();
+    var p = fmParse(src);
+    if (!p.ok) { out.innerHTML = '<div class="tool-error">' + p.error + '</div>'; return; }
+
+    var vars = fmVars(p.ast);
+    if (vars.length > 6) {
+      out.innerHTML = '<div class="tool-error">' + vars.length + ' variables would need ' +
+        Math.pow(2, vars.length) + ' rows. Six is the most this will draw — which is itself the point ' +
+        'the lectures make about truth tables.</div>';
+      return;
+    }
+    if (!vars.length) {
+      out.innerHTML = '<div class="tool-error">No variables in that formula. ' +
+        'Variables are capital letters, like <code>P</code>.</div>';
+      return;
+    }
+
+    var table = fmTable(p.ast);
+    var dnf = fmDnf(table), cnf = fmCnf(table);
+    var agree = fmAgree(p.ast, dnf.terms, cnf.clauses);
+
+    var h = '<div class="tt-shown">Reading <strong>' + esc(fmShow(p.ast)) + '</strong></div>';
+
+    /* the table */
+    h += '<table class="results-table tt-table"><tr><th>#</th>';
+    for (var v = 0; v < vars.length; v++) h += '<th>' + esc(vars[v]) + '</th>';
+    h += '<th class="tt-res">' + esc(fmShow(p.ast)) + '</th><th>reads</th></tr>';
+
+    for (var i = 0; i < table.rows.length; i++) {
+      var r = table.rows[i];
+      h += '<tr class="' + (r.value ? 'tt-row-t' : 'tt-row-f') + '"><td class="tt-n">' + r.n + '</td>';
+      for (var j = 0; j < vars.length; j++) h += ttCell(r.bits[j]);
+      h += ttCell(r.value);
+      h += '<td class="tt-why">' + (r.value
+        ? 'a <strong>DNF</strong> term'
+        : 'a <strong>CNF</strong> clause to avoid') + '</td></tr>';
+    }
+    h += '</table>';
+
+    /* the two normal forms */
+    h += '<div class="tt-forms">';
+
+    h += '<div class="tt-form"><div class="tt-form-head">Disjunctive normal form' +
+         '<span>one ∧-term per <em>true</em> row, joined by ∨</span></div>' +
+         '<div class="tt-form-body">' + esc(fmDnfShow(dnf.terms)) + '</div>' +
+         '<div class="tt-form-foot">' + (dnf.rows.length
+            ? 'from row' + (dnf.rows.length > 1 ? 's' : '') + ' ' + dnf.rows.join(', ')
+            : 'no row is true, so there is nothing to disjoin — the formula is a contradiction') +
+         '</div></div>';
+
+    h += '<div class="tt-form"><div class="tt-form-head">Conjunctive normal form' +
+         '<span>one ∨-clause per <em>false</em> row, joined by ∧</span></div>' +
+         '<div class="tt-form-body">' + esc(fmCnfShow(cnf.clauses)) + '</div>' +
+         '<div class="tt-form-foot">' + (cnf.rows.length
+            ? 'ruling out row' + (cnf.rows.length > 1 ? 's' : '') + ' ' + cnf.rows.join(', ') +
+              ' — note every literal is <em>flipped</em>, because the clause exists to make that row false'
+            : 'no row is false, so there is nothing to rule out — the formula is a tautology') +
+         '</div></div>';
+
+    h += '</div>';
+
+    /* satisfiability, and the cost of answering it this way */
+    var sat = fmSat(p.ast);
+    h += '<div class="verdict ' + (sat.sat ? 'safe' : 'bad') + '">' +
+      (sat.sat
+        ? 'SATISFIABLE — row ' + sat.row + ' does it: ' +
+          vars.map(function (x) { return x + ' = ' + (sat.model[x] ? 'T' : 'F'); }).join(', ')
+        : 'UNSATISFIABLE — false on all ' + sat.rows + ' rows') +
+      '</div>';
+
+    h += '<p class="tool-note">Deciding that took <strong>' + sat.rows + '</strong> rows — 2<sup>' +
+      vars.length + '</sup>. Add one variable and it doubles. That is why a truth table is not a ' +
+      'polynomial-time decision procedure for SAT, and why SAT sits in <strong>NP</strong> rather ' +
+      'than being known to sit in <strong>P</strong>.</p>';
+
+    /* the self-check */
+    h += '<p class="tool-note">' + (agree.ok
+      ? '✓ Checked: the formula, its DNF and its CNF return the same value on all <strong>' +
+        agree.checked + '</strong> assignments.'
+      : '<strong>Disagreement on row ' + agree.first.row + '</strong> — formula ' +
+        (agree.first.formula ? 'T' : 'F') + ', DNF ' + (agree.first.dnf ? 'T' : 'F') +
+        ', CNF ' + (agree.first.cnf ? 'T' : 'F') + '. This is a bug; please do not trust the output above.') +
+      '</p>';
+
+    out.innerHTML = h;
+  }

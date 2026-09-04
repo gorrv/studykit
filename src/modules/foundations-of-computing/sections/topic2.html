@@ -1,0 +1,539 @@
+<section id="topic2" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 02 · Complexity</div>
+        <h1>P, NP and the Million Dollar Problem</h1>
+        <div class="topic-subtitle">why checking an answer and finding one are not the same job</div>
+      </div>
+
+      <p>Topic 1 asked what a machine can do <em>at all</em>. This one assumes the machine can do it and
+      asks what it <strong>costs</strong>. The answer turns out to depend on a distinction so simple it
+      sounds like a trick: for a great many problems, nobody knows how to find an answer quickly, but
+      anybody can check one quickly. Whether that gap is real or just a gap in our knowledge is the
+      open question the topic is named after.</p>
+
+      <div class="callout">
+        <div class="callout-label">The shape of the argument</div>
+        Measure a machine's running time as a function of input length, and throw away everything but
+        the growth rate. Call a problem <strong>P</strong> if a deterministic machine decides it in
+        polynomial time, and <strong>NP</strong> if a non-deterministic one does. Every P problem is an
+        NP problem; nobody knows whether the reverse holds. Then <strong>reductions</strong> let you
+        transfer hardness from one problem to another, and it turns out there is a family of problems
+        — the <strong>NP-complete</strong> ones — that are all exactly as hard as each other, so that
+        solving any one of them quickly would solve them all.
+      </div>
+
+      <!-- ===== Measuring cost ===== -->
+      <h2 id="t2-cost">Measuring what a machine costs</h2>
+
+      <p>Running time is measured in <strong>steps of the machine</strong>, not seconds, because seconds
+      depend on the hardware and steps do not. Two definitions do the work.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">The definitions to memorise</div>
+        <strong>t<sub>M</sub>(w)</strong> — the number of steps machine <em>M</em> takes on the specific
+        input word <em>w</em>.<br><br>
+        <strong>T<sub>M</sub>(n) := max { t<sub>M</sub>(w) : |w| = n }</strong> — the
+        <em>worst</em> input of length <em>n</em>.<br><br>
+        The <code>max</code> is the part people skip. Complexity here is always worst case: a machine
+        that is instant on almost every input and catastrophic on one of them is judged by the
+        catastrophe.
+      </div>
+
+      <p>Every problem in this topic is phrased as a <strong>decision problem</strong> — a question with a
+      yes/no answer — so that it can be treated as a language, exactly as in Topic 1. The problem
+      &ldquo;does this graph have a clique of size k?&rdquo; becomes the language of all encoded
+      (graph, k) pairs for which the answer is yes, and &ldquo;solving the problem&rdquo; becomes
+      &ldquo;deciding the language&rdquo;. Nothing is lost: an optimisation problem can usually be
+      answered by asking the decision version a few times.</p>
+
+      <!-- ===== Asymptotics ===== -->
+      <h2 id="t2-growth">O, Ω and Θ</h2>
+
+      <p>T<sub>M</sub>(n) is typically an ugly expression, and most of it is noise. Asymptotic notation
+      keeps the part that survives as <em>n</em> grows.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">The definitions to memorise</div>
+        <strong>f ∈ O(g)</strong> ⟺ ∃c ∃N ∀n &gt; N : f(n) ≤ c · g(n) &nbsp;&nbsp;<em>(upper bound)</em><br>
+        <strong>f ∈ Ω(g)</strong> ⟺ ∃c ∃N ∀n &gt; N : f(n) ≥ c · g(n) &nbsp;&nbsp;<em>(lower bound)</em><br>
+        <strong>Θ(g) = O(g) ∩ Ω(g)</strong> &nbsp;&nbsp;<em>(both at once — a tight bound)</em><br><br>
+        Two quantifiers, in this order: there <em>exists</em> a constant and a threshold such that
+        <em>for all</em> larger n the inequality holds. You are allowed to pick c as large as you like
+        and ignore as much of the start of the function as you like.
+      </div>
+
+      <p>Which is why constant factors and lower-order terms vanish. 3n² + 500n + 9000 is Θ(n²): the
+      500n and the 9000 are eventually swamped, and the 3 is absorbed into <em>c</em>. Below n ≈ 40 the
+      lower-order terms actually dominate — the tool shows the ratio starting near 9500 and sliding
+      down to 3 — but &ldquo;eventually&rdquo; is the only word the definition uses.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">O is an upper bound, not an estimate</div>
+        n ∈ O(n!) is perfectly true and perfectly useless. Saying an algorithm is O(n²) does not say it
+        is <em>slow</em>, and does not say it is Θ(n²). If you want to claim a running time is exactly
+        that, you need Θ, which means proving a matching lower bound too. Exam questions exploit this.
+      </div>
+
+      <!-- ===== TOOL: growth ===== -->
+      <h3 id="t2-gwtool">🛠️ Comparing growth rates</h3>
+
+      <div class="tool" data-run="runGrowth">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>f(n) versus g(n)</h3>
+        </div>
+        <div class="tool-desc">Write sums of terms: <code>3n^2 + 500n + 9000</code>, <code>n log n</code>,
+          <code>2^n</code>, <code>n!</code>, <code>sqrt n</code>. The verdict is decided by comparing the
+          classes symbolically; the constants underneath it are found numerically and are only evidence
+          over the range shown.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 220px;">
+            <label for="gw-f">f(n)</label>
+            <input type="text" id="gw-f" value="3n^2 + 500n + 9000" spellcheck="false">
+          </div>
+          <div class="tool-field" style="flex:1 1 220px;">
+            <label for="gw-g">g(n)</label>
+            <input type="text" id="gw-g" value="n^2" spellcheck="false">
+          </div>
+        </div>
+
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="gwPreset('3n^2 + 500n + 9000','n^2')">Constants don’t matter</button>
+          <button class="tool-btn" onclick="gwPreset('n log n','n^2')">n log n vs n²</button>
+          <button class="tool-btn" onclick="gwPreset('2^n','n^3')">Exponential vs cubic</button>
+          <button class="tool-btn" onclick="gwPreset('n!','2^n')">Factorial vs exponential</button>
+          <button class="tool-btn" onclick="gwPreset('n','n!')">A true but useless bound</button>
+          <button class="tool-reset" onclick="toolReset(this)">Reset tool</button>
+        </div>
+
+        <div class="tool-output" id="gw-output"></div>
+      </div>
+
+      <!-- ===== P and NP ===== -->
+      <h2 id="t2-pnp">P and NP</h2>
+
+      <p>Here are the two definitions side by side. Read them carefully, because they differ by exactly
+      one word.</p>
+
+      <table>
+        <tr><th></th><th>P</th><th>NP</th></tr>
+        <tr>
+          <td><strong>Definition</strong></td>
+          <td>L ∈ P if some <strong>deterministic</strong> Turing machine decides L with
+              T<sub>M</sub>(n) ∈ O(n<sup>k</sup>) for some fixed k</td>
+          <td>L ∈ NP if some <strong>non-deterministic</strong> Turing machine decides L with
+              T<sub>M</sub>(n) ∈ O(n<sup>k</sup>) for some fixed k</td>
+        </tr>
+        <tr>
+          <td><strong>Intuition</strong></td>
+          <td>can be <em>solved</em> quickly</td>
+          <td>a proposed answer can be <em>checked</em> quickly</td>
+        </tr>
+      </table>
+
+      <p>The second row needs justifying, because it is not what the definition says. A non-deterministic
+      machine, as in Topic 1, may branch — and accepts when <em>some</em> branch accepts. So an NDTM can
+      guess a candidate answer in one burst of branching and then verify it deterministically. That is
+      why &ldquo;non-deterministic polynomial time&rdquo; and &ldquo;has a certificate you can check in
+      polynomial time&rdquo; come to the same thing, and the second phrasing is the one worth carrying
+      around: <strong>NP is the class of problems whose yes-answers have short, quickly checkable
+      evidence.</strong></p>
+
+      <div class="callout tip">
+        <div class="callout-label">P ⊆ NP is the easy half</div>
+        A deterministic machine <em>is</em> a non-deterministic machine that never branches. So anything
+        decidable in deterministic polynomial time is decidable in non-deterministic polynomial time,
+        and P ⊆ NP falls out immediately. Whether the containment is strict — whether there is anything
+        in NP that is not in P — is the open problem, and it carries a million-dollar prize.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">NP does not mean "not polynomial"</div>
+        It means <strong>non-deterministic polynomial</strong>. Every problem in P is also in NP. If you
+        catch yourself using "NP" to mean "hard", you are reaching for <strong>NP-hard</strong>, which
+        is a different thing entirely and is defined further down.
+      </div>
+
+      <!-- ===== SAT ===== -->
+      <h2 id="t2-sat">The Boolean satisfiability problem</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">SAT</div>
+        <strong>Input)</strong> A Boolean formula F over variables P, Q, R, …<br>
+        <strong>Output)</strong> True if and only if there is an assignment of truth values to those
+        variables that makes F true.<br><br>
+        A formula with a satisfying assignment is <strong>satisfiable</strong>. One with none is
+        <strong>unsatisfiable</strong>. One true under <em>every</em> assignment is a
+        <strong>tautology</strong>.
+      </div>
+
+      <p>The obvious method is a truth table: n variables give 2<sup>n</sup> rows, and you look for a
+      true one. That decides the problem, so SAT is certainly decidable — but 2<sup>n</sup> is not
+      polynomial, so it does not put SAT in P. Add one variable and the work doubles.</p>
+
+      <p>SAT is in <strong>NP</strong>, though, and the argument is the general one above. A
+      non-deterministic machine branches once, guessing a row of the truth table, and then evaluates the
+      formula along that single row. Evaluating costs at most one step per connective, which is linear
+      in the size of the formula. Guess in parallel, check in polynomial time.</p>
+
+      <!-- ===== Normal forms ===== -->
+      <h2 id="t2-normal">Normal forms: DNF and CNF</h2>
+
+      <p>Any formula, however it is written, can be rewritten into either of two standard shapes without
+      changing what it means.</p>
+
+      <table>
+        <tr><th>Form</th><th>Shape</th><th>Example</th></tr>
+        <tr>
+          <td><strong>DNF</strong><br>disjunctive normal form</td>
+          <td>An <strong>∨ of ∧s</strong> — a disjunction of conjunctions of literals</td>
+          <td><code>(P ∧ Q ∧ ¬R) ∨ (¬P ∧ Q ∧ R)</code></td>
+        </tr>
+        <tr>
+          <td><strong>CNF</strong><br>conjunctive normal form</td>
+          <td>An <strong>∧ of ∨s</strong> — a conjunction of disjunctions of literals</td>
+          <td><code>(¬P ∨ ¬Q ∨ ¬R) ∧ (P ∨ Q ∨ R)</code></td>
+        </tr>
+      </table>
+
+      <p>A <strong>literal</strong> is a variable or a negated variable, and nothing else. If you find a
+      bracket or an implication inside what you are calling a clause, it is not in normal form yet.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">Converting by rewriting — the four steps</div>
+        <strong>1.</strong> Remove implications: <code>A → B</code> becomes <code>¬A ∨ B</code>.<br>
+        <strong>2.</strong> Push negations inward with De Morgan:
+        <code>¬(A ∨ B) ≡ ¬A ∧ ¬B</code> and <code>¬(A ∧ B) ≡ ¬A ∨ ¬B</code>.<br>
+        <strong>3.</strong> Cancel double negations: <code>¬¬A ≡ A</code>.<br>
+        <strong>4.</strong> Distribute. For <strong>DNF</strong> distribute ∧ over ∨ so the disjunctions
+        rise to the top; for <strong>CNF</strong> distribute ∨ over ∧ so the conjunctions do.<br><br>
+        Only the last step differs between the two, and it is the step where the formula can blow up in
+        size.
+      </div>
+
+      <p>There is a second route, and for exam purposes it is faster and far harder to get wrong: read
+      the normal form straight off the truth table.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Reading normal forms off a truth table</div>
+        <strong>DNF — use the TRUE rows.</strong> Each true row becomes one ∧-term describing exactly
+        that row: a variable that is T appears plain, one that is F appears negated. Join the terms with
+        ∨. The formula is then true precisely when you are in one of those rows.<br><br>
+        <strong>CNF — use the FALSE rows.</strong> Each false row becomes one ∨-clause whose job is to
+        <em>exclude</em> that row, so every literal is <strong>flipped</strong>: a variable that is T in
+        the row appears <em>negated</em>. Join the clauses with ∧.<br><br>
+        The flip is the only fiddly part, and it is where marks are lost. The clause exists to be false
+        on that one row and true on all the others.
+      </div>
+
+      <!-- ===== TOOL: truth tables ===== -->
+      <h3 id="t2-tttool">🛠️ Truth tables and normal forms</h3>
+
+      <div class="tool" data-run="runTruth">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Formula → table → DNF and CNF</h3>
+        </div>
+        <div class="tool-desc">Write <code>~</code> or <code>!</code> for ¬, <code>&amp;</code> for ∧,
+          <code>|</code> for ∨, <code>-&gt;</code> for →. Variables are capital letters. Every row is
+          labelled with the part it plays, and the two normal forms are re-evaluated against the
+          original on all 2<sup>n</sup> assignments before you see them.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 420px;">
+            <label for="tt-formula">A formula</label>
+            <input type="text" id="tt-formula" value="(P | ~R) -> ~(~Q | R)" spellcheck="false"
+                   style="width:100%; font-family:'IBM Plex Mono', monospace; font-size:14px;">
+          </div>
+        </div>
+
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="ttPreset('(P | ~R) -> ~(~Q | R)')">Worked example</button>
+          <button class="tool-btn" onclick="ttPreset('~(P -> Q) &amp; ~(P | ~R)')">Unsatisfiable</button>
+          <button class="tool-btn" onclick="ttPreset('P | ~P')">A tautology</button>
+          <button class="tool-btn" onclick="ttPreset('(P -> Q) &amp; (Q -> R) -> (P -> R)')">Transitivity</button>
+          <button class="tool-btn" onclick="ttPreset('(P | ~Q | R) &amp; (~P | ~Q | ~R) &amp; (P | Q | ~R)')">The CNF used below</button>
+          <button class="tool-reset" onclick="toolReset(this)">Reset tool</button>
+        </div>
+
+        <div class="tool-output" id="tt-output"></div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Cook–Levin</div>
+        <strong>SAT is NP-complete.</strong> Stated here, proved later in the course. It matters now
+        because it is the anchor: it is the first problem known to be NP-hard, so every later hardness
+        proof can start from SAT instead of arguing about all of NP from scratch. Note also that SAT
+        stays NP-complete when the input is restricted to CNF — which is why every reduction below
+        takes a CNF formula as its input.
+      </div>
+
+      <!-- ===== Reductions ===== -->
+      <h2 id="t2-reductions">Polynomial reductions</h2>
+
+      <p>A reduction is a way of saying &ldquo;this problem is at least as hard as that one&rdquo;
+      without solving either.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">The definition to memorise</div>
+        A <strong>polynomial reduction</strong> from X to Y is a function f : Σ* → Σ*, computable in
+        polynomial time, such that<br><br>
+        <strong>w ∈ X &nbsp;⟺&nbsp; f(w) ∈ Y</strong><br><br>
+        Written <strong>X ≤<sub>p</sub> Y</strong>, read &ldquo;X is polynomially reducible to Y&rdquo;.
+      </div>
+
+      <p>Three things about that definition are worth pausing on. It is an <strong>if and only if</strong>,
+      so f must preserve no-instances as well as yes-instances — a reduction that turns every input into
+      a yes-instance of Y is not a reduction. The function must be computable in <strong>polynomial
+      time</strong>, or the reduction could smuggle in the work of solving X. And the direction is the
+      opposite of what the notation suggests to most people: <strong>X ≤<sub>p</sub> Y means Y is the
+      harder one</strong>, because a fast algorithm for Y would give you a fast algorithm for X.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">The direction, since it is the classic exam trap</div>
+        To prove your problem X is <strong>hard</strong>, reduce a known-hard problem <em>to</em> it:
+        SAT ≤<sub>p</sub> X. To prove X is <strong>easy</strong>, reduce it <em>to</em> something you can
+        already solve: X ≤<sub>p</sub> (something in P). Reducing X to SAT proves nothing about X being
+        hard — it only says X is no harder than SAT.
+      </div>
+
+      <h3 id="t2-hard">NP-hardness and NP-completeness</h3>
+
+      <div class="callout exam">
+        <div class="callout-label">Two definitions, and they are not the same</div>
+        <strong>X is NP-hard</strong> if Y ≤<sub>p</sub> X for <em>every</em> Y ∈ NP. X is at least as
+        hard as everything in NP. Note that X need not itself be in NP — an NP-hard problem can be far
+        worse, including undecidable.<br><br>
+        <strong>X is NP-complete</strong> if <strong>(i)</strong> X is NP-hard (a lower bound) and
+        <strong>(ii)</strong> X ∈ NP (an upper bound). Both halves are required, and an exam answer
+        giving only one is giving half the marks away.
+      </div>
+
+      <p>Proving NP-hardness from the definition would mean reducing every one of infinitely many NP
+      problems to yours. The following theorem is what makes it practical.</p>
+
+      <div class="proof">
+        <div class="pf-lbl">Theorem — if Y is NP-hard and Y ≤<sub>p</sub> X, then X is NP-hard</div>
+        <div class="pf-step">1. Suppose (i) Y is NP-hard and (ii) Y ≤<sub>p</sub> X.
+          <span class="pf-just">the two assumptions</span></div>
+        <div class="pf-step">2. By (i), Z ≤<sub>p</sub> Y for every Z ∈ NP.
+          <span class="pf-just">unfolding the definition of NP-hard</span></div>
+        <div class="pf-step">3. So Z ≤<sub>p</sub> Y ≤<sub>p</sub> X for every Z ∈ NP.
+          <span class="pf-just">by (ii), and transitivity of ≤<sub>p</sub></span></div>
+        <div class="pf-step">4. Hence X is NP-hard. &nbsp;∎</div>
+      </div>
+
+      <p>Transitivity is doing the real work in step 3, and it holds because composing two polynomial-time
+      functions gives a polynomial-time function — a polynomial of a polynomial is a polynomial. So the
+      recipe for showing a new problem X is NP-complete is two steps:
+      <strong>show X ∈ NP</strong> by describing the certificate and the check, then
+      <strong>show SAT ≤<sub>p</sub> X</strong> by constructing the reduction.</p>
+
+      <!-- ===== CLIQUE ===== -->
+      <h2 id="t2-clique">The Clique problem</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">CLIQUE</div>
+        <strong>Input)</strong> An undirected graph G = (V, E) and an integer k &gt; 2.<br>
+        <strong>Output)</strong> True if and only if G contains a <strong>clique</strong> of size k —
+        a set of k vertices with an edge between every pair.
+      </div>
+
+      <p><strong>CLIQUE ∈ NP.</strong> Checking every k-subset means checking
+      <span style="white-space:nowrap">(<sup>n</sup><sub>k</sub>)</span> of them, which is not
+      polynomial. But a non-deterministic machine branches once to pick a subset, and each branch then
+      checks only the k(k−1)/2 pairs within its subset — the k² of the lecture notes, which is
+      polynomial. Guess in parallel, check quickly.</p>
+
+      <p><strong>SAT ≤<sub>p</sub> CLIQUE.</strong> Given a CNF formula F, build a graph:</p>
+
+      <div class="callout">
+        <div class="callout-label">The construction</div>
+        <strong>Vertices —</strong> one per literal <em>occurrence</em>. The same literal in two clauses
+        gives two distinct vertices, so they are labelled with their clause number: P₁, ¬Q₁, P₃.<br><br>
+        <strong>Edges —</strong> join L¹<sub>i</sub> and L²<sub>j</sub> exactly when
+        <strong>i ≠ j</strong> (different clauses) <strong>and L¹ ≢ ¬L²</strong> (not each other's
+        negation).<br><br>
+        <strong>k —</strong> the number of clauses in F.
+      </div>
+
+      <p>Each half of the edge rule enforces one half of what a satisfying assignment has to do. Because
+      vertices in the same clause are never joined, a clique of size k must take exactly
+      <em>one literal from every clause</em> — which is what &ldquo;every clause has a true
+      literal&rdquo; means. Because complementary literals are never joined, it can never pick both P
+      and ¬P — which is what &ldquo;this is a consistent assignment&rdquo; means. Put those together
+      and a k-clique <em>is</em> a satisfying assignment, written in a different alphabet.</p>
+
+      <!-- ===== TOOL: reduction ===== -->
+      <h3 id="t2-rdtool">🛠️ SAT ≤ₚ CLIQUE, built and checked</h3>
+
+      <div class="tool" data-run="runReduce">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>From a formula to a graph and back</h3>
+        </div>
+        <div class="tool-desc">Give a formula in CNF. The tool builds G<sub>F</sub>, searches for a
+          k-clique, and separately decides satisfiability by brute force — then compares the two
+          answers. Both directions of the correspondence are constructed and verified: the clique it
+          finds is turned back into an assignment and run through the formula.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 420px;">
+            <label for="rd-formula">A CNF formula</label>
+            <input type="text" id="rd-formula" value="(P | ~Q | R) &amp; (~P | ~Q | ~R) &amp; (P | Q | ~R)"
+                   spellcheck="false" style="width:100%; font-family:'IBM Plex Mono', monospace; font-size:14px;">
+          </div>
+        </div>
+
+        <div class="tool-controls">
+          <button class="tool-btn" onclick="rdPreset('(P | ~Q | R) &amp; (~P | ~Q | ~R) &amp; (P | Q | ~R)')">Worked example</button>
+          <button class="tool-btn" onclick="rdPreset('(P) &amp; (~P)')">Unsatisfiable</button>
+          <button class="tool-btn" onclick="rdPreset('(P | Q) &amp; (~P | Q) &amp; (P | ~Q) &amp; (~P | ~Q)')">Four clauses, no model</button>
+          <button class="tool-btn" onclick="rdPreset('(P | ~Q) &amp; (~P | ~R)')">Two clauses</button>
+          <button class="tool-reset" onclick="toolReset(this)">Reset tool</button>
+        </div>
+
+        <div class="tool-output" id="rd-output"></div>
+      </div>
+
+      <p>Since SAT is NP-hard and SAT ≤<sub>p</sub> CLIQUE, the theorem above makes CLIQUE NP-hard; and
+      CLIQUE is in NP. So <strong>CLIQUE is NP-complete</strong>.</p>
+
+      <!-- ===== HAMILTONIAN ===== -->
+      <h2 id="t2-ham">The Hamiltonian Cycle problem</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">HAMILTONIAN</div>
+        <strong>Input)</strong> An undirected graph G = (V, E).<br>
+        <strong>Output)</strong> True if and only if G contains a <strong>Hamiltonian cycle</strong> —
+        a cycle visiting every vertex exactly once and returning to its start.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Not the same as an Eulerian circuit</div>
+        A <strong>Hamiltonian</strong> cycle visits every <em>vertex</em> once; an
+        <strong>Eulerian</strong> circuit uses every <em>edge</em> once. They sound like siblings and
+        behave nothing alike: Euler's problem is decided in linear time by looking at the degrees
+        (a connected graph has one exactly when every vertex has even degree), while Hamilton's is
+        NP-complete. Two nearly identical questions, on opposite sides of the divide.
+      </div>
+
+      <p><strong>HAMILTONIAN ∈ NP</strong>, by the same shape of argument. Checking every permutation of
+      the vertices means n! of them, which is not polynomial. But a non-deterministic machine guesses a
+      permutation and each branch checks only the n edges along it. Guess in parallel, check quickly.</p>
+
+      <p><strong>SAT ≤<sub>p</sub> HAMILTONIAN</strong> too, via a graph assembled from gadgets. Each
+      variable becomes a small component that a Hamiltonian cycle can traverse in exactly
+      <strong>two</strong> ways — left-to-right or right-to-left — and those two ways stand for
+      &ldquo;true&rdquo; and &ldquo;false&rdquo;. Each clause becomes an extra vertex, wired into the
+      variable gadgets whose literals appear in it, and reachable only if the cycle traverses at least
+      one of them in the direction that makes the clause true. A cycle through the whole graph must
+      therefore choose a direction per variable (an assignment) and satisfy every clause vertex.
+      So the graph has a Hamiltonian cycle exactly when F is satisfiable, and
+      <strong>HAMILTONIAN is NP-complete</strong>.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">What a gadget is doing</div>
+        Every reduction of this kind works the same way: find a piece of the target problem that has
+        exactly two stable configurations, and use it to store a bit. The rest of the construction is
+        plumbing that forces those bits to be consistent and forces every clause to be satisfied. Once
+        you see the two-way gadget, the CLIQUE and HAMILTONIAN proofs stop looking like different
+        tricks.
+      </div>
+
+      <!-- ===== TOOL: graphs ===== -->
+      <h3 id="t2-gptool">🛠️ Cliques and Hamiltonian cycles</h3>
+
+      <div class="tool" data-run="runGraph">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Find the shape, or prove it is not there</h3>
+        </div>
+        <div class="tool-desc">One edge per line: <code>a b</code>. The tool reports how many steps the
+          search took and how few the check took — that gap is the whole of NP. Where a graph has no
+          Hamiltonian cycle for a reason that can be stated in one line, it gives the reason instead of
+          reporting a failed search.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="gp-graph">Edges</label>
+            <textarea id="gp-graph" rows="8" spellcheck="false"
+              style="width:100%; font-family:'IBM Plex Mono', monospace; font-size:13px;">a b
+b c
+c d
+d e
+e a
+a c
+b d</textarea>
+          </div>
+          <div class="tool-field" style="flex:0 0 160px;">
+            <label for="gp-k">Clique size k</label>
+            <input type="number" id="gp-k" value="3" min="2" max="12">
+            <label for="gp-preset" style="margin-top:12px;">Load a graph</label>
+            <select id="gp-preset" onchange="gpPreset(this.value)">
+              <option value="">choose…</option>
+              <option value="dodeca">Dodecahedron</option>
+              <option value="petersen">Petersen graph</option>
+              <option value="k34">K(3,4)</option>
+              <option value="k33">K(3,3)</option>
+              <option value="k5">K5</option>
+              <option value="k6">K6</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tool-controls">
+          <button class="tool-reset" onclick="toolReset(this)">Reset tool</button>
+        </div>
+
+        <div class="tool-output" id="gp-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Three graphs worth loading</div>
+        <strong>The dodecahedron</strong> is the graph of Hamilton's own 1857 puzzle, and it has a
+        cycle — the tool finds one and then verifies it in twenty edge lookups.<br><br>
+        <strong>K(3,4)</strong> has none, and here you get a proof rather than a failed search: the
+        graph is bipartite with sides of 3 and 4, a cycle in a bipartite graph must alternate sides and
+        so use equally many from each, and 3 ≠ 4. One line, no searching.<br><br>
+        <strong>The Petersen graph</strong> has none either — but it is not bipartite, every vertex has
+        degree 3, and no short argument explains it. The only way the tool knows is by exhausting the
+        search. It does have a Hamiltonian <em>path</em>, which makes the near-miss concrete. This is
+        the honest picture of the problem: sometimes there is a reason, and usually there is not.
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="t2-exam">Exam takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">What gets asked, and what loses marks</div>
+        <strong>Give both halves of NP-completeness.</strong> NP-hard <em>and</em> in NP. Half an answer
+        for half the definition.<br><br>
+        <strong>Get the reduction direction right.</strong> To show X is hard, reduce a known-hard
+        problem <em>to</em> X. SAT ≤<sub>p</sub> X, never X ≤<sub>p</sub> SAT.<br><br>
+        <strong>Both directions of ⟺.</strong> A reduction must map no-instances to no-instances. Say so
+        explicitly; it is often worth a mark on its own.<br><br>
+        <strong>For "X ∈ NP", name the certificate.</strong> The subset, the permutation, the assignment
+        — then say what checking it costs. That is the entire proof.<br><br>
+        <strong>Θ needs two bounds.</strong> An upper bound alone gives you O, not Θ.<br><br>
+        <strong>Flip the literals for CNF.</strong> Reading CNF off a truth table uses the
+        <em>false</em> rows with every literal <em>negated</em>. The commonest slip in the topic.<br><br>
+        <strong>NP means non-deterministic polynomial</strong>, not "not polynomial". P ⊆ NP.
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">The one-paragraph version</div>
+        Cost is measured in worst-case steps as a function of input length, and asymptotic notation
+        keeps only the growth rate. <strong>P</strong> is what a deterministic machine decides in
+        polynomial time; <strong>NP</strong> is what a non-deterministic one does, equivalently what has
+        a quickly checkable certificate. P ⊆ NP, and whether that is strict is open. A
+        <strong>polynomial reduction</strong> X ≤<sub>p</sub> Y transfers hardness upward to Y;
+        <strong>NP-hard</strong> means everything in NP reduces to you, <strong>NP-complete</strong>
+        means that and membership in NP. <strong>SAT</strong> is NP-complete by Cook–Levin, and
+        reductions out of it make <strong>CLIQUE</strong> and <strong>HAMILTONIAN</strong> NP-complete
+        too — so all three stand or fall together.
+      </div>
+
+    </section>

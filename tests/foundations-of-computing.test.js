@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Foundations of Computing — Topic 01.
+ * Foundations of Computing — Topics 01 and 02.
  *
  * The tools in this module are simulators, so the only test worth writing is
  * one that runs them and compares the answer to something established
@@ -16,6 +16,11 @@
  *      any one of them breaks, they stop agreeing.
  *   3. Invariants over exhaustive input. A construction that claims to
  *      preserve a language is run on every word up to a length and checked.
+ *   4. Theorems, checked by running them. Topic 2's reduction claims that a
+ *      formula is satisfiable exactly when its graph has a clique of a given
+ *      size. Both sides are computed by unrelated means, so the claim can be
+ *      tested on formulas rather than assumed — which is done below on every
+ *      three-clause two-variable formula there is.
  */
 
 const { loadModule, Suite, checkStructure, checkQuestionBank } = require('./lib/harness');
@@ -233,6 +238,304 @@ module.exports = async function run() {
     const a = w.pumpAnalyse(w.PUMP_LANGS.evenLen.inL, 'abababab', 4, 6);
     s.ok('the regular language cannot be beaten', !a.wins);
     s.ok('and some split visibly survives', a.survivors.length > 0);
+  }
+
+  /* ================================================================
+     TOPIC 02 — complexity
+
+     The reduction is the interesting thing to test here, because it
+     is a theorem rather than a value: SAT <=p CLIQUE claims that F is
+     satisfiable exactly when G_F has a clique of size k. Both sides
+     are computed independently, so the claim can be checked by
+     running it on formulas rather than by trusting the construction.
+     ================================================================ */
+
+  /* ---------------- truth tables and normal forms ---------------- */
+
+  {
+    // The formula worked through in the lecture slides, with its column
+    // of eight values, the rows its DNF is read from, and the rows its
+    // CNF rules out. All three are published, so all three are pinned.
+    const p = w.fmParse('(P | ~R) -> ~(~Q | R)');
+    s.ok('the worked formula parses', p.ok, p.error);
+
+    const t = w.fmTable(p.ast);
+    s.same('its columns are P, Q, R', t.vars, ['P', 'Q', 'R']);
+    s.is('with 2^3 rows', t.rows.length, 8);
+    s.is('and the published column of values',
+      t.rows.map(r => (r.value ? 'T' : 'F')).join(''), 'FTFFTTTF');
+
+    const dnf = w.fmDnf(t);
+    s.same('the DNF comes off rows 2, 5, 6, 7', dnf.rows, [2, 5, 6, 7]);
+    s.is('as four conjunctions', dnf.terms.length, 4);
+    s.is('reading (P ∧ Q ∧ ¬R) ∨ (¬P ∧ Q ∧ R) ∨ (¬P ∧ Q ∧ ¬R) ∨ (¬P ∧ ¬Q ∧ R)',
+      w.fmDnfShow(dnf.terms),
+      '(P ∧ Q ∧ ¬R) ∨ (¬P ∧ Q ∧ R) ∨ (¬P ∧ Q ∧ ¬R) ∨ (¬P ∧ ¬Q ∧ R)');
+
+    const cnf = w.fmCnf(t);
+    s.same('the CNF rules out rows 1, 3, 4, 8', cnf.rows, [1, 3, 4, 8]);
+    s.is('reading (¬P ∨ ¬Q ∨ ¬R) ∧ (¬P ∨ Q ∨ ¬R) ∧ (¬P ∨ Q ∨ R) ∧ (P ∨ Q ∨ R)',
+      w.fmCnfShow(cnf.clauses),
+      '(¬P ∨ ¬Q ∨ ¬R) ∧ (¬P ∨ Q ∨ ¬R) ∧ (¬P ∨ Q ∨ R) ∧ (P ∨ Q ∨ R)');
+
+    const agree = w.fmAgree(p.ast, dnf.terms, cnf.clauses);
+    s.ok('formula, DNF and CNF agree on every assignment', agree.ok,
+      agree.first ? JSON.stringify(agree.first) : '');
+  }
+
+  {
+    // The slides' second formula is false on all eight rows.
+    const p = w.fmParse('~(P -> Q) & ~(P | ~R)');
+    s.ok('the second worked formula parses', p.ok, p.error);
+    const t = w.fmTable(p.ast);
+    s.is('and is false on all eight rows',
+      t.rows.map(r => (r.value ? 'T' : 'F')).join(''), 'FFFFFFFF');
+    s.ok('so it is unsatisfiable', w.fmSat(p.ast).sat === false);
+    s.is('its DNF is a contradiction', w.fmDnfShow(w.fmDnf(t).terms), '⊥');
+    s.is('and its CNF has a clause for every row', w.fmCnf(t).clauses.length, 8);
+  }
+
+  {
+    // Implication is right-associative, and the two bracketings must differ.
+    const val = src => w.fmTable(w.fmParse(src).ast).rows.map(r => r.value).join('');
+    s.is('P->Q->R is read as P->(Q->R)', val('P->Q->R'), val('P->(Q->R)'));
+    s.ok('and is not the same as (P->Q)->R', val('P->Q->R') !== val('(P->Q)->R'));
+    s.ok('a tautology has no false rows', w.fmCnf(w.fmTable(w.fmParse('P | ~P').ast)).clauses.length === 0);
+    s.is('so its CNF is ⊤', w.fmCnfShow(w.fmCnf(w.fmTable(w.fmParse('P | ~P').ast)).clauses), '⊤');
+  }
+
+  {
+    // Every formula round-trips through its own printed form.
+    const srcs = ['P&Q|R', 'P|Q&R', '~P&Q', '(P->Q)->R', '~(P|Q)&R', '(P|~R)->~(~Q|R)'];
+    let bad = 0;
+    srcs.forEach(src => {
+      const a = w.fmParse(src);
+      const b = w.fmParse(w.fmShow(a.ast));
+      if (!b.ok) { bad++; return; }
+      const va = w.fmTable(a.ast).rows.map(r => r.value).join('');
+      const vb = w.fmTable(b.ast).rows.map(r => r.value).join('');
+      if (va !== vb) bad++;
+    });
+    s.is(`all ${srcs.length} formulas survive being printed and reparsed`, bad, 0);
+  }
+
+  /* ---------------- SAT <=p CLIQUE ---------------- */
+
+  {
+    // The graph the slides build, and the three 3-cliques they highlight.
+    const F = w.fmParse('(P | ~Q | R) & (~P | ~Q | ~R) & (P | Q | ~R)');
+    const cl = w.fmClauses(F.ast);
+    s.ok('the slides\' CNF yields three clauses', cl.ok && cl.clauses.length === 3, cl.error);
+
+    const g = w.rdBuild(cl.clauses);
+    s.is('the graph has nine vertices', g.vertices.length, 9);
+    s.is('and k is the clause count', g.k, 3);
+    s.same('the vertices are labelled by clause',
+      g.vertices.map(v => v.label),
+      ['P₁', '¬Q₁', 'R₁', '¬P₂', '¬Q₂', '¬R₂', 'P₃', 'Q₃', '¬R₃']);
+    // 3 clause-pairs x 3 x 3 = 27 cross-clause pairs, less 6 complementary ones.
+    s.is('and it has 21 edges', g.edges.length, 21);
+
+    const at = {};
+    g.vertices.forEach(v => { at[v.label] = v.i; });
+    [['P₁', 'Q₃', '¬R₂'], ['¬Q₁', '¬R₃', '¬R₂'], ['R₁', 'P₃', '¬Q₂']].forEach(set => {
+      const idx = set.map(l => at[l]);
+      s.ok(`the published clique {${set.join(', ')}} really is one`, w.rdIsClique(g, idx));
+      s.ok('  and it yields an assignment satisfying F', w.rdCliqueToModel(g, idx).satisfies);
+    });
+
+    const chk = w.rdCheck(cl.clauses);
+    s.ok('the formula is satisfiable', chk.sat);
+    s.ok('the graph has a clique of size 3', chk.clique !== null);
+    s.ok('both directions of the reduction close', chk.agree && chk.sound);
+  }
+
+  {
+    // Two vertices in the same clause are never joined, even when they are
+    // the same literal; complementary literals are never joined, even across
+    // clauses. Both halves of the edge rule, checked separately.
+    const taut = w.rdBuild([[{ v: 'P', neg: false }, { v: 'P', neg: true }], [{ v: 'Q', neg: false }]]);
+    s.ok('P₁ and ¬P₁ share a clause, so they are not joined', taut.adj[0][1] === false);
+    s.ok('but P₁ and Q₂ are', taut.adj[0][2] === true);
+    const opp = w.rdBuild([[{ v: 'P', neg: false }], [{ v: 'P', neg: true }]]);
+    s.ok('P₁ and ¬P₂ are complementary, so they are not joined', opp.adj[0][1] === false);
+  }
+
+  {
+    // The theorem, over every three-clause two-variable formula there is.
+    // No randomness: the clauses are all 1- and 2-literal clauses over P, Q,
+    // and all 10^3 ordered triples of them are tried.
+    const lits = [{ v: 'P', neg: false }, { v: 'P', neg: true },
+                  { v: 'Q', neg: false }, { v: 'Q', neg: true }];
+    const clauses = lits.map(l => [l]);
+    for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) clauses.push([lits[i], lits[j]]);
+
+    let n = 0, sat = 0, unsat = 0, disagreed = 0, unsound = 0, first = null;
+    for (const a of clauses) for (const b of clauses) for (const c of clauses) {
+      const F = [a, b, c];
+      const r = w.rdCheck(F);
+      n++;
+      r.sat ? sat++ : unsat++;
+      if (!r.agree) { disagreed++; if (!first) first = w.fmCnfShow(F); }
+      if (!r.sound) unsound++;
+    }
+    s.is(`the reduction is tested on all ${n} three-clause two-variable formulas`, n, 1000);
+    s.ok(`and both answers arise (${sat} satisfiable, ${unsat} not), so the test is not vacuous`,
+      sat > 0 && unsat > 0);
+    s.is('F is satisfiable exactly when G_F has a k-clique — no disagreements',
+      disagreed, 0, first ? `first: ${first}` : '');
+    s.is('and every clique round-trips to a model that satisfies F', unsound, 0);
+  }
+
+  /* ---------------- cliques and Hamiltonian cycles ---------------- */
+
+  {
+    const dod = w.gphPetersen(10, 2);          // GP(10,2) is the dodecahedron
+    s.is('the dodecahedron has 20 vertices', dod.n, 20);
+    s.is('and 30 edges', dod.edges.length, 30);
+    s.ok('and is 3-regular', dod.deg.every(d => d === 3));
+    const cyc = w.gphHamCycle(dod);
+    s.ok('it has a Hamiltonian cycle', cyc.cycle !== null && !cyc.capped);
+    s.ok('and the cycle verifies', w.gphIsCycle(dod, cyc.cycle));
+    s.ok('no cheap argument rules one out', w.gphWhyNoCycle(dod) === null);
+  }
+
+  {
+    const pet = w.gphPetersen(5, 2);           // GP(5,2) is the Petersen graph
+    s.is('the Petersen graph has 10 vertices', pet.n, 10);
+    s.is('and 15 edges', pet.edges.length, 15);
+    const cyc = w.gphHamCycle(pet);
+    s.ok('it has NO Hamiltonian cycle, and the search proves it', cyc.cycle === null && !cyc.capped);
+    s.ok('but it does have a Hamiltonian path', w.gphHamPath(pet).path !== null);
+    s.ok('and no one-line argument explains the difference', w.gphWhyNoCycle(pet) === null);
+  }
+
+  {
+    // The parity argument: a cycle in a bipartite graph alternates sides.
+    const k34 = w.gphBiclique(3, 4);
+    const why = w.gphWhyNoCycle(k34);
+    s.ok('K(3,4) is ruled out by unequal sides', why && why.why === 'unequal sides',
+      why ? why.why : 'no reason found');
+    s.ok('and an exhaustive search agrees', w.gphHamCycle(k34).cycle === null);
+
+    const k33 = w.gphBiclique(3, 3);
+    s.ok('K(3,3) has equal sides, so the argument does not apply', w.gphWhyNoCycle(k33) === null);
+    s.ok('and it really is Hamiltonian', w.gphIsCycle(k33, w.gphHamCycle(k33).cycle));
+  }
+
+  {
+    const pend = w.gphParse('a b\nb c\nc a\nc d');
+    s.ok('a vertex of degree 1 is spotted without searching',
+      w.gphWhyNoCycle(pend.g).why.indexOf('degree') >= 0);
+    const split = w.gphParse('a b\nb c\nc a\nx y\ny z\nz x');
+    s.is('a disconnected graph is spotted too', w.gphWhyNoCycle(split.g).why, 'not connected');
+  }
+
+  {
+    // K_n is the one graph whose largest clique is known without searching.
+    let wrong = 0;
+    for (let n = 3; n <= 7; n++) {
+      const k = w.gphComplete(n);
+      if (w.cqMax(k.adj, n).clique.length !== n) wrong++;
+      if (k.edges.length !== (n * (n - 1)) / 2) wrong++;
+    }
+    s.is('the largest clique in K3…K7 is n every time', wrong, 0);
+  }
+
+  {
+    // Clique search against brute force over all 2^n subsets, and the
+    // impossibility proofs against the search that would have to agree.
+    let seed = 4242;
+    const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+
+    let cliqueWrong = 0, unsound = 0, reasons = 0, found = 0;
+    for (let t = 0; t < 300; t++) {
+      const n = 3 + Math.floor(rnd() * 5);
+      const names = [], pairs = [];
+      for (let i = 0; i < n; i++) names.push('v' + i);
+      for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) if (rnd() < 0.5) pairs.push([a, b]);
+      const g = w.gphMake(names, pairs);
+
+      // brute force: the largest subset that is pairwise joined
+      let best = 0;
+      for (let mask = 0; mask < (1 << n); mask++) {
+        const set = [];
+        for (let i = 0; i < n; i++) if (mask & (1 << i)) set.push(i);
+        if (set.length <= best) continue;
+        let good = true;
+        for (let i = 0; i < set.length && good; i++)
+          for (let j = i + 1; j < set.length; j++) if (!g.adj[set[i]][set[j]]) { good = false; break; }
+        if (good) best = set.length;
+      }
+      const mine = w.cqMax(g.adj, g.n);
+      if (mine.clique.length !== best || !w.cqIs(g.adj, mine.clique)) cliqueWrong++;
+
+      const reason = w.gphWhyNoCycle(g), cyc = w.gphHamCycle(g);
+      if (reason) reasons++;
+      if (cyc.cycle) found++;
+      if (reason && cyc.cycle) unsound++;                       // claimed impossible, yet found
+      if (cyc.cycle && !w.gphIsCycle(g, cyc.cycle)) unsound++;  // found one that is not a cycle
+    }
+    s.is('clique search agrees with brute force on 300 random graphs', cliqueWrong, 0);
+    s.ok(`both outcomes occur (${reasons} impossibility proofs, ${found} cycles found)`,
+      reasons > 0 && found > 0);
+    s.is('and no impossibility proof was ever given for a graph that has a cycle', unsound, 0);
+  }
+
+  /* ---------------- growth rates ---------------- */
+
+  {
+    const ladder = w.gwLadder().map(l => l.show);
+    s.same('the ladder sorts into the lectured order', ladder,
+      ['1', 'log n', '√n', 'n', 'n log n', 'n²', 'n³', '2ⁿ', 'n!']);
+
+    // The symbolic ordering has to match the arithmetic at a decent n.
+    const L = w.gwLadder();
+    let inversions = 0;
+    for (let i = 0; i < L.length - 1; i++) if (L[i].f(60) >= L[i + 1].f(60)) inversions++;
+    s.is('and each rung really is smaller than the next at n = 60', inversions, 0);
+  }
+
+  {
+    const cases = [
+      ['3n^2 + 500n + 9000', 'n^2', 'Theta'],
+      ['n^2', '3n^2 + 500n + 9000', 'Theta'],
+      ['1000000', '1', 'Theta'],
+      ['n', 'n^2', 'O'],
+      ['sqrt n', 'n', 'O'],
+      ['log n', 'sqrt n', 'O'],
+      ['n log n', 'n^2', 'O'],
+      ['n^2', 'n', 'Omega'],
+      ['n log n', 'n', 'Omega'],
+      ['2^n', 'n^3', 'Omega'],
+      ['n!', '2^n', 'Omega'],
+    ];
+    let wrong = 0, firstBad = '';
+    cases.forEach(([a, b, want]) => {
+      const fa = w.gwParse(a), fb = w.gwParse(b);
+      if (!fa.ok || !fb.ok) { wrong++; return; }
+      const got = w.gwCompare(fa, fb).verdict;
+      if (got !== want) { wrong++; if (!firstBad) firstBad = `${a} vs ${b}: got ${got}, want ${want}`; }
+    });
+    s.is(`all ${cases.length} O/Ω/Θ verdicts are right`, wrong, 0, firstBad);
+  }
+
+  {
+    // "log n" must not be read as log × n, nor "sqrt n" as √n × n.
+    s.ok('log n is slower than n', w.gwCompare(w.gwParse('log n'), w.gwParse('n')).verdict === 'O');
+    s.ok('sqrt n is slower than n', w.gwCompare(w.gwParse('sqrt n'), w.gwParse('n')).verdict === 'O');
+    s.ok('but n log n is faster', w.gwCompare(w.gwParse('n log n'), w.gwParse('n')).verdict === 'Omega');
+
+    // The headline example: the ratio has to collapse onto the coefficient.
+    const r = w.gwCompare(w.gwParse('3n^2 + 500n + 9000'), w.gwParse('n^2'), 1024);
+    s.ok('the ratio starts far above 3', r.samples[0].ratio > 1000, r.samples[0].ratio);
+    s.ok('and has settled near 3 by n = 1024',
+      Math.abs(r.samples[r.samples.length - 1].ratio - 3) < 0.6,
+      r.samples[r.samples.length - 1].ratio);
+    s.ok('the O witness is a genuine finite constant', isFinite(r.cO) && r.cO > 3);
+
+    s.ok('gibberish is rejected', w.gwParse('n^2 + wibble').ok === false);
+    s.ok('and so is an empty term', w.gwParse('n^2 + ').ok === false);
   }
 
   /* ---------------- question bank ---------------- */

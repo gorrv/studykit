@@ -245,3 +245,188 @@
              (!back || back.satisfies),
     };
   }
+
+  /* ---------- rendering ---------- */
+
+  var RD_COLOURS = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)', 'var(--accent-4)'];
+  function rdColour(c) { return RD_COLOURS[c % RD_COLOURS.length]; }
+
+  function rdPreset(src) {
+    var box = document.getElementById('rd-formula');
+    if (box) box.value = src;
+    runReduce();
+  }
+
+  /**
+   * Lay the vertices out on a circle, clause by clause, with a gap
+   * between clauses so the grouping is visible without drawing a hull
+   * around each one.
+   */
+  function rdLayout(g, W, H) {
+    var n = g.vertices.length, k = g.clauses.length;
+    var cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.36;
+    var unit = (2 * Math.PI) / (n + k);
+    var a = -Math.PI / 2 - unit * 0.5;
+    var pos = [], clauseAngle = [];
+
+    for (var c = 0; c < k; c++) {
+      var first = a;
+      for (var p = 0; p < g.clauses[c].length; p++) {
+        pos.push({ x: cx + R * Math.cos(a), y: cy + R * Math.sin(a), a: a });
+        a += unit;
+      }
+      clauseAngle.push((first + (a - unit)) / 2);
+      a += unit;                                     // the gap
+    }
+    return { pos: pos, clauseAngle: clauseAngle, cx: cx, cy: cy, R: R };
+  }
+
+  function rdSvg(g, clique) {
+    var W = 720, H = 420;
+    var L = rdLayout(g, W, H);
+    var inClique = {};
+    (clique || []).forEach(function (i) { inClique[i] = true; });
+
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="max-height:440px;" ' +
+            'role="img" aria-label="The graph built from the formula">';
+
+    /* edges: ordinary ones first so the clique draws on top */
+    for (var e = 0; e < g.edges.length; e++) {
+      var u = g.edges[e][0], v = g.edges[e][1];
+      var hot = inClique[u] && inClique[v];
+      if (hot) continue;
+      s += '<line x1="' + L.pos[u].x.toFixed(1) + '" y1="' + L.pos[u].y.toFixed(1) +
+           '" x2="' + L.pos[v].x.toFixed(1) + '" y2="' + L.pos[v].y.toFixed(1) +
+           '" stroke="var(--rule)" stroke-width="1" opacity="0.55"/>';
+    }
+    for (var f = 0; f < g.edges.length; f++) {
+      var a = g.edges[f][0], b = g.edges[f][1];
+      if (!(inClique[a] && inClique[b])) continue;
+      s += '<line x1="' + L.pos[a].x.toFixed(1) + '" y1="' + L.pos[a].y.toFixed(1) +
+           '" x2="' + L.pos[b].x.toFixed(1) + '" y2="' + L.pos[b].y.toFixed(1) +
+           '" stroke="var(--accent-2)" stroke-width="3.5" stroke-linecap="round"/>';
+    }
+
+    /* clause labels, just outside the ring */
+    for (var c = 0; c < L.clauseAngle.length; c++) {
+      var la = L.clauseAngle[c];
+      var lx = L.cx + (L.R + 46) * Math.cos(la), ly = L.cy + (L.R + 46) * Math.sin(la);
+      s += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" ' +
+           'dominant-baseline="middle" font-size="11" font-family="IBM Plex Mono, monospace" ' +
+           'fill="' + rdColour(c) + '" opacity="0.85">clause ' + (c + 1) + '</text>';
+    }
+
+    /* vertices */
+    for (var i = 0; i < g.vertices.length; i++) {
+      var vtx = g.vertices[i], pt = L.pos[i], hotV = inClique[i];
+      s += '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="' + (hotV ? 19 : 16) +
+           '" fill="var(--surface)" stroke="' + (hotV ? 'var(--accent-2)' : rdColour(vtx.clause)) +
+           '" stroke-width="' + (hotV ? 3 : 1.6) + '"/>';
+      s += '<text x="' + pt.x.toFixed(1) + '" y="' + pt.y.toFixed(1) + '" text-anchor="middle" ' +
+           'dominant-baseline="central" font-size="12" font-family="IBM Plex Mono, monospace" ' +
+           'fill="var(--ink)" font-weight="' + (hotV ? '600' : '400') + '">' + esc(vtx.label) + '</text>';
+    }
+
+    return s + '</svg>';
+  }
+
+  function runReduce() {
+    var out = document.getElementById('rd-output');
+    if (!out) return;
+
+    var src = ((document.getElementById('rd-formula') || {}).value || '').trim();
+    var p = fmParse(src);
+    if (!p.ok) { out.innerHTML = '<div class="tool-error">' + p.error + '</div>'; return; }
+
+    var cl = fmClauses(p.ast);
+    if (!cl.ok) {
+      out.innerHTML = '<div class="tool-error">' + cl.error +
+        '<br><br>The reduction takes CNF as its input. Use the truth-table tool above to convert ' +
+        'this formula first, then paste the CNF back in here.</div>';
+      return;
+    }
+    if (cl.clauses.length > 6) {
+      out.innerHTML = '<div class="tool-error">' + cl.clauses.length +
+        ' clauses would need a clique of that size and a graph too dense to read. Six is the limit here.</div>';
+      return;
+    }
+
+    var r = rdCheck(cl.clauses);
+    var g = r.g;
+
+    var h = '<div class="rd-stats">' +
+      '<span class="stat-pill a">' + g.vertices.length + ' vertices</span>' +
+      '<span class="stat-pill a">' + g.edges.length + ' edges</span>' +
+      '<span class="stat-pill dark">k = ' + g.k + '</span>' +
+      '</div>';
+
+    h += '<div class="rd-rule">An edge joins two literals exactly when they sit in ' +
+         '<strong>different clauses</strong> and are <strong>not each other&rsquo;s negation</strong>. ' +
+         'Both conditions matter: the first forces a clique to take one literal per clause, ' +
+         'the second stops it choosing P and ¬P at once.</div>';
+
+    h += rdSvg(g, r.clique);
+
+    /* the verdict, both sides computed separately */
+    h += '<div class="verdict ' + (r.sat ? 'safe' : 'bad') + '">' +
+      'F is ' + (r.sat ? 'SATISFIABLE' : 'UNSATISFIABLE') + '  &nbsp;⟺&nbsp;  G<sub>F</sub> ' +
+      (r.clique ? 'HAS' : 'HAS NO') + ' clique of size ' + g.k +
+      '<br>' + (r.agree
+        ? '✓ the two sides agree — which is the reduction doing its job'
+        : '✗ THE TWO SIDES DISAGREE. The construction is wrong; do not trust this.') +
+      '</div>';
+
+    /* the two directions, spelled out */
+    if (r.sat && r.forward) {
+      h += '<div class="rd-dir"><div class="rd-dir-head">⟹ from a satisfying assignment to a clique</div>' +
+        '<div class="rd-dir-body">Take the assignment ' +
+        '<code>' + Object.keys(r.model).map(function (v) {
+          return v + '=' + (r.model[v] ? 'T' : 'F'); }).join(', ') + '</code> ' +
+        'and pick one true literal out of each clause:<br>' +
+        r.forward.picks.map(function (pk) {
+          return 'clause ' + (pk.clause + 1) + ' → <strong>' + esc(pk.label) + '</strong>';
+        }).join('<br>') +
+        '<br><br>' + (r.forward.ok
+          ? '✓ Checked: those ' + r.forward.clique.length + ' vertices are pairwise joined, so they are a clique.'
+          : '✗ Those vertices are not a clique — a bug.') +
+        '</div></div>';
+    }
+
+    if (r.clique && r.back) {
+      h += '<div class="rd-dir"><div class="rd-dir-head">⟸ from a clique back to a satisfying assignment</div>' +
+        '<div class="rd-dir-body">The clique is ' +
+        r.clique.map(function (i) { return '<strong>' + esc(g.vertices[i].label) + '</strong>'; }).join(', ') +
+        '. No two of them share a clause, and none is the negation of another, so setting every one ' +
+        'of them true is consistent:<br><code>' +
+        Object.keys(r.back.model).map(function (v) {
+          return v + '=' + (r.back.model[v] ? 'T' : 'F');
+        }).join(', ') + '</code>' +
+        (r.back.free.length ? '<br><span class="rd-free">' + r.back.free.join(', ') +
+          ' never appear in the clique, so nothing constrains them — they are set false arbitrarily.</span>' : '') +
+        '<br><br>' + (r.back.satisfies
+          ? '✓ Checked: running F on that assignment gives <strong>true</strong>.'
+          : '✗ That assignment does not satisfy F — a bug.') +
+        '</div></div>';
+    }
+
+    if (!r.clique) {
+      var best = rdMaxClique(g);
+      h += '<p class="tool-note">The largest clique in this graph has <strong>' + best.length +
+        '</strong> vertices (' + best.map(function (i) { return esc(g.vertices[i].label); }).join(', ') +
+        '), short of the ' + g.k + ' needed. Every set of ' + g.k + ' vertices either repeats a clause ' +
+        'or contains a literal and its negation.</p>';
+    }
+
+    /* the cost, which is the point of the exercise */
+    var checkCost = (g.k * (g.k - 1)) / 2;
+    h += '<p class="tool-note"><strong>Finding</strong> the clique took ' + r.steps +
+      ' search steps. <strong>Checking</strong> one takes ' + checkCost + ' edge lookups — ' +
+      'k(k−1)/2, which is the k² of the lecture notes. That gap between finding and checking ' +
+      'is what NP is.</p>';
+
+    h += '<p class="tool-note">Both sides were computed independently: satisfiability by trying all ' +
+      Math.pow(2, rdVars(cl.clauses).length) + ' assignments, the clique by searching the graph. ' +
+      'Neither answer was derived from the other.</p>';
+
+    out.innerHTML = h;
+  }

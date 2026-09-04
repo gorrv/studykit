@@ -217,3 +217,96 @@
     }
     return out.sort(function (a, b) { return gwCmp(a.cls, b.cls); });
   }
+
+  /* ---------- rendering ---------- */
+
+  function gwPreset(f, g) {
+    var bf = document.getElementById('gw-f'), bg = document.getElementById('gw-g');
+    if (bf) bf.value = f;
+    if (bg) bg.value = g;
+    runGrowth();
+  }
+
+  function gwNum(x) {
+    if (!isFinite(x)) return '∞';
+    if (x >= 1e12) return x.toExponential(2);
+    if (x >= 1000) return Math.round(x).toLocaleString('en-GB');
+    if (x >= 10) return x.toFixed(1);
+    return x.toFixed(3);
+  }
+
+  function runGrowth() {
+    var out = document.getElementById('gw-output');
+    if (!out) return;
+
+    var fs = ((document.getElementById('gw-f') || {}).value || '').trim();
+    var gs = ((document.getElementById('gw-g') || {}).value || '').trim();
+
+    var fx = gwParse(fs), gx = gwParse(gs);
+    if (!fx.ok) { out.innerHTML = '<div class="tool-error">In f(n): ' + fx.error + '</div>'; return; }
+    if (!gx.ok) { out.innerHTML = '<div class="tool-error">In g(n): ' + gx.error + '</div>'; return; }
+
+    var r = gwCompare(fx, gx, 1024);
+
+    var verdictText, verdictClass;
+    if (r.verdict === 'Theta') {
+      verdictText = 'f ∈ Θ(g)  —  and so also f ∈ O(g) and f ∈ Ω(g)';
+      verdictClass = 'safe';
+    } else if (r.verdict === 'O') {
+      verdictText = 'f ∈ O(g)  —  f grows strictly slower, so f ∉ Ω(g) and f ∉ Θ(g)';
+      verdictClass = 'warn';
+    } else {
+      verdictText = 'f ∈ Ω(g)  —  f grows strictly faster, so f ∉ O(g) and f ∉ Θ(g)';
+      verdictClass = 'warn';
+    }
+
+    var h = '<div class="gw-classes">' +
+      '<div class="gw-cls"><span>f(n) = ' + esc(fs) + '</span><strong>Θ(' + gwClassShow(r.clsF) + ')</strong></div>' +
+      '<div class="gw-cls"><span>g(n) = ' + esc(gs) + '</span><strong>Θ(' + gwClassShow(r.clsG) + ')</strong></div>' +
+      '</div>';
+
+    h += '<div class="verdict ' + verdictClass + '">' + verdictText + '</div>';
+
+    /* the ratio, which is where the intuition lives */
+    h += '<table class="results-table gw-table"><tr><th>n</th><th>f(n)</th><th>g(n)</th>' +
+         '<th>f(n) / g(n)</th></tr>';
+    for (var i = 0; i < r.samples.length; i++) {
+      var s = r.samples[i];
+      h += '<tr><td>' + s.n + '</td><td>' + gwNum(s.f) + '</td><td>' + gwNum(s.g) +
+           '</td><td class="gw-ratio">' + gwNum(s.ratio) + '</td></tr>';
+    }
+    h += '</table>';
+
+    if (r.verdict === 'Theta') {
+      h += '<p class="tool-note">The ratio settles. Over n ≤ 1024 the definition is met with ' +
+        '<strong>c = ' + gwNum(r.cO) + '</strong> for the O side and <strong>c = ' + gwNum(r.cOmega) +
+        '</strong> for the Ω side, both from N = 1. Whatever constants and lower-order terms you ' +
+        'wrote, they are absorbed — that is exactly what Θ is for.</p>';
+    } else if (r.verdict === 'O') {
+      h += '<p class="tool-note">The ratio falls towards zero, so no constant c can hold f above g. ' +
+        'The O direction is met easily: <strong>f(n) ≤ ' + gwNum(r.cO) + ' · g(n)</strong> throughout ' +
+        'the range above.</p>';
+    } else {
+      h += '<p class="tool-note">The ratio grows without bound, so no constant c can hold f below g. ' +
+        'The Ω direction is met: <strong>f(n) ≥ ' + gwNum(r.cOmega) + ' · g(n)</strong> throughout ' +
+        'the range above.</p>';
+    }
+
+    /* the ladder, with both ends marked */
+    var ladder = gwLadder();
+    h += '<div class="gw-ladder"><div class="gw-ladder-head">The standard ladder, slowest first</div><div class="gw-rungs">';
+    for (var k = 0; k < ladder.length; k++) {
+      var isF = gwCmp(ladder[k].cls, r.clsF) === 0;
+      var isG = gwCmp(ladder[k].cls, r.clsG) === 0;
+      h += '<span class="gw-rung' + (isF ? ' is-f' : '') + (isG ? ' is-g' : '') + '">' +
+           ladder[k].show + (isF && isG ? ' (f, g)' : isF ? ' (f)' : isG ? ' (g)' : '') + '</span>';
+      if (k < ladder.length - 1) h += '<span class="gw-lt">&lt;</span>';
+    }
+    h += '</div></div>';
+
+    h += '<p class="tool-note">The verdict above comes from comparing the classes symbolically, ' +
+      'not from the numbers in the table. Sampling could not tell n from n<sup>1.0001</sup> over any ' +
+      'finite range, so the constants are offered as evidence and the ordering does the deciding.</p>';
+
+    out.innerHTML = h;
+  }
