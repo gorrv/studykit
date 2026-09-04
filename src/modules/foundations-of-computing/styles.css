@@ -418,3 +418,185 @@
 }
 
 .gw-lt { color: var(--ink-soft); font-size: 11px; }
+
+/* ============================================================
+   TOPIC 03 — recurrences, induction, divide-and-conquer
+   ============================================================ */
+
+.rc-shown {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+  margin-bottom: 10px;
+}
+
+.rc-table { display: block; overflow-x: auto; white-space: nowrap; }
+.rc-table td, .rc-table th { text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+.rc-table .rc-lab { text-align: left; color: var(--ink-muted); font-size: 11.5px; white-space: nowrap; }
+.rc-hit  { color: var(--accent-3); }
+.rc-miss { background: var(--tint-bad); color: var(--accent-2); font-weight: 600; }
+
+.rc-proof {
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-top: 14px;
+  background: var(--surface-2);
+}
+
+.rc-proof-head {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-4);
+  font-weight: 600;
+  margin: 10px 0 6px;
+}
+.rc-proof-head:first-child { margin-top: 0; }
+
+.rc-line {
+  font-size: 12.5px;
+  line-height: 1.65;
+  padding: 3px 0 3px 14px;
+  border-left: 2px solid var(--rule);
+  margin-bottom: 3px;
+}
+.rc-line.good { border-left-color: var(--accent-3); }
+.rc-line.bad  { border-left-color: var(--accent-2); color: var(--accent-2); }
+
+/* ---------- master theorem ---------- */
+
+.mt-steps { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+
+.mt-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface-3);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.mt-step-n {
+  flex: 0 0 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--accent); color: var(--surface-2);
+  font-size: 11px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.mt-step-body { flex: 1; }
+
+.mt-warn {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  background: var(--tint-warn);
+  color: var(--warn-text);
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+.mt-cases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.mt-case {
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  opacity: 0.5;
+}
+.mt-case.on {
+  opacity: 1;
+  border-color: var(--accent);
+  background: var(--tint-a);
+}
+.mt-case-n {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 5px;
+}
+.mt-case.on .mt-case-n { color: var(--accent); font-weight: 600; }
+.mt-case-if   { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--ink-muted); }
+.mt-case-then { font-family: 'IBM Plex Mono', monospace; font-size: 13px; margin-top: 5px; }
+
+.mt-table td, .mt-table th { text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+.mt-table .mt-exp { color: var(--accent); font-weight: 600; }
+
+/* ---------- Towers of Hanoi ---------- */
+
+.hn-trace, .mg-trace { margin: 14px 0 4px; }
+
+.hn-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.hn-move { flex: 0 0 130px; color: var(--ink-muted); }
+
+.hn-pegs { display: flex; gap: 14px; flex-wrap: wrap; }
+
+.hn-peg {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px 2px 4px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  min-width: 62px;
+}
+.hn-peg-n { color: var(--ink-soft); font-size: 10px; margin-right: 3px; }
+.hn-empty { color: var(--ink-soft); }
+
+.hn-disc {
+  display: inline-block;
+  min-width: 16px;
+  text-align: center;
+  padding: 1px 3px;
+  border-radius: 3px;
+  font-size: 11px;
+  background: var(--tint-a);
+  color: var(--accent);
+}
+.hn-disc.d1 { background: var(--tint-c);  color: var(--accent-3); }
+.hn-disc.d2 { background: var(--tint-a);  color: var(--accent); }
+.hn-disc.d3 { background: var(--tint-b2); color: var(--accent-2); }
+.hn-disc.d4 { background: var(--tint-d);  color: var(--accent-4); }
+
+/* ---------- merge sort ---------- */
+
+.mg-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+.mg-halves { color: var(--ink-muted); }
+.mg-arrow  { color: var(--ink-soft); }
+.mg-out    { color: var(--accent); font-weight: 500; }
+
+.mg-table { display: block; overflow-x: auto; white-space: nowrap; }
+.mg-table td, .mg-table th { text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }

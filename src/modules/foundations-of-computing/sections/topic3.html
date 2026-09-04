@@ -1,0 +1,421 @@
+<section id="topic3" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 03 · Recursion</div>
+        <h1>Divide, Conquer, and Solve the Recurrence</h1>
+        <div class="topic-subtitle">from a recursive algorithm to its running time, and back</div>
+      </div>
+
+      <p>A recursive algorithm describes its own cost recursively, and that description is a
+      <strong>recurrence relation</strong>: T(n) in terms of T of something smaller. This topic is about
+      turning such a relation into a closed form — by guessing and proving with induction, or by
+      reading the answer off the <strong>Master Theorem</strong> when the recurrence has the right
+      shape. It closes with the proof Topic 2 deferred.</p>
+
+      <div class="callout">
+        <div class="callout-label">The shape of the argument</div>
+        <strong>Divide-and-conquer</strong> splits a problem into self-similar pieces, and the cost of
+        doing so is a recurrence. Two ways to solve one: <strong>induction</strong>, where you guess the
+        closed form and prove it, and the <strong>Master Theorem</strong>, which reads the answer off
+        a, b and f(n) directly. Finally <strong>Cook&ndash;Levin</strong> shows SAT is NP-complete by
+        writing an entire Turing machine computation as a Boolean formula.
+      </div>
+
+      <!-- ===== Divide and conquer ===== -->
+      <h2 id="t3-dc">Divide and conquer</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The three steps</div>
+        <strong>Divide)</strong> Split the problem into several &lsquo;self-similar&rsquo; but smaller
+        sub-problems.<br>
+        <strong>Conquer)</strong> Solve those sub-problems recursively.<br>
+        <strong>Combine)</strong> Recombine their answers into a solution for the whole.<br><br>
+        The cost of the divide and combine steps is the f(n) that shows up in every recurrence below.
+        The conquer step is where the recursion — and the a and b — come from.
+      </div>
+
+      <h3 id="t3-hanoi">The Towers of Hanoi</h3>
+
+      <p>Move a tower of n discs from peg 1 to peg 3, one disc at a time, never placing a disc on a
+      smaller one. The recursive solution is three lines, and it is pure divide-and-conquer:</p>
+
+      <div class="proof">
+        <div class="pf-lbl">MOVETOWER(n, 1, 3)</div>
+        <div class="pf-step">1. If n = 1 then MOVE(1, 3)</div>
+        <div class="pf-step">2. Else</div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;3. MOVETOWER(n − 1, 1, 2)
+          <span class="pf-just">get the top n−1 out of the way</span></div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;4. MOVE(1, 3)
+          <span class="pf-just">move the one disc that matters</span></div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;5. MOVETOWER(n − 1, 2, 3)
+          <span class="pf-just">put them back on top</span></div>
+      </div>
+
+      <p>Count the moves and the recurrence writes itself: two recursive calls on n−1, plus the single
+      move in the middle.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">The recurrence, and its solution</div>
+        <strong>T(1) = 1, &nbsp; T(n) = 2 T(n−1) + 1</strong> &nbsp;→&nbsp;
+        <strong>T(n) = 2<sup>n</sup> − 1</strong><br><br>
+        Giving 1, 3, 7, 15, 31, 63, 127, 255, … Each extra disc doubles the work and adds one move.
+      </div>
+
+      <!-- ===== TOOL: Hanoi ===== -->
+      <h3 id="t3-hntool">🛠️ Towers of Hanoi</h3>
+
+      <div class="tool" data-run="runHanoi">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Run it, and check the count</h3>
+        </div>
+        <div class="tool-desc">Every move is replayed against the rules — one disc at a time, never onto
+          a smaller one, and the tower must actually arrive on peg 3 — before the move count is compared
+          with the recurrence. Step through with the transport bar.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:0 0 160px;">
+            <label for="hn-n">Discs</label>
+            <input type="number" id="hn-n" value="3" min="1" max="9">
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="hn-output"></div>
+      </div>
+
+      <h3 id="t3-merge">Merge sort</h3>
+
+      <p>Split the list in half, sort each half recursively, then merge the two sorted halves. The merge
+      walks both halves once, so it costs about n.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">The recurrence</div>
+        <strong>T(1) = 1, &nbsp; T(n) = T(⌊n/2⌋) + T(⌈n/2⌉) + n</strong><br><br>
+        Often written in the simpler approximate form <strong>T(n) ≈ 2T(⌈n/2⌉) + n</strong>, which is
+        what the Master Theorem below takes as its input, and which gives <strong>Θ(n log n)</strong>.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The two recurrences are not the same sequence</div>
+        The exact form gives 1, 4, 8, 12, 17, 22, 27, 32; the approximation gives
+        1, 4, <strong>11</strong>, 12, <strong>27</strong>, <strong>28</strong>, <strong>31</strong>, 32.
+        They agree only when n is a power of two and part company from n = 3. Both are Θ(n log n), which
+        is why the approximation is harmless for the growth rate — but if you are asked to
+        <em>tabulate</em> T(n), say which one you are tabulating.
+      </div>
+
+      <!-- ===== TOOL: merge sort ===== -->
+      <h3 id="t3-mgtool">🛠️ Merge sort</h3>
+
+      <div class="tool" data-run="runMerge">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Every merge, and what it really costs</h3>
+        </div>
+        <div class="tool-desc">Sorts the list and counts the comparisons it actually makes, then checks
+          the output is sorted <em>and</em> a rearrangement of the input. Both published recurrences are
+          tabulated side by side so you can see where they diverge.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 320px;">
+            <label for="mg-list">A list to sort</label>
+            <input type="text" id="mg-list" value="7, 10, 4, 6, 1, 5, 9, 3, 8, 2" spellcheck="false"
+                   style="width:100%; font-family:'IBM Plex Mono', monospace; font-size:13px;">
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="mgPreset('7, 10, 4, 6, 1, 5, 9, 3, 8, 2')">The slides’ hand</button>
+          <button class="tool-btn secondary" onclick="mgPreset('1, 2, 3, 4, 5, 6, 7, 8')">Already sorted</button>
+          <button class="tool-btn secondary" onclick="mgPreset('8, 7, 6, 5, 4, 3, 2, 1')">Reversed</button>
+          <button class="tool-btn secondary" onclick="mgPreset('5, 1, 4')">n = 3, where the two recurrences split</button>
+          <button class="tool-btn secondary" onclick="mgShuffle()">Shuffle</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="mg-output"></div>
+      </div>
+
+      <!-- ===== Induction ===== -->
+      <h2 id="t3-induction">Solving by induction</h2>
+
+      <p>The lectures call this the <strong>method of substitution</strong>: guess the closed form, then
+      prove it. The proof has two obligations and both must be discharged.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">Proof by induction</div>
+        <strong>Base case)</strong> Show the formula holds at the smallest n.<br>
+        <strong>Inductive case)</strong> <strong>(i)</strong> Assume it holds for n = k.
+        <strong>(ii)</strong> Substitute, and confirm it then holds for n = k+1.<br><br>
+        <strong>Strong induction</strong> changes only step (i): assume it holds for <em>all</em> m ≤ k,
+        not just for k. Use it when the recurrence refers to something other than n−1 — anything with
+        T(n/2) in it needs the stronger hypothesis, because k/2 is not k−1.
+      </div>
+
+      <p>Here is the Hanoi recurrence solved. Notice that the inductive step never re-derives anything:
+      it substitutes the assumption and simplifies.</p>
+
+      <div class="proof">
+        <div class="pf-lbl">T(1) = 1, T(n) = 2T(n−1) + 1 &nbsp;⟹&nbsp; T(n) = 2ⁿ − 1</div>
+        <div class="pf-step"><strong>Base case.</strong> T(1) = 1, and 2¹ − 1 = 1. ✓</div>
+        <div class="pf-step"><strong>I.H.</strong> Assume T(k) = 2<sup>k</sup> − 1 for some k ≥ 1.</div>
+        <div class="pf-step">T(k+1) = 2 T(k) + 1
+          <span class="pf-just">the recurrence at n = k+1</span></div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 2(2<sup>k</sup> − 1) + 1
+          <span class="pf-just">substitute the I.H. — this is the only place it is used</span></div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 2<sup>k+1</sup> − 2 + 1</div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 2<sup>k+1</sup> − 1
+          <span class="pf-just">which is the formula at n = k+1 &nbsp;∎</span></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Induction proves inequalities too</div>
+        Nothing requires the claim to be an equation. To show
+        <strong>T(n) ≥ n log₂ n</strong> for T(n) = 2T(⌈n/2⌉) + n, the base case becomes
+        T(1) = 1 ≥ 1·log₂1 = 0, and the step chains inequalities instead of equalities. The structure
+        is identical; only the relation changes.
+      </div>
+
+      <!-- ===== TOOL: recurrences ===== -->
+      <h3 id="t3-rctool">🛠️ Recurrences and the inductive step</h3>
+
+      <div class="tool" data-run="runRecur">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Unfold it, then test the step</h3>
+        </div>
+        <div class="tool-desc">Write <code>2T(n-1) + 1</code>, <code>T(floor(n/2)) + T(ceil(n/2)) + n</code>,
+          <code>2^n - 1</code>, <code>n*log2(n)</code>. The closed form is not just compared value by
+          value — it is <em>substituted into the recurrence</em>, which is the thing an inductive step
+          actually asks you to do.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 180px;">
+            <label for="rc-base">Base case(s)</label>
+            <input type="text" id="rc-base" value="T(1) = 1" spellcheck="false">
+          </div>
+          <div class="tool-field" style="flex:1 1 220px;">
+            <label for="rc-rec">T(n) =</label>
+            <input type="text" id="rc-rec" value="2T(n-1) + 1" spellcheck="false">
+          </div>
+        </div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:0 0 90px;">
+            <label for="rc-rel">Claim</label>
+            <select id="rc-rel">
+              <option value="=">T(n) =</option>
+              <option value="&gt;=">T(n) ≥</option>
+              <option value="&lt;=">T(n) ≤</option>
+            </select>
+          </div>
+          <div class="tool-field" style="flex:1 1 200px;">
+            <label for="rc-form">Closed form</label>
+            <input type="text" id="rc-form" value="2^n - 1" spellcheck="false">
+          </div>
+          <div class="tool-field" style="flex:0 0 110px;">
+            <label for="rc-upto">Show up to n</label>
+            <input type="number" id="rc-upto" value="12" min="2" max="40">
+          </div>
+        </div>
+
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="rcPreset('T(1) = 1','2T(n-1) + 1','2^n - 1','=')">Hanoi</button>
+          <button class="tool-btn secondary" onclick="rcPreset('T(1) = 1','T(n-1) + n','(n^2 + n)/2','=')">Triangular</button>
+          <button class="tool-btn secondary" onclick="rcPreset('T(1) = 1','2T(ceil(n/2)) + n','n*log2(n)','&gt;=')">Strong induction, an inequality</button>
+          <button class="tool-btn secondary" onclick="rcPreset('T(0) = 0, T(1) = 1','T(n-1) + T(n-2)','','=')">Fibonacci</button>
+          <button class="tool-btn secondary" onclick="rcPreset('T(1) = 1','2T(n-1) + 1','n^2','=')">A formula that fails</button>
+          <button class="tool-btn secondary" onclick="rcPreset('T(1) = 1','T(floor(n/2)) + T(ceil(n/2)) + n','','=')">Merge sort, exact</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="rc-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Two ways a proof fails, and they are different</div>
+        <strong>The base case fails.</strong> The step can be perfect and the result still false — a bad
+        base propagates all the way up. Try the triangular preset with <code>T(1) = 2</code>: the step
+        still holds at every k, and the formula is still wrong everywhere.<br><br>
+        <strong>The step fails.</strong> The formula may match the first few values and then diverge.
+        Matching values is not a proof, which is why the tool substitutes rather than just compares.
+      </div>
+
+      <!-- ===== Master theorem ===== -->
+      <h2 id="t3-master">The Master Theorem</h2>
+
+      <p>Guessing works, but for the divide-and-conquer shape there is a formula that skips the guessing
+      entirely.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">The theorem to memorise</div>
+        Let T be monotonically increasing with
+        <strong>T(n) = a T(n/b) + f(n)</strong> for constants a ≥ 1, b ≥ 2. Put
+        <strong>k = log<sub>b</sub> a</strong>. Then<br><br>
+        <strong>Case 1)</strong> f(n) ∈ O(n<sup>k−ε</sup>) &nbsp;→&nbsp; T(n) = Θ(n<sup>k</sup>)<br>
+        <strong>Case 2)</strong> f(n) ∈ Θ(n<sup>k</sup>) &nbsp;→&nbsp; T(n) = Θ(n<sup>k</sup> log n)<br>
+        <strong>Case 3)</strong> f(n) ∈ Ω(n<sup>k+ε</sup>) &nbsp;→&nbsp; T(n) = Θ(f(n))<br><br>
+        for some ε &gt; 0.
+      </div>
+
+      <p>The whole thing is one comparison. <strong>n<sup>k</sup> is the cost of the recursion</strong> —
+      a branches, log<sub>b</sub> n levels deep. <strong>f(n) is the cost of the dividing and
+      combining.</strong> Whichever grows faster wins; if they tie, every one of the log<sub>b</sub> n
+      levels costs the same, and multiplying by the number of levels is where the extra log n comes
+      from.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">k = log<sub>b</sub> a, and the base is b</div>
+        <strong>b</strong> is what you divide by; <strong>a</strong> is how many subproblems you get.
+        So it is log<sub>b</sub>a. For a = 2, b = 3 that is log₃2 ≈ <strong>0.63</strong> — not
+        log₂3 ≈ 1.58. The two are reciprocals, so flipping them is easy to do and hard to spot: the
+        answer often still lands in the same case. The tool prints both values every time, so the
+        wrong one has somewhere to be recognised.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Simplify f before you classify it</div>
+        <strong>√((n+1)⁵) = (n+1)<sup>2.5</sup> ∈ Θ(n<sup>2.5</sup>)</strong> — adding a constant to n
+        cannot change a growth rate.<br>
+        <strong>log₂(5n²) = log₂5 + 2log₂n ∈ Θ(log n)</strong> — the constant and the multiple both
+        drop out.<br><br>
+        Both of these are lecture examples, and in both the simplification is most of the work.
+      </div>
+
+      <!-- ===== TOOL: master theorem ===== -->
+      <h3 id="t3-mttool">🛠️ The Master Theorem</h3>
+
+      <div class="tool" data-run="runMaster">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>a, b, f(n) → Θ(?)</h3>
+        </div>
+        <div class="tool-desc">Works through the three steps the exam wants, then checks its own answer
+          by unfolding the recurrence numerically and measuring the growth exponent. If the theorem and
+          the numbers disagree, it says so instead of showing you the theorem's answer.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:0 0 110px;">
+            <label for="mt-a">a (subproblems)</label>
+            <input type="number" id="mt-a" value="2" min="1" max="64" step="1">
+          </div>
+          <div class="tool-field" style="flex:0 0 110px;">
+            <label for="mt-b">b (divide by)</label>
+            <input type="number" id="mt-b" value="2" min="2" max="16" step="1">
+          </div>
+          <div class="tool-field" style="flex:1 1 200px;">
+            <label for="mt-f">f(n)</label>
+            <input type="text" id="mt-f" value="n" spellcheck="false">
+          </div>
+        </div>
+
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="mtPreset(2,2,'n')">Merge sort</button>
+          <button class="tool-btn secondary" onclick="mtPreset(9,3,'sqrt((n+1)^5)')">Lecture example 1</button>
+          <button class="tool-btn secondary" onclick="mtPreset(2,3,'log2(5n^2)')">Lecture example 3</button>
+          <button class="tool-btn secondary" onclick="mtPreset(8,2,'n^2')">Case 1</button>
+          <button class="tool-btn secondary" onclick="mtPreset(7,2,'n^2')">Strassen</button>
+          <button class="tool-btn secondary" onclick="mtPreset(1,2,'1')">Binary search</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="mt-output"></div>
+      </div>
+
+      <!-- ===== Cook-Levin ===== -->
+      <h2 id="t3-cooklevin">Cook&ndash;Levin: SAT is NP-complete</h2>
+
+      <p>Topic 2 stated this and deferred the proof. Here it is, and the idea is startling: encode an
+      entire Turing machine computation as a Boolean formula, so that the formula is satisfiable exactly
+      when the machine accepts.</p>
+
+      <p>To show SAT is NP-hard, every problem X ∈ NP must reduce to it. So take an arbitrary X ∈ NP.
+      By definition there is a non-deterministic machine M with</p>
+
+      <div class="callout">
+        <div class="callout-label">The starting point</div>
+        <strong>M has a polynomial-length computation that accepts w &nbsp;⟺&nbsp; w ∈ X</strong><br><br>
+        Polynomial length is the crucial part: it bounds how much tape the machine can touch and how many
+        steps it can take, so the whole computation fits in a table of size polynomial in |w| — and a
+        finite table can be described by a finite formula.
+      </div>
+
+      <p>Three families of variables describe a computation, indexed by cell i, time t, symbol a and
+      state q — all of them ranging only up to T<sub>M</sub>(n), which is polynomial:</p>
+
+      <table>
+        <tr><th>Variable</th><th>True exactly when</th></tr>
+        <tr><td><strong>C<sub>i,t,a</sub></strong></td><td>cell i of the tape holds symbol a at time t</td></tr>
+        <tr><td><strong>H<sub>i,t</sub></strong></td><td>the tape head is at position i at time t</td></tr>
+        <tr><td><strong>S<sub>q,t</sub></strong></td><td>the machine is in state q at time t</td></tr>
+      </table>
+
+      <p>Everything a legal, accepting computation must satisfy can then be written as a constraint on
+      those variables. The lecture gives four representative ones:</p>
+
+      <div class="proof">
+        <div class="pf-lbl">Constraints, in the machine's own vocabulary</div>
+        <div class="pf-step">¬(S<sub>q4,2</sub> ∧ S<sub>q5,2</sub>)
+          <span class="pf-just">the machine cannot be in two states at once</span></div>
+        <div class="pf-step">(H<sub>0,3</sub> ∨ H<sub>1,3</sub> ∨ H<sub>2,3</sub> ∨ H<sub>3,3</sub>)
+          <span class="pf-just">the head must be somewhere</span></div>
+        <div class="pf-step">C<sub>3,1,a</sub> → ¬C<sub>3,1,b</sub>
+          <span class="pf-just">a cell holds one symbol</span></div>
+        <div class="pf-step">(S<sub>q1,6</sub> ∧ H<sub>4,6</sub> ∧ C<sub>4,6,a</sub>) →
+          (S<sub>q2,7</sub> ∧ H<sub>3,7</sub> ∧ C<sub>4,7,b</sub>)
+          <span class="pf-just">the transition function itself, one step at a time</span></div>
+      </div>
+
+      <p>Conjoin all of them — plus the start configuration and the requirement that some time step is
+      accepting — into one formula <strong>F<sub>M,w</sub></strong>. Then a satisfying assignment
+      <em>is</em> an accepting computation, written out cell by cell and step by step, and</p>
+
+      <div class="callout exam">
+        <div class="callout-label">The conclusion</div>
+        <strong>w ∈ X &nbsp;⟺&nbsp; F<sub>M,w</sub> is satisfiable</strong>, so
+        <strong>X ≤<sub>p</sub> SAT</strong>.<br><br>
+        X was an arbitrary member of NP, so this holds for <em>every</em> X ∈ NP — which is precisely
+        the definition of SAT being <strong>NP-hard</strong>. SAT is also in NP (Topic 2). Both halves,
+        so <strong>SAT is NP-complete</strong>. ∎
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why this is the keystone</div>
+        Every later NP-hardness proof — CLIQUE, HAMILTONIAN, and the rest — starts from SAT and uses the
+        transitivity theorem. That is only legitimate because Cook&ndash;Levin did the hard work once,
+        against all of NP at once. It is the only proof in the course that argues about an
+        <em>arbitrary</em> machine rather than a specific problem.
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="t3-exam">Exam takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">What gets asked, and what loses marks</div>
+        <strong>Do both halves of the induction.</strong> Base case <em>and</em> step. A perfect step
+        with an unchecked base proves nothing.<br><br>
+        <strong>Say where the I.H. is used.</strong> Markers look for the line where you substitute the
+        assumption. If it never appears, you have not done an induction.<br><br>
+        <strong>Use strong induction when the recurrence jumps.</strong> Anything with T(n/2) needs
+        &ldquo;for all m ≤ k&rdquo;, because k/2 is not k−1.<br><br>
+        <strong>k = log<sub>b</sub> a.</strong> Divide by b, get a pieces. Not log<sub>a</sub> b.<br><br>
+        <strong>Simplify f(n) before classifying it.</strong> Constants, constant shifts and log
+        multiples all drop out — and that simplification is usually most of the marks.<br><br>
+        <strong>Case 2 is where the log comes from</strong>, and only there. Cases 1 and 3 have no
+        log unless f itself has one.<br><br>
+        <strong>Cook&ndash;Levin argues about an arbitrary NDTM</strong>, not a particular problem.
+        That is what makes it apply to all of NP.
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">The one-paragraph version</div>
+        A recursive algorithm's cost is a <strong>recurrence</strong>. Solve it by guessing a closed form
+        and proving it by <strong>induction</strong> — base case, then substitute the hypothesis into the
+        recurrence at k+1 — or, when it has the form a T(n/b) + f(n), by the <strong>Master
+        Theorem</strong>: set k = log<sub>b</sub>a and compare f against n<sup>k</sup>, taking the larger,
+        with an extra log n when they tie. <strong>Hanoi</strong> gives 2T(n−1)+1 = 2ⁿ−1;
+        <strong>merge sort</strong> gives 2T(n/2)+n = Θ(n log n). And
+        <strong>Cook&ndash;Levin</strong> encodes an arbitrary polynomial-time NDTM computation as a
+        Boolean formula, making SAT NP-complete and every reduction in Topic 2 legitimate.
+      </div>
+
+    </section>

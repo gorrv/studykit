@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Foundations of Computing — Topics 01 and 02.
+ * Foundations of Computing — Topics 01 to 03.
  *
  * The tools in this module are simulators, so the only test worth writing is
  * one that runs them and compares the answer to something established
@@ -536,6 +536,211 @@ module.exports = async function run() {
 
     s.ok('gibberish is rejected', w.gwParse('n^2 + wibble').ok === false);
     s.ok('and so is an empty term', w.gwParse('n^2 + ').ok === false);
+  }
+
+  /* ================================================================
+     TOPIC 03 — recurrences, induction, divide-and-conquer
+
+     Two things are worth testing here that the earlier topics did not
+     have. First, the published tables: the lecture slides tabulate
+     T(n) for Hanoi and for merge sort, so those sequences are pinned.
+     Second, the inductive step, which is a stronger claim than "the
+     values agree" -- and the tests below include a formula that
+     matches values for a while and still fails the step, so the
+     difference is not hypothetical.
+     ================================================================ */
+
+  /* ---------------- recurrences ---------------- */
+
+  {
+    const r = w.rcBuild({ 1: 1 }, '2T(n-1) + 1');
+    s.ok('the Hanoi recurrence builds', r.ok, r.error);
+    s.is('and gives the published 1, 3, 7, 15, 31, 63, 127, 255',
+      [1, 2, 3, 4, 5, 6, 7, 8].map(n => r.T(n)).join(','), '1,3,7,15,31,63,127,255');
+
+    // The slide states 2T(n-1) - 1, which is constant at 1 and cannot be
+    // 2^n - 1. The proof on the following slide uses + 1. Pinned so the
+    // distinction stays visible.
+    const minus = w.rcBuild({ 1: 1 }, '2T(n-1) - 1');
+    s.ok('2T(n-1) − 1 is constant at 1, so it is not 2^n − 1',
+      [1, 2, 3, 4, 5].every(n => minus.T(n) === 1));
+  }
+
+  {
+    const r = w.rcBuild({ 1: 1 }, 'T(n-1) + n');
+    s.is('T(n-1)+n with T(1)=1 gives the triangular numbers',
+      [1, 2, 3, 4, 5].map(n => r.T(n)).join(','), '1,3,6,10,15');
+    const two = w.rcBuild({ 1: 2 }, 'T(n-1) + n');
+    s.ok('and with T(1)=2 it does not match (n²+n)/2', two.T(3) !== 6, two.T(3));
+  }
+
+  {
+    const approx = w.rcBuild({ 1: 1 }, '2T(ceil(n/2)) + n');
+    s.is('the merge-sort approximation gives the table printed in the notes',
+      [1, 2, 3, 4, 5, 6, 7, 8].map(n => approx.T(n)).join(','), '1,4,11,12,27,28,31,32');
+    const exact = w.rcBuild({ 1: 1 }, 'T(floor(n/2)) + T(ceil(n/2)) + n');
+    s.is('while the exact recurrence gives a different sequence',
+      [1, 2, 3, 4, 5, 6, 7, 8].map(n => exact.T(n)).join(','), '1,4,8,12,17,22,27,32');
+    s.ok('the two agree at powers of two and nowhere else in 1..8',
+      [1, 2, 4, 8].every(n => approx.T(n) === exact.T(n)) &&
+      [3, 5, 6, 7].every(n => approx.T(n) !== exact.T(n)));
+  }
+
+  {
+    const fib = w.rcBuild({ 0: 0, 1: 1 }, 'T(n-1) + T(n-2)');
+    s.is('two base cases work, and give Fibonacci',
+      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => fib.T(n)).join(','),
+      '0,1,1,2,3,5,8,13,21,34,55');
+  }
+
+  {
+    // A recurrence whose argument never shrinks must be reported, not
+    // allowed to exhaust the stack and take the page down.
+    const spin = w.rcBuild({ 1: 1 }, '2T(n) + 1');
+    const v = spin.T(5);
+    s.ok('a recurrence that never reaches its base case is caught',
+      !Number.isFinite(v) && /never reached a base case|too deeply nested/.test(spin.failed() || ''),
+      spin.failed());
+  }
+
+  {
+    s.ok('a closed form may not mention T', w.rcCompile('2T(n-1)', false).ok === false);
+    s.ok('and unreadable base cases are rejected', w.rcParseBase('T one = 1').ok === false);
+  }
+
+  /* ---------------- the inductive step ---------------- */
+
+  {
+    const i = w.rcInduction({ 1: 1 }, '2T(n-1) + 1', '2^n - 1', '=', 1, 40);
+    s.ok('Hanoi: the base case holds', i.base.every(b => b.ok));
+    s.ok('and the step survives substitution for 40 values of k', i.allOk,
+      JSON.stringify(i.steps.find(x => !x.ok)));
+  }
+
+  {
+    const good = w.rcInduction({ 1: 1 }, 'T(n-1) + n', '(n^2 + n)/2', '=', 1, 40);
+    s.ok('(n²+n)/2 survives the step with T(1)=1', good.allOk);
+
+    // The instructive failure: a bad base case with a perfect step.
+    const bad = w.rcInduction({ 1: 2 }, 'T(n-1) + n', '(n^2 + n)/2', '=', 1, 40);
+    s.ok('with T(1)=2 the base case fails', !bad.base[0].ok);
+    s.ok('but the step still holds at every k — so the base is the culprit',
+      bad.steps.every(x => x.ok));
+  }
+
+  {
+    const i = w.rcInduction({ 1: 1 }, '2T(ceil(n/2)) + n', 'n*log2(n)', '>=', 1, 60);
+    s.ok('strong induction: T(n) ≥ n log₂ n survives the step', i.allOk,
+      JSON.stringify(i.steps.find(x => !x.ok)));
+  }
+
+  {
+    // The point of substituting rather than comparing values: a formula can
+    // agree on a stretch of values and still fail the step.
+    const wrong = w.rcInduction({ 1: 1 }, '2T(n-1) + 1', 'n^2', '=', 1, 10);
+    s.ok('a formula that is not the solution fails the step', !wrong.allOk);
+    const r = w.rcBuild({ 1: 1 }, '2T(n-1) + 1');
+    s.is('while the correct one agrees on values too', w.rcAgree(r, '2^n - 1', '=', 14).bad, 0);
+  }
+
+  /* ---------------- the Master Theorem ---------------- */
+
+  {
+    const sol = w.mtSolve(9, 3, 'sqrt((n+1)^5)');
+    s.ok('lecture example 1 parses √((n+1)⁵)', sol.ok, sol.error);
+    s.is('k = log₃(9) = 2', sol.kShown, 2);
+    s.is('f ∈ Θ(n^2.5)', w.gwClassShow(sol.clsF), 'n²·⁵');
+    s.is('Case 3', sol.caseNo, 3);
+    s.is('T(n) = Θ(n^2.5)', sol.answer, 'Θ(n²·⁵)');
+  }
+
+  {
+    const sol = w.mtSolve(2, 2, 'n');
+    s.is('merge sort: k = 1', sol.kShown, 1);
+    s.is('Case 2', sol.caseNo, 2);
+    s.is('T(n) = Θ(n log n)', sol.answer, 'Θ(n log n)');
+  }
+
+  {
+    const sol = w.mtSolve(2, 3, 'log2(5n^2)');
+    s.ok('lecture example 3 parses log₂(5n²)', sol.ok, sol.error);
+    s.is('f ∈ Θ(log n)', w.gwClassShow(sol.clsF), 'log n');
+    s.is('Case 1', sol.caseNo, 1);
+    // The slide prints 1.5849 for log_3(2). That is log_2(3); the bases are
+    // swapped. The answer happens to survive, which is exactly why it is
+    // worth pinning both numbers.
+    s.ok('k = log₃(2) ≈ 0.6309', Math.abs(sol.k - 0.6309) < 1e-3, sol.k);
+    s.ok('and log₂(3) ≈ 1.5849 is the other one, not k', Math.abs(sol.kWrong - 1.5849) < 1e-3,
+      sol.kWrong);
+  }
+
+  {
+    // k = 0 must not render as "Theta(1 log n)".
+    s.is('binary search comes out as Θ(log n)', w.mtSolve(1, 2, '1').answer, 'Θ(log n)');
+    s.is('Strassen falls in Case 1', w.mtSolve(7, 2, 'n^2').caseNo, 1);
+  }
+
+  {
+    // The theorem's verdict against the recurrence's own numbers.
+    const cases = [[9, 3, 'sqrt((n+1)^5)'], [2, 2, 'n'], [2, 3, 'log2(5n^2)'],
+                   [8, 2, 'n^2'], [4, 2, 'n^2'], [3, 2, 'n'], [1, 2, '1']];
+    let bad = 0, first = '';
+    cases.forEach(([a, b, f]) => {
+      const sol = w.mtSolve(a, b, f);
+      // Guard rather than assume. A regression that makes mtSolve fail would
+      // otherwise throw here and take the remaining assertions in this file
+      // down with it — one broken thing should produce one failure, not a
+      // dead suite.
+      if (!sol.ok) { bad++; if (!first) first = `a=${a} b=${b} f=${f}: ${sol.error}`; return; }
+      const num = w.mtNumeric(a, b, sol.fFn, 4096);
+      const agr = w.mtAgrees(sol, num.estimate);
+      if (!agr.ok) { bad++; if (!first) first = `a=${a} b=${b} f=${f}: measured ${num.estimate}, want ${agr.want}`; }
+    });
+    s.is(`the theorem agrees with the unfolded recurrence on all ${cases.length} cases`, bad, 0, first);
+  }
+
+  s.ok('a < 1 is rejected', w.mtSolve(0, 2, 'n').ok === false);
+  s.ok('b < 2 is rejected', w.mtSolve(2, 1, 'n').ok === false);
+
+  /* ---------------- the algorithms themselves ---------------- */
+
+  {
+    let bad = 0, first = '';
+    for (let n = 1; n <= 12; n++) {
+      const run = w.hanoiRun(n);
+      const chk = w.hanoiCheck(n, run.moves);
+      if (!chk.ok) { bad++; if (!first) first = `n=${n}: ${chk.why}`; continue; }
+      if (run.count !== Math.pow(2, n) - 1) { bad++; if (!first) first = `n=${n}: ${run.count} moves`; }
+      if (run.count !== w.hanoiRecurrence(n)) { bad++; if (!first) first = `n=${n}: recurrence disagrees`; }
+    }
+    s.is('Hanoi is legal and takes exactly 2ⁿ−1 moves for n = 1..12', bad, 0, first);
+
+    // An illegal sequence must be rejected, or the check above proves nothing.
+    const run3 = w.hanoiRun(3);
+    const tampered = run3.moves.slice();
+    tampered[1] = { disc: 3, from: 0, to: 2 };
+    s.ok('and a tampered move sequence is rejected', w.hanoiCheck(3, tampered).ok === false);
+  }
+
+  {
+    let bad = 0, first = '';
+    for (let n = 1; n <= 40; n++) {
+      const input = w.msSample(n, 500 + n);
+      const r = w.msRun(input);
+      const chk = w.msCheck(input, r.sorted);
+      if (!chk.ok) { bad++; if (!first) first = `n=${n}: ${chk.why}`; continue; }
+      // The recurrence charges n per merge level and 1 per leaf, so the
+      // elements that actually pass through a merge come to T(n) - n.
+      if (r.merged !== w.msRecurrence(n, 'exact') - n) {
+        bad++;
+        if (!first) first = `n=${n}: merged ${r.merged}, T(n)-n = ${w.msRecurrence(n, 'exact') - n}`;
+      }
+      if (r.comparisons > r.merged) { bad++; if (!first) first = `n=${n}: compared more than it merged`; }
+    }
+    s.is('merge sort sorts, and its merged-element count is T(n) − n, for n = 1..40', bad, 0, first);
+
+    s.ok('an unsorted output is rejected', w.msCheck([3, 1, 2], [1, 3, 2]).ok === false);
+    s.ok('and so is one that is not a rearrangement', w.msCheck([3, 1, 2], [1, 2, 2]).ok === false);
   }
 
   /* ---------------- question bank ---------------- */
