@@ -2,10 +2,10 @@
       <div class="topic-header">
         <div class="topic-eyebrow">Revision</div>
         <h1>Cram sheet</h1>
-        <div class="topic-subtitle">everything in this topic on one page</div>
+        <div class="topic-subtitle">all three topics on one page</div>
       </div>
 
-      <h2 id="cr-defs">The definitions, verbatim</h2>
+      <h2 id="cr-defs">Topic 01 &middot; machines and languages</h2>
 
       <div class="callout exam">
         <div class="callout-label">Write these out exactly</div>
@@ -55,7 +55,7 @@
           "Contradiction, so L is not regular." ∎</span></div>
       </div>
 
-      <h2 id="cr-traps">Traps</h2>
+      <h2 id="cr-traps">Topic 01 traps</h2>
 
       <div class="callout warn">
         <div class="callout-label">Cost you marks last year</div>
@@ -66,6 +66,102 @@
           <li><code>ab*</code> vs <code>(ab)*</code>.</li>
           <li>"Not pumpable ⟹ not regular" is right; "pumpable ⟹ regular" is wrong.</li>
           <li>Calling a non-halting machine "rejecting". It is neither — that is the point.</li>
+        </ul>
+      </div>
+
+      <h2 id="cr-t2">Topic 02 &middot; complexity</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        <table style="margin:8px 0 0;">
+          <tr><th>t<sub>M</sub>(w)</th><td colspan="2">steps M takes on the word w</td></tr>
+          <tr><th>T<sub>M</sub>(n)</th><td colspan="2">max { t<sub>M</sub>(w) : |w| = n } &nbsp;— worst case, always</td></tr>
+          <tr><th>O(g)</th><td>∃c ∃N ∀n &gt; N</td><td>f(n) ≤ c·g(n)</td></tr>
+          <tr><th>&Omega;(g)</th><td>∃c ∃N ∀n &gt; N</td><td>f(n) ≥ c·g(n)</td></tr>
+          <tr><th>&Theta;(g)</th><td colspan="2">O(g) ∩ &Omega;(g)</td></tr>
+          <tr><th>P</th><td colspan="2">decided by a <em>deterministic</em> TM in polynomial time</td></tr>
+          <tr><th>NP</th><td colspan="2">decided by a <em>non-deterministic</em> TM in polynomial time</td></tr>
+          <tr><th>X ≤<sub>p</sub> Y</th><td colspan="2">poly-time f with w ∈ X ⟺ f(w) ∈ Y</td></tr>
+          <tr><th>NP-hard</th><td colspan="2">Y ≤<sub>p</sub> X for <em>every</em> Y ∈ NP</td></tr>
+          <tr><th>NP-complete</th><td colspan="2">NP-hard <strong>and</strong> in NP</td></tr>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Six one-liners</div>
+        <ul style="margin:6px 0 0;">
+          <li>P ⊆ NP, because a deterministic machine is a non-deterministic one that never branches.</li>
+          <li>NP = "has a short certificate you can check fast". Name the certificate and its check cost — that is the whole membership proof.</li>
+          <li>DNF from the <strong>true</strong> rows, as written. CNF from the <strong>false</strong> rows, every literal <strong>flipped</strong>.</li>
+          <li>SAT is NP-complete (Cook&ndash;Levin), and stays so restricted to CNF input.</li>
+          <li>SAT ≤<sub>p</sub> CLIQUE: vertex per literal <em>occurrence</em>; edge iff different clauses and not complementary; k = number of clauses.</li>
+          <li>CLIQUE and HAMILTONIAN are NP-complete, both by reduction from SAT plus membership in NP.</li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>NP means <strong>non-deterministic polynomial</strong>, not "not polynomial".</li>
+          <li>Giving one half of NP-completeness. Both halves, every time.</li>
+          <li>Reduction direction: SAT ≤<sub>p</sub> X to show X is hard. Never X ≤<sub>p</sub> SAT.</li>
+          <li>Forgetting the ⟺: a reduction must send no-instances to no-instances too.</li>
+          <li>O where &Theta; was asked. n ∈ O(n!) is true and useless.</li>
+          <li>Not flipping the literals when reading CNF off a truth table.</li>
+          <li>Hamiltonian (every <em>vertex</em>) vs Eulerian (every <em>edge</em>). Euler is easy; Hamilton is NP-complete.</li>
+        </ul>
+      </div>
+
+      <h2 id="cr-t3">Topic 03 &middot; recursion</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The Master Theorem, verbatim</div>
+        T(n) = a T(n/b) + f(n), &nbsp; a ≥ 1, b ≥ 2, &nbsp;
+        <strong>k = log<sub>b</sub> a</strong>:<br><br>
+        <table style="margin:0;">
+          <tr><th>Case 1</th><td>f ∈ O(n<sup>k−ε</sup>)</td><td>T = &Theta;(n<sup>k</sup>)</td></tr>
+          <tr><th>Case 2</th><td>f ∈ &Theta;(n<sup>k</sup>)</td><td>T = &Theta;(n<sup>k</sup> log n)</td></tr>
+          <tr><th>Case 3</th><td>f ∈ &Omega;(n<sup>k+ε</sup>)</td><td>T = &Theta;(f(n))</td></tr>
+        </table>
+        <br>n<sup>k</sup> is the cost of the recursion, f(n) the cost of dividing and combining.
+        The larger wins; when they tie, every one of the log<sub>b</sub> n levels costs the same
+        and that is where the log comes from.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Recurrences worth knowing on sight</div>
+        <table style="margin:8px 0 0;">
+          <tr><th>Hanoi</th><td>T(n) = 2T(n−1) + 1</td><td>2<sup>n</sup> − 1</td></tr>
+          <tr><th>Merge sort</th><td>T(n) = 2T(n/2) + n</td><td>&Theta;(n log n)</td></tr>
+          <tr><th>Binary search</th><td>T(n) = T(n/2) + 1</td><td>&Theta;(log n)</td></tr>
+          <tr><th>Triangular</th><td>T(n) = T(n−1) + n</td><td>(n² + n)/2</td></tr>
+          <tr><th>Fibonacci</th><td>T(n) = T(n−1) + T(n−2)</td><td>&Theta;(&Phi;<sup>n</sup>)</td></tr>
+        </table>
+      </div>
+
+      <h2 id="cr-induction">Induction, as a procedure</h2>
+
+      <div class="xl-walk">
+        <div class="xl-step"><span class="xl-step-n">1</span><span class="xl-step-body">
+          <strong>Base case.</strong> Show the formula holds at the smallest n. Do not skip it — a bad base with a perfect step still gives a false result.</span></div>
+        <div class="xl-step"><span class="xl-step-n">2</span><span class="xl-step-body">
+          <strong>State the I.H.</strong> "Assume T(k) = … for some k ≥ 1." For strong induction: "for all m ≤ k".</span></div>
+        <div class="xl-step"><span class="xl-step-n">3</span><span class="xl-step-body">
+          <strong>Write the recurrence at k+1.</strong> Not the formula — the recurrence.</span></div>
+        <div class="xl-step"><span class="xl-step-n">4</span><span class="xl-step-body">
+          <strong>Substitute the I.H.</strong> This is the line markers look for. If it never appears, you have not done an induction.</span></div>
+        <div class="xl-step"><span class="xl-step-n">5</span><span class="xl-step-body">
+          <strong>Simplify to the formula at k+1.</strong> Then ∎.</span></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>k = log<sub>b</sub>a. Divide by b, get a pieces. Not log<sub>a</sub>b — the two are reciprocals and the case often still lands right, so the error hides.</li>
+          <li>Ordinary induction on a recurrence that jumps. Anything with T(n/2) needs strong induction, because k/2 is not k−1.</li>
+          <li>Not simplifying f before classifying it: √((n+1)⁵) is &Theta;(n<sup>2.5</sup>), log(5n²) is &Theta;(log n).</li>
+          <li>A log in the answer for Case 1 or 3. Only Case 2 introduces one.</li>
+          <li>Checking values instead of substituting. Matching the first few n is not a proof.</li>
         </ul>
       </div>
     </section>
