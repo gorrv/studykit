@@ -2,7 +2,7 @@
       <div class="topic-header">
         <div class="topic-eyebrow">Revision</div>
         <h1>Cram sheet</h1>
-        <div class="topic-subtitle">all three topics on one page</div>
+        <div class="topic-subtitle">all five topics on one page</div>
       </div>
 
       <h2 id="cr-defs">Topic 01 &middot; machines and languages</h2>
@@ -162,6 +162,122 @@
           <li>Not simplifying f before classifying it: √((n+1)⁵) is &Theta;(n<sup>2.5</sup>), log(5n²) is &Theta;(log n).</li>
           <li>A log in the answer for Case 1 or 3. Only Case 2 introduces one.</li>
           <li>Checking values instead of substituting. Matching the first few n is not a proof.</li>
+        </ul>
+      </div>
+
+      <h2 id="cr-t4">Topic 04 &middot; graph algorithms</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The four termination times</div>
+        <table style="margin:8px 0 0;">
+          <tr><th>BFS / DFS</th><td>O(|V| + |E|)</td><td>&sum;<sub>u</sub>|Adj(u)| = O(|E|)</td></tr>
+          <tr><th>Kruskal</th><td>O(|E| log |E|)</td><td>dominated by the sort</td></tr>
+          <tr><th>Prim</th><td>O(|E| + |V| log |V|)</td><td>with a Fibonacci heap</td></tr>
+          <tr><th>Topological sort / SCC</th><td>O(|V| + |E|)</td><td>DFS once, or twice</td></tr>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Six one-liners</div>
+        <ul style="margin:6px 0 0;">
+          <li>BFS and DFS are one algorithm with a queue or a stack. BFS gives shortest paths;
+            DFS gives timestamps and back edges.</li>
+          <li>The linear bound comes from summing |Adj(u)|, not multiplying it by |V|.</li>
+          <li>&ldquo;Would this edge make a cycle?&rdquo; = &ldquo;are u and v already connected?&rdquo;
+            — a disjoint-set lookup, not a search.</li>
+          <li>A spanning tree of |V| vertices always has |V| − 1 edges. What is minimised is the
+            <em>weight</em>.</li>
+          <li>A topological order exists ⟺ the graph is a DAG. Same question, two phrasings.</li>
+          <li>G<sup>SCC</sup> is always a DAG — a cycle among components would have merged them.</li>
+        </ul>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">SCC, in four steps</div>
+        <strong>1)</strong> DFS on G, record the reverse finishing order.<br>
+        <strong>2)</strong> Take the first unassigned vertex u in that order.<br>
+        <strong>3)</strong> DFS on the <strong>transpose</strong> G<sup>T</sup> from u; everything
+        reached is one component.<br>
+        <strong>4)</strong> Remove them and repeat.<br><br>
+        Pass 1 finds what u <em>reaches</em>; pass 2 finds what <em>reaches</em> u. Both = a round trip.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>O(|V|·|E|) for a search, from multiplying step 4 by the loop.</li>
+          <li>Assuming the MST is unique — Kruskal and Prim can return different trees of equal weight.</li>
+          <li>Assuming the topological order is unique — the algorithm says <em>any</em> unsorted vertex.</li>
+          <li>Forgetting <strong>maximal</strong> in the SCC definition.</li>
+          <li>Second SCC pass on G rather than G<sup>T</sup>.</li>
+          <li>Naming no cycle when refusing to topologically sort.</li>
+        </ul>
+      </div>
+
+      <h2 id="cr-t5">Topic 05 &middot; SAT solving</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The three responses to an NP-complete problem</div>
+        <table style="margin:8px 0 0;">
+          <tr><th>GREEDY-SAT</th><td>polynomial</td><td><strong>incomplete</strong> — False means
+            &ldquo;stuck&rdquo;</td></tr>
+          <tr><th>DPLL</th><td>exponential worst case</td><td><strong>complete</strong> — always right</td></tr>
+          <tr><th>2SAT, Horn</th><td>polynomial</td><td>complete, but only for restricted input</td></tr>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The two DPLL rules, kept apart</div>
+        <strong>Unit propagation</strong> — a clause with one literal left. Assigns what
+        <strong>MUST</strong> be assigned. <em>Can</em> conflict, and that is how dead branches are
+        found.<br><br>
+        <strong>Pure literal elimination</strong> — a literal with only one sign in the whole formula.
+        Assigns what <strong>SHOULD</strong> be assigned. Can <em>never</em> conflict.<br><br>
+        Neither is needed for correctness. Plain branching is already complete. They exist to make the
+        search stop sooner.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The reductions, and where the line falls</div>
+        2SAT ≤<sub>p</sub> 3SAT ≤<sub>p</sub> … ≤<sub>p</sub> SAT &nbsp;— trivial, identity map.<br>
+        SAT ≤<sub>p</sub> 3SAT &nbsp;— split wide clauses with <strong>fresh</strong> bridging
+        variables: (l₁ ∨ l₂ ∨ X) ∧ (¬X ∨ l₃ ∨ l₄). A k-literal clause becomes k−2 clauses using
+        k−3 fresh variables.<br>
+        3SAT ≤<sub>p</sub> 2SAT &nbsp;— <strong>no</strong>. 2SAT is in P, so this would prove P = NP.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">2SAT by implication graph</div>
+        <strong>1)</strong> (a ∨ b) becomes ¬a → b and ¬b → a.<br>
+        <strong>2)</strong> One vertex per literal, one edge per implication.<br>
+        <strong>3)</strong> Compute the SCCs.<br>
+        <strong>4)</strong> <strong>Unsatisfiable ⟺ some component contains a literal and its own
+        negation.</strong><br><br>
+        To read off an assignment: make a literal true when its component is <em>downstream</em> of its
+        negation&rsquo;s.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Horn clauses</div>
+        At most one positive literal, so it reads as a rule: (¬P ∨ ¬Q ∨ R) is P ∧ Q → R.<br>
+        Decided by <strong>forward chaining</strong> — fire from the facts to a fixed point, linear
+        time — because a Horn formula has a <strong>unique minimal model</strong>.<br><br>
+        2SAT and Horn overlap rather than nest: (P ∨ Q) is 2SAT not Horn; (¬P ∨ ¬Q ∨ R) is Horn not
+        2SAT.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>Reading &ldquo;polynomial time&rdquo; as &ldquo;solves it&rdquo;. Greedy is the
+            counterexample and it is on the slides.</li>
+          <li>Swapping the two rules. Unit = one literal <em>left in a clause</em>; pure = one
+            <em>sign across the formula</em>.</li>
+          <li>Claiming pure literal elimination can conflict. It cannot.</li>
+          <li>Reusing an existing variable as the 3SAT bridge. It must be fresh.</li>
+          <li>Giving one direction of a ≤<sub>p</sub> argument.</li>
+          <li>&ldquo;2SAT is easy because clauses are small&rdquo; — 3SAT&rsquo;s are small too. It is
+            easy because two literals make an implication.</li>
         </ul>
       </div>
     </section>

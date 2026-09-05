@@ -670,3 +670,27 @@
   .gr-row { flex-wrap: wrap; }
   .gr-note { flex-basis: 100%; }
 }
+
+
+/* ---------- Topic 05 · SAT tools -------------------------------- */
+.gr-chip.up   { background: var(--tint-c); color: var(--accent-3); }
+.gr-chip.down { background: var(--tint-b2); color: var(--accent-2); }
+
+.dp-rule {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 3px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  vertical-align: 1px;
+}
+.dp-rule.unit { background: var(--tint-b2); color: var(--accent-2); }
+.dp-rule.pure { background: var(--tint-c); color: var(--accent-3); }
+
+.tool-sub {
+  margin: 16px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}

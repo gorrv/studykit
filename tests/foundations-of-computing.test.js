@@ -1036,6 +1036,334 @@ module.exports = async function run() {
     s.ok('an undirected graph is refused', w.sccFind(w.grParse('A - B')).ok === false);
   }
 
+  /* ---------------- Topic 5 · greedy SAT ---------------- */
+  {
+    const p = w.stParse(w.ST_PRESETS.greedy);
+    s.ok('the lecture greedy example parses', p.ok, p.error);
+    s.is('7 clauses', p.nC, 7);
+    s.is('over P, Q, R', p.vars.join(''), 'PQR');
+
+    // The eight hypercube scores on the slide, one assertion each,
+    // so a wrong one names itself.
+    const land = w.gdLandscape(p.clauses, p.vars);
+    s.ok('the landscape is computable', land.ok, land.error);
+    const at = (P, Q, R) => land.nodes.filter(n =>
+      n.asg.P === P && n.asg.Q === Q && n.asg.R === R)[0].score;
+    s.is('FFF scores 5', at(false, false, false), 5);
+    s.is('TFF scores 6', at(true, false, false), 6);
+    s.is('FTF scores 5', at(false, true, false), 5);
+    s.is('FFT scores 5', at(false, false, true), 5);
+    s.is('TTF scores 6', at(true, true, false), 6);
+    s.is('TFT scores 5', at(true, false, true), 5);
+    s.is('FTT scores 7 — every clause', at(false, true, true), 7);
+    s.is('TTT scores 5', at(true, true, true), 5);
+
+    // Scores must agree with a direct count, not just with each other.
+    {
+      let bad = 0;
+      land.nodes.forEach(n => {
+        const byHand = p.clauses.filter(c =>
+          c.some(l => (n.asg[l.v] === true) !== l.neg)).length;
+        if (byHand !== n.score) bad++;
+      });
+      s.is('every score matches a direct clause-by-clause count', bad, 0);
+    }
+
+    s.is('there are exactly two local maxima that are not solutions', land.traps.length, 2);
+    s.is('and one satisfying assignment', land.solutions.length, 1);
+
+    // The point of the whole section: greedy is wrong, from the very
+    // start the lecture picks.
+    const run = w.gdRun(p.clauses, p.vars, { P: true, Q: false, R: false });
+    s.ok('greedy from the deck start returns False', run.verdict === false);
+    s.ok('having stopped at a local maximum rather than run out of iterations',
+      run.stuck === true && !run.capped,
+      run.capped ? 'it hit the iteration cap — it is taking non-improving moves'
+                 : 'it did not report being stuck');
+    s.is('with a score of 6', run.score, 6);
+    const truth = w.stBrute(p.clauses, p.vars);
+    s.ok('but the formula is satisfiable', truth.sat);
+    s.is('by exactly one assignment', truth.count, 1);
+    s.is('namely P false, Q true, R true',
+      [truth.model.P, truth.model.Q, truth.model.R].join(','), 'false,true,true');
+
+    const survey = w.gdSurvey(p.clauses, p.vars);
+    s.is('greedy fails from 4 of the 8 possible starts', survey.wrong, 4);
+
+    // When greedy says True it must be telling the truth -- soundness
+    // is the one property it does have, and it has to hold always.
+    {
+      let unsound = 0, first = '', seed = 991, tested = 0;
+      const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+      const vars = ['P', 'Q', 'R', 'S'];
+      for (let t = 0; t < 400; t++) {
+        const n = 3 + Math.floor(rnd() * 6), lines = [];
+        for (let i = 0; i < n; i++) {
+          const k = 1 + Math.floor(rnd() * 3), lits = [];
+          for (let j = 0; j < k; j++) {
+            lits.push((rnd() < 0.5 ? '~' : '') + vars[Math.floor(rnd() * 4)]);
+          }
+          lines.push(lits.join(' | '));
+        }
+        const f = w.stParse(lines.join('\n'));
+        if (!f.ok) continue;
+        tested++;
+        const start = {};
+        f.vars.forEach(v => { start[v] = rnd() < 0.5; });
+        const r = w.gdRun(f.clauses, f.vars, start);
+        // Sound: True must mean the final assignment really works.
+        if (r.verdict && !w.stEval(f.clauses, r.asg).all) {
+          unsound++; if (!first) first = lines.join(' ; ');
+        }
+        // And the score must never have gone down. A run that takes
+        // sideways moves can circle forever, so hitting the cap is a
+        // bug rather than bad luck: every step is a strict increase in
+        // a quantity bounded by the clause count, so the number of
+        // steps is bounded by the clause count too.
+        if (r.capped) { unsound++; if (!first) first = lines.join(' ; ') + ' — hit the iteration cap'; }
+        if (r.steps.length > f.nC + 2) {
+          unsound++;
+          if (!first) first = `${lines.join(' ; ')} — ${r.steps.length} steps for ${f.nC} clauses`;
+        }
+        for (let i = 1; i < r.steps.length; i++) {
+          if (r.steps[i].score < r.steps[i - 1].score) {
+            unsound++; if (!first) first = lines.join(' ; ') + ' — score decreased';
+          }
+        }
+      }
+      s.ok('enough random formulas were generated', tested > 300, `only ${tested}`);
+      s.is('greedy is sound, never lowers its score, and always terminates within |C| steps',
+        unsound, 0, first);
+    }
+  }
+
+  /* ---------------- Topic 5 · DPLL ---------------- */
+  {
+    // Pure literals, against the slide.
+    const pure = w.stParse(w.ST_PRESETS.pure);
+    s.is('the deck pure-literal example gives P and ¬S',
+      w.dpPure(pure.clauses).map(l => (l.neg ? '~' : '') + l.v).join(','), 'P,~S');
+
+    // Unit propagation, against the slide, ending in the conflict the
+    // deck displays but does not name.
+    const unit = w.stParse(w.ST_PRESETS.unit);
+    s.is('the deck unit example starts with ¬Q and R',
+      w.dpUnits(unit.clauses).map(l => (l.neg ? '~' : '') + l.v).join(','), '~Q,R');
+    const prop = w.dpPropagate(unit.clauses, {});
+    s.ok('and propagation ends in a conflict', prop.conflict === true, prop.why);
+    s.ok('naming S as the variable forced both ways', /\bS\b/.test(prop.why), prop.why);
+    s.ok('so that clause set is unsatisfiable', w.stBrute(unit.clauses, unit.vars).sat === false);
+
+    // Pure literal elimination must never conflict. That is its
+    // defining property, so it is worth testing rather than assuming.
+    {
+      let bad = 0, first = '', seed = 31337, tested = 0;
+      const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+      const vars = ['P', 'Q', 'R', 'S'];
+      for (let t = 0; t < 500; t++) {
+        const n = 2 + Math.floor(rnd() * 6), lines = [];
+        for (let i = 0; i < n; i++) {
+          const k = 1 + Math.floor(rnd() * 3), lits = [];
+          for (let j = 0; j < k; j++) lits.push((rnd() < 0.5 ? '~' : '') + vars[Math.floor(rnd() * 4)]);
+          lines.push(lits.join(' | '));
+        }
+        const f = w.stParse(lines.join('\n'));
+        if (!f.ok) continue;
+        tested++;
+        const pe = w.dpPureEliminate(f.clauses, {});
+        if (pe.conflict) { bad++; if (!first) first = lines.join(' ; '); }
+        // And it must preserve satisfiability.
+        const before = w.stBrute(f.clauses, f.vars).sat;
+        const after = w.stBrute(w.stSimplify(f.clauses, pe.asg), f.vars).sat;
+        if (before !== after) { bad++; if (!first) first = lines.join(' ; ') + ' — changed the answer'; }
+      }
+      s.ok('enough formulas were generated', tested > 400, `only ${tested}`);
+      s.is('pure literal elimination never conflicts and never changes the answer', bad, 0, first);
+    }
+
+    // DPLL against exhaustive search, under every combination of rules.
+    {
+      let bad = 0, first = '', seed = 5150, tested = 0;
+      const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+      const vars = ['P', 'Q', 'R', 'S'];
+      for (let t = 0; t < 400; t++) {
+        const n = 2 + Math.floor(rnd() * 7), lines = [];
+        for (let i = 0; i < n; i++) {
+          const k = 1 + Math.floor(rnd() * 3), lits = [];
+          for (let j = 0; j < k; j++) lits.push((rnd() < 0.5 ? '~' : '') + vars[Math.floor(rnd() * 4)]);
+          lines.push(lits.join(' | '));
+        }
+        const f = w.stParse(lines.join('\n'));
+        if (!f.ok) continue;
+        tested++;
+        const want = w.stBrute(f.clauses, f.vars).sat;
+        [[true, true], [true, false], [false, true], [false, false]].forEach(([pu, un]) => {
+          const r = w.dpSolve(f.clauses, f.vars, { pure: pu, unit: un });
+          if (!r.ok) { bad++; if (!first) first = lines.join(' ; ') + ' — ' + r.error; return; }
+          if (r.sat !== want) {
+            bad++;
+            if (!first) first = `${lines.join(' ; ')} — pure=${pu} unit=${un} said ${r.sat}, truth ${want}`;
+          }
+          // A model returned must actually work.
+          if (r.sat && !w.stEval(f.clauses, r.model).all) {
+            bad++; if (!first) first = lines.join(' ; ') + ' — returned a model that fails';
+          }
+        });
+      }
+      s.ok('enough formulas were generated', tested > 300, `only ${tested}`);
+      s.is('DPLL matches exhaustive search under all four rule settings, and every model verifies',
+        bad, 0, first);
+    }
+
+    // The rules are an optimisation, not a correctness fix: turning
+    // them off must never change the answer, only the effort.
+    {
+      const f = w.stParse(w.ST_PRESETS.greedy);
+      const on = w.dpSolve(f.clauses, f.vars, { pure: true, unit: true });
+      const off = w.dpSolve(f.clauses, f.vars, { pure: false, unit: false });
+      s.is('the rules do not change the verdict', on.sat, off.sat);
+      s.ok('but they do reduce the work', on.calls <= off.calls,
+        `${on.calls} with, ${off.calls} without`);
+    }
+  }
+
+  /* ---------------- Topic 5 · 2SAT, Horn, SAT ≤p 3SAT ---------------- */
+  {
+    const p = w.stParse(w.ST_PRESETS.twosat);
+    const r = w.tsSolve(p.clauses, p.vars);
+    s.ok('the lecture 2SAT example solves', r.ok, r.error);
+    s.ok('and is satisfiable', r.sat === true);
+    s.is('with the two components the slide draws',
+      r.components.map(c => '{' + c.join(',') + '}').sort().join(' '),
+      '{P,Q,R} {¬P,¬Q,¬R}');
+    s.ok('and the assignment it produces really satisfies every clause', r.verified,
+      w.stShowAsg(r.asg, p.vars));
+
+    const bad2 = w.stParse(w.ST_PRESETS.twobad);
+    const rb = w.tsSolve(bad2.clauses, bad2.vars);
+    s.ok('an unsatisfiable 2SAT instance is detected', rb.sat === false);
+    s.ok('by naming a variable whose two literals share a component',
+      rb.clashes.length > 0, JSON.stringify(rb.clashes));
+
+    s.ok('a 3-literal clause is refused rather than mis-solved',
+      w.tsSolve(w.stParse('(P | Q | R)').clauses, ['P', 'Q', 'R']).ok === false);
+    s.ok('a tautological clause is handled, not crashed on',
+      w.tsSolve(w.stParse('(P | ~P)\n(Q | ~Q)').clauses, ['P', 'Q']).sat === true);
+
+    // 2SAT against exhaustive search, at volume.
+    {
+      let bad = 0, first = '', tested = 0, sat = 0, unsat = 0, seed = 909;
+      const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+      const vars = ['P', 'Q', 'R', 'S'];
+      for (let t = 0; t < 1200; t++) {
+        const n = 2 + Math.floor(rnd() * 7), lines = [];
+        for (let i = 0; i < n; i++) {
+          lines.push((rnd() < 0.5 ? '~' : '') + vars[Math.floor(rnd() * 4)] + ' | ' +
+                     (rnd() < 0.5 ? '~' : '') + vars[Math.floor(rnd() * 4)]);
+        }
+        const f = w.stParse(lines.join('\n'));
+        if (!f.ok) continue;
+        tested++;
+        const got = w.tsSolve(f.clauses, f.vars), want = w.stBrute(f.clauses, f.vars);
+        if (!got.ok) { bad++; if (!first) first = lines.join(' ; ') + ' — ' + got.error; continue; }
+        if (got.sat !== want.sat) {
+          bad++; if (!first) first = `${lines.join(' ; ')} — 2SAT said ${got.sat}, truth ${want.sat}`;
+        }
+        if (got.sat) {
+          sat++;
+          if (!w.stEval(f.clauses, got.asg).all) {
+            bad++; if (!first) first = lines.join(' ; ') + ' — assignment does not satisfy';
+          }
+        } else unsat++;
+      }
+      s.ok('enough 2SAT instances were generated', tested > 1000, `only ${tested}`);
+      s.ok('and both answers occur', sat > 100 && unsat > 20, `${sat} sat, ${unsat} unsat`);
+      s.is('the SCC method agrees with exhaustive search every time, ' +
+           'and every assignment it returns works', bad, 0, first);
+    }
+
+    // Horn.
+    const h = w.stParse(w.ST_PRESETS.horn);
+    const hr = w.hnSolve(h.clauses);
+    s.ok('the lecture Horn example is recognised as Horn', hr.ok, hr.error);
+    s.is('forward chaining derives all five atoms', hr.known.join(','), 'P,Q,R,S,T');
+    s.ok('and it is satisfiable', hr.sat === true);
+    s.is('agreeing with exhaustive search', hr.sat, w.stBrute(h.clauses, h.vars).sat);
+    s.ok('a non-Horn clause is reported as such',
+      w.hnClassify(w.stParse('(P | Q)').clauses).horn === false);
+    s.ok('and (¬P ∨ Q) is Horn', w.hnClassify(w.stParse('(~P | Q)').clauses).horn === true);
+
+    {
+      // Horn forward chaining vs exhaustive search.
+      let bad = 0, first = '', tested = 0, seed = 246;
+      const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+      const vars = ['P', 'Q', 'R', 'S'];
+      for (let t = 0; t < 600; t++) {
+        const n = 2 + Math.floor(rnd() * 5), lines = [];
+        for (let i = 0; i < n; i++) {
+          const body = vars.filter(() => rnd() < 0.4);
+          const lits = body.map(v => '~' + v);
+          if (rnd() < 0.75) lits.push(vars[Math.floor(rnd() * 4)]);
+          if (!lits.length) continue;
+          lines.push(lits.join(' | '));
+        }
+        if (!lines.length) continue;
+        const f = w.stParse(lines.join('\n'));
+        if (!f.ok) continue;
+        const cls = w.hnClassify(f.clauses);
+        if (!cls.horn) continue;
+        tested++;
+        const got = w.hnSolve(f.clauses), want = w.stBrute(f.clauses, f.vars);
+        if (got.sat !== want.sat) {
+          bad++; if (!first) first = `${lines.join(' ; ')} — Horn said ${got.sat}, truth ${want.sat}`;
+        }
+        if (got.sat && !w.stEval(f.clauses, got.asg).all) {
+          bad++; if (!first) first = lines.join(' ; ') + ' — minimal model does not satisfy';
+        }
+      }
+      s.ok('enough Horn formulas were generated', tested > 300, `only ${tested}`);
+      s.is('forward chaining decides every one correctly', bad, 0, first);
+    }
+
+    // SAT ≤p 3SAT.
+    const wide = w.stParse(w.ST_PRESETS.wide);
+    const three = w.tsTo3(wide.clauses, wide.vars);
+    s.is('the lecture wide clause is split to width 3', three.widest, 3);
+    s.is('using one fresh variable', three.added, 1);
+    s.is('giving exactly the clauses on the slide',
+      w.stShow(three.clauses), '(P ∨ ¬Q ∨ X1) ∧ (¬X1 ∨ R ∨ S) ∧ (Q ∨ ¬R ∨ ¬T)');
+
+    {
+      // The reduction's actual claim, at volume: equisatisfiable.
+      let bad = 0, first = '', tested = 0, split = 0, seed = 767;
+      const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+      const vars = ['P', 'Q', 'R', 'S', 'T'];
+      for (let t = 0; t < 400; t++) {
+        const n = 1 + Math.floor(rnd() * 4), lines = [];
+        for (let i = 0; i < n; i++) {
+          const k = 2 + Math.floor(rnd() * 4), lits = [];
+          for (let j = 0; j < k; j++) lits.push((rnd() < 0.5 ? '~' : '') + vars[Math.floor(rnd() * 5)]);
+          lines.push(lits.join(' | '));
+        }
+        const f = w.stParse(lines.join('\n'));
+        if (!f.ok) continue;
+        tested++;
+        const chk = w.tsTo3Check(f.clauses, f.vars);
+        if (!chk.ok) continue;
+        if (f.widest > 3) split++;
+        if (!chk.agree) {
+          bad++; if (!first) first = `${lines.join(' ; ')} — ${chk.before} became ${chk.after}`;
+        }
+        if (chk.widest > 3) {
+          bad++; if (!first) first = lines.join(' ; ') + ' — still has a wide clause';
+        }
+      }
+      s.ok('enough formulas were generated', tested > 300, `only ${tested}`);
+      s.ok('and many actually needed splitting', split > 100, `only ${split}`);
+      s.is('every one comes out at width 3 with satisfiability preserved', bad, 0, first);
+    }
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 2000);

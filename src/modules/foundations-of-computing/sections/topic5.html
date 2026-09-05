@@ -1,0 +1,456 @@
+<section id="topic5" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 05 · SAT Solving</div>
+        <h1>Fast, Correct, or Restricted — Pick Two</h1>
+        <div class="topic-subtitle">what you can actually do about an NP-complete problem</div>
+      </div>
+
+      <p>Topic 2 established that SAT is NP-complete and left it there. This topic is about what to do
+      next, because the problem does not go away: every NP problem reduces to SAT, logic is a natural
+      specification language, and industrial solvers routinely handle formulas with millions of
+      literals. Three honest responses to a hard problem, and this topic covers all three.</p>
+
+      <div class="callout">
+        <div class="callout-label">The three responses, and what each gives up</div>
+        <strong>Be fast, give up correctness.</strong> GREEDY-SAT runs in polynomial time and gets the
+        answer wrong.<br>
+        <strong>Be correct, give up speed.</strong> DPLL always answers correctly, in exponential time
+        on the worst case, but with two rules that make the typical case survivable.<br>
+        <strong>Restrict the problem.</strong> 2SAT and Horn formulas are genuinely in P — not
+        heuristically fast, provably polynomial.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Why SAT is worth this much effort</div>
+        <ul style="margin:6px 0 0;">
+          <li>The first problem shown to be NP-complete (Cook&ndash;Levin, Topic 3).</li>
+          <li>Every problem in NP reduces to it, so a polynomial algorithm for SAT would prove
+            <strong>P = NP</strong>.</li>
+          <li>Reductions <em>to</em> SAT are usually straightforward, which makes it a practical target
+            rather than only a theoretical one.</li>
+          <li>Even if P ≠ NP, real instances still need answering — and real instances are rarely
+            worst-case.</li>
+        </ul>
+      </div>
+
+      <!-- ===== Greedy ===== -->
+      <h2 id="t5-greedy">A greedy approach, and where it fails</h2>
+
+      <p>The obvious idea: guess an assignment, then keep flipping whichever single variable improves
+      the count of satisfied clauses, until no flip helps.</p>
+
+      <div class="proof">
+        <div class="pf-lbl">GREEDY-SAT(C)</div>
+        <div class="pf-step">1. Randomly select a variable assignment V</div>
+        <div class="pf-step">2. <strong>While</strong> there is some unsatisfied clause in C:</div>
+        <div class="pf-step">&nbsp;&nbsp;3. Count the number of unsatisfied clauses</div>
+        <div class="pf-step">&nbsp;&nbsp;4. <strong>For each</strong> variable P: count the clauses
+          satisfied by <em>flipping</em> P</div>
+        <div class="pf-step">&nbsp;&nbsp;5. <strong>If</strong> no improvement: <strong>Return False</strong></div>
+        <div class="pf-step">&nbsp;&nbsp;6. Update V to the best improvement</div>
+        <div class="pf-step">7. <strong>Return True</strong></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Theorem: GREEDY-SAT runs in polynomial time</div>
+        <strong>Proof.</strong> Choosing a random assignment and scoring it are both linear. Each
+        iteration scores at most n assignments differing in one variable, so it is polynomial. And
+        since the score <em>strictly increases</em> every iteration and is bounded by |C|, there are at
+        most |C| iterations. ∎
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The proof is correct. The algorithm is still wrong.</div>
+        Nothing in that theorem says the answer is right — only that it arrives quickly. GREEDY-SAT is
+        <strong>sound but incomplete</strong>: when it returns True it hands you an assignment you can
+        check yourself, but when it returns False it has proved nothing at all. All it means is
+        &ldquo;I ran out of uphill moves&rdquo;.<br><br>
+        This is not a hypothetical. On the lecture&rsquo;s own seven-clause example, starting from the
+        assignment the slides pick — <code>P := True, Q := False, R := False</code> — greedy scores 6,
+        finds that no single flip does better than 6, and returns <strong>False</strong>. The formula
+        is satisfiable: <code>P := False, Q := True, R := True</code> satisfies all seven. Greedy
+        cannot get there because the route passes through assignments that score <em>worse</em>.
+      </div>
+
+      <h3 id="t5-gdtool">&#128736;&#65039; Watch it climb, and watch it get stuck</h3>
+
+      <div class="tool" data-run="runGreedy">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Hill climbing, with the whole landscape visible</h3>
+        </div>
+        <div class="tool-desc">One clause per line, literals separated by <code>|</code>, negation as
+          <code>~</code>. The tool runs greedy from your chosen start, then shows every assignment with
+          its score so you can see the local maxima — and reruns greedy from <em>all</em> starts to
+          measure how often it is wrong.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="gd-text">Clauses</label>
+            <textarea id="gd-text" rows="7" spellcheck="false">(P | Q)
+(P | R)
+(P | ~Q | R)
+(~P | ~Q)
+(~P | Q)
+(~P | ~R)
+(P | Q | ~R)</textarea>
+          </div>
+          <div class="tool-field" style="flex:0 0 150px;">
+            <label for="gd-start">Start (T/F per variable)</label>
+            <input type="text" id="gd-start" value="TFF" spellcheck="false">
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="gdPreset('greedy')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="gdPreset('twosat')">A 2SAT formula</button>
+          <button class="tool-btn secondary" onclick="gdPreset('unsat')">Unsatisfiable</button>
+          <button class="tool-btn secondary" onclick="gdPreset('horn')">Horn clauses</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="gd-output"></div>
+      </div>
+
+      <!-- ===== Branching and DPLL ===== -->
+      <h2 id="t5-dpll">Branching, and the DPLL algorithm</h2>
+
+      <p>To be <em>right</em>, an algorithm has to consider both values of a variable. That is the naïve
+      branching algorithm: pick a variable, try False, try True, recurse. It is divide-and-conquer —
+      each branch is the same problem with one fewer variable.</p>
+
+      <div class="proof">
+        <div class="pf-lbl">BRANCH-SAT(C, U)</div>
+        <div class="pf-step">1. <strong>If</strong> U contains a conflict: <strong>Return False</strong></div>
+        <div class="pf-step">2. <strong>If</strong> C = &empty;: <strong>Return True</strong></div>
+        <div class="pf-step">3. Simplify the clauses in C as much as possible</div>
+        <div class="pf-step">4. Select a variable P appearing in C</div>
+        <div class="pf-step">5. <strong>If</strong> BRANCH-SAT(C, U ∪ {¬P}) = True: <strong>Return True</strong></div>
+        <div class="pf-step">6. <strong>If</strong> BRANCH-SAT(C, U ∪ {P}) = True: <strong>Return True</strong></div>
+        <div class="pf-step">7. <strong>Return False</strong></div>
+      </div>
+
+      <p>This is correct and it is exponential — it is a systematic walk over 2<sup>n</sup> assignments.
+      <strong>DPLL</strong> (Davis, Logemann and Loveland, 1962, building on Davis and Putnam, 1960) is
+      the same algorithm with two rules inserted before the branch. Neither rule is needed for
+      correctness. Both are there to make branching unnecessary as often as possible.</p>
+
+      <div class="two-col">
+        <div class="callout exam">
+          <div class="callout-label">Unit propagation — what MUST be assigned</div>
+          A <strong>unit clause</strong> has exactly one literal left. There is no choice: that literal
+          must be true, or the clause is dead.<br><br>
+          Assign it, delete every clause it satisfies, and delete its negation from the rest. That
+          often creates <em>new</em> unit clauses, so the rule cascades.<br><br>
+          Because it forces things, it <strong>can produce a conflict</strong> — and that is how DPLL
+          discovers a branch is hopeless before exploring it.
+        </div>
+        <div class="callout exam">
+          <div class="callout-label">Pure literal elimination — what SHOULD be assigned</div>
+          A <strong>pure literal</strong> appears with only one sign in the whole formula: always P, or
+          always ¬P, never both.<br><br>
+          Make it true. Every clause containing it is satisfied at a stroke, and because its negation
+          appears nowhere, nothing is damaged.<br><br>
+          It <strong>can never cause a conflict</strong>. It is free progress — which is exactly why
+          the deck calls it &ldquo;should&rdquo; rather than &ldquo;must&rdquo;.
+        </div>
+      </div>
+
+      <div class="proof">
+        <div class="pf-lbl">DPLL(C, U)</div>
+        <div class="pf-step">1. <strong>If</strong> U contains a conflict: <strong>Return False</strong></div>
+        <div class="pf-step">2. <strong>If</strong> C = &empty;: <strong>Return True</strong></div>
+        <div class="pf-step">3. Simplify the clauses in C as much as possible</div>
+        <div class="pf-step">4. Apply PURE-LITERAL-ELIMINATION to C</div>
+        <div class="pf-step">5. Apply UNIT-PROPAGATION to C</div>
+        <div class="pf-step">6. Select a variable P appearing in C</div>
+        <div class="pf-step">7. <strong>If</strong> DPLL(C, U ∪ {¬P}) = True: <strong>Return True</strong></div>
+        <div class="pf-step">8. <strong>If</strong> DPLL(C, U ∪ {P}) = True: <strong>Return True</strong></div>
+        <div class="pf-step">9. <strong>Return False</strong></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Follow the lecture's unit propagation to its end</div>
+        The slides propagate <code>¬Q</code> and <code>R</code>, which forces <code>P</code>, which
+        leaves <code>S</code> and <code>¬S</code> both as unit clauses — and then the deck moves on.
+        That pair <em>is</em> the conclusion: S is forced both ways, so the branch has a conflict, and
+        since no branching happened at all, <strong>that clause set is unsatisfiable</strong>. Running
+        it in the tool below confirms it against exhaustive search.
+      </div>
+
+      <h3 id="t5-dptool">&#128736;&#65039; DPLL, with each rule switchable</h3>
+
+      <div class="tool" data-run="runDpll">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>The search tree, and what the two rules save you</h3>
+        </div>
+        <div class="tool-desc">Every answer is cross-checked against exhaustive search, and any model
+          returned is verified against the clauses. Switch the rules off to see how much bigger the
+          search gets without them — the answer never changes, only the effort.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="dp-text">Clauses</label>
+            <textarea id="dp-text" rows="7" spellcheck="false">~Q
+(P | Q)
+(~P | ~R | S)
+(~P | Q | ~S)
+(~P | ~Q)
+R
+(Q | R | S)</textarea>
+          </div>
+          <div class="tool-field" style="flex:0 0 150px;">
+            <label for="dp-unit">Unit propagation</label>
+            <select id="dp-unit"><option value="on">on</option><option value="off">off</option></select>
+          </div>
+          <div class="tool-field" style="flex:0 0 150px;">
+            <label for="dp-pure">Pure literals</label>
+            <select id="dp-pure"><option value="on">on</option><option value="off">off</option></select>
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="dpPreset('unit')">Unit propagation example</button>
+          <button class="tool-btn secondary" onclick="dpPreset('pure')">Pure literal example</button>
+          <button class="tool-btn secondary" onclick="dpPreset('greedy')">Where greedy failed</button>
+          <button class="tool-btn secondary" onclick="dpPreset('unsat')">Unsatisfiable</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="dp-output"></div>
+      </div>
+
+      <!-- ===== N-SAT ===== -->
+      <h2 id="t5-nsat">Restricted versions: N SAT</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write this out exactly</div>
+        <strong>The Boolean Satisfiability Problem N SAT</strong><br>
+        <strong>Input)</strong> A propositional formula F in CNF with <em>at most</em> N literals in
+        each clause.<br>
+        <strong>Output)</strong> True if and only if F is satisfiable.
+      </div>
+
+      <p>One direction of reduction is trivial. A formula with at most k literals per clause also has at
+      most k+1, so <strong>2SAT ≤<sub>p</sub> 3SAT ≤<sub>p</sub> 4SAT ≤<sub>p</sub> … ≤<sub>p</sub>
+      SAT</strong> with no work at all — the identity map is the reduction.</p>
+
+      <p>The other direction is the surprising one: <strong>SAT ≤<sub>p</sub> 3SAT</strong>. Unbounded
+      clauses can be chopped down to three literals without changing satisfiability.</p>
+
+      <div class="xl-walk">
+        <div class="xl-step"><span class="xl-step-n">1</span><span class="xl-step-body">
+          Take any CNF formula, e.g. (P ∨ ¬Q ∨ R ∨ S) ∧ (Q ∨ ¬R ∨ ¬T).</span></div>
+        <div class="xl-step"><span class="xl-step-n">2</span><span class="xl-step-body">
+          Find a clause with more than 3 literals — here the first.</span></div>
+        <div class="xl-step"><span class="xl-step-n">3</span><span class="xl-step-body">
+          Break it in the middle.</span></div>
+        <div class="xl-step"><span class="xl-step-n">4</span><span class="xl-step-body">
+          Introduce a <strong>fresh</strong> variable X to bridge the gap:
+          <strong>(P ∨ ¬Q ∨ X) ∧ (¬X ∨ R ∨ S)</strong>.</span></div>
+        <div class="xl-step"><span class="xl-step-n">5</span><span class="xl-step-body">
+          Repeat until every clause has at most 3 literals.</span></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why the bridge works, in both directions</div>
+        If X is <strong>false</strong>, the first clause needs P or ¬Q. If X is <strong>true</strong>,
+        the second needs R or S. Either way something from the original clause must be true — so
+        satisfying the new formula satisfies the old.<br><br>
+        Conversely, given a satisfying assignment for the original, some literal in the wide clause is
+        true; set X to send the obligation to the other side. So the two are satisfiable together or
+        not at all — which is what ≤<sub>p</sub> requires, and the half that is easy to forget.
+      </div>
+
+      <h3 id="t5-r3tool">&#128736;&#65039; Chop clauses down to three</h3>
+
+      <div class="tool" data-run="runTo3">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>SAT &le;<sub>p</sub> 3SAT, checked rather than asserted</h3>
+        </div>
+        <div class="tool-desc">Splits every wide clause and then verifies, by exhaustive search over
+          both formulas, that satisfiability really is preserved — the claim the reduction has to make.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 300px;">
+            <label for="r3-text">Clauses</label>
+            <textarea id="r3-text" rows="4" spellcheck="false">(P | ~Q | R | S)
+(Q | ~R | ~T)</textarea>
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="r3Preset('wide')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="r3Preset('greedy')">Already narrow</button>
+          <button class="tool-btn secondary" onclick="r3Preset('unsat')">Unsatisfiable</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="r3-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The chain stops at 3</div>
+        Putting the two theorems together, <strong>3SAT, 4SAT, …, SAT are all equivalent</strong> — each
+        reduces to the others, so all are NP-complete. The obvious next question is whether the trick
+        continues: <strong>3SAT ≤<sub>p</sub> 2SAT?</strong><br><br>
+        It does not, and the next section shows why not by showing that 2SAT is <em>easy</em>. If 3SAT
+        reduced to 2SAT then 3SAT would be in P, and so would every problem in NP.
+      </div>
+
+      <!-- ===== 2SAT ===== -->
+      <h2 id="t5-2sat">2SAT is in P</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Theorem: 2SAT is solvable in polynomial time</div>
+        <strong>Proof.</strong> By the strongly connected component algorithm from Topic 4.<br><br>
+        <strong>Step 1)</strong> Write each clause as two implications. (a ∨ b) is equivalent to
+        (¬a → b) ∧ (¬b → a) — if one disjunct fails the other must hold.<br>
+        <strong>Step 2)</strong> Build the <strong>implication graph</strong>: one vertex per literal,
+        one edge per implication.<br>
+        <strong>Step 3)</strong> Compute the strongly connected components.<br>
+        <strong>Step 4)</strong> If any component contains both a literal and its negation, F is
+        unsatisfiable. Otherwise it is satisfiable.<br><br>
+        All four steps are polynomial, so 2SAT is in P. ∎
+      </div>
+
+      <p>Step 4 is the one to understand rather than memorise. A path x ⇝ y in the implication graph
+      means &ldquo;x forces y&rdquo;. If x and ¬x lie in the same component then x forces ¬x
+      <em>and</em> ¬x forces x. Setting x true makes it false; setting it false makes it true. Neither
+      value survives, so nothing satisfies the formula.</p>
+
+      <p>And when no component contains such a pair, an assignment can be read straight off: make a
+      literal true when its component sits <strong>downstream</strong> of its negation&rsquo;s in the
+      condensation. Implications only ever run from earlier components to later ones, so choosing the
+      downstream literal can never contradict something already settled.</p>
+
+      <h3 id="t5-twotool">&#128736;&#65039; The implication graph, end to end</h3>
+
+      <div class="tool" data-run="runTwoSat">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Clauses to implications to components to an answer</h3>
+        </div>
+        <div class="tool-desc">This calls the same SCC engine as Topic 4 — the deck says &ldquo;using
+          our strongly connected component algorithm&rdquo;, and here it literally is. The verdict is
+          cross-checked against exhaustive search, and any assignment produced is checked against the
+          clauses.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 300px;">
+            <label for="two-text">Clauses (at most 2 literals each)</label>
+            <textarea id="two-text" rows="5" spellcheck="false">(~P | Q)
+(~Q | R)
+(P | ~R)
+(R | Q)</textarea>
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="twoPreset('twosat')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="twoPreset('twobad')">Unsatisfiable</button>
+          <button class="tool-btn secondary" onclick="twoPreset('greedy')">Try a 3-literal one</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="two-output"></div>
+      </div>
+
+      <!-- ===== Horn ===== -->
+      <h2 id="t5-horn">Horn clauses, easy for a different reason</h2>
+
+      <p>A <strong>definite Horn clause</strong> has exactly one positive literal, which lets it be
+      written as a rule with a single head:</p>
+
+      <div class="callout exam">
+        <div class="callout-label">The same clauses, two ways</div>
+        <code>P</code>, &nbsp; <code>(¬P ∨ Q)</code>, &nbsp; <code>(¬P ∨ ¬Q ∨ R)</code>, &nbsp;
+        <code>(¬Q ∨ S)</code>, &nbsp; <code>(¬S ∨ ¬R ∨ T)</code><br>
+        becomes<br>
+        <code>P</code>, &nbsp; <code>P → Q</code>, &nbsp; <code>P ∧ Q → R</code>, &nbsp;
+        <code>Q → S</code>, &nbsp; <code>S ∧ R → T</code><br><br>
+        The negative literals are the body, the single positive literal is the head. A clause with
+        <em>no</em> positive literal is a <strong>goal</strong>: it says not all of its atoms may hold.
+      </div>
+
+      <p>Horn formulas are decided by <strong>forward chaining</strong>: start from the facts, fire
+      every rule whose body is satisfied, repeat until nothing new appears. One pass, no backtracking,
+      linear time. It works because a Horn formula has a <strong>unique minimal model</strong> — the
+      set of atoms the rules force. If that model breaks a goal clause, every larger model breaks it
+      too, so there is nothing else to try.</p>
+
+      <h3 id="t5-hntool">&#128736;&#65039; Forward chaining</h3>
+
+      <div class="tool" data-run="runHorn">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Rules, facts, and the minimal model</h3>
+        </div>
+        <div class="tool-desc">Shows each clause in rule form, then fires the rules in order. Feed it a
+          non-Horn formula and it will say which clause disqualifies it and why.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 300px;">
+            <label for="hn-text">Clauses</label>
+            <textarea id="hn-text" rows="6" spellcheck="false">(P)
+(~P | Q)
+(~P | ~Q | R)
+(~Q | S)
+(~S | ~R | T)</textarea>
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="hornPreset('horn')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="hornPreset('unit')">Not Horn</button>
+          <button class="tool-btn secondary" onclick="hornPreset('twosat')">A 2SAT formula</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="hn-out2"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Two easy fragments, two unrelated reasons</div>
+        2SAT is easy because it is secretly a <em>graph</em> problem. Horn is easy because it has a
+        <em>unique minimal model</em> reachable by a fixed-point computation. Neither contains the
+        other: <code>(P ∨ Q)</code> is 2SAT but not Horn (two positive literals);
+        <code>(¬P ∨ ¬Q ∨ R)</code> is Horn but not 2SAT (three literals). That is why the
+        lecture&rsquo;s diagram draws them as overlapping circles inside P, rather than one inside the
+        other.
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="t5-exam">Exam takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Six one-liners</div>
+        <ul style="margin:6px 0 0;">
+          <li>GREEDY-SAT is polynomial <em>and</em> incomplete. True means true; False means
+            &ldquo;stuck&rdquo;.</li>
+          <li>Unit propagation assigns what <strong>must</strong> be — and can conflict.</li>
+          <li>Pure literal elimination assigns what <strong>should</strong> be — and never can.</li>
+          <li>Neither rule is needed for correctness. Both are there for speed.</li>
+          <li>SAT ≤<sub>p</sub> 3SAT by splitting wide clauses with fresh bridging variables, so 3SAT
+            and SAT are equally hard.</li>
+          <li>2SAT and Horn are in P; 3SAT is not known to be. The line falls between 2 and 3.</li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>Reading &ldquo;polynomial time&rdquo; as &ldquo;solves the problem&rdquo;. Greedy is the
+            counterexample, and it is on the slides.</li>
+          <li>Swapping the two DPLL rules. Unit = one literal <em>left in a clause</em>. Pure = one
+            <em>sign across the whole formula</em>.</li>
+          <li>Claiming pure literal elimination can cause a conflict. It cannot — that is its
+            defining property.</li>
+          <li>Reusing an existing variable as the bridge in SAT ≤<sub>p</sub> 3SAT. It must be
+            <strong>fresh</strong>, or you constrain something you had no right to.</li>
+          <li>Giving only one direction of the ≤<sub>p</sub> argument. Both are required.</li>
+          <li>Concluding 2SAT is easy &ldquo;because clauses are small&rdquo;. 3SAT&rsquo;s clauses are
+            small too. It is easy because two literals make an <em>implication</em>.</li>
+          <li>Saying a component containing P and Q makes a formula unsatisfiable. It must contain a
+            literal <strong>and its own negation</strong>.</li>
+        </ul>
+      </div>
+    </section>
