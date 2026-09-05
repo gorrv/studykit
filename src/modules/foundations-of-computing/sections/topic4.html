@@ -1,0 +1,495 @@
+<section id="topic4" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 04 · Graph Algorithms</div>
+        <h1>Searching, Spanning, Sorting, Condensing</h1>
+        <div class="topic-subtitle">four algorithms on graphs, and what each one is really counting</div>
+      </div>
+
+      <p>Everything in this topic runs on a graph, so the cost is written in two variables rather than
+      one: <strong>T(|V|, |E|)</strong>, the number of primitive operations on a graph with |V| vertices
+      and |E| edges. A primitive operation is anything doable in O(1). The reason for two variables is
+      that graphs vary in density — a graph on n vertices can have n−1 edges or n(n−1)/2 of them, and
+      an algorithm that touches every edge behaves very differently in the two cases.</p>
+
+      <div class="callout">
+        <div class="callout-label">The four algorithms, and the one idea each rests on</div>
+        <strong>BFS and DFS</strong> differ by one data structure — a queue or a stack — and nothing
+        else.<br>
+        <strong>Kruskal and Prim</strong> are both greedy, and both correct, and on the lecture graph
+        they return <em>different</em> trees.<br>
+        <strong>Topological sort</strong> exists exactly when the graph has no cycle.<br>
+        <strong>SCC</strong> uses depth-first search twice, the second time on the reversed graph.
+      </div>
+
+      <!-- ===== BFS and DFS ===== -->
+      <h2 id="t4-search">Breadth-first and depth-first search</h2>
+
+      <p>The two searches are the same five lines. Only the container changes.</p>
+
+      <div class="two-col">
+        <div class="proof">
+          <div class="pf-lbl">BREADTH-FIRST-SEARCH</div>
+          <div class="pf-step">1. Select root vertex and add to a <strong>queue</strong></div>
+          <div class="pf-step">2. <strong>While</strong> queue is not empty:</div>
+          <div class="pf-step">&nbsp;&nbsp;3. Inspect the <strong>first</strong> element u on the queue.</div>
+          <div class="pf-step">&nbsp;&nbsp;4. Add any unvisited neighbours of u to the queue.</div>
+          <div class="pf-step">&nbsp;&nbsp;5. Remove u from the queue.</div>
+        </div>
+        <div class="proof">
+          <div class="pf-lbl">DEPTH-FIRST-SEARCH</div>
+          <div class="pf-step">1. Select root vertex and add to a <strong>stack</strong></div>
+          <div class="pf-step">2. <strong>While</strong> stack is not empty:</div>
+          <div class="pf-step">&nbsp;&nbsp;3. Inspect the <strong>top</strong> element u on the stack.</div>
+          <div class="pf-step">&nbsp;&nbsp;4. Add any unvisited neighbours of u to the stack.</div>
+          <div class="pf-step">&nbsp;&nbsp;5. Remove u from the stack.</div>
+        </div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The termination time, and its proof</div>
+        <strong>Theorem.</strong> BFS and DFS both terminate in <strong>O(|V| + |E|)</strong>.<br><br>
+        <strong>Proof.</strong> Every vertex is enqueued and dequeued <em>at most once</em>, so steps 3–5
+        run once per u ∈ V. Inspecting and removing are O(1) each. Step 4 costs O(|Adj(u)|), because it
+        looks at every neighbour of u. Summing:<br><br>
+        <span class="pf-center">&sum;<sub>u∈V</sub> ( O(1) + O(|Adj(u)|) ) = O(|V|) + O(|E|)</span><br>
+        because &sum;<sub>u</sub> |Adj(u)| counts each edge once (twice if undirected), which is O(|E|).
+        The DFS proof is identical with &ldquo;stack&rdquo; for &ldquo;queue&rdquo;. ∎
+      </div>
+
+      <p>The sum is the only step worth pausing on. It is tempting to say &ldquo;step 4 is O(|E|) and it
+      runs |V| times, so O(|V|·|E|)&rdquo; — but that double-counts badly. Each vertex only pays for
+      <em>its own</em> neighbours, and adding those up across all vertices totals the edge count once.
+      This telescoping is why graph searches are linear rather than quadratic.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">What the two searches actually give you</div>
+        BFS visits everything at distance 1, then everything at distance 2, and so on, so the order it
+        dequeues vertices in <strong>is</strong> increasing distance from the root. That makes BFS a
+        shortest-path algorithm for free, on unweighted graphs.<br><br>
+        DFS gives no such ordering — it plunges. What it gives instead is the <strong>timestamp
+        structure</strong>: when a vertex is entered and when it is finished. That structure is what
+        Topic 4 uses twice more, for topological sorting and for SCC.
+      </div>
+
+      <h3 id="t4-grtool">&#128736;&#65039; Run either search, step by step</h3>
+
+      <div class="tool" data-run="runSearch">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Breadth-first and depth-first, on any graph</h3>
+        </div>
+        <div class="tool-desc">Write one line per vertex: <code>A &gt; B E G</code> for a directed graph,
+          <code>A - B</code> for an undirected one. The trace shows the queue or the stack at every
+          step; step through it with the transport bar.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="gr-text">Graph</label>
+            <textarea id="gr-text" rows="8" spellcheck="false">A &gt; B E G
+B &gt; C
+C &gt; D
+E &gt; C F G H
+F &gt; D
+G &gt; H
+H &gt; I
+I &gt; D</textarea>
+          </div>
+          <div class="tool-field" style="flex:0 0 110px;">
+            <label for="gr-root">Root</label>
+            <input type="text" id="gr-root" value="A" spellcheck="false">
+          </div>
+          <div class="tool-field" style="flex:0 0 150px;">
+            <label for="gr-mode">Search</label>
+            <select id="gr-mode">
+              <option value="bfs">breadth-first</option>
+              <option value="dfs">depth-first</option>
+            </select>
+          </div>
+          <div class="tool-field" style="flex:0 0 190px;">
+            <label for="gr-nbr">Neighbour order (DFS)</label>
+            <select id="gr-nbr">
+              <option value="stack">reverse — pushed on a stack</option>
+              <option value="listed">as listed</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="grPreset('search')">Lecture graph</button>
+          <button class="tool-btn secondary" onclick="grPreset('dag')">A DAG</button>
+          <button class="tool-btn secondary" onclick="grPreset('cyclic')">With a cycle</button>
+          <button class="tool-btn secondary" onclick="grPreset('scc')">The SCC graph</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="gr-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">A discrepancy worth knowing about</div>
+        The two Week 4 decks explore neighbours in <strong>opposite orders</strong>. The search slides
+        push neighbours onto a stack, so they come off in reverse: A&rsquo;s neighbours are B, E, G and
+        the search leaves for <strong>G</strong>. The topological-sort slides walk them in listed order
+        instead, so F leaves for <strong>E</strong>, not H. Both are genuine depth-first searches and
+        both are correct — but they produce different traces, which is worth knowing before you assume
+        you have made an arithmetic error. The tool above has a control for it.
+      </div>
+
+      <!-- ===== MST ===== -->
+      <h2 id="t4-mst">Minimum spanning trees</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        A <strong>spanning tree</strong> for a weighted graph G = (V, E, w) is a tree T = (V, E&prime;)
+        in which every vertex is connected and E&prime; &sube; E.<br><br>
+        A <strong>minimum spanning tree</strong> is a spanning tree whose total weight is minimal out of
+        all possible spanning trees.<br><br>
+        Note what is being minimised: the <strong>sum of the edge weights</strong>, not the number of
+        edges. Every spanning tree of a graph on |V| vertices has exactly |V| − 1 edges, so there is
+        nothing to choose there.
+      </div>
+
+      <p>Two greedy algorithms find one. Kruskal sorts all the edges once and takes them cheapest-first,
+      skipping any that would close a cycle. Prim grows a single tree outwards from a root, always
+      taking the cheapest edge that leaves it.</p>
+
+      <div class="two-col">
+        <div class="proof">
+          <div class="pf-lbl">KRUSKAL-MST(G)</div>
+          <div class="pf-step">1. Sort the edge list E by weight (shortest first)</div>
+          <div class="pf-step">2. Initialise the set T = &empty;</div>
+          <div class="pf-step">3. <strong>While</strong> sorted list E is not empty:</div>
+          <div class="pf-step">&nbsp;&nbsp;4. Dequeue shortest edge (u, v) from E</div>
+          <div class="pf-step">&nbsp;&nbsp;5. <strong>If</strong> T &cup; {(u,v)} is acyclic:</div>
+          <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;6. T &larr; T &cup; {(u,v)}</div>
+          <div class="pf-step">7. <strong>Return</strong> tree T</div>
+        </div>
+        <div class="proof">
+          <div class="pf-lbl">PRIM-MST(G)</div>
+          <div class="pf-step">1. Select a root r ∈ V, all its edges to a priority queue Q</div>
+          <div class="pf-step">2. Initialise the set T = &empty;</div>
+          <div class="pf-step">3. <strong>While</strong> queue Q is not empty:</div>
+          <div class="pf-step">&nbsp;&nbsp;4. Dequeue shortest edge (u, v) from Q</div>
+          <div class="pf-step">&nbsp;&nbsp;5. <strong>If</strong> T &cup; {(u,v)} is acyclic:</div>
+          <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;6. T &larr; T &cup; {(u,v)}</div>
+          <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;7. Add to Q any new edges adjacent to u or v</div>
+          <div class="pf-step">8. <strong>Return</strong> tree T</div>
+        </div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The two termination times</div>
+        <strong>Kruskal: O(|E| log |E|)</strong>, and the sort is the whole story —<br>
+        &nbsp;&nbsp;sorting E by weight = O(|E| log |E|)<br>
+        &nbsp;&nbsp;steps 4 and 6, once per edge = O(|E|)<br>
+        &nbsp;&nbsp;the cycle test, done by asking whether u and v are already connected =
+        O((|V| + |E|) &alpha;(|V|))<br>
+        where &alpha; is the inverse Ackermann function, which grows so slowly it is under 5 for any
+        input that fits in the universe. The sort dominates.<br><br>
+        <strong>Prim: O(|E| + |V| log |V|)</strong>, using a Fibonacci heap for the priority queue.
+        The bound is a property of the data structure, not of the algorithm — with a simpler heap you
+        get O(|E| log |V|).
+      </div>
+
+      <p>Step 5 is the interesting one in both. &ldquo;Is T ∪ {(u,v)} acyclic?&rdquo; sounds like it
+      needs a search, but it does not: T is always a forest, so adding (u,v) creates a cycle
+      <strong>exactly when</strong> u and v are already in the same component. That turns a graph search
+      into a lookup, and it is why the disjoint-set structure appears in the complexity bound.</p>
+
+      <h3 id="t4-msttool">&#128736;&#65039; Kruskal and Prim, and why they can disagree</h3>
+
+      <div class="tool" data-run="runMst">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Build the tree, then check it is minimum</h3>
+        </div>
+        <div class="tool-desc">Write weighted undirected edges as <code>A - B:4 H:8</code>. The result is
+          checked to be a genuine spanning tree, and — for graphs small enough — compared against
+          <em>every</em> spanning tree by brute force, so &ldquo;minimum&rdquo; is verified rather than
+          assumed.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="mst-text">Weighted graph</label>
+            <textarea id="mst-text" rows="8" spellcheck="false">A - B:4 H:8
+B - C:8 H:11
+C - D:7 F:4 I:2
+D - E:9 F:14
+E - F:10
+F - G:2
+G - H:1 I:6
+H - I:7</textarea>
+          </div>
+          <div class="tool-field" style="flex:0 0 150px;">
+            <label for="mst-alg">Algorithm</label>
+            <select id="mst-alg">
+              <option value="kruskal">Kruskal</option>
+              <option value="prim">Prim</option>
+            </select>
+          </div>
+          <div class="tool-field" style="flex:0 0 110px;">
+            <label for="mst-root">Prim&rsquo;s root</label>
+            <input type="text" id="mst-root" value="A" spellcheck="false">
+          </div>
+          <div class="tool-field" style="flex:0 0 200px;">
+            <label for="mst-tie">Tie-break on equal weights</label>
+            <select id="mst-tie">
+              <option value="alpha">alphabetical</option>
+              <option value="late">most recently queued</option>
+              <option value="early">longest queued</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="mst-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The thing to take from that tool</div>
+        On the lecture graph, Kruskal returns a tree containing <strong>A–H</strong> and Prim returns one
+        containing <strong>B–C</strong>. Both weigh 8. Both totals come to <strong>37</strong>. Brute
+        force over all 662 spanning trees confirms 37 is the minimum and that exactly two trees achieve
+        it — so both algorithms are right, and they have simply landed on different members of a tie.
+        If an exam answer differs from the mark scheme only in which of two equal-weight edges it took,
+        check the total before assuming you are wrong.
+      </div>
+
+      <!-- ===== Topological sort ===== -->
+      <h2 id="t4-topo">Directed acyclic graphs and topological sorting</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        A graph G = (V, E) is a <strong>directed acyclic graph</strong> if it is <strong>irreflexive</strong>
+        and contains no cycles of length &ge; 2 — equivalently, if there is a path u &#8669; v then there
+        is no path v &#8669; u.<br><br>
+        A <strong>topological sorting</strong> of a DAG is an ordered list L = &lang;v<sub>1</sub>, …,
+        v<sub>n</sub>&rang; such that <strong>if v<sub>i</sub> &#8669; v<sub>j</sub> then i &lt; j</strong>
+        — every arrow points downstream.
+      </div>
+
+      <div class="proof">
+        <div class="pf-lbl">TOPOLOGICAL-SORT(G)</div>
+        <div class="pf-step">1. <strong>While</strong> vertices remain unsorted:</div>
+        <div class="pf-step">&nbsp;&nbsp;2. Select <em>any</em> unsorted vertex and add to a stack</div>
+        <div class="pf-step">&nbsp;&nbsp;3. <strong>While</strong> stack is not empty:</div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;4. Inspect the top element u on the stack.</div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;5. <strong>If</strong> u has no unsorted neighbours:</div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6. Pop u and add to the <strong>front</strong> of list L.</div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;7. <strong>Else</strong>:</div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8. Add any unsorted neighbours of u to the stack.</div>
+        <div class="pf-step">9. <strong>Return</strong> sorted list L</div>
+      </div>
+
+      <p>A vertex is added to L only once <em>everything downstream of it</em> is already there — so it
+      lands in front of all its descendants. That is the invariant, and it is the whole proof of
+      correctness. The outer loop exists because a DAG need not be connected: dressing involves a watch
+      that nothing depends on and that depends on nothing.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">Two things that catch people out</div>
+        <strong>The order is not unique.</strong> Step 2 says &ldquo;select <em>any</em> unsorted
+        vertex&rdquo;. Socks and a watch can go in either order, so there are many correct answers and
+        the mark scheme has one of them. Check your answer against the definition — every arrow forwards
+        — rather than against a remembered list.<br><br>
+        <strong>Sorting and acyclicity are the same question.</strong> A topological order exists exactly
+        when there is no cycle, because three vertices on a cycle would each have to come before the
+        next and after it. So &ldquo;give a topological sort&rdquo; and &ldquo;show this is a DAG&rdquo;
+        are answered by the same piece of work.
+      </div>
+
+      <h3 id="t4-tstool">&#128736;&#65039; Sort it, or have your own order marked</h3>
+
+      <div class="tool" data-run="runTopo">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Topological sorting, and cycle witnesses</h3>
+        </div>
+        <div class="tool-desc">If the graph has a cycle the tool names one rather than just refusing —
+          on an exam you have to produce the witness. You can also type your own ordering and have it
+          checked against the definition, which is the useful direction: many orders are correct.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 300px;">
+            <label for="ts-text">Directed graph</label>
+            <textarea id="ts-text" rows="8" spellcheck="false">underwear &gt; shoes trousers
+socks &gt; shoes
+trousers &gt; belt shoes
+shirt &gt; belt tie
+belt &gt; jacket
+tie &gt; jacket
+watch
+jacket
+shoes</textarea>
+          </div>
+          <div class="tool-field" style="flex:0 0 190px;">
+            <label for="ts-nbr">Neighbour order</label>
+            <select id="ts-nbr">
+              <option value="stack">reverse — pushed on a stack</option>
+              <option value="listed">as listed</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="tsPreset('dress')">Getting dressed</button>
+          <button class="tool-btn secondary" onclick="tsPreset('dag')">A small DAG</button>
+          <button class="tool-btn secondary" onclick="tsPreset('cyclic')">Has a cycle</button>
+          <button class="tool-btn secondary" onclick="tsPreset('scc')">The SCC graph</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="ts-output"></div>
+
+        <div class="tool-controls" style="margin-top:14px;">
+          <div class="tool-field" style="flex:1 1 320px;">
+            <label for="ts-guess">Or check your own order</label>
+            <input type="text" id="ts-guess" spellcheck="false"
+                   value="socks underwear trousers shoes watch shirt belt tie jacket">
+          </div>
+          <button class="tool-btn green" onclick="tsMark()">Check my order ▶</button>
+        </div>
+        <div class="tool-output" id="ts-mark-output"></div>
+      </div>
+
+      <!-- ===== SCC ===== -->
+      <h2 id="t4-scc">Strongly connected components</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        Define a relation &sim; &sube; V &times; V by<br>
+        <span class="pf-center">u &sim; v &nbsp;&hArr;&nbsp; u = v, or there is a path u &#8669; v
+        <strong>and</strong> a path v &#8669; u</span><br>
+        A <strong>strongly connected component</strong> is a <strong>maximal</strong> subset C &sube; V
+        with u &sim; v for all u, v ∈ C. Equivalently, the components are the equivalence classes
+        [u]<sub>&sim;</sub> = { v ∈ V : v &sim; u }.<br><br>
+        The <strong>component graph</strong> G<sup>SCC</sup> = (V<sup>SCC</sup>, E<sup>SCC</sup>) has one
+        vertex per component, and (A, B) ∈ E<sup>SCC</sup> iff (a, b) ∈ E for some a ∈ A, b ∈ B with
+        A &ne; B.
+      </div>
+
+      <p>The word doing the work is <strong>maximal</strong>. Any single vertex is trivially strongly
+      connected with itself, so &ldquo;a set where everything reaches everything&rdquo; is not enough —
+      the set must not be extendable. Leaving out a vertex that belongs is the commonest way to lose
+      marks here, and it is why the tool below checks maximality separately.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">Theorem: G<sup>SCC</sup> is always a DAG</div>
+        <strong>Proof.</strong> Suppose for contradiction that the component graph contains a cycle
+        &lang;C<sub>1</sub>, C<sub>2</sub>, …, C<sub>n</sub>, C<sub>1</sub>&rang;.<br>
+        Choose any a ∈ C<sub>i</sub> and b ∈ C<sub>j</sub> with C<sub>i</sub> &ne; C<sub>j</sub>.<br>
+        Following the cycle forwards gives a path a &#8669; b; continuing round it gives b &#8669; a.<br>
+        So a &sim; b, and C<sub>i</sub> and C<sub>j</sub> were never <em>maximal</em> — they should have
+        been one component. Contradiction, so G<sup>SCC</sup> has no cycles. ∎
+      </div>
+
+      <p>This is a genuinely useful theorem rather than a curiosity: it says any directed graph, however
+      tangled, becomes a DAG once you collapse its cycles. Everything you know about DAGs — topological
+      order, downstream reasoning, dependency resolution — then applies to the condensed graph.</p>
+
+      <div class="proof">
+        <div class="pf-lbl">SCC(G)</div>
+        <div class="pf-step">1. Call TOPOLOGICAL-SORT(G) to generate ordered list L</div>
+        <div class="pf-step">2. <strong>While</strong> L is not empty:</div>
+        <div class="pf-step">&nbsp;&nbsp;3. Inspect the first element u in the list.</div>
+        <div class="pf-step">&nbsp;&nbsp;4. Perform DFS on the <strong>transpose graph G<sup>T</sup></strong> from u</div>
+        <div class="pf-step">&nbsp;&nbsp;5. Add all visited vertices to a new component S</div>
+        <div class="pf-step">&nbsp;&nbsp;6. Remove these vertices from the list L.</div>
+        <div class="pf-step">7. <strong>Return</strong> all components identified</div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Step 1 looks like a mistake, and is not</div>
+        A graph with cycles has <em>no</em> topological order, so calling TOPOLOGICAL-SORT on one sounds
+        wrong. What the routine actually computes is the <strong>reverse finishing order</strong> of a
+        depth-first search. On an acyclic graph that happens to be a topological order — which is why it
+        has that name — and on a cyclic one it is still perfectly well defined, and is exactly the order
+        the second pass needs.<br><br>
+        Why the transpose? Pass one, on G, finds everything <strong>u can reach</strong>. Pass two, on
+        G<sup>T</sup>, finds everything that <strong>can reach u</strong>. A vertex in both sits on a
+        round trip through u — which is the definition of u &sim; v. The finishing order is what stops
+        the second search spilling out of the component and swallowing the next one.
+      </div>
+
+      <h3 id="t4-scctool">&#128736;&#65039; Both passes, the transpose, and the condensation</h3>
+
+      <div class="tool" data-run="runScc">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Find the components — then check them against the definition</h3>
+        </div>
+        <div class="tool-desc">The components are found by the lecture&rsquo;s two-pass algorithm, and
+          then checked by plain reachability that has never heard of it: every pair inside a component
+          must reach each other both ways, and no outside vertex may belong. The component graph is
+          built and tested for acyclicity, so the theorem is confirmed rather than quoted.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 300px;">
+            <label for="scc-text">Directed graph</label>
+            <textarea id="scc-text" rows="10" spellcheck="false">A &gt; D
+B &gt; D F
+C &gt; A B
+D &gt; C E
+E &gt; F
+F &gt; E H
+G &gt; I
+H &gt; E G I J
+I &gt; J
+J &gt; I</textarea>
+          </div>
+          <div class="tool-field" style="flex:0 0 190px;">
+            <label for="scc-nbr">Neighbour order</label>
+            <select id="scc-nbr">
+              <option value="stack">reverse — pushed on a stack</option>
+              <option value="listed">as listed</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="sccPreset('scc')">Lecture graph</button>
+          <button class="tool-btn secondary" onclick="sccPreset('cyclic')">One small cycle</button>
+          <button class="tool-btn secondary" onclick="sccPreset('dag')">A DAG</button>
+          <button class="tool-btn secondary" onclick="sccPreset('search')">The search graph</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="scc-output"></div>
+      </div>
+
+      <p>Try the DAG preset. Every component is a single vertex, because a DAG has no cycles and so
+      nothing is mutually reachable with anything else — and the component graph comes back as a copy of
+      the original. That is the degenerate case of the theorem, and a good sanity check that you have
+      the definition the right way round.</p>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="t4-exam">Exam takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Six one-liners</div>
+        <ul style="margin:6px 0 0;">
+          <li>BFS and DFS are the same algorithm with a queue and a stack. Both O(|V| + |E|).</li>
+          <li>The linear bound comes from &sum;<sub>u</sub>|Adj(u)| = O(|E|) — each vertex pays only for
+            its own neighbours.</li>
+          <li>BFS gives shortest paths on unweighted graphs; DFS gives timestamps and back edges.</li>
+          <li>Kruskal O(|E| log |E|), dominated by the sort. Prim O(|E| + |V| log |V|) with a Fibonacci
+            heap.</li>
+          <li>&ldquo;Would this edge make a cycle?&rdquo; = &ldquo;are u and v already connected?&rdquo;</li>
+          <li>G<sup>SCC</sup> is always a DAG, because a cycle among components would merge them.</li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>O(|V|·|E|) for a search, from multiplying step 4 by the loop instead of summing it.</li>
+          <li>Assuming the MST is unique. It usually is not, and Kruskal and Prim can return different
+            trees of equal weight.</li>
+          <li>Assuming the topological order is unique. Step 2 says <em>any</em> unsorted vertex.</li>
+          <li>Forgetting <strong>maximal</strong> in the SCC definition — {A} on its own is always
+            &ldquo;strongly connected&rdquo;.</li>
+          <li>Doing the second SCC pass on G instead of G<sup>T</sup>. On G it just re-finds what u
+            reaches, which you already had.</li>
+          <li>Calling a graph a DAG without checking irreflexivity. A self-loop is a cycle of length 1.</li>
+          <li>Reporting &ldquo;no topological order&rdquo; without naming the cycle that prevents it.</li>
+        </ul>
+      </div>
+    </section>

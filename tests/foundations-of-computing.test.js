@@ -743,6 +743,299 @@ module.exports = async function run() {
     s.ok('and so is one that is not a rearrangement', w.msCheck([3, 1, 2], [1, 2, 2]).ok === false);
   }
 
+  /* ---------------- Topic 4 · graphs ---------------- */
+  {
+    const g = w.grParse(w.GR_PRESETS.search);
+    s.ok('the lecture search graph parses', g.ok, g.error);
+    s.is('9 vertices', g.nV, 9);
+    s.is('13 edges', g.nE, 13);
+    s.ok('and is read as directed', g.directed === true);
+
+    // ---- BFS, against the slide ----
+    const b = w.grBfs(g, 'A');
+    s.is('BFS from A reproduces the lecture visit order',
+      b.order.join(' '), 'A B E G C F H D I');
+    s.is('and every vertex is reached', b.reached, 9);
+    s.is('D sits at distance 3', b.dist.D, 3);
+    s.is('and B at distance 1', b.dist.B, 1);
+
+    // BFS distances must BE shortest paths. Checked against a
+    // completely separate computation: repeated edge relaxation.
+    {
+      const far = {};
+      g.vertices.forEach(v => { far[v] = v === 'A' ? 0 : Infinity; });
+      for (let i = 0; i < g.nV; i++) {
+        g.edges.forEach(e => {
+          if (far[e.u] + 1 < far[e.v]) far[e.v] = far[e.u] + 1;
+          if (!g.directed && far[e.v] + 1 < far[e.u]) far[e.u] = far[e.v] + 1;
+        });
+      }
+      const bad = g.vertices.filter(v => (b.dist[v] === undefined ? Infinity : b.dist[v]) !== far[v]);
+      s.is('BFS distances agree with independent relaxation', bad.length, 0, bad.join(','));
+    }
+
+    // ---- DFS, against the slide's timestamps ----
+    const d = w.grDfs(g, 'A');
+    s.is('DFS stamps A 1/10/18/21, as the slide does', d.show('A'), '1/10/18/21');
+    s.is('E 11/14/17', d.show('E'), '11/14/17');
+    s.is('G 2/9', d.show('G'), '2/9');
+    s.is('H 3/8', d.show('H'), '3/8');
+    s.is('I 4/7', d.show('I'), '4/7');
+    s.is('D 5/6', d.show('D'), '5/6');
+    s.is('F 12/13', d.show('F'), '12/13');
+    s.is('C 15/16', d.show('C'), '15/16');
+    s.is('B 19/20', d.show('B'), '19/20');
+    s.is('and the whole run takes 21 ticks', d.ticks, 21);
+
+    // The stamps are not decoration: they have to be a consistent
+    // schedule. Every number 1..t used exactly once, and a child's
+    // whole interval nested inside its parent's.
+    {
+      const all = [];
+      g.vertices.forEach(v => d.stamps[v].forEach(x => all.push(x)));
+      all.sort((x, y) => x - y);
+      const contiguous = all.length === d.ticks && all.every((x, i) => x === i + 1);
+      s.ok('every tick from 1 to 21 is used exactly once', contiguous,
+        `got ${all.length} stamps: ${all.join(',')}`);
+
+      const lo = v => d.stamps[v][0], hi = v => d.stamps[v][d.stamps[v].length - 1];
+      const bad = d.tree.filter(e => !(lo(e.u) < lo(e.v) && hi(e.v) < hi(e.u)));
+      s.is('every child interval nests inside its parent', bad.length, 0,
+        bad.map(e => `${e.u}->${e.v}`).join(','));
+    }
+
+    s.is('neighbour order changes the trace but not the vertex set',
+      w.grDfs(g, 'A', 'listed').order.slice().sort().join(''),
+      d.order.slice().sort().join(''));
+
+    // A search only finds what its root reaches.
+    s.is('from D, which has one way out, only D and its descendants are found',
+      w.grBfs(g, 'D').order.join(' '), 'D');
+    s.ok('and the rest are reported as missed', w.grBfs(g, 'D').missed.length === 8);
+
+    s.ok('an unknown root is refused', w.grBfs(g, 'Z').ok === false);
+    s.ok('a self-loop is refused', w.grParse('A > A').ok === false);
+    s.ok('mixing > and - is refused', w.grParse('A > B\nB - C').ok === false);
+    s.ok('a contradictory weight is refused', w.grParse('A - B:3\nB - A:5').ok === false);
+
+    // The transpose must be an involution, and must reverse reachability.
+    {
+      const t = w.grTranspose(g), tt = w.grTranspose(t);
+      const key = x => x.edges.map(e => e.u + e.v).sort().join(' ');
+      s.is('transposing twice gives the original graph back', key(tt), key(g));
+      let bad = 0;
+      g.vertices.forEach(u => g.vertices.forEach(v => {
+        if ((w.grReach(g, u).indexOf(v) >= 0) !== (w.grReach(t, v).indexOf(u) >= 0)) bad++;
+      }));
+      s.is('u reaches v in G exactly when v reaches u in G^T', bad, 0);
+    }
+  }
+
+  /* ---------------- Topic 4 · spanning trees ---------------- */
+  {
+    const g = w.grParse(w.GR_PRESETS.mst);
+    s.ok('the lecture MST graph parses', g.ok, g.error);
+    s.ok('as undirected and weighted', g.directed === false && g.weighted === true);
+    s.is('14 edges', g.nE, 14);
+
+    const k = w.mstKruskal(g), p = w.mstPrim(g, 'A');
+    s.is('Kruskal totals 37, as the slide says', k.weight, 37);
+    s.is('Prim totals 37 too', p.weight, 37);
+    s.ok('Kruskal returns a genuine spanning tree', w.mstIsTree(g, k.tree).ok,
+      w.mstIsTree(g, k.tree).why.join(' '));
+    s.ok('and so does Prim', w.mstIsTree(g, p.tree).ok, w.mstIsTree(g, p.tree).why.join(' '));
+
+    // The claim that matters, and the reason both are computed:
+    // greedy really is optimal here, checked by exhaustion.
+    const brute = w.mstBrute(g);
+    s.ok('brute force over all spanning trees succeeds', brute.ok, brute.error);
+    s.is('the graph has 662 spanning trees', brute.spanningTrees, 662);
+    s.is('whose minimum weight is 37', brute.weight, 37);
+    s.is('and exactly two of them achieve it', brute.minimumTrees, 2);
+
+    // Which is why the two algorithms can disagree without either
+    // being wrong. Pinned, because it is the topic's best lesson.
+    const show = t => w.mstSortEdges(t).map(e => [e.u, e.v].sort().join('') + ':' + e.w).join(' ');
+    s.is('Kruskal takes A–H at the weight-8 tie',
+      show(k.tree), 'GH:1 CI:2 FG:2 AB:4 CF:4 CD:7 AH:8 DE:9');
+    s.is('and the lecture Prim trace takes B–C instead, for the same total',
+      show(w.mstPrim(g, 'A', 'late').tree), 'GH:1 CI:2 FG:2 AB:4 CF:4 CD:7 BC:8 DE:9');
+    s.ok('the two trees really are different',
+      show(k.tree) !== show(w.mstPrim(g, 'A', 'late').tree));
+
+    // Every tie-break, and every root, must still give weight 37.
+    {
+      let bad = 0, first = '';
+      ['alpha', 'late', 'early'].forEach(tie => {
+        g.vertices.forEach(r => {
+          const t = w.mstPrim(g, r, tie);
+          if (t.weight !== 37) { bad++; if (!first) first = `root ${r}, tie ${tie}: ${t.weight}`; }
+          if (!w.mstIsTree(g, t.tree).ok) { bad++; if (!first) first = `root ${r}, tie ${tie}: not a tree`; }
+        });
+      });
+      s.is('Prim gives a spanning tree of weight 37 from every root, under every tie-break', bad, 0, first);
+    }
+
+    // Random graphs: greedy must match brute force every time.
+    {
+      let bad = 0, first = '', tested = 0;
+      let seed = 20240904;
+      const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+      for (let trial = 0; trial < 120; trial++) {
+        const n = 4 + Math.floor(rnd() * 3);
+        const names = 'ABCDEFG'.slice(0, n).split('');
+        const lines = [];
+        for (let i = 0; i < n; i++) {
+          for (let j = i + 1; j < n; j++) {
+            if (rnd() < 0.55) lines.push(names[i] + ' - ' + names[j] + ':' + (1 + Math.floor(rnd() * 9)));
+          }
+        }
+        const rg = w.grParse(lines.join('\n'));
+        if (!rg.ok || rg.nV !== n || !w.grConnected(rg)) continue;
+        tested++;
+        const rk = w.mstKruskal(rg), rp = w.mstPrim(rg, names[0]);
+        const rb = w.mstBrute(rg);
+        if (!rb.ok) continue;
+        if (rk.weight !== rb.weight || rp.weight !== rb.weight) {
+          bad++;
+          if (!first) first = `${lines.join(';')} — Kruskal ${rk.weight}, Prim ${rp.weight}, true min ${rb.weight}`;
+        }
+        if (!w.mstIsTree(rg, rk.tree).ok || !w.mstIsTree(rg, rp.tree).ok) {
+          bad++; if (!first) first = `${lines.join(';')} — not a spanning tree`;
+        }
+      }
+      s.ok('enough random connected graphs were generated', tested > 40, `only ${tested}`);
+      s.is('on every one, both greedy algorithms hit the true minimum', bad, 0, first);
+    }
+
+    // The tree checker has to reject things, or it proves nothing.
+    s.ok('a tree with too few edges is rejected',
+      w.mstIsTree(g, w.mstKruskal(g).tree.slice(1)).ok === false);
+    s.ok('an edge not in the graph is rejected',
+      w.mstIsTree(g, [{ u: 'A', v: 'E', w: 1 }]).ok === false);
+    s.ok('a directed graph is refused', w.mstKruskal(w.grParse('A > B')).ok === false);
+  }
+
+  /* ---------------- Topic 4 · topological sort and SCC ---------------- */
+  {
+    const dress = w.grParse(w.GR_PRESETS.dress);
+    const t = w.tsSort(dress);
+    s.ok('the dressing DAG sorts', t.ok, t.error);
+    s.ok('and the order it returns is valid by the definition', t.check.ok,
+      JSON.stringify(t.check.backwards));
+    s.is('all nine garments appear', t.order.length, 9);
+
+    // Not unique -- so what is tested is validity, under every
+    // setting, rather than one remembered answer.
+    {
+      let bad = 0, first = '';
+      ['stack', 'listed'].forEach(mode => {
+        dress.vertices.forEach(start => {
+          const r = w.tsSort(dress, { mode: mode, start: [start] });
+          if (!r.ok || !r.check.ok) { bad++; if (!first) first = `${mode} from ${start}`; }
+        });
+      });
+      s.is('every starting vertex and neighbour order gives a valid topological sort', bad, 0, first);
+    }
+
+    s.ok('an order the student might type is accepted when correct',
+      w.tsCheck(dress, ['socks', 'underwear', 'trousers', 'shoes', 'watch',
+                        'shirt', 'belt', 'tie', 'jacket']).ok);
+    s.ok('and rejected when an edge points backwards',
+      w.tsCheck(dress, ['jacket', 'socks', 'underwear', 'trousers', 'shoes', 'watch',
+                        'shirt', 'belt', 'tie']).ok === false);
+    s.ok('and rejected when a vertex is missing',
+      w.tsCheck(dress, ['socks', 'underwear']).ok === false);
+
+    // A cyclic graph must be refused, with a witness.
+    const cyc = w.grParse(w.GR_PRESETS.cyclic);
+    const bad = w.tsSort(cyc);
+    s.ok('a cyclic graph has no topological sort', bad.ok === false);
+    s.ok('and the cycle is named rather than merely denied', Array.isArray(bad.cycle) && bad.cycle.length === 3,
+      JSON.stringify(bad.cycle));
+    {
+      // The witness must actually be a cycle in the graph.
+      const c = bad.cycle;
+      let realCycle = true;
+      for (let i = 0; i < c.length; i++) {
+        const from = c[i], to = c[(i + 1) % c.length];
+        if (w.grNbrs(cyc, from).indexOf(to) < 0) realCycle = false;
+      }
+      s.ok('and every step of the witness is a real edge', realCycle, c.join('->'));
+    }
+    s.ok('a DAG is recognised', w.tsIsDag(w.grParse(w.GR_PRESETS.dag)));
+    s.ok('and a cyclic graph is not', w.tsIsDag(cyc) === false);
+
+    // ---- SCC ----
+    const g = w.grParse(w.GR_PRESETS.scc);
+    s.is('the lecture SCC graph has 10 vertices', g.nV, 10);
+    const sc = w.sccFind(g);
+    const asText = x => x.components.map(c => '{' + c.join(',') + '}').join(' ');
+    s.is('the components are the four on the slide',
+      asText(sc), '{A,B,C,D} {E,F,H} {G} {I,J}');
+    s.ok('and they satisfy the definition, checked by plain reachability',
+      w.sccCheck(g, sc.components).ok, w.sccCheck(g, sc.components).why.join(' '));
+
+    // The deck's own trace, reproduced exactly.
+    s.is('the lecture settings reproduce its finishing order',
+      w.tsFinish(g, { mode: 'listed', start: ['F', 'C'] }).order.join(' '),
+      'C B A D F H G I J E');
+
+    // The answer must not depend on the trace.
+    {
+      let bad = 0, first = '';
+      ['stack', 'listed'].forEach(mode => {
+        g.vertices.forEach(start => {
+          const r = w.sccFind(g, { mode: mode, start: [start] });
+          if (asText(r) !== asText(sc)) { bad++; if (!first) first = `${mode} from ${start}: ${asText(r)}`; }
+        });
+      });
+      s.is('every starting vertex and neighbour order gives the same components', bad, 0, first);
+    }
+
+    // The theorem, on this instance and on many random ones.
+    const cd = w.sccCondense(g, sc.components);
+    s.ok('the component graph is acyclic', cd.acyclic);
+    s.is('with one vertex per component', cd.nV, 4);
+
+    {
+      let bad = 0, first = '', tested = 0, seed = 77777;
+      const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+      for (let trial = 0; trial < 250; trial++) {
+        const n = 3 + Math.floor(rnd() * 5);
+        const names = 'ABCDEFG'.slice(0, n).split('');
+        const lines = [];
+        names.forEach(u => {
+          const outs = names.filter(v => v !== u && rnd() < 0.35);
+          lines.push(outs.length ? u + ' > ' + outs.join(' ') : u);
+        });
+        // A graph of bare names carries no > or -, so its directedness
+        // has to be stated rather than inferred.
+        const rg = w.grParse(lines.join('\n'), { directed: true });
+        if (!rg.ok) continue;
+        const rs = w.sccFind(rg);
+        if (!rs.ok) { bad++; if (!first) first = lines.join(';') + ' — ' + rs.error; continue; }
+        tested++;
+        const chk = w.sccCheck(rg, rs.components);
+        if (!chk.ok) { bad++; if (!first) first = lines.join(';') + ' — ' + chk.why[0]; }
+        const rc = w.sccCondense(rg, rs.components);
+        if (!rc.acyclic) { bad++; if (!first) first = lines.join(';') + ' — condensation has a cycle'; }
+        // Every vertex in exactly one component.
+        const total = rs.components.reduce((a, c) => a + c.length, 0);
+        if (total !== rg.nV) { bad++; if (!first) first = lines.join(';') + ' — components do not partition V'; }
+        // A DAG must have all-singleton components.
+        if (w.tsIsDag(rg) && rs.components.some(c => c.length > 1)) {
+          bad++; if (!first) first = lines.join(';') + ' — a DAG got a component of size > 1';
+        }
+      }
+      s.ok('enough random digraphs were generated', tested > 200, `only ${tested}`);
+      s.is('over ' + tested + ' random digraphs: components satisfy the definition, partition V, ' +
+           'and condense to a DAG', bad, 0, first);
+    }
+
+    s.ok('an undirected graph is refused', w.sccFind(w.grParse('A - B')).ok === false);
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 2000);

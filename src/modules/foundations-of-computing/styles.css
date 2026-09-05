@@ -600,3 +600,73 @@
 
 .mg-table { display: block; overflow-x: auto; white-space: nowrap; }
 .mg-table td, .mg-table th { text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+
+
+/* ---------- Topic 04 · graph traces ------------------------------
+   One row per step, driven by ixTrace via data-step. The columns are
+   fixed-width so the queue does not jitter as it grows and shrinks,
+   which made the first version unreadable while playing. */
+.gr-trace {
+  margin: 14px 0 4px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.gr-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 11px;
+  border-bottom: 1px solid var(--rule);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+}
+.gr-row:last-child { border-bottom: none; }
+.gr-row.took { background: var(--tint-c); }
+.gr-row.skipped { background: var(--tint-b2); opacity: 0.72; }
+
+.gr-n { flex: 0 0 2.2em; text-align: right; color: var(--ink-soft); }
+.gr-at { flex: 0 0 5.5em; font-weight: 600; color: var(--accent-2); }
+.gr-w { flex: 0 0 2em; color: var(--ink-soft); }
+.gr-queue {
+  flex: 0 0 auto;
+  min-width: 13em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px;
+}
+.gr-lbl {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  margin-right: 4px;
+}
+.gr-chip {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  color: var(--ink);
+  font-size: 11px;
+}
+.gr-empty { color: var(--ink-soft); font-style: italic; }
+.gr-note { flex: 1 1 14em; color: var(--ink-muted); font-family: 'IBM Plex Sans', sans-serif; }
+
+/* Two algorithm boxes side by side, stacking on narrow screens. */
+.two-col { display: flex; gap: 14px; flex-wrap: wrap; margin: 12px 0; }
+.two-col > * { flex: 1 1 300px; margin: 0; }
+
+/* A centred display line inside a proof or callout. */
+.pf-center {
+  display: block;
+  text-align: center;
+  margin: 8px 0;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+@media (max-width: 720px) {
+  .gr-row { flex-wrap: wrap; }
+  .gr-note { flex-basis: 100%; }
+}

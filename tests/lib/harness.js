@@ -295,8 +295,13 @@ async function checkStructure(s, m) {
     // MutationObserver callbacks are delivered asynchronously, so a counter
     // would still be zero when this loop read it. takeRecords() drains the
     // queue synchronously, which is what makes click-then-check work.
+    //
+    // Watch EVERY output pane in the tool, not just the first. A tool is
+    // allowed more than one -- the topological-sort tool computes an order
+    // in one pane and marks the student's own order in another -- and
+    // watching only the first reports the second pane's buttons as dead.
     const obs = new m.window.MutationObserver(() => {});
-    obs.observe(pane, { childList: true });
+    tool.querySelectorAll('.tool-output').forEach(p => obs.observe(p, { childList: true }));
 
     const dead = [];
     labels.forEach(text => {
