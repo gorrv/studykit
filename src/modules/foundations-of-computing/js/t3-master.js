@@ -108,11 +108,39 @@
       ? Math.round(k) : k.toFixed(4)));
     if (!crit.ok) return { ok: false, error: 'Could not form n^k.' };
 
+    /*
+       Cases 1 and 3 need f to be POLYNOMIALLY separated from n^k --
+       O(n^(k-e)) and Omega(n^(k+e)) for some e > 0 -- not merely
+       slower or faster. Ordering the two classes and reading off
+       -1 / 0 / +1 misses that, because n^k log n is ordered above
+       n^k while being only a log factor above it, and there is no
+       e > 0 with log n in Omega(n^e).
+
+       That gap is not a technicality. T(n) = 9T(n/3) + n^2 log n
+       was reported here as Case 3 with answer Theta(n^2 log n);
+       unfolding the recurrence numerically shows T/(n^2 log n)
+       still climbing at n = 3^14 while T/(n^2 log^2 n) settles,
+       so the true answer is Theta(n^2 log^2 n) and NO case of the
+       theorem as stated applies. caseNo 0 says so.
+    */
     var cmp = gwCmp(f.cls, crit.cls);
-    var caseNo = cmp < 0 ? 1 : cmp === 0 ? 2 : 3;
+    var samePower = f.cls.kind === crit.cls.kind && f.cls.p === crit.cls.p;
+    var caseNo;
+    if (cmp === 0) caseNo = 2;
+    else if (samePower) caseNo = 0;               // faster or slower, but only by logs
+    else caseNo = cmp < 0 ? 1 : 3;
 
     var answer;
-    if (caseNo === 1) answer = 'Θ(' + gwClassShow(crit.cls) + ')';
+    if (caseNo === 0) {
+      // The extended form, checked numerically on five instances:
+      // f = n^k log^p n gives T = n^k log^(p+1) n. Offered as an aside,
+      // because the examinable answer is "the theorem does not apply".
+      answer = f.cls.logs > crit.cls.logs
+        ? 'no case applies — but Θ(' +
+          gwClassShow(gwClass(crit.cls.kind, crit.cls.p, f.cls.logs + 1)) + ') by the extended form'
+        : 'no case applies';
+    }
+    else if (caseNo === 1) answer = 'Θ(' + gwClassShow(crit.cls) + ')';
     else if (caseNo === 2) {
       // Build the class with one extra log rather than gluing " log n" on the
       // end: for k = 0 (binary search) the n^0 has to disappear, and
@@ -137,11 +165,12 @@
   /**
    * Unfold the recurrence numerically and estimate its growth.
    *
-   * The exponent is read off consecutive doublings:
+   * The exponent is read off consecutive recursion levels:
    *
-   *     T(2n) / T(n)  ≈  2^p   for T ∈ Θ(n^p)
+   *     T(bn) / T(n)  ≈  b^p   for T ∈ Θ(n^p)
    *
-   * so p ≈ log2(T(2n)/T(n)). For a Θ(n^k log n) answer the estimate
+   * so p ≈ log_b(T(bn)/T(n)). Stepping by b rather than by 2 matters:
+   * see the comment in the loop. For a Θ(n^k log n) answer the estimate
    * drifts slightly above k, which is the log showing up — worth
    * seeing rather than hiding.
    *
@@ -160,13 +189,29 @@
       return v;
     }
 
-    var rows = [], n = 2;
+    /*
+       Sample at powers of b, not powers of 2.
+
+       T is only defined by the recurrence at multiples of b, and the
+       floor(n/b) makes it a staircase between them. Reading the ratio
+       across a DOUBLING therefore measures where each sample happens to
+       land relative to the steps rather than the growth itself, and for
+       b = 3 it is badly wrong: T(n) = 9T(n/3) + 1 is a textbook Case 1
+       with answer Theta(n^2), and doubling-based sampling reported an
+       exponent of 1.585 -- so the tool printed "these disagree, do not
+       trust the answer above" underneath a correct answer. Stepping by b
+       lines the samples up with the recursion levels exactly, and the
+       exponent is then log_b of the ratio.
+    */
+    var rows = [], n = b;
     var top = upto || 4096;
-    while (n <= top) {
-      var t = T(n), half = T(n / 2);
-      rows.push({ n: n, T: t, ratio: half > 0 ? t / half : NaN,
-                  exp: half > 0 ? Math.log2(t / half) : NaN });
-      n *= 2;
+    var levels = Math.max(6, Math.ceil(Math.log(top) / Math.log(2) / Math.log2(b)) + 4);
+    for (var lv = 1; lv <= levels; lv++) {
+      var t = T(n), prev = T(n / b);
+      if (!isFinite(t) || t > 1e300) break;
+      rows.push({ n: n, T: t, ratio: prev > 0 ? t / prev : NaN,
+                  exp: prev > 0 ? Math.log(t / prev) / Math.log(b) : NaN });
+      n *= b;
     }
     var tail = rows.slice(-4).filter(function (r) { return isFinite(r.exp); });
     var estimate = tail.length
@@ -186,7 +231,9 @@
   function mtAgrees(sol, est) {
     if (!isFinite(est)) return { ok: false, why: 'no numeric estimate' };
     var want = sol.caseNo === 3 ? sol.clsF.p : sol.k;
-    var slack = sol.caseNo === 2 ? 0.35 : 0.2;
+    // Case 2 answers carry an extra log, so the measured exponent sits a
+    // little above k; the gap case carries two, so it drifts further still.
+    var slack = sol.caseNo === 2 ? 0.35 : sol.caseNo === 0 ? 0.6 : 0.2;
     return { ok: Math.abs(est - want) <= slack, want: want, got: est, slack: slack };
   }
 
@@ -250,7 +297,11 @@
       : sol.caseNo === 2
         ? 'f grows at <strong>the same rate</strong> as n<sup>k</sup>, so every one of the log<sub>' +
           b + '</sub> n levels costs the same — which is where the extra log n comes from'
-        : 'f grows <strong>strictly faster</strong> than n<sup>k</sup>, so the top-level combine dominates';
+        : sol.caseNo === 0
+          ? 'f is ' + (sol.clsF.logs > sol.clsCrit.logs ? 'faster' : 'slower') + ' than ' +
+            'n<sup>k</sup>, but only by a <strong>logarithmic</strong> factor — and Cases 1 and 3 ' +
+            'need a <strong>polynomial</strong> one. This is the gap in the theorem'
+          : 'f grows <strong>strictly faster</strong> than n<sup>k</sup>, so the top-level combine dominates';
 
     h += '<div class="mt-step"><div class="mt-step-n">3</div><div class="mt-step-body">' +
       '<strong>Identify the case.</strong><br>' +
@@ -271,14 +322,36 @@
     });
     h += '</div>';
 
-    h += '<div class="verdict safe">T(n) = <strong>' + sol.answer + '</strong></div>';
+    if (sol.caseNo === 0) {
+      h += '<div class="mt-case on" style="margin-top:8px;">' +
+        '<div class="mt-case-n">No case</div>' +
+        '<div class="mt-case-if">f is within a log factor of n<sup>k</sup></div>' +
+        '<div class="mt-case-then">the theorem is silent</div></div>';
+    }
+
+    h += '<div class="verdict ' + (sol.caseNo === 0 ? 'warn' : 'safe') + '">T(n) = <strong>' +
+      sol.answer + '</strong></div>';
+
+    if (sol.caseNo === 0) {
+      h += '<div class="callout warn" style="margin:10px 0;">' +
+        '<div class="callout-label">The Master Theorem does not apply here</div>' +
+        'Case 1 needs f ∈ O(n<sup>k−ε</sup>) and Case 3 needs f ∈ Ω(n<sup>k+ε</sup>), for some ' +
+        '<strong>ε &gt; 0</strong>. Here f and n<sup>k</sup> have the same exponent and differ only ' +
+        'by a factor of log n — and there is no ε &gt; 0 for which log n ∈ Ω(n<sup>ε</sup>), so ' +
+        'neither condition can be met. The classic instance is T(n) = 2T(n/2) + n log n.<br><br>' +
+        'The recurrence still has an answer; it just is not one the theorem gives you. Unfolding it ' +
+        'shows that an f of the form n<sup>k</sup> log<sup>p</sup> n produces ' +
+        'n<sup>k</sup> log<sup>p+1</sup> n — one more log, from the log<sub>b</sub> n levels each ' +
+        'contributing the same amount. In an exam, say that no case applies and why; the extended ' +
+        'form is worth a sentence but is not what was asked.</div>';
+    }
 
     /* the numeric cross-check */
     var num = mtNumeric(a, b, sol.fFn, 4096);
     var agr = mtAgrees(sol, num.estimate);
 
     h += '<table class="results-table mt-table"><tr><th>n</th><th>T(n)</th>' +
-         '<th>T(n) / T(n/2)</th><th>log₂ of that</th></tr>';
+         '<th>T(n) / T(n/' + b + ')</th><th>log<sub>' + b + '</sub> of that</th></tr>';
     num.rows.forEach(function (r) {
       h += '<tr><td>' + r.n + '</td><td>' + mtNum(r.T) + '</td><td>' + mtNum(r.ratio) +
            '</td><td class="mt-exp">' + (isFinite(r.exp) ? r.exp.toFixed(3) : '—') + '</td></tr>';
@@ -287,7 +360,8 @@
 
     h += '<p class="tool-note">' + (agr.ok ? '✓' : '✗') + ' <strong>Cross-check.</strong> ' +
       'The recurrence was unfolded numerically with this a, b and f, and its growth exponent ' +
-      'read off consecutive doublings: <strong>' + (isFinite(num.estimate) ? num.estimate.toFixed(3) : '—') +
+      'read off consecutive levels — one factor of ' + b + ' apart, so the samples line up with ' +
+      'the recursion rather than straddling it: <strong>' + (isFinite(num.estimate) ? num.estimate.toFixed(3) : '—') +
       '</strong>, against the <strong>' + agr.want.toFixed(3) + '</strong> the theorem predicts.' +
       (sol.caseNo === 2
         ? ' Case 2 answers carry a log n, so the measured exponent sits a little <em>above</em> k — ' +

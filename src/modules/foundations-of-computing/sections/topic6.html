@@ -1,0 +1,173 @@
+<section id="topic6" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 06 · Revision Week</div>
+        <h1>Halfway, and What Holds It Together</h1>
+        <div class="topic-subtitle">no new material — the through-line, an audit, and a drill</div>
+      </div>
+
+      <p>Week 6 is the revision week, so there is no sixth lecture and nothing new below. What there
+      is instead: the argument that runs through the first five topics, said once as a whole; a tool
+      that re-checks each topic's central claim on freshly generated instances; and a drill that mixes
+      questions from all of them and keeps a separate score per area, so that &ldquo;revise&rdquo;
+      turns into a list rather than a mood.</p>
+
+      <!-- ===== THE THROUGH-LINE ===== -->
+      <h2 id="t6-story">The argument so far</h2>
+
+      <p>Read as five separate topics it is a lot of definitions. Read as one argument it is short.
+      <strong>Topic 1</strong> asks what a machine can decide <em>at all</em>, and finds a ceiling:
+      finite automata cannot count, and Turing machines cannot decide halting. <strong>Topic 2</strong>
+      keeps only the problems that are decidable and asks what they <em>cost</em>, which produces P,
+      NP, and the reduction as the tool for comparing two problems' difficulty without solving either.
+      <strong>Topic 3</strong> takes the problems that are cheap and gets better at them — divide and
+      conquer, and the Master Theorem as a way of reading a recurrence's answer off its shape.
+      <strong>Topic 4</strong> is that machinery applied to graphs, where the algorithms are the ones
+      you will actually use. <strong>Topic 5</strong> goes back to the hardest problem in Topic 2, SAT,
+      and asks what to do when a problem is NP-complete but you need an answer anyway — which is where
+      the module stops being about classification and starts being about tactics.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">The one-line version of each topic</div>
+        <table style="margin:8px 0 0;">
+          <tr><th>01</th><td>What can be decided</td>
+            <td>Some languages need unbounded memory; some need more than any machine has.</td></tr>
+          <tr><th>02</th><td>What it costs</td>
+            <td>P, NP, and reductions — comparing difficulty without solving anything.</td></tr>
+          <tr><th>03</th><td>Doing the cheap ones faster</td>
+            <td>Divide and conquer, recurrences, and reading the answer off a/b/f.</td></tr>
+          <tr><th>04</th><td>The same, on graphs</td>
+            <td>Search, spanning trees, topological order, strong connectivity.</td></tr>
+          <tr><th>05</th><td>Coping with the hard ones</td>
+            <td>DPLL, and the tractable islands: 2SAT and Horn clauses.</td></tr>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The joins, which is where the marks are</div>
+        Almost every hard exam question in this module lives on a boundary between two topics, not
+        inside one.<br><br>
+        <strong>1 → 2.</strong> A decision problem is a language; a machine deciding it in polynomial
+        time is what P means. The two topics use the same objects.<br>
+        <strong>2 → 3.</strong> Cook–Levin says SAT is NP-complete, which is what makes every later
+        reduction possible — you reduce <em>from</em> SAT because SAT is the one already known to be
+        hard.<br>
+        <strong>2 → 5.</strong> SAT ≤ₚ CLIQUE and SAT ≤ₚ 3SAT are the same technique in two
+        directions: rewrite the instance, preserve the answer, keep it polynomial.<br>
+        <strong>4 → 5.</strong> 2SAT is in P <em>because</em> of Topic 4: build the implication graph
+        and run strongly connected components on it. A formula is unsatisfiable exactly when some P and
+        ¬P land in the same component. The 2SAT tool in this module literally calls Topic 4's
+        <code>sccFind</code>.<br>
+        <strong>3 → 4.</strong> The complexity of BFS, DFS, Kruskal and Prim is stated as
+        T(|V|, |E|), and reading those bounds is Topic 3's skill applied to Topic 4's algorithms.
+      </div>
+
+      <!-- ===== THE AUDIT ===== -->
+      <h2 id="t6-audit">Does it all still hold?</h2>
+
+      <p>Every claim below is checked by two engines that share no reasoning — a construction against
+      exhaustive testing, an algorithm against brute force, a theorem against the thing it is a theorem
+      about. Instances are generated fresh each time you press the button, so a claim that survives
+      twenty rounds has survived twenty inputs nobody chose.</p>
+
+      <h3 id="t6-autool">&#128736;&#65039; Re-check every theorem on fresh instances</h3>
+
+      <div class="tool" data-run="runAudit">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>The audit</h3>
+        </div>
+        <div class="tool-desc">Each row names the topic the claim comes from and the independent
+          method it is checked against. The instance shown is a real one — copy it into the relevant
+          tool upstairs and work it through by hand.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="rv-rounds">instances each</label>
+            <input type="number" id="rv-rounds" value="6" min="1" max="60" step="1">
+          </div>
+          <button class="tool-btn" onclick="runAudit()">Run the audit ▶</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="rv-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">What a green row does and does not mean</div>
+        It means the claim held on some small random instances, decided twice. It is evidence, not a
+        proof, and the difference matters in this module more than most: Topic 7's whole point is that
+        an approximation ratio holds only if it holds for <em>every</em> input, so no number of
+        agreeing examples establishes one. Examples are good for the opposite job — a single
+        disagreement refutes. Use the audit to catch things that are broken, never to conclude that
+        something is right.
+      </div>
+
+      <!-- ===== THE DRILL ===== -->
+      <h2 id="t6-drill">Find the weak spot</h2>
+
+      <p>The self-test elsewhere in these notes covers every topic and keeps one score. This one covers
+      Topics 1 to 5 only and keeps seven, because a single percentage hides exactly the thing you are
+      revising to find. Questions are drawn more often from whatever is going worst.</p>
+
+      <h3 id="t6-drtool">&#128736;&#65039; Mixed drill, scored by area</h3>
+
+      <div class="tool" data-run="rvRender">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Drill Topics 1 to 5 and see where you are thin</h3>
+        </div>
+        <div class="tool-desc">Every question is generated and marked by the same engines the tools
+          upstairs use, so the working in the explanation is real working. The bars start empty and
+          sort weakest-first as you answer.</div>
+        <div class="tool-controls">
+          <button class="tool-btn green" onclick="rvNext()">New question ▶</button>
+          <button class="tool-btn secondary" onclick="rvRevealAnswer()">Show answer</button>
+          <button class="tool-btn danger" onclick="rvResetDrill()">Reset score</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="rv-drill-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== HOW TO REVISE ===== -->
+      <h2 id="t6-plan">A way to spend the week</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The definitions that must be automatic</div>
+        These are the ones that appear as bookwork marks, where there is no partial credit for the
+        gist: the five-tuple for a DFA, an NFA and a Turing machine; the definition of P and of NP;
+        what it means for A ≤ₚ B; NP-hard versus NP-complete; the three cases of the Master Theorem;
+        the definition of a strongly connected component; and what unit propagation and pure literal
+        elimination each do. Write them from memory, then check them against the cram sheet — not the
+        other way round, which only ever produces the feeling of knowing them.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The mistakes this module's tools were built to catch</div>
+        <ul style="margin:6px 0 0;">
+          <li>Using the pumping lemma to prove a language <em>is</em> regular. It cannot; it only
+            refutes.</li>
+          <li>Getting a reduction backwards. To show B is hard you reduce a known-hard A <em>to</em> B,
+            not B to A.</li>
+          <li>Applying the Master Theorem when f is not polynomially separated from
+            n<sup>log_b a</sup> — Case 2 has conditions, and there is a gap where no case applies.</li>
+          <li>Claiming a DFS finishing order is a topological sort of a graph that has a cycle. It is a
+            finishing order; the sort only exists for a DAG.</li>
+          <li>Believing a satisfying assignment because the algorithm returned one. Check it against
+            the clauses — a 2SAT bug can produce a well-formed assignment that satisfies nothing.</li>
+          <li>Saying NP-complete where the argument only gives NP-hard.</li>
+        </ul>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">If you have three sessions</div>
+        <strong>One.</strong> Write the definitions out cold, then run the drill above until every bar
+        has something in it. You are looking for which bar is shortest, not for a good score.<br><br>
+        <strong>Two.</strong> Take the worst area and do it by hand — not by re-reading. Run the
+        relevant tool, copy the instance it gives you, work it on paper, then compare. The tools show
+        every intermediate step precisely so that you can find the step where you and they part
+        company.<br><br>
+        <strong>Three.</strong> Do the joins: state Cook–Levin, do a SAT ≤ₚ CLIQUE reduction on a
+        small formula by hand, and build one implication graph for a 2SAT instance. Those three cover
+        the boundaries where the harder questions live.
+      </div>
+
+    </section>

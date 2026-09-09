@@ -55,7 +55,11 @@
     else if (c.p === 1) base = 'n';
     else base = 'n' + gwSup(c.p);
     var out = (c.p === 0 && c.logs) ? '' : base;
-    for (var i = 0; i < c.logs; i++) out += (out ? ' ' : '') + 'log n';
+    // Two or more logs print as log² n, not "log n log n" — which only
+    // started arising once the Master Theorem's gap case began reporting
+    // the extended n^k log^(p+1) n form.
+    if (c.logs === 1) out += (out ? ' ' : '') + 'log n';
+    else if (c.logs > 1) out += (out ? ' ' : '') + 'log' + gwSup(c.logs) + ' n';
     return out || '1';
   }
 

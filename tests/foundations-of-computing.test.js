@@ -1621,6 +1621,121 @@ module.exports = async function run() {
     }
   }
 
+  /* ---------------- Topic 06 · revision week ----------------
+
+     No new material, so nothing here checks content. What it checks is the
+     audit: every claim in it must hold on freshly generated instances, and
+     the drill must be able to reach every one of its seven areas.
+  */
+  {
+    s.is('the audit covers eight claims', w.RV_CHECKS.length, 8);
+    const topics = {};
+    w.RV_CHECKS.forEach(c => { topics[c.from] = true; });
+    s.ok('drawn from at least five topics', Object.keys(topics).length >= 5,
+      Object.keys(topics).join(', '));
+
+    w.RV_CHECKS.forEach(c => {
+      let pass = 0, why = null;
+      for (let i = 0; i < 25; i++) {
+        let r;
+        try { r = c.run(); } catch (e) { r = { ok: false, detail: 'threw: ' + e.message }; }
+        if (r.ok) pass++;
+        else if (!why) why = `${r.detail} :: ${String(r.instance || '').replace(/\n/g, ' ; ')}`;
+      }
+      s.is(`audit "${c.id}" holds on 25 random instances`, pass, 25, why);
+    });
+
+    // The drill must be able to produce a question for every area, or a bar
+    // stays permanently empty and the tool quietly lies about coverage.
+    {
+      const keys = w.RV_TOPICS.map(t => t.key);
+      const have = {};
+      w.QZ_GEN.forEach(g => { if (keys.indexOf(g.topic) >= 0) have[g.topic] = true; });
+      s.is('every area on the drill board has at least one generator',
+        Object.keys(have).length, keys.length,
+        keys.filter(k => !have[k]).join(', '));
+    }
+  }
+
+  /* ---------------- Topic 03 · the gap in the Master Theorem ----------------
+
+     Found by the Topic 6 audit: mtSolve reported T(n) = 9T(n/3) + n^2 log n
+     as Case 3 with answer Theta(n^2 log n). Cases 1 and 3 need f to be
+     POLYNOMIALLY separated from n^k, and n^2 log n is only a log factor
+     above n^2 — so no case applies, and unfolding the recurrence shows the
+     true answer carries a second log.
+  */
+  {
+    const gap = w.mtSolve(9, 3, 'n^2 log n');
+    s.ok('9T(n/3) + n² log n parses', gap.ok, gap.error);
+    s.is('and is reported as no case at all, not Case 3', gap.caseNo, 0);
+    s.ok('saying so in the answer', /no case applies/.test(gap.answer), gap.answer);
+    s.ok('and offering the extended form with the second log',
+      /log² n/.test(gap.answer), gap.answer);
+    s.is('the classic instance 2T(n/2) + n log n is the same gap',
+      w.mtSolve(2, 2, 'n log n').caseNo, 0);
+
+    // The neighbouring cases must be untouched by the fix.
+    s.is('f exactly n^k is still Case 2', w.mtSolve(4, 2, 'n^2').caseNo, 2);
+    s.is('f polynomially above is still Case 3', w.mtSolve(9, 3, 'n^3').caseNo, 3);
+    s.is('f polynomially below is still Case 1', w.mtSolve(9, 3, 'n').caseNo, 1);
+    s.is('and Strassen is still Case 1', w.mtSolve(7, 2, 'n^2').caseNo, 1);
+
+    // Two or more logs must print as log^p n rather than "log n log n".
+    s.is('a class with two logs prints as log² n',
+      w.gwClassShow(w.gwClass(0, 2, 2)), 'n² log² n');
+    s.is('one log still prints plainly', w.gwClassShow(w.gwClass(0, 1, 1)), 'n log n');
+    s.is('and no logs is unchanged', w.gwClassShow(w.gwClass(0, 2, 0)), 'n²');
+
+    /* The numeric cross-check used to sample at powers of 2 while the
+       recurrence steps by b, so for b = 3 it measured the staircase rather
+       than the growth: T(n) = 9T(n/3) + 1 is Case 1 with answer Theta(n^2)
+       and the tool printed "do not trust the answer above" underneath it. */
+    {
+      const sol = w.mtSolve(9, 3, '1');
+      s.is('9T(n/3) + 1 is Case 1', sol.caseNo, 1);
+      s.is('with answer Θ(n²)', sol.answer, 'Θ(n²)');
+      const est = w.mtNumeric(9, 3, sol.fFn, 4096).estimate;
+      s.near('and the numeric estimate now lands on 2, not log₂3', est, 2, 0.05);
+      s.ok('so the cross-check agrees', w.mtAgrees(sol, est).ok);
+
+      // every base, every f: the estimator must not contradict a right answer
+      const fs = ['1', 'n', 'n^2', 'n^3', 'log n', 'n log n', 'sqrt n', 'n^2 log n'];
+      let bad = 0, tot = 0, first = '';
+      [2, 3, 4, 5].forEach(b2 => {
+        for (let a2 = 1; a2 <= 9; a2++) {
+          fs.forEach(f => {
+            const so = w.mtSolve(a2, b2, f);
+            if (!so.ok) return;
+            tot++;
+            const ag = w.mtAgrees(so, w.mtNumeric(a2, b2, so.fFn, 4096).estimate);
+            if (!ag.ok) {
+              bad++;
+              if (!first) first = `${a2}T(n/${b2})+${f} case ${so.caseNo}: measured ${ag.got}, want ${ag.want}`;
+            }
+          });
+        }
+      });
+      s.ok(`a decent spread of recurrences was measured`, tot > 250, `${tot}`);
+      s.is('the theorem and the unfolded recurrence agree on every one, for every base',
+        bad, 0, first);
+    }
+
+    // Every case, including the gap, must survive the numeric cross-check.
+    {
+      const cases = [[9, 3, 'n^2 log n'], [2, 2, 'n log n'], [4, 2, 'n^2'], [9, 3, 'n^3'],
+                     [1, 2, '1'], [7, 2, 'n^2'], [2, 2, 'n'], [3, 3, 'n log n']];
+      let bad = 0, first = '';
+      cases.forEach(([a, b, f]) => {
+        const sol = w.mtSolve(a, b, f);
+        if (!sol.ok) { bad++; if (!first) first = `${a},${b},${f}: ${sol.error}`; return; }
+        const agr = w.mtAgrees(sol, w.mtNumeric(a, b, sol.fFn, 4096).estimate);
+        if (!agr.ok) { bad++; if (!first) first = `${a}T(n/${b})+${f}: measured ${agr.got}, want ${agr.want}`; }
+      });
+      s.is('the theorem still agrees with the unfolded recurrence on all eight', bad, 0, first);
+    }
+  }
+
   /* ---------------- Topic 08 · linear and integer programming ----------------
 
      Two engines solve every linear program here and they share no code: the

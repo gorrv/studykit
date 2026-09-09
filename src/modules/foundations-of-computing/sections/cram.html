@@ -125,7 +125,13 @@
         </table>
         <br>n<sup>k</sup> is the cost of the recursion, f(n) the cost of dividing and combining.
         The larger wins; when they tie, every one of the log<sub>b</sub> n levels costs the same
-        and that is where the log comes from.
+        and that is where the log comes from.<br><br>
+        <strong>The ε matters.</strong> Cases 1 and 3 need a <em>polynomial</em> separation, and a log
+        factor is not one — there is no ε &gt; 0 with log n ∈ Ω(n<sup>ε</sup>). So for
+        <strong>T(n) = 2T(n/2) + n log n</strong> no case applies at all: f is above n<sup>k</sup>
+        but not polynomially above, and not Θ(n<sup>k</sup>) either. Say that. (Unfolding gives
+        Θ(n log² n); in general n<sup>k</sup> log<sup>p</sup> n gives n<sup>k</sup>
+        log<sup>p+1</sup> n.)
       </div>
 
       <div class="callout exam">

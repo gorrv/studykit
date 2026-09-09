@@ -264,6 +264,24 @@
       from.</p>
 
       <div class="callout warn">
+        <div class="callout-label">The ε is load-bearing: there is a gap between the cases</div>
+        Cases 1 and 3 do not say &ldquo;slower&rdquo; and &ldquo;faster&rdquo;. They say
+        O(n<sup>k−ε</sup>) and Ω(n<sup>k+ε</sup>) <strong>for some ε &gt; 0</strong> — the separation
+        has to be <em>polynomial</em>, not merely some separation. A log factor is not polynomial:
+        there is no ε &gt; 0 with log n ∈ Ω(n<sup>ε</sup>), however small you make it.<br><br>
+        So take <strong>T(n) = 2T(n/2) + n log n</strong>. Here k = 1, and f = n log n grows faster
+        than n — but only by a log. Case 3 needs Ω(n<sup>1+ε</sup>) and n log n is not that. Case 2
+        needs Θ(n) and n log n is not that either. <strong>No case applies</strong>, and that is the
+        answer the exam wants.<br><br>
+        The recurrence still has a solution: unfolding it gives Θ(n log² n), and in general an f of
+        the form n<sup>k</sup> log<sup>p</sup> n gives n<sup>k</sup> log<sup>p+1</sup> n — one more
+        log, because every level again costs the same. That extended form is worth a sentence, but
+        write &ldquo;the Master Theorem does not apply, because f is only a logarithmic factor above
+        n<sup>k</sup>&rdquo; first. The tool below reports this case as <em>no case</em> rather than
+        forcing it into Case 3; try 9, 3, <code>n^2 log n</code>.
+      </div>
+
+      <div class="callout warn">
         <div class="callout-label">k = log<sub>b</sub> a, and the base is b</div>
         <strong>b</strong> is what you divide by; <strong>a</strong> is how many subproblems you get.
         So it is log<sub>b</sub>a. For a = 2, b = 3 that is log₃2 ≈ <strong>0.63</strong> — not
