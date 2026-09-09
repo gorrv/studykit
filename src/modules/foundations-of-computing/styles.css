@@ -1107,3 +1107,138 @@
   .rv-bar-row { flex-wrap: wrap; }
   .rv-bar-lab { flex-basis: 100%; }
 }
+
+
+/* ---------- Topic 09 · probability -------------------------------- */
+
+.pb-svg {
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  background: var(--surface-3);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  margin: 10px 0;
+}
+.pb-axis { stroke: var(--ink-soft); stroke-width: 1.2; }
+.pb-bar  { fill: var(--accent); opacity: 0.7; }
+.pb-bar.hot { fill: var(--accent-2); opacity: 1; }
+.pb-mean { stroke: var(--accent-3); stroke-width: 2; stroke-dasharray: 5 3; }
+.pb-lab, .pb-val, .pb-meanlab {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  fill: var(--ink-muted);
+  text-anchor: middle;
+}
+.pb-val { font-size: 9px; fill: var(--ink-soft); }
+.pb-meanlab { text-anchor: start; fill: var(--accent-3); font-size: 10px; }
+
+.pb-table, .pj-table, .pc-table {
+  width: 100%;
+  margin: 10px 0;
+  display: block;
+  overflow-x: auto;
+}
+.pb-table td, .pb-table th, .pj-table td, .pj-table th, .pc-table td, .pc-table th {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+.pb-table th:first-child, .pj-table th:first-child, .pc-table th:first-child {
+  text-align: left;
+  color: var(--ink-muted);
+}
+.pj-marg { color: var(--ink-soft); border-left: 2px solid var(--rule); }
+.pc-ok { color: var(--accent-3); font-weight: 600; }
+.pc-no { color: var(--accent-2); font-weight: 600; }
+
+.pb-two { display: flex; flex-wrap: wrap; gap: 14px; margin: 12px 0; }
+.pb-half {
+  flex: 1 1 230px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface-2);
+  padding: 10px 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+}
+.pb-cap {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-muted);
+  margin-bottom: 6px;
+}
+.pj-verdict { margin-top: 7px; font-weight: 600; }
+.pj-verdict.yes { color: var(--accent-3); }
+.pj-verdict.no  { color: var(--accent-2); }
+
+.mk-sides { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 12px 0; }
+.mk-side {
+  flex: 1 1 220px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface-2);
+  padding: 10px 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+}
+.mk-rel { font-size: 22px; color: var(--ink-muted); flex: 0 0 auto; }
+.mk-bad { color: var(--accent-2); font-weight: 700; }
+.mk-note { margin-top: 5px; font-size: 10.5px; color: var(--ink-soft); font-family: inherit; }
+
+.pt-branches { margin: 14px 0 4px; }
+.pt-branch {
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--rule);
+  border-radius: 7px;
+  padding: 9px 12px;
+  margin-bottom: 8px;
+  background: var(--surface-2);
+}
+.pt-branch.accept { border-left-color: var(--accent-3); background: var(--tint-c); }
+.pt-branch.reject { border-left-color: var(--accent-2); background: var(--tint-b2); }
+.pt-branch.open   { border-left-color: var(--warn-border); background: var(--tint-warn); }
+.pt-branch.stuck  { border-left-color: var(--ink-soft); }
+.pt-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; }
+.pt-verdict {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-muted);
+}
+.pt-prob { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; }
+.pt-depth { font-size: 11px; color: var(--ink-soft); margin-left: auto; }
+.pt-configs { margin-top: 7px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.pt-cfg {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  background: var(--surface-3);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--ink-muted);
+}
+.pt-arrow { color: var(--ink-soft); font-size: 11px; }
+
+.pc-bar {
+  display: inline-block;
+  height: 8px;
+  border-radius: 3px;
+  background: var(--accent-2);
+  vertical-align: middle;
+}
+.pc-amp, .pc-zpp {
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface-2);
+  padding: 11px 13px;
+  margin: 14px 0;
+}
+
+@media (max-width: 640px) {
+  .cd-row { flex-wrap: wrap; }
+  .cd-lab { flex-basis: 100%; text-align: left; }
+  .mk-rel { display: none; }
+}

@@ -2078,6 +2078,174 @@ module.exports = async function run() {
     }
   }
 
+  /* ---------------- Topic 09 · probability and randomised classes ----------------
+
+     Exact rationals throughout, so "is this at most 1/3?" is a question about
+     arithmetic rather than about rounding.
+  */
+  {
+    const fr = w.fr, frStr = w.frStr, frCmp = w.frCmp, frNum = w.frNum;
+    const eq = (a, b) => frCmp(a, b) === 0;
+
+    /* ---- the lecture's own worked example ---- */
+    {
+      const d = w.pbParse(w.PB_PRESETS.lecture);
+      s.ok('the slide-10 distribution parses', d.ok, d.error);
+      s.ok('and its probabilities sum to exactly 1', d.sums, frStr(d.total));
+      s.is('E[X] is 67/20', frStr(w.pbMean(d)), '67/20');
+      s.near('which is the 3.35 printed on the slide', frNum(w.pbMean(d)), 3.35, 1e-12);
+
+      const v = w.pbVar(d);
+      s.ok('the two variance formulas agree on it', v.agree,
+        `${frStr(v.direct)} vs ${frStr(v.shortcut)}`);
+    }
+
+    /* ---- Var[X] = E[X²] − E[X]², on random distributions ---- */
+    {
+      let bad = 0, n = 0, first = null;
+      for (let t = 0; t < 400; t++) {
+        const k = ri(2, 6), den = ri(4, 20), parts = [];
+        let left = den;
+        for (let i = 0; i < k - 1; i++) {
+          const take = ri(1, Math.max(1, left - (k - 1 - i)));
+          parts.push(take); left -= take;
+        }
+        parts.push(left);
+        const d = w.pbParse(parts.map((p, i) => `${ri(-9, 9)} ${p}/${den}`).join('\n'));
+        if (!d.ok || !d.sums) continue;
+        n++;
+        const v = w.pbVar(d);
+        if (!v.agree) { bad++; if (!first) first = `${frStr(v.direct)} vs ${frStr(v.shortcut)}`; }
+      }
+      s.ok('a decent sample of distributions was built', n > 200, `${n}`);
+      s.is('E[(X−μ)²] equals E[X²]−E[X]² on every one', bad, 0, first);
+    }
+
+    /* ---- Markov, and the hypothesis the slide omits ---- */
+    {
+      const ce = w.mkCounterexample(fr(2));
+      s.ok('X = −10 is not non-negative', ce.r.nonNegative === false);
+      s.ok('and the slide-as-stated bound fails on it', ce.r.holds === false,
+        `${frStr(ce.r.lhs)} vs ${frStr(ce.r.rhs)}`);
+      s.is('the left-hand side is 1', frStr(ce.r.lhs), '1');
+      s.is('while the claimed bound is 1/2', frStr(ce.r.rhs), '1/2');
+
+      const tight = w.mkCheck(w.pbParse(w.PB_PRESETS.tight), fr(3));
+      s.ok('Markov is met with equality on the tight distribution', tight.tight);
+      s.ok('so no smaller bound follows from the mean alone', tight.holds);
+
+      // it must never fail when the hypothesis does hold
+      let viol = 0, n = 0;
+      for (let t = 0; t < 600; t++) {
+        const k = ri(2, 6), den = ri(4, 20), parts = [];
+        let left = den;
+        for (let i = 0; i < k - 1; i++) {
+          const take = ri(1, Math.max(1, left - (k - 1 - i)));
+          parts.push(take); left -= take;
+        }
+        parts.push(left);
+        const d = w.pbParse(parts.map((p) => `${ri(0, 20)} ${p}/${den}`).join('\n'));
+        if (!d.ok || !d.sums) continue;
+        if (eq(w.pbMean(d), fr(0))) continue;
+        n++;
+        if (!w.mkCheck(d, fr(ri(2, 10))).holds) viol++;
+      }
+      s.ok('enough non-negative cases were tried', n > 300, `${n}`);
+      s.is('Markov never fails when X ≥ 0', viol, 0);
+    }
+
+    /* ---- linearity needs nothing; variance additivity needs independence ---- */
+    {
+      ['dependent', 'independent', 'anti'].forEach(k => {
+        const j = w.pjParse(w.PJ_PRESETS[k]);
+        s.ok(`E[X+Y] = E[X]+E[Y] on the "${k}" joint distribution`, j.linearHolds);
+      });
+      s.ok('variance adds when X and Y are independent',
+        w.pjParse(w.PJ_PRESETS.independent).varAdds);
+      s.ok('and does not when Y = X', w.pjParse(w.PJ_PRESETS.dependent).varAdds === false);
+      s.ok('nor when Y = 1 − X', w.pjParse(w.PJ_PRESETS.anti).varAdds === false);
+      s.is('the covariance is zero exactly when they are independent',
+        frStr(w.pjParse(w.PJ_PRESETS.independent).covariance), '0');
+    }
+
+    /* ---- the computation tree on slides 9 and 10 ---- */
+    {
+      const p = w.ptmParse(w.PTM_PRESETS.lecture);
+      s.ok('the lecture PTM parses', p.ok, p.error);
+      const t = w.ptmTree(p.m, '111', { depth: 12 });
+      s.ok('its leaf probabilities total exactly 1', t.exhaustive, frStr(t.total));
+      s.same('and are the 1/3, 2/9, 4/9 on the slide',
+        t.leaves.map(l => frStr(l.prob)).sort(), ['1/3', '2/9', '4/9'].sort());
+      s.is('so Prob(accept) = 1/3 + 4/9 = 7/9', frStr(t.pAccept), '7/9');
+      s.is('and Prob(reject) = 2/9', frStr(t.pReject), '2/9');
+
+      // delta really must be a distribution
+      const bad = w.ptmParse('start: q0\naccept: qa\nq0 1 qa 1 > 1/3\nq0 1 q0 1 > 1/3');
+      s.ok('a δ group that does not sum to 1 is refused', bad.ok === false);
+
+      // halting with probability 1 is not the same as halting within a bound
+      const b = w.ptmParse(w.PTM_PRESETS.biased);
+      s.ok('the unbounded-time preset parses', b.ok, b.error);
+      [2, 4, 6, 8, 10, 12].forEach(dep => {
+        const tt = w.ptmTree(b.m, '', { depth: dep });
+        s.ok(`masses total 1 at depth ${dep}`, tt.exhaustive, frStr(tt.total));
+        s.is(`nothing is stuck at depth ${dep}`, frStr(tt.pStuck), '0');
+      });
+      s.is('the surviving mass halves every two steps',
+        frStr(w.ptmTree(b.m, '', { depth: 12 }).pOpen), '1/64');
+      s.is('so Prob(accept) climbs towards 1',
+        frStr(w.ptmTree(b.m, '', { depth: 12 }).pAccept), '63/64');
+
+      const det = w.ptmParse(w.PTM_PRESETS.deterministic);
+      s.is('a machine with no branching gives one path',
+        w.ptmTree(det.m, '111', { depth: 12 }).branches, 1);
+    }
+
+    /* ---- BPP, ZPP, amplification ---- */
+    {
+      s.ok('the lecture constants are in BPP', w.pcClassify(fr(2, 3), fr(1, 3), {}).inBPP);
+      s.ok('always-right with expected polynomial time is in ZPP',
+        w.pcClassify(fr(1), fr(0), {}).inZPP);
+      s.ok('and is therefore in BPP too', w.pcClassify(fr(1), fr(0), {}).inBPP);
+      s.ok('a machine with no gap around ½ amplifies to nothing',
+        w.pcClassify(fr(1, 2), fr(1, 2), {}).straddles === false);
+      s.ok('a narrow gap still straddles ½', w.pcClassify(fr(3, 5), fr(2, 5), {}).straddles);
+
+      const a1 = w.pcAmplify(fr(2, 3), 1);
+      s.near('one run of a 2/3-accurate machine errs 1/3 of the time', a1.error, 1 / 3, 1e-9);
+      const a101 = w.pcAmplify(fr(2, 3), 101);
+      s.near('101 runs bring that to 2.724e-4', a101.error, 2.724e-4, 1e-6);
+      s.ok('more repetitions never make it worse',
+        w.pcAmplify(fr(2, 3), 51).error < w.pcAmplify(fr(2, 3), 21).error);
+      s.ok('an even number of repetitions is refused', w.pcAmplify(fr(2, 3), 20).ok === false);
+      const rep = w.pcRepetitions(fr(2, 3), 1e-9);
+      s.ok('a finite number of repetitions reaches 1e-9', rep.ok && rep.k > 1, `${rep.k}`);
+
+      /* ZPP ⊆ BPP, computed exactly rather than bounded. The slide drops the
+         coin's factor of ½; both its bound and the honest one must hold. */
+      const geo = w.pbParse(w.PB_PRESETS.geometric);
+      s.ok('the geometric runtime sums to 1', geo.ok && geo.sums);
+      const z = w.pcZppToBpp(geo);
+      s.ok('the construction runs', z.ok, z.error);
+      s.ok('Markov’s bound on the tail holds', z.markovHolds, frStr(z.pOver));
+      s.ok('and the construction meets BPP’s guarantees', z.meetsBPP,
+        `${frStr(z.accIn)} / ${frStr(z.accOut)}`);
+      s.is('the slide’s bound on the error is 1/3', frStr(z.slideBoundOut), '1/3');
+      s.is('the honest bound, keeping the coin’s ½, is 1/6', frStr(z.honestBoundOut), '1/6');
+      s.is('and on the other side, 2/3 against 5/6', frStr(z.honestBoundIn), '5/6');
+      s.ok('the actual acceptance beats both', frCmp(z.accIn, z.honestBoundIn) >= 0 &&
+        frCmp(z.accOut, z.honestBoundOut) <= 0);
+
+      // known versus open, which is the examinable distinction
+      s.is('P ⊆ ZPP is proved', w.pcAsk('P', 'ZPP').status, 'proved');
+      s.is('ZPP ⊆ BPP is proved', w.pcAsk('ZPP', 'BPP').status, 'proved');
+      s.is('P ⊆ BPP follows by chaining', w.pcAsk('P', 'BPP').status, 'proved');
+      s.is('BPP ⊆ PSPACE is proved', w.pcAsk('BPP', 'PSPACE').status, 'proved');
+      s.is('BPP ⊆ NP is open', w.pcAsk('BPP', 'NP').status, 'open');
+      s.is('and so is NP ⊆ BPP', w.pcAsk('NP', 'BPP').status, 'open');
+    }
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 2000);

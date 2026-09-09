@@ -1,0 +1,369 @@
+<section id="topic9" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 09 · Randomised Computation</div>
+        <h1>Getting It Right Most of the Time</h1>
+        <div class="topic-subtitle">probability, expectation, and the classes a coin buys you</div>
+      </div>
+
+      <p>Every machine so far has been given the same input twice and done the same thing twice. This
+      topic hands the machine a coin. That changes what &ldquo;M decides L&rdquo; can mean: an answer
+      may now be right with some probability, and a running time may now be right on average. Where you
+      allow the randomness to hurt you &mdash; in the answer, or in the clock &mdash; is exactly what
+      separates the two classes at the end.</p>
+
+      <!-- ===== PROBABILITY ===== -->
+      <h2 id="t9-prob">Probability, expectation, variance</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        <strong>Sample space</strong> S = { all possible outcomes } = { s₁, s₂, …, sₙ }.<br>
+        <strong>Probability measure</strong> Prob : S → [0, 1].<br>
+        <strong>Event</strong> — any subset E ⊆ S, i.e. E ∈ 𝒫(S), with
+        Prob(E) = Σ<sub>s∈E</sub> Prob(s).<br>
+        <strong>Random variable</strong> X : S → ℝ — a <em>measurement</em> of a random outcome,
+        not an outcome.<br>
+        Prob(X = k) = Prob({ s ∈ S : X(s) = k }), and similarly for X ≤ k.<br>
+        <strong>Probability mass function</strong> p<sub>X</sub>(k) = Prob(X = k).<br><br>
+        <strong>Expectation</strong> E[X] = Σ<sub>k</sub> k · p<sub>X</sub>(k).<br>
+        <strong>Variance</strong> Var[X] = E[(X − μ)²] where μ = E[X], and
+        <strong>Var[X] = E[X²] − E[X]²</strong>.<br>
+        <strong>Standard deviation</strong> σ<sub>X</sub> = √Var[X].
+      </div>
+
+      <p>The definition of a random variable is worth pausing on, because the name is misleading: X is
+      neither random nor a variable. It is a <em>function</em> from outcomes to numbers, fixed once and
+      for all. What is random is which outcome you get, and X merely measures it. That is why
+      questions about X reduce to questions about sets of outcomes &mdash; Prob(X = k) is shorthand
+      for the probability of the event on which X happens to take the value k.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Why the first attempt at variance fails</div>
+        The slide tries Var[X] = E[X − μ] first and gets <strong>zero, always</strong>. That is not an
+        accident of the example: by linearity E[X − μ] = E[X] − μ = 0 for every random variable there
+        is. Deviations above and below the mean cancel exactly, which is what &ldquo;mean&rdquo; means.
+        Squaring first is what stops the cancellation, and it is also what makes the units of Var[X]
+        the square of the units of X &mdash; hence taking the root at the end to get σ back into the
+        units you started in.
+      </div>
+
+      <h3 id="t9-dttool">&#128736;&#65039; Expectation and variance, both ways</h3>
+
+      <div class="tool" data-run="runDist">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Compute E[X], Var[X] and σ from a distribution</h3>
+        </div>
+        <div class="tool-desc">Exact fractions throughout. The variance is computed twice — from the
+          definition and from the theorem on slide 13 — and the two are compared, so the theorem is
+          checked on your distribution rather than taken on trust.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="pb-text">value and probability, one pair per line</label>
+            <textarea id="pb-text" rows="7" spellcheck="false">1 0.15
+2 0.3
+3 0.15
+4 0.1
+5 0.05
+6 0.25</textarea>
+          </div>
+          <button class="tool-btn" onclick="runDist()">Compute ▶</button>
+          <button class="tool-btn secondary" onclick="pbPreset('lecture')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="pbPreset('die')">Fair die</button>
+          <button class="tool-btn secondary" onclick="pbPreset('skewed')">Nearly all mass at 0</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="pb-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Properties of expectation</div>
+        For any random variables X and Y and any real a, b:<br>
+        <strong>(i)</strong> E[aX + b] = a·E[X] + b<br>
+        <strong>(ii)</strong> E[X + Y] = E[X] + E[Y]<br><br>
+        Part (ii) is called <strong>linearity of expectation</strong> and it needs <em>no</em>
+        assumption about X and Y. They may be as dependent as you like — Y may literally be X — and it
+        still holds. That is unusual enough to be worth a line of its own in an answer, because the
+        corresponding statement for variance is false: Var[X + Y] = Var[X] + Var[Y] + 2·Cov[X, Y], so
+        variances add only when the covariance vanishes, which independence guarantees and nothing
+        else does.
+      </div>
+
+      <h3 id="t9-jntool">&#128736;&#65039; What linearity needs, and what it does not</h3>
+
+      <div class="tool" data-run="runJoint">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Two variables on one joint distribution</h3>
+        </div>
+        <div class="tool-desc">Make X and Y as dependent as you like and watch which of the two
+          identities survives. Independence is checked cell by cell against the product of the
+          marginals, and the covariance is reported so you can see where the discrepancy goes.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="pj-text">x, y and probability, one triple per line</label>
+            <textarea id="pj-text" rows="5" spellcheck="false">0 0 1/2
+1 1 1/2</textarea>
+          </div>
+          <button class="tool-btn" onclick="runJoint()">Compute ▶</button>
+          <button class="tool-btn secondary" onclick="pjPreset('dependent')">Y = X</button>
+          <button class="tool-btn secondary" onclick="pjPreset('anti')">Y = 1 − X</button>
+          <button class="tool-btn secondary" onclick="pjPreset('independent')">Independent</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="pj-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== MARKOV ===== -->
+      <h2 id="t9-markov">Markov&rsquo;s inequality</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The theorem, with the hypothesis the slide omits</div>
+        Let X be a <strong>non-negative</strong> random variable with expectation E[X]. Then for any
+        a &gt; 0:<br><br>
+        <strong>Prob( X ≥ a · E[X] ) ≤ 1/a</strong><br><br>
+        In words: a non-negative quantity cannot be far above its average very often. It is the only
+        tail bound you get from knowing the mean alone, and it is tight — a variable that is
+        a·E[X] with probability 1/a and 0 otherwise meets it with equality — so no better bound is
+        possible without more information.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The slide states it without X ≥ 0, and then it is false</div>
+        As printed, the theorem reads &ldquo;let X be a random variable with expectation E[X]&rdquo;,
+        with no condition on X. Take X = −10 always. Then E[X] = −10, and for a = 2 the claim is
+        Prob(X ≥ −20) ≤ ½ — but that probability is <strong>1</strong>.<br><br>
+        The reason is visible once you look: with a negative mean, multiplying by a larger a moves the
+        threshold <em>down</em>, so the event becomes more likely as the bound gets tighter. Every
+        actual use of Markov in this topic is on a running time, which is non-negative, so nothing
+        downstream breaks — but write the hypothesis down. The tool below will take a negative
+        distribution and show the bound failing.
+      </div>
+
+      <h3 id="t9-mktool">&#128736;&#65039; Markov&rsquo;s inequality, checked</h3>
+
+      <div class="tool" data-run="runMarkov">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Both sides of the bound, on your distribution</h3>
+        </div>
+        <div class="tool-desc">The shaded bars are the event the left-hand side measures. The tool
+          reports whether X ≥ 0 holds separately from whether the bound holds, because those are
+          different questions and the slide only asks one of them.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 240px;">
+            <label for="mk-text">the distribution</label>
+            <textarea id="mk-text" rows="5" spellcheck="false">0 0.99
+100 0.01</textarea>
+          </div>
+          <div class="tool-field">
+            <label for="mk-a">a</label>
+            <input type="text" id="mk-a" value="2" spellcheck="false">
+          </div>
+          <button class="tool-btn" onclick="runMarkov()">Check ▶</button>
+          <button class="tool-btn secondary" onclick="mkPreset('skewed')">Long tail</button>
+          <button class="tool-btn secondary" onclick="mkPreset('tight')">Meets it exactly</button>
+          <button class="tool-btn secondary" onclick="mkPreset('die')">Fair die</button>
+          <button class="tool-btn danger" onclick="mkPreset('negative')">Break it: X &lt; 0</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="mk-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== PTM ===== -->
+      <h2 id="t9-ptm">Probabilistic Turing machines</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write this out exactly</div>
+        A <strong>probabilistic Turing machine</strong> is
+        M = ⟨Σ, Q, q<sub>init</sub>, q<sub>accept</sub>, q<sub>reject</sub>, δ⟩ — the same six-tuple as
+        before — where<br><br>
+        δ( current state, symbol read ) ↦ a <strong>probability distribution</strong> over possible
+        instructions,<br>
+        drawn from the sample space S = Q × (Σ ∪ {␣}) × {←, →}.<br><br>
+        <strong>Configurations</strong> are as for an ordinary machine: (current state, left substring,
+        right substring). The <strong>computations</strong> are all sequences of configurations
+        obtainable by running M — which now form a <em>tree</em> rather than a single path.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Reading the tree</div>
+        <strong>Prob(a branch)</strong> = the <em>product</em> of the probabilities along it, because
+        each choice is made afresh.<br>
+        <strong>Prob(M(w) = 1)</strong> = Σ over all accepting branches — a <em>sum</em>, because
+        distinct branches are mutually exclusive events. Two different sequences of choices cannot both
+        happen.<br><br>
+        Any number you can attach to a computation is a random variable on that tree: the
+        <strong>termination time T(n)</strong>, the <strong>space S(n)</strong>, the number of visits
+        to a given state. T(n) is the one the next section needs.
+      </div>
+
+      <h3 id="t9-pttool">&#128736;&#65039; The computation tree</h3>
+
+      <div class="tool" data-run="runPtm">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Every branch, its probability, and what they sum to</h3>
+        </div>
+        <div class="tool-desc">The syntax is Topic 1&rsquo;s Turing machine with a probability at the
+          end of each line. δ is checked to be a genuine distribution — every (state, symbol) group
+          must sum to 1 — and so is the tree: the four outcome probabilities have to total exactly 1.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="pt-text">the machine</label>
+            <textarea id="pt-text" rows="8" spellcheck="false">start: q0
+accept: qacc
+reject: qrej
+q0 1 qacc 1 > 1/3
+q0 1 q1 1 > 2/3
+q1 1 qrej 1 > 1/3
+q1 1 qacc 1 > 2/3</textarea>
+          </div>
+          <div class="tool-field">
+            <label for="pt-word">input</label>
+            <input type="text" id="pt-word" value="111" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="pt-depth">depth</label>
+            <input type="number" id="pt-depth" value="8" min="1" max="16">
+          </div>
+          <button class="tool-btn" onclick="runPtm()">Run ▶</button>
+          <button class="tool-btn secondary" onclick="ptmPreset('lecture')">Lecture tree</button>
+          <button class="tool-btn secondary" onclick="ptmPreset('coin')">Fair coin</button>
+          <button class="tool-btn secondary" onclick="ptmPreset('biased')">No time bound</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="pt-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Try the &ldquo;no time bound&rdquo; preset at several depths</div>
+        It accepts with probability ½ at each round and otherwise goes back to where it started. Its
+        probability of eventually halting is 1 — the surviving mass halves every two steps, so it
+        tends to zero — and yet there is <strong>no k</strong> such that it always halts within k
+        steps. Halting with probability 1 and halting within a bound are different properties, and
+        the gap between them is precisely the gap between ZPP and BPP below.
+      </div>
+
+      <!-- ===== CLASSES ===== -->
+      <h2 id="t9-classes">BPP and ZPP</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        <strong>Bounded-error probabilistic polynomial time (BPP).</strong> L ∈ BPP if some machine M
+        is<br>
+        &nbsp;&nbsp;probabilistically <em>sound</em>: w ∉ L ⇒ Prob(M(w) = 1) ≤ <strong>1/3</strong><br>
+        &nbsp;&nbsp;probabilistically <em>complete</em>: w ∈ L ⇒ Prob(M(w) = 1) ≥ <strong>2/3</strong><br>
+        &nbsp;&nbsp;polynomial-time: T(n) ∈ O(n<sup>k</sup>) &nbsp;<em>(worst case)</em><br><br>
+        <strong>Zero-error probabilistic polynomial time (ZPP).</strong> L ∈ ZPP if some machine M
+        is<br>
+        &nbsp;&nbsp;<em>sound</em>: w ∉ L ⇒ Prob(M(w) = 1) = <strong>0</strong><br>
+        &nbsp;&nbsp;<em>complete</em>: w ∈ L ⇒ Prob(M(w) = 1) = <strong>1</strong><br>
+        &nbsp;&nbsp;expected polynomial-time: E[T(n)] ∈ O(n<sup>k</sup>) &nbsp;<em>(expected)</em>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Monte Carlo and Las Vegas</div>
+        A <strong>Monte Carlo</strong> algorithm has a deterministic running time but may return the
+        wrong answer. <strong>BPP</strong> = the problems with a polynomial-time Monte Carlo
+        algorithm.<br><br>
+        A <strong>Las Vegas</strong> algorithm is always sound and complete, but its running time
+        varies. <strong>ZPP</strong> = the problems with a polynomial-time Las Vegas algorithm.<br><br>
+        The names are worth keeping straight by the mnemonic that in Las Vegas you can always leave
+        with your money, you just cannot say when; in Monte Carlo you leave on schedule and might have
+        lost.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Theorem: ZPP ⊆ BPP</div>
+        <strong>Step 1.</strong> Let L ∈ ZPP, so some M is sound and complete with
+        E[T(n)] &lt; c·n<sup>k</sup>.<br>
+        <strong>Step 2.</strong> Build M′: run M for at most <strong>K = 3·E[T(n)]</strong> steps. If
+        it finished, answer what it answered. If it did not, <strong>flip a fair coin</strong>.<br>
+        <strong>Step 3.</strong> M′ always terminates within O(n<sup>k</sup>) steps, by construction.<br>
+        <strong>Step 4 (sound).</strong> If w ∉ L then M never accepts, so M′ can only accept by
+        guessing: Prob(M′(w) = 1) ≤ Prob(T(n) &gt; 3E[T(n)]) ≤ <strong>1/3</strong> by Markov.<br>
+        <strong>Step 5 (complete).</strong> If w ∈ L then M accepts whenever it finishes, so
+        Prob(M′(w) = 1) ≥ 1 − Prob(T(n) &gt; 3E[T(n)]) ≥ <strong>2/3</strong>.<br>
+        <strong>Step 6.</strong> M′ is a polynomial-time Monte Carlo algorithm, so L ∈ BPP. ∎<br><br>
+        Markov is doing all the work, and it is legitimate here because T(n) is a running time and
+        therefore non-negative — the hypothesis the earlier slide omitted.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The proof gives away more than it claims</div>
+        Steps 4 and 5 bound the error by Prob(T &gt; K) alone, dropping the coin&rsquo;s factor of ½.
+        Putting it back gives <strong>1/6</strong> and <strong>5/6</strong> rather than 1/3 and 2/3 —
+        the construction lands comfortably inside the definition rather than exactly on its boundary.
+        Both versions are correct, since throwing away slack can only weaken a bound you are trying to
+        satisfy, but it is worth seeing that the theorem is not as tight a squeeze as the numbers
+        suggest. The tool below computes both on a concrete runtime distribution.
+      </div>
+
+      <h3 id="t9-cltool">&#128736;&#65039; Which class, and how much the constants matter</h3>
+
+      <div class="tool" data-run="runClasses">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Classify a machine, then amplify it</h3>
+        </div>
+        <div class="tool-desc">Give the two acceptance probabilities and the tool checks them against
+          both definitions, then shows what majority voting does to the error rate — and works the
+          ZPP ⊆ BPP construction on a real runtime distribution.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="pc-in">Prob(accept) when w ∈ L</label>
+            <input type="text" id="pc-in" value="2/3" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="pc-out">Prob(accept) when w ∉ L</label>
+            <input type="text" id="pc-out" value="1/3" spellcheck="false">
+          </div>
+          <button class="tool-btn" onclick="runClasses()">Classify ▶</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="pc-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The hierarchy, and what is actually known</div>
+        <strong>Proved:</strong> P ⊆ ZPP ⊆ BPP ⊆ PSpace, and P ⊆ NP ⊆ PSpace, and P ⊆ co-NP ⊆
+        PSpace.<br><br>
+        <strong>Open, and on the slide as questions:</strong> BPP ⊆ NP? NP ⊆ BPP? ZPP = P? BPP = P?
+        <br><br>
+        The last one is the surprise. Most people meeting BPP for the first time assume randomness
+        must buy something, and the current expectation among complexity theorists is the opposite:
+        <strong>BPP = P is widely believed to be true</strong>. Randomness looks like power, but for
+        decision problems it is increasingly thought to be a convenience — one that good enough
+        pseudorandom generators would remove. Nobody has proved it.
+      </div>
+
+      <!-- ===== EXAM ===== -->
+      <h2 id="t9-exam">Exam takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">What is most likely to be asked</div>
+        <strong>Compute E[X] and Var[X] from a table.</strong> Build the k·p<sub>X</sub>(k) row and
+        sum it; use E[X²] − E[X]² rather than the definition, and check Σp = 1 first.<br><br>
+        <strong>State Markov&rsquo;s inequality and apply it.</strong> Include <em>X ≥ 0</em> and
+        <em>a &gt; 0</em>. Typical use: bound the chance of running more than a few times the expected
+        time.<br><br>
+        <strong>Read a computation tree.</strong> Multiply along a branch, add across accepting
+        branches, and check the leaves total 1.<br><br>
+        <strong>Define BPP and ZPP.</strong> Three clauses each. The examinable contrast is worst-case
+        time with bounded error against expected time with no error.<br><br>
+        <strong>Prove ZPP ⊆ BPP.</strong> Cut off at 3·E[T], flip a coin, apply Markov. Say why Markov
+        applies.<br><br>
+        <strong>Say which containments are known.</strong> P ⊆ ZPP ⊆ BPP is proved; BPP versus NP is
+        open in both directions.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The one-sentence version</div>
+        Randomness lets a machine trade certainty for speed, and the two classes differ only in which
+        one they refuse to give up: ZPP keeps the answer exact and lets the clock slip, BPP keeps the
+        clock exact and lets the answer slip — and Markov&rsquo;s inequality is the bridge, because a
+        machine that is usually quick cannot be slow very often.
+      </div>
+
+    </section>

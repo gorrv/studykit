@@ -417,4 +417,51 @@
             origin; that needs a phase-one method.</li>
         </ul>
       </div>
+
+      <h2 id="cr-t9">Topic 09 &middot; probability &amp; randomised classes</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        <strong>E[X] = Σ<sub>k</sub> k · p<sub>X</sub>(k)</strong><br>
+        <strong>Var[X] = E[(X − μ)²] = E[X²] − E[X]²</strong>, &nbsp; σ<sub>X</sub> = √Var[X]<br>
+        <strong>E[aX + b] = a E[X] + b</strong> &nbsp;and&nbsp; <strong>E[X + Y] = E[X] + E[Y]</strong>
+        <br><br>
+        <strong>Markov.</strong> For a <strong>non-negative</strong> X and any a &gt; 0:
+        Prob( X ≥ a·E[X] ) ≤ 1/a.<br><br>
+        <strong>PTM.</strong> ⟨Σ, Q, q<sub>init</sub>, q<sub>acc</sub>, q<sub>rej</sub>, δ⟩ with
+        δ(state, symbol) ↦ a <em>distribution</em> over Q × (Σ ∪ {␣}) × {←, →}. Prob(branch) =
+        product along it; Prob(accept) = sum over accepting branches.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">BPP and ZPP</div>
+        <table style="margin:0;">
+          <tr><th></th><th>w ∉ L</th><th>w ∈ L</th><th>time</th></tr>
+          <tr><th>BPP</th><td>Prob(accept) ≤ 1/3</td><td>Prob(accept) ≥ 2/3</td>
+            <td>T(n) ∈ O(n<sup>k</sup>) worst case</td></tr>
+          <tr><th>ZPP</th><td>Prob(accept) = 0</td><td>Prob(accept) = 1</td>
+            <td>E[T(n)] ∈ O(n<sup>k</sup>) expected</td></tr>
+        </table>
+        <br>BPP = Monte Carlo (on time, maybe wrong). ZPP = Las Vegas (always right, maybe slow).
+        <br><br>
+        <strong>ZPP ⊆ BPP:</strong> run the Las Vegas machine for K = 3·E[T]; if unfinished, flip a
+        fair coin. Markov caps Prob(T &gt; K) at 1/3, which lands inside BPP’s bounds.<br><br>
+        <strong>Known:</strong> P ⊆ ZPP ⊆ BPP ⊆ PSpace. <strong>Open:</strong> BPP ⊆ NP? NP ⊆ BPP?
+        ZPP = P? BPP = P? — the last is widely believed <em>true</em>.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>Quoting Markov without <strong>X ≥ 0</strong>. The slide does; it is false without it.</li>
+          <li>Thinking E[X + Y] = E[X] + E[Y] needs independence. It needs nothing.</li>
+          <li>Thinking Var[X + Y] = Var[X] + Var[Y] needs nothing. It needs independence.</li>
+          <li>Defining variance as E[X − μ] — always zero, for every X.</li>
+          <li>Swapping which class has the time guarantee. BPP’s clock is exact; ZPP’s answer is.</li>
+          <li>Treating 1/3 and 2/3 as essential. Any constant gap around ½ amplifies by majority vote.</li>
+          <li>Confusing "halts with probability 1" with "halts within a bound". They differ, and that
+            gap is the gap between ZPP and BPP.</li>
+        </ul>
+      </div>
+
     </section>
