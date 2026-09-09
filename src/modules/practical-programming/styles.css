@@ -1,0 +1,194 @@
+  /* --------------------------------------------------------------------------
+     Module tokens. Only what this module needs on top of the shared palette:
+     the object boxes in the memory diagram, and the Java/C++ contrast panels.
+     -------------------------------------------------------------------------- */
+  :root, html[data-theme="light"] {
+    --pp-obj:#dce9f6; --pp-obj-edge:#8fb8dd;
+    --pp-shared:#fbe8d2; --pp-shared-edge:#d9a76a;
+    --pp-java:#efe6f7; --pp-cpp:#e2eff0;
+  }
+  html[data-theme="dark"] {
+    --pp-obj:#1e2f42; --pp-obj-edge:#3f6188;
+    --pp-shared:#3c2e1b; --pp-shared-edge:#8a6a3a;
+    --pp-java:#2b2435; --pp-cpp:#1d2d2e;
+  }
+
+  /* Borrowed from the other modules' idiom: the row of summary pills that
+     heads a tool's output. Defined here because it lives in each module's
+     own stylesheet rather than the shared chrome. */
+  .rd-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+
+  .pp-snippet {
+    margin: 8px 0;
+    padding: 10px 12px;
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--code-fg);
+    white-space: pre-wrap;
+    overflow-x: auto;
+  }
+
+  /* ---------- the memory diagram ---------- */
+
+  .pp-steps { margin: 14px 0 4px; }
+  .pp-step {
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 10px 13px;
+    margin-bottom: 9px;
+    background: var(--surface-2);
+  }
+  .pp-code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .pp-mem { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0; }
+  .pp-obj {
+    border: 2px solid var(--pp-obj-edge);
+    background: var(--pp-obj);
+    border-radius: 8px;
+    padding: 7px 11px;
+    min-width: 88px;
+  }
+  .pp-obj.shared { border-color: var(--pp-shared-edge); background: var(--pp-shared); }
+  .pp-obj.dead { opacity: 0.45; border-style: dashed; }
+  .pp-obj-id {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-soft);
+  }
+  .pp-obj-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    margin: 3px 0 5px;
+    line-height: 1.4;
+  }
+  .pp-obj-names { display: flex; flex-wrap: wrap; gap: 4px; }
+  .pp-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 0 5px;
+    color: var(--ink);
+  }
+  .pp-name.ref { border-color: var(--pp-shared-edge); color: var(--accent-2); }
+  .pp-name.const { font-style: italic; opacity: 0.85; }
+  .pp-none { font-size: 10.5px; color: var(--ink-soft); font-style: italic; }
+  .pp-obj-born { margin-top: 4px; font-size: 10px; color: var(--ink-soft); }
+  .pp-note { margin-top: 7px; font-size: 12.5px; color: var(--ink-muted); line-height: 1.55; }
+  .pp-sofar {
+    margin-top: 5px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent-3);
+  }
+  .pp-out { display: inline-block; margin-top: 4px; line-height: 1.6; }
+
+  .pp-src { margin: 14px 0; }
+  .pp-src summary {
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--ink-muted);
+    padding: 5px 0;
+  }
+  .pp-src pre {
+    margin: 8px 0 0;
+    padding: 10px 12px;
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    font-size: 11.5px;
+    white-space: pre-wrap;
+    color: var(--code-fg);
+  }
+  .pp-foot { margin-top: 10px; font-size: 12.5px; color: var(--ink-muted); line-height: 1.6; }
+  .pp-cap {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+  }
+
+  .pp-order {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--surface-2);
+    padding: 10px 13px;
+    margin: 12px 0;
+  }
+  .pp-order ol { margin: 0; padding-left: 20px; }
+  .pp-order li { font-size: 12.5px; line-height: 1.6; color: var(--ink-muted); margin: 3px 0; }
+
+  .pp-two { display: flex; flex-wrap: wrap; gap: 14px; margin: 12px 0; }
+  .pp-half {
+    flex: 1 1 260px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--surface-2);
+    padding: 11px 13px;
+  }
+  .pp-verdict {
+    margin: 7px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .pp-verdict.yes { color: var(--accent-3); }
+  .pp-verdict.no  { color: var(--accent-2); }
+  .pp-expand {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin: 5px 0;
+  }
+
+  /* ---------- Java against C++ ---------- */
+
+  .jc-list { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
+  .jc-item {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--surface-2);
+    padding: 11px 13px;
+  }
+  .jc-topic { font-weight: 700; color: var(--accent); margin-bottom: 7px; font-size: 13px; }
+  .jc-pair { display: flex; flex-wrap: wrap; gap: 9px; }
+  .jc-side { flex: 1 1 230px; border-radius: 7px; padding: 8px 10px; }
+  .jc-side.java { background: var(--pp-java); }
+  .jc-side.cpp  { background: var(--pp-cpp); }
+  .jc-lang {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .jc-side code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--ink);
+    background: none;
+    padding: 0;
+    white-space: pre-wrap;
+  }
+  .jc-note { margin-top: 8px; font-size: 12.5px; color: var(--ink-muted); line-height: 1.6; }
+
+  @media (max-width: 640px) {
+    .pp-mem { flex-direction: column; }
+    .jc-pair { flex-direction: column; }
+  }

@@ -1,0 +1,83 @@
+    <section id="cram" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Revision</div>
+        <h1>Cram sheet</h1>
+        <div class="topic-subtitle">every rule so far, one page</div>
+      </div>
+
+      <h2 id="cr-t1">Topic 01 &middot; first steps in C++</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The shape of a program</div>
+        <code>#include &lt;iostream&gt;</code>, <code>int main() { … return 0; }</code>, not inside a
+        class, no <code>String[] args</code>.<br>
+        <code>g++ -std=c++11 -o hello hello.cc</code> then <code>./hello</code> — a native
+        executable, no JVM.<br>
+        A prototype <code>int answer();</code> lets you define the body later.<br>
+        Semicolon after a class&rsquo;s closing brace.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The one that matters</div>
+        <table style="margin:8px 0 0;">
+          <tr><th><code>Coordinate b = a;</code></th><td>copy constructor</td>
+            <td><strong>two</strong> objects</td></tr>
+          <tr><th><code>Coordinate &amp; r = a;</code></th><td>reference</td>
+            <td><strong>one</strong> object, two names</td></tr>
+          <tr><th><code>const Coordinate &amp; c = a;</code></th><td>const reference</td>
+            <td>one object, read-only through c</td></tr>
+        </table>
+        <br>Parameters the same way: by value copies, by reference aliases, by const reference
+        aliases without permission to modify. References cannot be null and cannot be reseated.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Constructors</div>
+        <code>Coordinate(int xIn, int yIn) : x(xIn), y(yIn) { }</code><br><br>
+        <strong>Members are constructed before the body runs.</strong> Everything follows:<br>
+        • member with no default constructor ⇒ the initialiser list is the only option<br>
+        • member that is <code>const</code> or a reference ⇒ likewise<br>
+        • otherwise the body version compiles, and default-constructs then assigns — one operation
+        more than needed<br><br>
+        Writing any constructor removes the free default one, so <code>Coordinate b;</code> and
+        <code>vector&lt;Coordinate&gt; v(2);</code> both stop compiling. <code>push_back</code> never
+        needs a default constructor.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">const</div>
+        <code>int getX() const { return x; }</code> — the method promises not to modify.<br>
+        Through a <code>const</code> reference only <code>const</code> methods may be called, so
+        const spreads from wherever you first wrote it.<br>
+        Const is <strong>one-way</strong>: a <code>const T &amp;</code> may bind to a modifiable
+        object, never the reverse. Hence, given <code>const Coordinate &amp; getStart()</code>,
+        <code>Coordinate &amp; b = j.getStart();</code> is the one line of the four that fails.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Operators</div>
+        For <code>a == b</code> with a of type A, b of type B, provide one of<br>
+        <code>class A { public: bool operator==(const B &amp; rhs) const; };</code><br>
+        <code>bool operator==(const A &amp; lhs, const B &amp; rhs);</code><br>
+        The member goes on the <strong>left</strong> type; the free function works when you cannot
+        edit that type.<br><br>
+        <code>ostream &amp; operator&lt;&lt;(ostream &amp; o, const Coordinate &amp; rhs)</code> — must
+        return the stream, because <code>cout &lt;&lt; x &lt;&lt; y</code> is
+        <code>(cout &lt;&lt; x) &lt;&lt; y</code>. Cannot be a member, since the left operand is the
+        stream; pair it with a public <code>write(ostream &amp;) const</code> when it needs privates.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>Expecting <code>Coordinate b = a;</code> to alias, as Java would.</li>
+          <li>Missing semicolon after a class body.</li>
+          <li>Returning a non-const reference to a member, breaking your own invariants.</li>
+          <li>Forgetting <code>const</code> on getters.</li>
+          <li>Putting <code>operator==</code> on the right-hand type.</li>
+          <li>Returning <code>void</code> from <code>operator&lt;&lt;</code>.</li>
+          <li>Reading an uninitialised <code>int</code>, or off the end of a vector — both undefined
+            behaviour, neither reported.</li>
+        </ul>
+      </div>
+    </section>

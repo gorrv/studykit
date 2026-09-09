@@ -1,0 +1,39 @@
+    <section id="practice" class="topic-section">
+      <div class="topic-header">
+        <div class="topic-eyebrow">Revision</div>
+        <h1>Self-test</h1>
+        <div class="topic-subtitle">generated questions, marked by the tracer</div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why these are worth doing</div>
+        The programs are different every time, and your answer is checked by running the same tracer
+        the tools upstairs use — which is itself checked against a real compiler on every test run.
+        So the answer you are marked against is the answer <code>g++</code> would give.
+      </div>
+
+      <h2 id="pr-selftest">Question generator</h2>
+
+      <div class="tool" data-run="qzNext">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Generate a question and mark my answer</h3>
+        </div>
+        <div class="tool-desc">Numbers are answered as plain integers. Where a program prints several
+          lines, answer with them separated by commas, e.g. <code>8, 4</code>.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="qz-topic">topic</label>
+            <select id="qz-topic">
+              <option value="all">everything</option>
+              <option value="cppbasics">C++ first steps</option>
+            </select>
+          </div>
+          <button class="tool-btn green" onclick="qzNext()">New question ▶</button>
+          <button class="tool-btn secondary" onclick="qzReveal()">Show answer</button>
+          <button class="tool-btn danger" onclick="qzResetScore()">Reset score</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="qz-output" class="tool-output"></div>
+      </div>
+    </section>

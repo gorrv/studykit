@@ -1,0 +1,46 @@
+    <div class="brand">Practical <span class="accent">Programming</span></div>
+    <div class="brand-sub">C++ &amp; Scala</div>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Switch between light and dark theme">
+      <span class="tt-dot" aria-hidden="true"></span><span class="tt-label" id="tt-label">Light</span>
+    </button>
+    <div class="search-box" id="ns-box">
+      <span class="s-ico" aria-hidden="true">&#9906;</span>
+      <input type="search" id="ns-input" placeholder="Search these notes…" autocomplete="off"
+             spellcheck="false" aria-label="Search these notes"
+             oninput="nsInput()" onkeydown="nsKey(event)" onfocus="nsInput()">
+      <button class="s-clr" onclick="nsClear()" title="Clear search" aria-label="Clear search">&times;</button>
+    </div>
+    <div class="search-results" id="ns-results" hidden></div>
+
+    <nav>
+      <ul>
+        <li class="topic">
+          <div class="topic-label">Topic 01</div>
+          <a class="topic-title" href="#" onclick="showSection('topic1'); return false;">First Steps in C++</a>
+          <div class="placeholder">Copies, references, const</div>
+          <ul class="subsection">
+            <li><a href="#t1-first" onclick="showSection('topic1')">The smallest program</a></li>
+            <li><a href="#t1-objects" onclick="showSection('topic1')">Objects and constructors</a></li>
+            <li><a href="#t1-trtool" onclick="showSection('topic1')">&#128736;&#65039; What each line makes</a></li>
+            <li><a href="#t1-mitool" onclick="showSection('topic1')">&#128736;&#65039; The initialiser list</a></li>
+            <li><a href="#t1-refs" onclick="showSection('topic1')">Copies and references</a></li>
+            <li><a href="#t1-ops" onclick="showSection('topic1')">Operators</a></li>
+            <li><a href="#t1-optool" onclick="showSection('topic1')">&#128736;&#65039; Where the operator goes</a></li>
+            <li><a href="#t1-java" onclick="showSection('topic1')">Coming from Java</a></li>
+            <li><a href="#t1-exam" onclick="showSection('topic1')">Takeaways</a></li>
+          </ul>
+        </li>
+
+        <li class="topic">
+          <div class="topic-label">&#9733; Revision</div>
+          <a class="topic-title" href="#" onclick="showSection('cram'); return false;" style="color:var(--accent-2);">Cram Sheet</a>
+          <div class="placeholder">Every rule, one page</div>
+        </li>
+
+        <li class="topic">
+          <div class="topic-label">&#9733; Practice</div>
+          <a class="topic-title" href="#" onclick="showSection('practice'); return false;" style="color:var(--accent-2);">Self-test</a>
+          <div class="placeholder">Generated, never the same twice</div>
+        </li>
+      </ul>
+    </nav>

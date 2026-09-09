@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function(){
+  var t = null;
+  try { t = localStorage.getItem('studykit-theme'); } catch (e) {}
+  if (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
+  document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+})();
+</script>
+<title>Practical Experiences of Programming — C++ and Scala</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+<!--@include @/styles/theme.css-->
+<!--@include @/styles/chrome.css-->
+<!--@include styles.css--></style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside>
+<!--@include nav.html--></aside>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+
+    <!-- ============ TOPIC 1 ============ -->
+    <!--@include sections/topic1.html-->
+
+    <!-- ============ CRAM SHEET ============ -->
+    <!--@include sections/cram.html-->
+
+    <!-- ============ SELF-TEST ============ -->
+    <!--@include sections/practice.html-->
+
+  </main>
+</div>
+
+<script>
+  <!--@include @/engine/helpers.js-->
+  <!--@include @/engine/theme.js-->
+  <!--@include @/engine/nav.js-->
+  <!--@include @/engine/ix.js-->
+  <!--@include @/engine/tools.js-->
+  <!--@include @/engine/quiz.js-->
+  <!--@include @/engine/search.js-->
+  <!--@include js/t1-cpp.js-->
+  <!--@include js/t1-rules.js-->
+  <!--@include js/t1-ui.js-->
+  <!--@include js/questions/cppbasics.js-->
+  <!--@include @/engine/boot.js--></script>
+
+</body>
+</html>

@@ -1,0 +1,388 @@
+<section id="topic1" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 01 · First Steps in C++</div>
+        <h1>Objects You Can Hold</h1>
+        <div class="topic-subtitle">copies, references, const, and coming to C++ from Java</div>
+      </div>
+
+      <p>Most of this week reads like Java with different punctuation, and most of it is. The part
+      that is not is worth the whole week: in Java a variable is a <em>handle</em> to an object, and
+      in C++ a variable can <em>be</em> the object. <code>Coordinate b = a;</code> compiles in both
+      languages, means something different in each, and gives you no warning either way.</p>
+
+      <!-- ===== FIRST STEPS ===== -->
+      <h2 id="t1-first">The smallest program, and how to run it</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Hello, world</div>
+        <pre class="pp-snippet">#include &lt;iostream&gt;
+
+int main() {
+  std::cout &lt;&lt; "Hello, World!\n";
+  return 0;
+}</pre>
+        <code>g++ -std=c++11 -o hello hello.cc</code> then <code>./hello</code><br><br>
+        <code>main</code> is <strong>not inside a class</strong>, returns an <code>int</code> exit
+        code, and takes no <code>String[] args</code>. Returning 0 means success — and may be
+        omitted from <code>main</code> alone, where the compiler supplies it.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">There is no JVM</div>
+        The compiler produces an executable — <code>hello</code> on Linux or macOS,
+        <code>hello.exe</code> on Windows — which the operating system runs directly. Nothing
+        interprets bytecode at runtime, which is where the performance argument comes from, and why
+        C++ turns up in networking, finance, games, engine management, and robotics on low-power
+        CPUs.<br><br>
+        The flip side is that the binary is built for one platform. Java’s
+        &ldquo;compile once, run anywhere&rdquo; and C++’s &ldquo;compile for each target, run
+        fast&rdquo; are the same trade seen from two ends.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Functions, and why prototypes exist</div>
+        <pre class="pp-snippet">int answer();          // a prototype: the signature, no body
+
+int main() {
+  printAnswer(answer());
+}
+
+int answer() { return 42; }   // the body, later</pre>
+        The compiler reads a file top to bottom and must know a function’s signature before it meets
+        a call. Declaring the prototype first lets you define the body anywhere — which is what
+        makes mutually recursive functions possible at all, and what header files are for.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Use std::vector, not arrays</div>
+        <pre class="pp-snippet">#include &lt;vector&gt;
+using std::vector;
+
+vector&lt;int&gt; numbers(10);      // ten ints
+numbers[i] = i;
+numbers.resize(20);           // grows; arrays do not
+
+vector&lt;vector&lt;int&gt;&gt; nums {
+  {1, 2, 3},
+  {4, 5, 6},
+  {7, 8, 9}
+};                            // rows need not be the same length</pre>
+        <code>std::string</code> is essentially a vector of characters, supports <code>+</code> to
+        join and <code>[]</code> to index, and <code>#include &lt;fstream&gt;</code> gives
+        <code>ofstream writer("filename.txt");</code> which you then <code>&lt;&lt;</code> into
+        exactly like <code>cout</code>.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Two things Java did for you that C++ does not</div>
+        <strong>No default initialisation.</strong> <code>int x;</code> as a local variable holds
+        an <em>indeterminate</em> value. Reading it is undefined behaviour — which does not mean
+        &ldquo;an unpredictable number&rdquo;, it means the standard places no constraint on what the
+        program does at all. Do not run it, observe a value, and reason from that.<br><br>
+        <strong>No bounds checking.</strong> There is no
+        <code>ArrayIndexOutOfBoundsException</code>. Reading off the end of a vector is undefined
+        behaviour and usually silent. <code>v.at(10)</code> <em>does</em> throw, and is worth the
+        extra keystrokes while you are learning.
+      </div>
+
+      <!-- ===== OBJECTS ===== -->
+      <h2 id="t1-objects">Objects, and the constructor that has to run</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">A class</div>
+        <pre class="pp-snippet">class Coordinate {
+protected:
+  int x;
+  int y;
+public:
+  Coordinate(int xIn, int yIn) : x(xIn), y(yIn) { }
+};</pre>
+        <code>class</code>, not <code>public class</code>. Access specifiers head
+        <strong>sections</strong> rather than each member, and everything before the first one is
+        private. Note the semicolon after the closing brace — the commonest first-week compiler
+        error.<br><br>
+        <code>: x(xIn), y(yIn)</code> is the <strong>initialiser list</strong>, and it runs before
+        the constructor body.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">No <code>new</code></div>
+        <pre class="pp-snippet">Coordinate a(4, -3);
+Coordinate b = a;</pre>
+        <code>a</code> and <code>b</code> are Coordinates. Not references to Coordinates —
+        Coordinates, living in this function’s frame and destroyed when it returns. The second line
+        runs the <strong>copy constructor</strong>, which the compiler writes for you if you do not,
+        copying each member. So <code>b</code> is a second object, and changing one cannot affect
+        the other.<br><br>
+        This is the line to fix in your head. It is the same eleven characters as in Java and it
+        does something else.
+      </div>
+
+      <h3 id="t1-trtool">&#128736;&#65039; What each line makes</h3>
+
+      <div class="tool" data-run="runTrace">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Trace objects, copies and references</h3>
+        </div>
+        <div class="tool-desc">Every box is an object with its own identity; the labels under it are
+          the names that currently denote it. A copy makes a new box; a reference adds a label. Step
+          through with ⏮ ◀ ▶. The panel at the bottom shows the same program as real C++.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 300px;">
+            <label for="tr-text">a fragment of main()</label>
+            <textarea id="tr-text" rows="7" spellcheck="false">Coordinate a(4, -3);
+Coordinate b = a;
+a.setX(8);
+print a.getX();
+print b.getX();</textarea>
+          </div>
+          <button class="tool-btn" onclick="runTrace()">Trace ▶</button>
+          <button class="tool-btn secondary" onclick="cppPreset('copy')">A copy</button>
+          <button class="tool-btn secondary" onclick="cppPreset('reference')">A reference</button>
+          <button class="tool-btn secondary" onclick="cppPreset('byvalue')">Passed by value</button>
+          <button class="tool-btn secondary" onclick="cppPreset('byref')">Passed by reference</button>
+          <button class="tool-btn secondary" onclick="cppPreset('constref')">const reference</button>
+          <button class="tool-btn danger" onclick="cppPreset('nodefault')">No default constructor</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="tr-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">This will not compile</div>
+        <pre class="pp-snippet">Coordinate a(4, 2);
+Coordinate b;          // looks for Coordinate()</pre>
+        <code>Coordinate b;</code> asks for the <strong>default constructor</strong> — one taking no
+        arguments — and this class has only <code>Coordinate(int, int)</code>. Writing any
+        constructor suppresses the free default one, which is exactly the point: an object that
+        requires two coordinates should not be constructible without them.<br><br>
+        The same requirement appears indirectly: <code>vector&lt;Coordinate&gt; coords(2);</code>
+        default-constructs two elements, so it fails too. <code>vector&lt;Coordinate&gt; coords;</code>
+        followed by <code>coords.push_back(Coordinate(4, -2));</code> never needs one.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why insisting on construction is worth something</div>
+        A Java method taking a <code>String</code> can be handed <code>null</code>, and
+        <code>a.length()</code> then throws at runtime. The C++ equivalent taking a
+        <code>string</code> cannot: a <code>string</code> parameter <em>is</em> a string, empty at
+        worst. References cannot be null either.<br><br>
+        You can still produce null pointers in C++ if you go looking. The point is that a large
+        amount of ordinary code has nowhere to put one, so an entire category of runtime failure
+        stops being available.
+      </div>
+
+      <h3 id="t1-mitool">&#128736;&#65039; The initialiser list</h3>
+
+      <div class="tool" data-run="runMemberInit">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>List or body — which compiles, and what it costs</h3>
+        </div>
+        <div class="tool-desc">The slides show one Journey that compiles and one that does not.
+          Change the member’s properties here and watch which combinations work — the rule underneath
+          is not the one the two examples suggest.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="mi-style">the constructor</label>
+            <select id="mi-style">
+              <option value="list">: start(s) { }</option>
+              <option value="body">{ start = s; }</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="mi-default">member has a default constructor</label>
+            <select id="mi-default">
+              <option value="no">no</option>
+              <option value="yes">yes</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="mi-const">member is const</label>
+            <select id="mi-const">
+              <option value="no">no</option>
+              <option value="yes">yes</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runMemberInit()">Check ▶</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="mi-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== COPIES VS REFERENCES ===== -->
+      <h2 id="t1-refs">Copies and references</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The three ways to take a parameter</div>
+        <table style="margin:8px 0 0;">
+          <tr><th><code>Coordinate in</code></th><td>by value</td>
+            <td>a copy is made; changes are lost on return</td></tr>
+          <tr><th><code>Coordinate &amp; in</code></th><td>by reference</td>
+            <td>an alias for the caller’s object; changes stick</td></tr>
+          <tr><th><code>const Coordinate &amp; in</code></th><td>by const reference</td>
+            <td>no copy, and no changes permitted — look but don’t touch</td></tr>
+        </table>
+        <br>A reference is <strong>another name</strong> for something that already exists. It
+        cannot be null, and it cannot be reseated to refer to something else later.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">const is contagious</div>
+        <pre class="pp-snippet">void printX(const Coordinate &amp; in) {
+  cout &lt;&lt; in.getX() &lt;&lt; endl;    // only compiles if getX is const
+}
+
+int getX() const { return x; }    // ...so mark it</pre>
+        Through a const reference you may only call methods that promise not to modify the object,
+        and a method promises that by writing <code>const</code> after its parameter list. Add one
+        const and you will find yourself adding several — which is the language telling you which of
+        your methods are observers and which are mutators. Marking every observer
+        <code>const</code> from the start is much less work than retrofitting it.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Returning a reference hands out the keys</div>
+        <pre class="pp-snippet">Coordinate &amp; getStart() { return start; }   // caller can modify start
+const Coordinate &amp; getStart() { return start; }  // caller can only read</pre>
+        With the first, <code>j.getStart().setX(0)</code> reaches inside the Journey and changes a
+        member from outside the class. That defeats the point of the encapsulation: if Journey also
+        cached a <code>distance</code>, it would now be wrong, and Journey would have no way to
+        know.<br><br>
+        Given <code>const Coordinate &amp; getStart()</code>, of the four lines on slide 48 the
+        second is the one that fails:<br>
+        <code>Coordinate a = j.getStart();</code> — fine, it is a copy<br>
+        <code>Coordinate &amp; b = j.getStart();</code> — <strong>refused</strong>, that would
+        discard const<br>
+        <code>const Coordinate &amp; c = j.getStart();</code> — fine<br>
+        <code>const Coordinate d = j.getStart();</code> — fine, a const copy<br><br>
+        Const is one-way: you may always promise not to modify something modifiable, never the
+        reverse.
+      </div>
+
+      <!-- ===== OPERATORS ===== -->
+      <h2 id="t1-ops">Operators</h2>
+
+      <div class="callout tip">
+        <div class="callout-label">The Java trap this fixes</div>
+        <code>new String("Dave") == new String("Dave")</code> is <strong>false</strong> in Java —
+        two objects, and <code>==</code> compares handles. In C++, <code>string a = "Dave";</code>
+        and <code>string b = "Dave";</code> gives <code>a == b</code> as <strong>true</strong>,
+        because <code>string</code> defines <code>operator==</code> to compare contents.<br><br>
+        For your own class nothing compares anything until you say how. There is no inherited
+        <code>equals</code> to fall back on and no default — <code>a == b</code> on two Coordinates
+        is a compile error until somebody writes the operator.
+      </div>
+
+      <h3 id="t1-optool">&#128736;&#65039; Where the operator has to go</h3>
+
+      <div class="tool" data-run="runOperators">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Does <code>a == b</code> resolve, and does <code>&lt;&lt;</code> chain?</h3>
+        </div>
+        <div class="tool-desc">Two questions with definite answers. Both predictions are checked
+          against a real compiler in this module’s test suite.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="op-where">where operator== is declared</label>
+            <select id="op-where">
+              <option value="member">member of Alice (the left side)</option>
+              <option value="free">free function taking both</option>
+              <option value="wrongside">member of Bob (the right side)</option>
+              <option value="none">nowhere</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="op-return">operator&lt;&lt; returns</label>
+            <select id="op-return">
+              <option value="ostream&amp;">ostream &amp;</option>
+              <option value="void">void</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runOperators()">Check ▶</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="op-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">operator&lt;&lt;, and the two-part solution</div>
+        <pre class="pp-snippet">ostream &amp; operator&lt;&lt;(ostream &amp; o, const Coordinate &amp; rhs) {
+  o &lt;&lt; rhs.getX() &lt;&lt; "," &lt;&lt; rhs.getY();
+  return o;                    // without this, nothing can follow
+}</pre>
+        <code>cout &lt;&lt; "It is at " &lt;&lt; a &lt;&lt; endl;</code> is
+        <code>((cout &lt;&lt; "It is at ") &lt;&lt; a) &lt;&lt; endl</code>, so each call has to hand
+        back the stream for the next one. Return <code>void</code> and the final step becomes
+        <code>void &lt;&lt; endl</code>, which does not exist.<br><br>
+        It cannot be a member of Coordinate, because the left operand is the <em>stream</em>. When
+        the operator needs the class’s privates, the usual answer is a public
+        <code>write(ostream &amp;) const</code> on the class and a free operator that calls it:
+        <pre class="pp-snippet">void write(ostream &amp; o) const { o &lt;&lt; x &lt;&lt; "," &lt;&lt; y; }
+
+ostream &amp; operator&lt;&lt;(ostream &amp; o, const Coordinate &amp; rhs) {
+  rhs.write(o);
+  return o;
+}</pre>
+      </div>
+
+      <!-- ===== FROM JAVA ===== -->
+      <h2 id="t1-java">Coming from Java</h2>
+
+      <div class="tool" data-run="runContrast">
+        <div class="tool-header">
+          <span class="tool-badge">Reference</span>
+          <h3>Where the two languages part company</h3>
+        </div>
+        <div class="tool-desc">Most differences announce themselves by failing to compile. One does
+          not.</div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="jc-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== EXAM ===== -->
+      <h2 id="t1-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">What to be able to do without thinking</div>
+        <strong>Say what a line makes.</strong> Given <code>Coordinate b = a;</code> versus
+        <code>Coordinate &amp; b = a;</code>, say how many objects exist and what happens to one when
+        you change the other.<br><br>
+        <strong>Choose a parameter form.</strong> Reading only and it is a class? Const reference.
+        Modifying the caller’s object? Reference. Actually want your own copy? By value, and say so
+        deliberately.<br><br>
+        <strong>Write a constructor with an initialiser list</strong>, and know that members are
+        built before the body runs.<br><br>
+        <strong>Mark observers const.</strong> Then const references to your class are usable.<br><br>
+        <strong>Write operator== and operator&lt;&lt;</strong> — the first as a member on the left
+        type or a free function on both, the second as a free function returning
+        <code>ostream &amp;</code>.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>Forgetting the semicolon after a class’s closing brace.</li>
+          <li>Expecting <code>Coordinate b = a;</code> to alias, as it would in Java.</li>
+          <li>Passing large objects by value without meaning to, then wondering why changes vanish.</li>
+          <li>Returning a non-const reference to a member and breaking your own invariants.</li>
+          <li>Forgetting <code>const</code> on getters, then finding const references unusable.</li>
+          <li>Writing <code>operator==</code> on the right-hand type and expecting
+            <code>a == b</code> to find it.</li>
+          <li>Returning <code>void</code> from <code>operator&lt;&lt;</code>.</li>
+          <li>Reading an uninitialised <code>int</code> and treating what you saw as its value.</li>
+        </ul>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The one-sentence version</div>
+        In Java a variable names a way to reach an object; in C++ a variable can be the object
+        itself, so the language needs separate spellings for &ldquo;another one like it&rdquo; and
+        &ldquo;another name for it&rdquo; — and almost everything else this week follows from
+        keeping those two apart.
+      </div>
+
+    </section>
