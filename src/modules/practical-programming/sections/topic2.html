@@ -1,0 +1,350 @@
+<section id="topic2" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 02 · Pointers and Ownership</div>
+        <h1>But I Miss Typing <code>new</code></h1>
+        <div class="topic-subtitle">pointers, delete, and the three functions you get for free</div>
+      </div>
+
+      <p>Week 1 said C++ objects can be values. This week puts <code>new</code> back, and with it the
+      question Java never asks: <strong>who frees this?</strong> Nothing collects your garbage, so
+      ownership stops being an implementation detail and becomes part of what a class means.</p>
+
+      <!-- ===== POINTERS ===== -->
+      <h2 id="t2-ptr">Pointers</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The syntax, against Java</div>
+        <pre class="pp-snippet">// Java
+Coordinate a = new Coordinate(4, 3);
+System.out.println(a.getX());
+
+// C++
+Coordinate * a = new Coordinate(4, 3);
+cout &lt;&lt; a-&gt;getX() &lt;&lt; endl;</pre>
+        <code>Coordinate *</code> is a pointer to a Coordinate. <code>-&gt;</code> reaches through
+        it, and is shorthand for <code>(*a).getX()</code>. A Java variable is always something like
+        this pointer — which is why the Java line needs no star, and why everything below has no Java
+        equivalent.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The three operators</div>
+        <table style="margin:8px 0 0;">
+          <tr><th><code>string c</code></th><td>c is a string</td></tr>
+          <tr><th><code>string * b</code></th><td>b is a pointer to a string</td></tr>
+          <tr><th><code>*b</code></th><td>the string b points at — <code>*</code> dereferences</td></tr>
+          <tr><th><code>&amp;c</code></th><td>a pointer to c — its address in memory</td></tr>
+          <tr><th><code>b-&gt;size()</code></th><td>the same as <code>(*b).size()</code></td></tr>
+        </table>
+        <br>Count stars: <code>*</code> takes one off, <code>&amp;</code> puts one on.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Pointers bring back the two things Week 1 removed</div>
+        <strong>They can be null.</strong> <code>string * s = nullptr; s-&gt;size();</code> compiles
+        and then crashes — the C++ equivalent of a NullPointerException, without the exception. A
+        reference could not have done this.<br><br>
+        <strong>Comparing them compares addresses.</strong>
+        <code>new string("Dave") == new string("Dave")</code> is <strong>false</strong>, exactly as in
+        Java, because there are two objects at two addresses. Week 1 said C++ fixes Java’s
+        <code>==</code> trap; this is the case where it does not, because now you are back to
+        comparing handles. <code>*a == *b</code> compares the strings.
+      </div>
+
+      <h3 id="t2-pqtool">&#128736;&#65039; Which of these are legal?</h3>
+
+      <div class="tool" data-run="runPtrQuiz">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Star counting</h3>
+        </div>
+        <div class="tool-desc">Given <code>string a("Hello");</code> and
+          <code>string * b = new string("Hello");</code>, which declarations typecheck? The whole of
+          slide 10 is worked below.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="pq-decl">a declaration</label>
+            <input type="text" id="pq-decl" value="string * h = &amp;a;" spellcheck="false">
+          </div>
+          <button class="tool-btn" onclick="runPtrQuiz()">Check ▶</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="pq-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== NEW AND DELETE ===== -->
+      <h2 id="t2-new">new, and the delete that has to follow it</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Every <code>new</code> needs a <code>delete</code></div>
+        <pre class="pp-snippet">void myFunction() {
+  string * s = new string("Hello");
+  cout &lt;&lt; *s &lt;&lt; endl;
+  delete s;
+}</pre>
+        In Java, an object with nothing pointing at it is collected. In C++ it simply stays,
+        unreachable and unfreed, for as long as the program runs. That is a <strong>memory
+        leak</strong>: the program’s footprint grows until it exits.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The early return, which is how leaks actually happen</div>
+        <pre class="pp-snippet">void myFunction(const string &amp; a) {
+  string * b = new string("Hello");
+  if (a == *b) {
+    cout &lt;&lt; "was Hello\n";
+    return;                  // ← b is never deleted
+  }
+  cout &lt;&lt; "was not Hello\n";
+  delete b;
+}</pre>
+        Nobody forgets the <code>delete</code> at the end of the function. They forget the one on the
+        path that returns early — and every extra <code>return</code>, <code>break</code> or thrown
+        exception adds a path that has to free everything again. This is the argument for not
+        allocating by hand at all where a vector or a local object will do.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Arrays, and the other delete</div>
+        <pre class="pp-snippet">int * a = new int[10];
+a[i] = i;                  // the same as *(a + i)
+delete [] a;               // note the brackets</pre>
+        <code>delete</code> and <code>delete []</code> are different operators, and using the wrong
+        one is undefined behaviour rather than an error you will be told about. A raw array also has
+        no idea how long it is, which is why the slide’s <code>printArray(int *, int)</code> has to be
+        handed the length separately and will happily read past the end if you lie to it.<br><br>
+        <strong>Use <code>vector</code>.</strong> It knows its own size, and when it falls out of
+        scope it frees its contents for you — so there is no <code>delete</code> to forget.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">operator[] comes in two versions, and const picks one</div>
+        <pre class="pp-snippet">int &amp; operator[](int idx);                    // on a modifiable vector
+const int &amp; operator[](int idx) const;       // on a const one</pre>
+        Returning a <em>reference</em> is what makes <code>numbers[i] += 1;</code> work, where Java
+        needs <code>numbers.set(i, numbers.get(i) + 1)</code>. The const version returns a const
+        reference and is the one chosen when the vector is reached through a
+        <code>const vector&lt;int&gt; &amp;</code> — which is why
+        <code>int addNumbers(const vector&lt;int&gt; &amp; toAdd)</code> uses it. Provide only the
+        non-const version and that function stops compiling.
+      </div>
+
+      <!-- ===== THE CLASS ===== -->
+      <h2 id="t2-anatomy">The anatomy of a class</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The four the compiler writes for you</div>
+        <table style="margin:8px 0 0;">
+          <tr><th>default constructor</th><td><code>C()</code></td>
+            <td>only if you write <em>no</em> constructor at all</td></tr>
+          <tr><th>copy constructor</th><td><code>C(const C &amp; other)</code></td>
+            <td>copies each member</td></tr>
+          <tr><th>assignment operator</th><td><code>C &amp; operator=(const C &amp; other)</code></td>
+            <td>assigns each member</td></tr>
+          <tr><th>destructor</th><td><code>~C()</code></td>
+            <td>destroys each member — and does nothing about pointers</td></tr>
+        </table>
+        <br>Write any constructor and the free default one disappears; ask for it back with
+        <code>C() {}</code> or, better, <code>C() = default;</code>.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why the copy constructor takes a const reference</div>
+        <strong>const</strong>, because copying something should not change it. <strong>Reference</strong>,
+        for a sharper reason: if it took its argument <em>by value</em>, then calling it would first
+        have to copy the argument — which would call the copy constructor — which would first have to
+        copy its argument. The signature has to be a reference or it cannot exist.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">operator=, and why it returns a reference</div>
+        <pre class="pp-snippet">SomeClass &amp; operator=(const SomeClass &amp; other) {
+  x = other.x;
+  y = other.y;
+  return *this;
+}</pre>
+        <code>b = a;</code> is <code>b.operator=(a);</code>. And <code>c = b = a;</code> is
+        <code>c.operator=(b.operator=(a));</code> — so whatever the inner call returns is what
+        <code>c</code> is assigned from. Return the object itself and you have made a copy for
+        nothing; return a reference to it and the chain works.<br><br>
+        <code>this</code> is a <strong>pointer</strong> to the current object, so
+        <code>*this</code> is the object — the same dereferencing operator as everywhere else.
+      </div>
+
+      <!-- ===== RULE OF THREE ===== -->
+      <h2 id="t2-rule">Pointers in classes: the Rule of Three</h2>
+
+      <p>The compiler’s versions of those functions copy each member. When a member is a
+      <code>string *</code>, copying it copies <em>the address</em> — and two objects end up sharing
+      one string that each of them believes it owns.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">The class the week is built around</div>
+        <pre class="pp-snippet">class IHazStringPtr {
+private:
+  string * str;
+public:
+  IHazStringPtr() : str(new string()) {}
+  void addCharacter(const char c) { str-&gt;push_back(c); }
+  void printIt() const { cout &lt;&lt; *str &lt;&lt; endl; }
+};</pre>
+        Two separate objects print <code>a</code> and <code>b</code>. But
+        <code>IHazStringPtr b = a;</code> uses the compiler’s copy constructor, which does
+        <code>str(other.str)</code> — and then both print <strong><code>ab</code></strong>, because
+        there was only ever one string.
+      </div>
+
+      <h3 id="t2-rttool">&#128736;&#65039; The three functions, and what goes wrong without them</h3>
+
+      <div class="tool" data-run="runRuleOfThree">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Leaks, double frees, and which of the three you wrote</h3>
+        </div>
+        <div class="tool-desc">Every block of memory is drawn with the objects that point at it. All
+          36 combinations of these switches are checked against <code>g++ -fsanitize=address</code> in
+          this module’s test suite, so the leaks reported here are the ones that really happen.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="rt-scenario">what happens</label>
+            <select id="rt-scenario">
+              <option value="copy">IHazStringPtr b = a;</option>
+              <option value="assign">b = a;</option>
+              <option value="self">a = a;</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="rt-copy">copy constructor</label>
+            <select id="rt-copy">
+              <option value="default">the compiler's (shallow)</option>
+              <option value="deep">yours, deep</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="rt-assign">operator=</label>
+            <select id="rt-assign">
+              <option value="default">the compiler's (shallow)</option>
+              <option value="deep">deep, no delete</option>
+              <option value="deep-delete">deep, deletes the old</option>
+              <option value="deep-delete-guard">deep, deletes, self-check</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="rt-dtor">destructor</label>
+            <select id="rt-dtor">
+              <option value="no">none</option>
+              <option value="yes">~C(){ delete str; }</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runRuleOfThree()">Run ▶</button>
+          <button class="tool-btn secondary" onclick="rtPreset('default')">All the compiler's</button>
+          <button class="tool-btn secondary" onclick="rtPreset('leaky')">Deep, but no destructor</button>
+          <button class="tool-btn secondary" onclick="rtPreset('partial')">Two of the three</button>
+          <button class="tool-btn secondary" onclick="rtPreset('correct')">All three, correct</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="rt-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">A deep copy</div>
+        <pre class="pp-snippet">// attempt 2 — handles a null pointer
+IHazStringPtr(const IHazStringPtr &amp; other) {
+  if (other.str == nullptr) { str = nullptr; }
+  else { str = new string(*(other.str)); }
+}
+
+// attempt 3 — the same, in the initialiser list
+IHazStringPtr(const IHazStringPtr &amp; other)
+  : str(other.str == nullptr ? nullptr
+                             : new string(*(other.str))) { }</pre>
+        <code>new string(*(other.str))</code> is the whole idea: dereference their pointer to get
+        their string, and construct a new string from it. The third version does it in the
+        initialiser list for the reason Week 1 gave — the member is built once rather than built
+        and then overwritten.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The assignment operator has one more job</div>
+        <pre class="pp-snippet">IHazStringPtr &amp; operator=(const IHazStringPtr &amp; other) {
+  if (str) delete str;             // ← the object already owned something
+  if (other.str) { str = new string(*(other.str)); }
+  else { str = nullptr; }
+  return *this;
+}</pre>
+        A copy constructor builds an object that did not exist a moment ago, so there is nothing to
+        release. An assignment overwrites one that <em>did</em>, and whatever it was holding becomes
+        unreachable the instant you overwrite the pointer. Without that first line the class leaks a
+        string on every assignment.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">And that version is still wrong, in a way the slides do not reach</div>
+        Try <code>a = a;</code> in the tool above with <strong>deep, deletes the old</strong>
+        selected.<br><br>
+        <code>if (str) delete str;</code> frees the string. Then
+        <code>new string(*(other.str))</code> reads <code>other.str</code> — and
+        <code>other</code> <em>is</em> <code>a</code>, so that pointer is the one just freed. The
+        object reads its own released memory. Compiled with
+        <code>-fsanitize=address</code> this is a hard crash, reported as a use-after-free inside
+        <code>operator=</code>.<br><br>
+        The fix is one line at the top:<br>
+        <code>if (this == &amp;other) return *this;</code><br><br>
+        Self-assignment looks like something nobody writes, and directly it is. It arrives through
+        aliases — <code>v[i] = v[j]</code> where i and j happen to be equal, or two references that
+        turn out to name the same object. Guard for it once and stop thinking about it.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The destructor, and the Rule of Three</div>
+        <pre class="pp-snippet">~IHazStringPtr() { delete str; }</pre>
+        Runs when the object goes out of scope. Without it, every IHazStringPtr ever created leaks
+        its string — the slide’s loop of 10 000 calls leaks 10 000 strings.<br><br>
+        <strong>The Rule of Three.</strong> If a class needs any one of the copy constructor, the
+        assignment operator or the destructor, it almost certainly needs all three, because all three
+        exist for the same reason: the class <em>owns</em> something the compiler does not know how to
+        copy or release. Writing one or two of them is the dangerous state — you have proved the
+        compiler’s versions are wrong for this class, and then left some of them in place.
+      </div>
+
+      <!-- ===== EXAM ===== -->
+      <h2 id="t2-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">What to be able to do without thinking</div>
+        <strong>Count stars.</strong> <code>*</code> removes one, <code>&amp;</code> adds one, both
+        sides must match.<br><br>
+        <strong>Pair every <code>new</code> with a <code>delete</code></strong>, on every path out of
+        the function — and <code>delete []</code> for <code>new []</code>.<br><br>
+        <strong>Say what the compiler’s copy constructor does</strong> to a class holding a pointer,
+        and what that means when both objects are destroyed.<br><br>
+        <strong>Write the three.</strong> Deep copy constructor; assignment operator that deletes the
+        old, deep copies, guards self-assignment and returns <code>*this</code>; destructor that
+        deletes.<br><br>
+        <strong>Explain why <code>operator=</code> returns a reference</strong> —
+        <code>c = b = a</code> — and why the copy constructor’s parameter must be one.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>Comparing pointers when you meant to compare what they point at.</li>
+          <li>Forgetting the <code>delete</code> on an early-return path.</li>
+          <li><code>delete</code> where <code>delete []</code> was needed.</li>
+          <li>Writing a deep copy constructor and leaving the assignment operator shallow.</li>
+          <li>An assignment operator that deep copies but never frees what it overwrote.</li>
+          <li>Forgetting the self-assignment guard once you do free it.</li>
+          <li>Returning by value from <code>operator=</code>, breaking <code>c = b = a</code>.</li>
+          <li>Assuming a destructor is unnecessary because nothing looks like it is leaking.</li>
+        </ul>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The one-sentence version</div>
+        A pointer says where something is but nothing about who is responsible for it, so the moment a
+        class holds one you have to answer that question yourself — and the three functions the
+        compiler writes for you all answer it wrongly.
+      </div>
+
+    </section>

@@ -192,3 +192,95 @@
     .pp-mem { flex-direction: column; }
     .jc-pair { flex-direction: column; }
   }
+
+  /* ---------- Topic 02 · pointers and ownership ---------- */
+
+  .pt-table { width: 100%; margin: 10px 0; }
+  .pt-table td, .pt-table th {
+    font-size: 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .pt-tag { font-family: 'IBM Plex Mono', monospace; color: var(--ink-soft); }
+  .pt-src { font-family: 'IBM Plex Mono', monospace; color: var(--ink); white-space: nowrap; }
+  .pp-ok { color: var(--accent-3); font-weight: 700; }
+  .pp-no { color: var(--accent-2); font-weight: 700; }
+  .pt-quiz {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--surface-2);
+    padding: 11px 13px;
+    margin: 12px 0;
+    overflow-x: auto;
+  }
+
+  .rt-mem { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 14px; }
+  .rt-block {
+    border: 2px solid var(--pp-obj-edge);
+    background: var(--pp-obj);
+    border-radius: 8px;
+    padding: 8px 11px;
+    min-width: 110px;
+  }
+  .rt-block.shared { border-color: var(--pp-shared-edge); background: var(--pp-shared); }
+  .rt-block.orphan { border-style: dashed; opacity: 0.7; }
+  .rt-block.freed { opacity: 0.4; text-decoration: line-through; }
+  .rt-bid { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ink-soft); }
+  .rt-btext {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 3px 0 5px;
+  }
+  .rt-bown { display: flex; flex-wrap: wrap; gap: 4px; }
+  .rt-lost { font-size: 10.5px; color: var(--accent-2); font-style: italic; }
+
+  .rt-events { margin: 12px 0; }
+  .rt-ev {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 12px;
+  }
+  .rt-ev:last-child { border-bottom: none; }
+  .rt-ev.dtor { color: var(--ink-muted); }
+  .rt-who {
+    flex: 0 0 4.5em;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .rt-what { flex: 0 0 auto; color: var(--ink); }
+  .rt-detail { flex: 1 1 200px; color: var(--ink-muted); }
+
+  .rt-rule {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--surface-2);
+    padding: 11px 13px;
+    margin: 14px 0;
+  }
+  .rt-three { display: flex; flex-wrap: wrap; gap: 9px; margin: 8px 0; }
+  .rt-member {
+    flex: 1 1 170px;
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    padding: 8px 10px;
+    background: var(--paper);
+    opacity: 0.5;
+  }
+  .rt-member.on { opacity: 1; border-color: var(--accent-3); background: var(--tint-c); }
+  .rt-mname { font-weight: 600; font-size: 12.5px; color: var(--ink); }
+  .rt-member code {
+    display: block;
+    margin: 4px 0;
+    font-size: 11px;
+    background: none;
+    padding: 0;
+    color: var(--ink-muted);
+  }
+  .rt-mwhen { font-size: 10.5px; color: var(--ink-soft); }

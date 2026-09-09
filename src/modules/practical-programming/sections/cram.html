@@ -80,4 +80,69 @@
             behaviour, neither reported.</li>
         </ul>
       </div>
+
+      <h2 id="cr-t2">Topic 02 &middot; pointers and ownership</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Stars</div>
+        <table style="margin:8px 0 0;">
+          <tr><th><code>string c</code></th><td>a string</td></tr>
+          <tr><th><code>string * b</code></th><td>a pointer to a string</td></tr>
+          <tr><th><code>*b</code></th><td>the string b points at</td></tr>
+          <tr><th><code>&amp;c</code></th><td>a pointer to c</td></tr>
+          <tr><th><code>b-&gt;size()</code></th><td>same as <code>(*b).size()</code></td></tr>
+        </table>
+        <br><code>*</code> removes a star, <code>&amp;</code> adds one, both sides must match.
+        Pointers can be <code>nullptr</code>; references cannot. Comparing pointers compares
+        addresses &mdash; the Java <code>==</code> trap, back again.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">new and delete</div>
+        Every <code>new</code> needs a <code>delete</code>, on <em>every</em> path out &mdash; the
+        early return is where leaks really come from. <code>new []</code> pairs with
+        <code>delete []</code>; mixing them is undefined behaviour, not an error.<br><br>
+        Prefer <code>vector</code>: it knows its size and frees itself when it falls out of scope.
+        <code>int &amp; operator[](int)</code> returns a reference, which is what makes
+        <code>v[i] += 1</code> work; the <code>const int &amp; operator[](int) const</code> overload
+        is the one chosen through a <code>const vector&lt;int&gt; &amp;</code>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The four the compiler writes</div>
+        Default constructor (only if you write no constructor at all), copy constructor, assignment
+        operator, destructor. Ask for the default back with <code>C() = default;</code>.<br><br>
+        <code>b = a;</code> is <code>b.operator=(a);</code> and <code>c = b = a;</code> is
+        <code>c.operator=(b.operator=(a));</code>, so <code>operator=</code> returns
+        <code>C &amp;</code> &mdash; <code>return *this;</code>. <code>this</code> is a pointer;
+        <code>*this</code> is the object. The copy constructor&rsquo;s parameter must be a reference,
+        or copying the argument would need the copy constructor.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The Rule of Three</div>
+        Need one of <strong>copy constructor</strong>, <strong>assignment operator</strong>,
+        <strong>destructor</strong> &mdash; need all three. They exist for one reason: the class owns
+        something the compiler cannot copy or release.<br><br>
+        <strong>Copy constructor:</strong> <code>str = new string(*(other.str))</code>, guarding
+        <code>nullptr</code>.<br>
+        <strong>operator=:</strong> self-check, delete the old, deep copy, <code>return *this</code>.<br>
+        <strong>Destructor:</strong> <code>delete str</code>.<br><br>
+        Shallow copy &rArr; two objects share one string &rArr; they see each other&rsquo;s changes,
+        and both destructors free it.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>Comparing pointers when you meant the things they point at.</li>
+          <li>Missing the <code>delete</code> on an early-return path.</li>
+          <li><code>delete</code> where <code>delete []</code> was needed.</li>
+          <li>A deep copy constructor with a shallow assignment operator.</li>
+          <li>An assignment operator that deep copies but never frees what it overwrote.</li>
+          <li>Freeing the old string without a <code>if (this == &amp;other)</code> guard &mdash;
+            <code>a = a;</code> then reads freed memory.</li>
+          <li>Returning by value from <code>operator=</code>.</li>
+        </ul>
+      </div>
     </section>

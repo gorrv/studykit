@@ -40,6 +40,26 @@ function cxx(source) {
   return { compiles: true, out: (r.stdout || '').trim().split('\n').filter(Boolean) };
 }
 
+/** Compile with AddressSanitizer, run, and report leaks and crashes. */
+function asan(source) {
+  const src = path.join(TMP, 'a.cc');
+  const bin = path.join(TMP, 'a');
+  fs.writeFileSync(src, source);
+  const c = spawnSync('g++', ['-std=c++11', '-g', '-fsanitize=address', '-o', bin, src],
+    { encoding: 'utf8', timeout: 60000 });
+  if (c.status !== 0) return { compiles: false };
+  const r = spawnSync(bin, [], { encoding: 'utf8', timeout: 40000 });
+  const err = r.stderr || '';
+  const m = /SUMMARY: AddressSanitizer: (\d+) byte\(s\) leaked/.exec(err);
+  const leaked = m ? +m[1] : 0;
+  /* This aarch64 build reports a double free as a SEGV inside its own
+     allocator rather than by name, so any AddressSanitizer error that is
+     not a leak report counts as an abort. */
+  const aborted = /ERROR: AddressSanitizer/.test(err) && leaked === 0;
+  return { compiles: true, out: (r.stdout || '').trim().split('\n').filter(Boolean),
+           leaked, aborted };
+}
+
 function ri(lo, hi) { return lo + Math.floor(Math.random() * (hi - lo + 1)); }
 function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
 
@@ -359,6 +379,120 @@ module.exports = async function run() {
     // an unreadable line is an error, not a silent skip
     s.ok('an unparseable line is reported', w.cppParse('Coordinate a = ;').ok === false);
     s.ok('a missing semicolon is reported', w.cppParse('Coordinate a(1,2)').ok === false);
+  }
+
+  /* ---------------- Topic 2 · pointers and ownership ---------------- */
+  {
+    /* Slide 10's quiz, decided by star counting and confirmed by g++. */
+    const want = { i: true, ii: false, iii: false, iv: true, v: true, vi: true };
+    w.PT_QUIZ.forEach(q => {
+      const r = w.ptCheck(q.decl, q.expr, w.PT_ENV);
+      s.is(`slide 10 ${q.tag}: ${q.src}`, r.legal, want[q.tag], r.why);
+      if (!HAVE_GPP) return;
+      const real = cxx('#include <string>\nusing std::string;\n' +
+        'int main(){ string a("Hello"); string * b = new string("Hello");\n  ' +
+        q.src.replace(/;$/, '') + '; (void)0; delete b; }');
+      s.is(`  ...and g++ agrees`, real.compiles, want[q.tag], real.error);
+    });
+
+    /* A depth of 0 is falsy in JavaScript, which once made every
+       non-pointer name look undeclared. Both quiz lines that start from a
+       plain string are the regression test. */
+    s.ok('a plain string is recognised as declared', w.ptTypeOf('a', w.PT_ENV).ok);
+    s.is('and has pointer depth 0', w.ptTypeOf('a', w.PT_ENV).depth, 0);
+    s.is('&a has depth 1', w.ptTypeOf('&a', w.PT_ENV).depth, 1);
+    s.is('*b has depth 0', w.ptTypeOf('*b', w.PT_ENV).depth, 0);
+    s.ok('**b is refused', w.ptTypeOf('**b', w.PT_ENV).ok === false);
+    s.ok('an unknown name is refused', w.ptTypeOf('zz', w.PT_ENV).ok === false);
+  }
+
+  /* The Rule of Three, every combination, against AddressSanitizer. */
+  if (HAVE_GPP) {
+    let n = 0, bad = 0, skipped = 0, first = null;
+    let sawLeak = 0, sawAbort = 0, sawClean = 0;
+
+    ['copy', 'assign', 'self'].forEach(scenario => {
+      ['default', 'deep'].forEach(copy => {
+        ['default', 'deep', 'deep-delete', 'deep-delete-guard'].forEach(assign => {
+          [false, true].forEach(dtor => {
+            if (scenario === 'copy' && assign !== 'default') return;
+            const opts = { copy, assign, dtor, scenario };
+            const sim = w.rtSimulate(opts);
+            const real = asan(w.rtGenerate(opts).source);
+            n++;
+            if (!real.compiles) {
+              bad++;
+              if (!first) first = `${JSON.stringify(opts)} did not compile`;
+              return;
+            }
+            const simLeak = sim.problems.some(p => p.kind === 'leak');
+            const simAbort = sim.problems.some(
+              p => p.kind === 'double-free' || p.kind === 'use-after-free');
+
+            /* Once the program aborts, LeakSanitizer never runs its
+               end-of-process report — so g++ cannot tell us about leaks in
+               that case and the comparison is skipped rather than asserted.
+               The simulation still reports both, which is more than the
+               tool can observe. */
+            const leakComparable = !real.aborted;
+            if (!leakComparable) skipped++;
+
+            const okLeak = !leakComparable || simLeak === (real.leaked > 0);
+            const okAbort = simAbort === real.aborted;
+            const expected = w.rtExpectedOutput(sim);
+            const okOut = expected === null || real.aborted ||
+              JSON.stringify(expected) === JSON.stringify(real.out);
+
+            if (real.aborted) sawAbort++;
+            else if (real.leaked > 0) sawLeak++;
+            else sawClean++;
+
+            if (!(okLeak && okAbort && okOut)) {
+              bad++;
+              if (!first) {
+                first = `${scenario} copy=${copy} assign=${assign} dtor=${dtor}\n` +
+                  `   sim: leak=${simLeak} abort=${simAbort} out=${JSON.stringify(expected)}\n` +
+                  `   g++: leak=${real.leaked > 0} abort=${real.aborted} out=${JSON.stringify(real.out || [])}`;
+              }
+            }
+          });
+        });
+      });
+    });
+
+    s.ok('every Rule-of-Three combination was built', n >= 30, `${n}`);
+    s.is('and the simulation agrees with AddressSanitizer on all of them', bad, 0, first);
+    s.ok('the set contains clean runs', sawClean > 3, `${sawClean}`);
+    s.ok('and leaking ones', sawLeak > 3, `${sawLeak}`);
+    s.ok('and ones that crash', sawAbort > 3, `${sawAbort}`);
+    s.ok('some leak checks were skipped because the program aborted first',
+      skipped > 0, `${skipped} — reported, not silently passed`);
+
+    /* The specific findings the notes make. */
+    const shallowCopy = w.rtSimulate({ copy: 'default', assign: 'default', dtor: false,
+                                       scenario: 'copy' });
+    s.same('the compiler\'s copy constructor makes both objects print "ab"',
+      w.rtExpectedOutput(shallowCopy), ['ab', 'ab']);
+    const deepCopy = w.rtSimulate({ copy: 'deep', assign: 'default', dtor: true,
+                                    scenario: 'copy' });
+    s.same('a deep one keeps them apart', w.rtExpectedOutput(deepCopy), ['a', 'b']);
+
+    const selfBug = w.rtSimulate({ copy: 'deep', assign: 'deep-delete', dtor: true,
+                                   scenario: 'self' });
+    s.ok('a = a on the slide\'s final operator= reads freed memory',
+      selfBug.problems.some(p => p.kind === 'use-after-free'));
+    const guarded = w.rtSimulate({ copy: 'deep', assign: 'deep-delete-guard', dtor: true,
+                                   scenario: 'self' });
+    s.ok('and the self-assignment guard fixes it', guarded.clean);
+
+    const noDelete = w.rtSimulate({ copy: 'deep', assign: 'deep', dtor: true, scenario: 'assign' });
+    s.ok('an assignment that never frees the old string leaks',
+      noDelete.problems.some(p => p.kind === 'leak'));
+
+    s.ok('the advice reports a partially-written Rule of Three',
+      w.rtAdvice({ copy: 'deep', assign: 'default', dtor: true }).complete === false);
+    s.ok('and a complete one',
+      w.rtAdvice({ copy: 'deep', assign: 'deep-delete-guard', dtor: true }).complete);
   }
 
   /* ---------------- question bank ---------------- */
