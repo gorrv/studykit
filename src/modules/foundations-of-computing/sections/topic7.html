@@ -1,0 +1,449 @@
+<section id="topic7" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 07 · Approximation &amp; TSP</div>
+        <h1>When You Cannot Win, Bound the Loss</h1>
+        <div class="topic-subtitle">approximation ratios, 2OPT, and the limits of approximating</div>
+      </div>
+
+      <p>Topic 5 asked what to do about an NP-complete <em>decision</em> problem. This topic asks the
+      same about an <strong>optimisation</strong> problem, where the answer is not yes or no but
+      &ldquo;the best one&rdquo;. If you cannot find the best in polynomial time, the next question is
+      how close you can guarantee to get — and, less comfortably, whether any guarantee is possible
+      at all.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">Decision versus optimisation</div>
+        <table style="margin:8px 0 0;">
+          <tr><th>Decision</th><td>Does a solution exist?</td>
+            <td>SAT, HALTING, HAMILTONIAN, GRAPH ISOMORPHISM</td></tr>
+          <tr><th>Optimisation</th><td>What is the <em>best</em> solution?</td>
+            <td>CLIQUE, VERTEX COVER, TSP</td></tr>
+        </table>
+        <br>An optimisation problem is fixed by a <strong>solution space</strong> S of all candidate
+        solutions and a <strong>cost function</strong> h. A <strong>global</strong> optimum beats every
+        s ∈ S; a <strong>local</strong> optimum beats only its <em>neighbours</em> — and what counts as
+        a neighbour depends entirely on which moves your algorithm is allowed to make.
+      </div>
+
+      <!-- ===== TSP ===== -->
+      <h2 id="t7-tsp">The Travelling Salesman Problem</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        <strong>TSP<sub>dec</sub></strong><br>
+        <strong>Input)</strong> A <em>complete</em> weighted graph M = (V, d) with d : V × V → ℚ,
+        and a value D ∈ ℚ.<br>
+        <strong>Output)</strong> True iff G contains a Hamiltonian cycle H with
+        length_of(H) ≤ D.<br><br>
+        <strong>TSP</strong><br>
+        <strong>Input)</strong> A complete weighted graph G = (V, d).<br>
+        <strong>Output)</strong> The <em>shortest</em> Hamiltonian cycle.<br><br>
+        S = { all possible routes H } &nbsp;&nbsp;&nbsp;
+        h(H) = length_of(H) = &sum;<sub>(x,y)∈H</sub> d(x, y)<br><br>
+        <strong>Theorem.</strong> TSP<sub>dec</sub> is NP-complete.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Theorem: TSP is in P iff TSP<sub>dec</sub> is</div>
+        <strong>(⇒)</strong> Trivial. Solve TSP for the optimal route H, then answer
+        length_of(H) ≤ D.<br><br>
+        <strong>(⇐)</strong> Binary search on D. Start with D⁻ = 0 and D⁺ = the total weight of all
+        edges, an interval that must contain the answer, and halve it with each call to
+        TSP<sub>dec</sub> until it is narrower than the shortest edge — at which point only one
+        achievable tour length remains inside it.<br><br>
+        Each call is polynomial and there are O(log) of them, so the whole thing is polynomial. This
+        is why we can talk about &ldquo;TSP is NP-complete&rdquo; loosely: the two versions live or
+        die together.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The loop condition on the slide is inverted</div>
+        The lecture writes <code>While (D⁺ − D⁻) &lt; shortest edge of G</code>. That is the
+        <em>stopping</em> condition, not the continuing one. The interval starts at the total edge
+        weight, which is far <em>bigger</em> than the shortest edge, so the test is false on the first
+        evaluation and the loop body never runs — the algorithm then returns a route of length
+        <code>mid</code> that was never assigned.<br><br>
+        It should be <code>While (D⁺ − D⁻) ≥ shortest edge</code>. The tool below runs both so you
+        can see the difference; the idea is right, only the inequality is backwards.
+      </div>
+
+      <h3 id="t7-bitool">&#128736;&#65039; Optimisation from decision, by bisection</h3>
+
+      <div class="tool" data-run="runBisect">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Binary search on the target length</h3>
+        </div>
+        <div class="tool-desc">The decision oracle is answered honestly by brute force, so the search
+          really is being driven by yes/no answers alone. Switch the loop condition to the one printed
+          on the slide and watch it do nothing.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 220px;">
+            <label for="bi-text">Points (name x y)</label>
+            <textarea id="bi-text" rows="5" spellcheck="false">A 0 0
+B 0 3
+C 4 3
+D 4 0</textarea>
+          </div>
+          <div class="tool-field" style="flex:0 0 220px;">
+            <label for="bi-cond">Loop condition</label>
+            <select id="bi-cond">
+              <option value="correct">while gap &ge; shortest edge (correct)</option>
+              <option value="deck">while gap &lt; shortest edge (as printed)</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="biPreset('square')">A square</button>
+          <button class="tool-btn secondary" onclick="biPreset('cross')">Five points</button>
+          <button class="tool-btn secondary" onclick="biPreset('line')">Collinear</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="bi-output"></div>
+      </div>
+
+      <!-- ===== Approximation ratio ===== -->
+      <h2 id="t7-ratio">The approximation ratio</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        The <strong>approximation ratio</strong> of an algorithm M on input w is the value
+        R<sub>M</sub>(w) ≥ 1 given by<br>
+        <span class="pf-center">R<sub>M</sub>(w) = max( C<sub>approx</sub>/C<sub>global</sub> ,
+        &nbsp; C<sub>global</sub>/C<sub>approx</sub> )</span>
+        where C<sub>approx</sub> is the cost of the approximate solution and C<sub>global</sub> the
+        cost of the optimal one.<br><br>
+        A problem L is <strong>R-approximable</strong> if there is a <em>polynomial-time</em>
+        algorithm M with R<sub>M</sub>(w) ≤ R for <strong>all</strong> w ∈ Σ*, equivalently
+        C<sub>approx</sub> ≤ R × C<sub>global</sub>.<br><br>
+        L is <strong>unapproximable</strong> if it is not R-approximable for <em>any</em> fixed R —
+        every polynomial-time algorithm gives arbitrarily bad answers on some inputs.
+      </div>
+
+      <p>The symmetric <code>max</code> is there so the ratio is at least 1 whether you are minimising
+      or maximising. For TSP, a minimisation, the approximate tour can never be shorter than the
+      optimum, so the ratio is always C<sub>approx</sub>/C<sub>global</sub> in practice.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">&ldquo;For all w&rdquo; is the whole definition</div>
+        A ratio is a <strong>worst-case guarantee</strong>, not an average. An algorithm that returns
+        the optimum on a million inputs and something ten times too long on the next one is not
+        2-approximable. This is why you can <em>refute</em> a claimed ratio with one example but never
+        <em>establish</em> one that way — establishing it takes a proof about every input, which is
+        what the 2OPT argument below provides.
+      </div>
+
+      <h3 id="t7-ratool">&#128736;&#65039; Compute and test a ratio</h3>
+
+      <div class="tool" data-run="runRatio">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>R<sub>M</sub>(w), and whether a claimed R survives</h3>
+        </div>
+        <div class="tool-desc">One line per input: a name, the approximate cost, the optimal cost.
+          The tool computes each ratio and reports whether any of them breaks the claim.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="ra-rows">name &nbsp; approximate &nbsp; optimal</label>
+            <textarea id="ra-rows" rows="5" spellcheck="false">lecture-graph 14.71 14.71
+preorder-only 19.07 14.71
+bad-case 27 14
+tiny 6 5</textarea>
+          </div>
+          <div class="tool-field" style="flex:0 0 130px;">
+            <label for="ra-R">Claimed R</label>
+            <input type="number" id="ra-R" value="2" min="1" step="0.1">
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="ra-output"></div>
+      </div>
+
+      <!-- ===== 2OPT ===== -->
+      <h2 id="t7-2opt">The 2OPT approximation algorithm</h2>
+
+      <div class="proof">
+        <div class="pf-lbl">SWAP-MOVE(H)</div>
+        <div class="pf-step">1. <strong>For each</strong> pair of <em>non-adjacent</em> edges (x,y) and (u,v) from H</div>
+        <div class="pf-step">&nbsp;&nbsp;2. <strong>If</strong> d(x,v) + d(u,y) &lt; d(x,y) + d(u,v):</div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;3. Let H′ be H with (x,y),(u,v) replaced by (x,v),(u,y)</div>
+        <div class="pf-step">&nbsp;&nbsp;&nbsp;&nbsp;4. <strong>Return</strong> H′</div>
+        <div class="pf-step">5. <strong>Return</strong> H unchanged if no improvement found</div>
+      </div>
+
+      <div class="proof">
+        <div class="pf-lbl">2OPT(G)</div>
+        <div class="pf-step">1. Construct a minimum spanning tree T<sub>0</sub> of G</div>
+        <div class="pf-step">2. Let H<sub>0</sub> be the <strong>preorder traversal</strong> of T<sub>0</sub></div>
+        <div class="pf-step">3. <strong>While</strong> H<sub>i</sub> is not (locally) optimal:</div>
+        <div class="pf-step">&nbsp;&nbsp;4. H<sub>i+1</sub> ← SWAP-MOVE(H<sub>i</sub>)</div>
+        <div class="pf-step">5. <strong>Return</strong> H</div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Which two edges do you add back?</div>
+        Removing two edges from a cycle leaves two <strong>paths</strong>, with four ends between them.
+        There are two ways to rejoin them and <em>only one is a tour</em>:<br><br>
+        <strong>Join each path to the other</strong> — one Hamiltonian cycle ✓<br>
+        <strong>Join each path to itself</strong> — two disjoint cycles ✗<br><br>
+        That second case is what Step 4 of the slides — &ldquo;make sure the swap does not disconnect
+        the graph!&rdquo; — is warning about. In tour terms the valid move is just
+        &ldquo;<strong>reverse the segment between the two removed edges</strong>&rdquo;, which is
+        why 2-opt is normally stated that way instead.
+      </div>
+
+      <h3 id="t7-swtool">&#128736;&#65039; One swap, both reconnections</h3>
+
+      <div class="tool" data-run="runSwap">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>See the tour split in two</h3>
+        </div>
+        <div class="tool-desc">Choose a tour and two edge positions. The tool shows the valid
+          reconnection as a picture and names the two cycles the wrong one would produce.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 200px;">
+            <label for="sw-text">Points</label>
+            <textarea id="sw-text" rows="5" spellcheck="false">A 1 0
+B 1 2
+C 0 3
+D 3 0
+E 4 1
+F 3 2
+G 5 2
+H 2 4</textarea>
+          </div>
+          <div class="tool-field" style="flex:1 1 200px;">
+            <label for="sw-tour">Tour</label>
+            <input type="text" id="sw-tour" value="A B C H D E F G" spellcheck="false">
+          </div>
+          <div class="tool-field" style="flex:0 0 100px;">
+            <label for="sw-i">First edge at</label>
+            <input type="number" id="sw-i" value="3" min="0">
+          </div>
+          <div class="tool-field" style="flex:0 0 100px;">
+            <label for="sw-j">Second at</label>
+            <input type="number" id="sw-j" value="7" min="2">
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="sw-output"></div>
+      </div>
+
+      <h3 id="t7-totool">&#128736;&#65039; The whole algorithm</h3>
+
+      <div class="tool" data-run="runTwoOpt">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>MST, preorder, swaps — and the ratio actually achieved</h3>
+        </div>
+        <div class="tool-desc">Give points as <code>A 1 0</code> (Euclidean, so metric) or explicit
+          distances as <code>A B 5</code> (which may not be). The result is compared against brute
+          force over every tour, so the ratio shown is measured rather than promised.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 220px;">
+            <label for="to-text">Instance</label>
+            <textarea id="to-text" rows="8" spellcheck="false">A 1 0
+B 1 2
+C 0 3
+D 3 0
+E 4 1
+F 3 2
+G 5 2
+H 2 4</textarea>
+          </div>
+          <div class="tool-field" style="flex:0 0 200px;">
+            <label for="to-pick">Which improving swap</label>
+            <select id="to-pick">
+              <option value="best">the best available (the worked example)</option>
+              <option value="first">the first found (the pseudocode)</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="twoOptPreset('lecture')">Lecture graph</button>
+          <button class="tool-btn secondary" onclick="twoOptPreset('cross')">Five points</button>
+          <button class="tool-btn secondary" onclick="twoOptPreset('square')">A square</button>
+          <button class="tool-btn secondary" onclick="twoOptPreset('nonmetric')">Non-metric</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="to-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Two things the lecture example quietly shows</div>
+        Its final tour, at ≈14.71, is not merely a local optimum — brute force over all 5040 tours
+        confirms it is the <strong>global</strong> one. The achieved ratio is 1.00 while the guarantee
+        is 2, which is the normal state of affairs: the bound is worst-case and typical inputs are not
+        the worst case.<br><br>
+        Also: the slides reach it in two swaps, but SWAP-MOVE as written returns the <em>first</em>
+        improving pair, which takes six. The worked example is silently taking the <em>best</em> one
+        each round. Both are valid 2-opt — the control above switches between them.
+      </div>
+
+      <!-- ===== The proof ===== -->
+      <h2 id="t7-proof">Proving the ratio</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Theorem: 2OPT has approximation ratio R = 2</div>
+        Write H<sub>approx</sub> for the local optimum 2OPT returns and H<sub>global</sub> for the
+        true shortest cycle. We want length_of(H<sub>approx</sub>) ≤ 2 × length_of(H<sub>global</sub>).
+        <br><br>
+        <strong>Step 2)</strong> Delete one edge from H<sub>global</sub> to get a path T. Then
+        length_of(T) ≤ length_of(H<sub>global</sub>).<br>
+        <strong>Step 3)</strong> T is a spanning tree, and T<sub>0</sub> is a <em>minimum</em> one, so
+        length_of(T<sub>0</sub>) ≤ length_of(T).<br>
+        <strong>Step 4)</strong> The preorder traversal walks each tree edge at most twice, so
+        length_of(H<sub>0</sub>) ≤ 2 × length_of(T<sub>0</sub>).<br>
+        <strong>Step 5)</strong> Every swap strictly shortens the cycle, so
+        length_of(H<sub>approx</sub>) ≤ … ≤ length_of(H<sub>0</sub>).<br><br>
+        <strong>Step 6)</strong> Chaining them:<br>
+        <span class="pf-center">
+        length_of(H<sub>approx</sub>) ≤ length_of(H<sub>0</sub>) ≤ 2·length_of(T<sub>0</sub>)
+        ≤ 2·length_of(T) ≤ 2·length_of(H<sub>global</sub>) &nbsp;∎</span>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The hypothesis the proof needs and the slide omits</div>
+        Step 4 is where the work happens, and it is not free. The preorder traversal of the tree
+        revisits vertices; turning it into a Hamiltonian cycle means <strong>shortcutting</strong> past
+        the ones already seen. That shortcut is only an improvement if
+        d(x,z) ≤ d(x,y) + d(y,z) — the <strong>triangle inequality</strong>.<br><br>
+        The slide states &ldquo;TSP is 2-approximable&rdquo; without qualification, and the very next
+        deck proves TSP is <em>unapproximable</em>. Both are correct. The first is about
+        <strong>metric</strong> TSP and the second about the general case, and the whole difference
+        between them is this one assumption. If an exam asks you to state the 2-approximation result,
+        say <em>metric</em> TSP.
+      </div>
+
+      <p>Note also what the swaps contribute to the bound: <strong>nothing</strong>. The factor of 2 is
+      already earned at step 4, by the tree and the traversal alone. Steps 5 only says the swaps do not
+      make things worse. They improve the answer in practice — often dramatically — but the guarantee
+      would hold if you skipped them entirely.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Christofides, 1976</div>
+        <strong>Theorem.</strong> Metric TSP is <strong>3/2</strong>-approximable — build the MST, then
+        add a minimum-weight perfect matching on its odd-degree vertices to get an Eulerian multigraph,
+        and shortcut that. It stood as the best known ratio for metric TSP for over forty years.
+      </div>
+
+      <!-- ===== Unapproximability ===== -->
+      <h2 id="t7-unapprox">When nothing can be guaranteed</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Theorem: TSP is unapproximable when d violates the triangle inequality</div>
+        <strong>Step 1)</strong> Suppose some polynomial-time algorithm achieves a fixed ratio R, so
+        length_of(H<sub>approx</sub>) ≤ R × length_of(H<sub>global</sub>).<br>
+        <strong>Step 2)</strong> Take any instance G = (V, E) of HAMILTONIAN, which is
+        NP-complete.<br>
+        <strong>Step 3)</strong> Build the complete weighted graph G′ = (V, d) with<br>
+        <span class="pf-center">d(x,y) = 1 if (x,y) ∈ E, &nbsp;&nbsp; nR + 1 if (x,y) ∉ E</span>
+        <strong>Step 4)</strong> Then length_of(H<sub>approx</sub>) ≤ nR ⟺ G has a Hamiltonian
+        cycle.<br>
+        &nbsp;&nbsp;<em>(⇒)</em> A tour that short can only use edges of cost 1, so it <em>is</em> a
+        Hamiltonian cycle of G.<br>
+        &nbsp;&nbsp;<em>(⇐)</em> If G has one, then length_of(H<sub>global</sub>) = n, so the
+        assumed ratio gives length_of(H<sub>approx</sub>) ≤ R × n.<br>
+        <strong>Step 5)</strong> So <code>length_of(H<sub>approx</sub>) ≤ nR</code> decides
+        HAMILTONIAN in polynomial time.<br>
+        <strong>Step 6)</strong> Assuming P ≠ NP, no such algorithm exists. ∎
+      </div>
+
+      <p>The trick is that <strong>nR + 1 is chosen after R is fixed</strong>. Whatever ratio you claim,
+      the construction makes the penalty for using a single missing edge bigger than that ratio can
+      absorb. That is why the conclusion is not &ldquo;there is no 2-approximation&rdquo; but
+      &ldquo;there is no R-approximation for any R at all&rdquo;.</p>
+
+      <h3 id="t7-gatool">&#128736;&#65039; Build the gadget and check the theorem</h3>
+
+      <div class="tool" data-run="runGadget">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>HAMILTONIAN ≤<sub>p</sub> TSP, made concrete</h3>
+        </div>
+        <div class="tool-desc">Enter an undirected graph. The tool builds G′, finds its shortest tour
+          by brute force, and checks &ldquo;tour ≤ nR&rdquo; against whether the graph really has a
+          Hamiltonian cycle — computed separately by the Topic 2 engine, which knows nothing about
+          this construction.</div>
+
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 240px;">
+            <label for="ga-text">Undirected graph</label>
+            <textarea id="ga-text" rows="6" spellcheck="false">A - B
+B - C
+C - D
+D - E
+E - A
+A - C</textarea>
+          </div>
+          <div class="tool-field" style="flex:0 0 130px;">
+            <label for="ga-R">Claimed ratio R</label>
+            <input type="number" id="ga-R" value="2" min="1" step="1">
+          </div>
+        </div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="gadPreset('ham')">Has a cycle</button>
+          <button class="tool-btn secondary" onclick="gadPreset('noham')">Has none</button>
+          <button class="tool-btn secondary" onclick="gadPreset('square')">A 4-cycle</button>
+          <button class="tool-btn secondary" onclick="gadPreset('path')">A path</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+
+        <div class="tool-output" id="ga-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">What this means outside the exam</div>
+        The slides put it well: routing to minimise <strong>distance</strong> is approximable, because
+        distances obey the triangle inequality — a detour cannot be shorter than going direct. Routing
+        to minimise <strong>duration</strong> is not, because travel times need not: a motorway
+        detour really can be quicker than the direct road through town.<br><br>
+        So the same problem, on the same map, is 2-approximable or hopeless depending on what you put
+        in the cells of d. That is a genuinely practical distinction, not a technicality.
+      </div>
+
+      <!-- ===== Exam ===== -->
+      <h2 id="t7-exam">Exam takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Six one-liners</div>
+        <ul style="margin:6px 0 0;">
+          <li>R<sub>M</sub>(w) = max(C<sub>a</sub>/C<sub>g</sub>, C<sub>g</sub>/C<sub>a</sub>) ≥ 1, and
+            R-approximable means R<sub>M</sub>(w) ≤ R for <strong>all</strong> w.</li>
+          <li>TSP and TSP<sub>dec</sub> are polynomially equivalent, by binary search on D.</li>
+          <li>2OPT = minimum spanning tree, preorder traversal, then swaps. Ratio 2.</li>
+          <li>The factor of 2 comes from the traversal walking each tree edge twice — not from the
+            swaps.</li>
+          <li>That proof needs the <strong>triangle inequality</strong>. So the result is about
+            <em>metric</em> TSP.</li>
+          <li>General TSP is unapproximable, by making non-edges cost nR + 1 — chosen <em>after</em>
+            R.</li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>Saying &ldquo;TSP is 2-approximable&rdquo; without the word <strong>metric</strong>. The
+            unqualified claim is false, and the next slide proves it false.</li>
+          <li>Treating an approximation ratio as typical rather than worst-case.</li>
+          <li>Thinking the 2-opt swaps are what earn the factor of 2.</li>
+          <li>Reconnecting a 2-opt swap the wrong way and producing two disjoint cycles.</li>
+          <li>Forgetting TSP needs a <strong>complete</strong> graph — that is what makes every
+            permutation a candidate tour.</li>
+          <li>Claiming a ratio from examples. Examples refute; only a proof establishes.</li>
+          <li>Confusing a local optimum with a global one. 2OPT returns the first, and only the
+            <em>bound</em> relates it to the second.</li>
+        </ul>
+      </div>
+    </section>

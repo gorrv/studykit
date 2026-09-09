@@ -1364,6 +1364,263 @@ module.exports = async function run() {
     }
   }
 
+  /* ---------------- Topic 7 · TSP and 2OPT ---------------- */
+  {
+    const g = w.tspParse(w.TSP_PRESETS.lecture);
+    s.ok('the lecture point set parses', g.ok, g.error);
+    s.is('8 vertices', g.n, 8);
+    s.ok('and being Euclidean, it satisfies the triangle inequality', g.metric.ok);
+
+    // The MST, the traversal and the three cycle lengths on the slide.
+    const mst = w.tspMst(g);
+    s.is('the MST is the one drawn in red',
+      mst.tree.map(e => e.u + e.v).sort().join(' '), 'AB AD BC BH DE EF EG');
+    s.near('of weight 11.8929', mst.weight, 11.8929, 1e-4);
+    s.is('the preorder traversal is the slide\'s H0',
+      w.tspPreorder(g, mst.tree).join(','), 'A,B,C,H,D,E,F,G');
+
+    const H0 = ['A', 'B', 'C', 'H', 'D', 'E', 'F', 'G'];
+    const H1 = ['A', 'B', 'C', 'H', 'G', 'F', 'E', 'D'];
+    const H2 = ['A', 'B', 'C', 'H', 'F', 'G', 'E', 'D'];
+    s.near('H1 is 16.08, as printed', w.tspLen(g, H1), 16.0843, 1e-3);
+    s.near('H2 is 14.71, as printed', w.tspLen(g, H2), 14.7148, 1e-3);
+    // The slide says H0 is 19.06. It is 19.07 -- pinned so that a
+    // corrected deck shows up here rather than passing silently.
+    s.near('H0 is 19.0740 — the slide rounds it to 19.06, which is a hair low',
+      w.tspLen(g, H0), 19.0740, 1e-3);
+
+    // Taking the best improving swap reproduces the slide exactly.
+    const best = w.tspTwoOpt(g, { pick: 'best' });
+    s.is('steepest descent reaches the answer in two swaps, as the slides do',
+      best.steps.filter(x => x.move).length, 2);
+    s.is('via H1', best.steps[1].tour.join(','), H1.join(','));
+    s.is('and then H2', best.steps[2].tour.join(','), H2.join(','));
+
+    // First-improvement is also valid 2-opt, and lands in the same place.
+    const first = w.tspTwoOpt(g, { pick: 'first' });
+    s.near('first-improvement reaches the same length', first.length, best.length, 1e-9);
+    s.ok('but takes more swaps to get there',
+      first.steps.filter(x => x.move).length > 2,
+      `${first.steps.filter(x => x.move).length} swaps`);
+
+    // And that answer is in fact globally optimal here.
+    const brute = w.tspBrute(g);
+    s.ok('brute force over every tour succeeds', brute.ok, brute.error);
+    s.is('checking 5040 of them', brute.searched, 5040);
+    s.near('the 2OPT answer is the true optimum on this instance', best.length, brute.length, 1e-9);
+    s.near('so the achieved ratio is 1, not 2', w.tspRatio(best.length, brute.length).ratio, 1, 1e-9);
+
+    // The ratio is symmetric and never below 1.
+    s.near('R is 1 when the two agree', w.tspRatio(10, 10).ratio, 1, 1e-12);
+    s.near('and 2 when the approximation is twice the optimum', w.tspRatio(20, 10).ratio, 2, 1e-12);
+    s.near('and still 2 the other way round', w.tspRatio(10, 20).ratio, 2, 1e-12);
+
+    // A tour must be a permutation, and its length independent of
+    // where you start or which way round you go.
+    {
+      const rot = H2.slice(3).concat(H2.slice(0, 3));
+      s.near('rotating a tour does not change its length',
+        w.tspLen(g, rot), w.tspLen(g, H2), 1e-12);
+      s.near('nor does reversing it',
+        w.tspLen(g, H2.slice().reverse()), w.tspLen(g, H2), 1e-12);
+    }
+
+    s.ok('a repeated vertex is refused', w.tspParse('A 0 0\nA 1 1\nB 2 2').ok === false);
+    s.ok('an incomplete distance matrix is refused',
+      w.tspParse('A B 1\nB C 1\nC D 1\nD A 1').ok === false);
+    s.ok('and mixing coordinates with distances is refused',
+      w.tspParse('A 0 0\nB C 3').ok === false);
+    s.ok('fewer than three vertices is refused', w.tspParse('A 0 0\nB 1 1').ok === false);
+  }
+
+  /* ---------------- Topic 7 · the swap, and the proof chain ---------------- */
+  {
+    const g = w.tspParse(w.TSP_PRESETS.lecture);
+    const tour = ['A', 'B', 'C', 'H', 'D', 'E', 'F', 'G'];
+
+    // The reconnection that is a tour, and the one that is not.
+    const rec = w.tspReconnect(tour, 3, 7);
+    s.is('the valid reconnection is the slide\'s H1', rec.good.tour.join(','),
+      'A,B,C,H,G,F,E,D');
+    s.is('and it is still a permutation of all 8 vertices',
+      rec.good.tour.slice().sort().join(''), 'ABCDEFGH');
+    s.is('while the other pairing splits into two cycles', rec.bad.cycles.length, 2);
+    s.is('covering every vertex between them',
+      rec.bad.cycles[0].concat(rec.bad.cycles[1]).sort().join(''), 'ABCDEFGH');
+    s.ok('but neither of them alone is a tour',
+      rec.bad.cycles[0].length < 8 && rec.bad.cycles[1].length < 8);
+
+    // Every link of the R = 2 proof, on many random metric instances.
+    {
+      let bad = 0, first = '', tested = 0, worst = 0, seed = 8888;
+      const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+      for (let t = 0; t < 120; t++) {
+        const n = 5 + Math.floor(rnd() * 4), lines = [];
+        for (let i = 0; i < n; i++) {
+          lines.push('V' + i + ' ' + (rnd() * 20).toFixed(3) + ' ' + (rnd() * 20).toFixed(3));
+        }
+        const inst = w.tspParse(lines.join('\n'));
+        if (!inst.ok) continue;
+        // Euclidean points are always metric; if that ever fails the
+        // distance function itself is wrong.
+        if (!inst.metric.ok) { bad++; if (!first) first = 'Euclidean instance was not metric'; continue; }
+        const opt = w.tspBrute(inst);
+        if (!opt.ok) continue;
+        tested++;
+
+        const run = w.tspTwoOpt(inst);
+        const H0len = w.tspLen(inst, run.start);
+        const T0 = run.mst.weight;
+
+        // Step 4: the traversal costs at most twice the tree.
+        if (H0len > 2 * T0 + 1e-9) {
+          bad++; if (!first) first = `H0 ${H0len} > 2*MST ${2 * T0}`;
+        }
+        // Step 3: the MST is no heavier than any spanning tree, in
+        // particular the optimal tour minus its longest edge.
+        if (T0 > opt.length + 1e-9) {
+          bad++; if (!first) first = `MST ${T0} > optimal tour ${opt.length}`;
+        }
+        // Step 5: swaps never lengthen the tour.
+        for (let k = 1; k < run.steps.length; k++) {
+          if (run.steps[k].length > run.steps[k - 1].length + 1e-9) {
+            bad++; if (!first) first = 'a swap made the tour longer';
+          }
+        }
+        // Step 6: the conclusion.
+        const ratio = run.length / opt.length;
+        if (ratio > worst) worst = ratio;
+        if (ratio > 2 + 1e-9) {
+          bad++; if (!first) first = `ratio ${ratio} exceeded 2 on ${lines.join(';')}`;
+        }
+        // And the result must be a genuine tour.
+        if (run.tour.slice().sort().join(',') !== inst.vertices.slice().sort().join(',')) {
+          bad++; if (!first) first = '2OPT returned something that is not a permutation';
+        }
+      }
+      s.ok('enough random metric instances were generated', tested > 90, `only ${tested}`);
+      s.is('every link of the R = 2 chain holds on all of them, and the result is always a tour',
+        bad, 0, first);
+      s.ok('and the worst ratio actually seen is well under 2', worst < 2,
+        `worst was ${worst.toFixed(4)}`);
+    }
+
+    // The triangle inequality, detected with a witness.
+    {
+      const nm = w.tspParse(w.TSP_PRESETS.nonmetric);
+      s.ok('the non-metric preset parses', nm.ok, nm.error);
+      s.ok('and is correctly flagged as violating the triangle inequality', nm.metric.ok === false);
+      const wt = nm.metric.worst;
+      s.ok('with a witness that really is a violation',
+        nm.d(wt.x, wt.z) > nm.d(wt.x, wt.y) + nm.d(wt.y, wt.z),
+        JSON.stringify(wt));
+      s.ok('a Euclidean instance is never flagged',
+        w.tspParse(w.TSP_PRESETS.cross).metric.ok === true);
+    }
+  }
+
+  /* ---------------- Topic 7 · unapproximability ---------------- */
+  {
+    const G = w.grParse(w.AP_PRESETS.ham.replace(/>/g, '-'));
+    const r = w.apUnapprox(G, 2);
+    s.ok('the gadget builds', r.ok, r.error);
+    s.is('with long edges costing nR+1', r.gadget.long, 5 * 2 + 1);
+    s.is('and a threshold of nR', r.threshold, 10);
+    s.ok('this graph has a Hamiltonian cycle', r.hasHam);
+    s.is('so the optimal tour costs exactly n', r.optimal, 5);
+    s.ok('which is under the threshold', r.short);
+    s.ok('and the two agree, as the theorem says', r.agrees);
+
+    // The construction's real claim is that the penalty outgrows ANY
+    // claimed ratio, because nR+1 is chosen after R. A fixed penalty
+    // would work for small R and quietly fail for large -- so the
+    // separation is tested at a ratio big enough to expose that.
+    {
+      let bad = 0, first = '';
+      [1, 2, 5, 20, 100].forEach(R => {
+        const withCycle = w.apUnapprox(w.grParse(w.AP_PRESETS.ham.replace(/>/g, '-')), R);
+        const without = w.apUnapprox(w.grParse(w.AP_PRESETS.path.replace(/>/g, '-')), R);
+        if (!withCycle.ok || !without.ok) { bad++; return; }
+        if (withCycle.gadget.long !== withCycle.gadget.n * R + 1) {
+          bad++; if (!first) first = `R=${R}: long edge ${withCycle.gadget.long}, expected nR+1`;
+        }
+        if (!withCycle.short) { bad++; if (!first) first = `R=${R}: Hamiltonian graph not under nR`; }
+        if (without.short) { bad++; if (!first) first = `R=${R}: non-Hamiltonian graph slipped under nR`; }
+        if (!withCycle.agrees || !without.agrees) {
+          bad++; if (!first) first = `R=${R}: the separation failed`;
+        }
+      });
+      s.is('the gadget separates Hamiltonian from non-Hamiltonian at every R, however large',
+        bad, 0, first);
+    }
+
+    const noham = w.apUnapprox(w.grParse(w.AP_PRESETS.path.replace(/>/g, '-')), 2);
+    s.ok('a path has no Hamiltonian cycle', noham.hasHam === false);
+    s.ok('so its cheapest tour must exceed the threshold', noham.short === false);
+    s.ok('and the two still agree', noham.agrees);
+
+    // The theorem at volume, over random graphs and several R.
+    {
+      let bad = 0, first = '', tested = 0, yes = 0, no = 0, seed = 20260909;
+      const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+      for (let t = 0; t < 300; t++) {
+        const n = 4 + Math.floor(rnd() * 3);
+        const V = 'ABCDEF'.slice(0, n).split(''), lines = [];
+        for (let i = 0; i < n; i++) {
+          for (let j = i + 1; j < n; j++) if (rnd() < 0.55) lines.push(V[i] + ' - ' + V[j]);
+        }
+        if (lines.length < 3) continue;
+        const g2 = w.grParse(lines.join('\n'));
+        if (!g2.ok || g2.nV !== n) continue;
+        const R = 1 + Math.floor(rnd() * 3);
+        const res = w.apUnapprox(g2, R);
+        if (!res.ok) continue;
+        tested++;
+        if (res.hasHam) yes++; else no++;
+        // The claim: cheap tour <=> Hamiltonian cycle exists.
+        if (!res.agrees) {
+          bad++;
+          if (!first) first = `${lines.join(';')} R=${R}: short=${res.short} ham=${res.hasHam}`;
+        }
+        // And when one exists the optimum is exactly n.
+        if (res.hasHam && Math.abs(res.optimal - n) > 1e-9) {
+          bad++; if (!first) first = `${lines.join(';')}: optimum ${res.optimal} != n=${n}`;
+        }
+        // When none does, every tour must cost more than nR.
+        if (!res.hasHam && res.optimal <= res.threshold) {
+          bad++; if (!first) first = `${lines.join(';')}: no cycle but tour ${res.optimal} <= ${res.threshold}`;
+        }
+      }
+      s.ok('enough random graphs were generated', tested > 200, `only ${tested}`);
+      s.ok('with both outcomes represented', yes > 40 && no > 40, `${yes} with, ${no} without`);
+      s.is('"cheapest tour ≤ nR" matches "has a Hamiltonian cycle" every time', bad, 0, first);
+    }
+
+    // The binary search, and the slide's inverted condition.
+    {
+      const g3 = w.tspParse(w.TSP_PRESETS.square);
+      const good = w.apBinarySearch(g3, { buggy: false });
+      s.ok('the corrected binary search runs', good.ranAtAll);
+      s.ok('and closes on the true optimum', good.correct,
+        `got ${good.answer}, truth ${good.truth}`);
+      s.ok('taking a handful of calls', good.calls > 1 && good.calls < 60, `${good.calls} calls`);
+
+      const printed = w.apBinarySearch(g3, { buggy: true });
+      s.ok('the condition as printed never enters the loop', printed.ranAtAll === false);
+      s.is('so it makes no calls at all', printed.calls, 0);
+    }
+
+    // apAssess: examples can refute a ratio but never establish one.
+    {
+      const refuted = w.apAssess([{ approx: 30, optimal: 10 }, { approx: 11, optimal: 10 }], 2);
+      s.ok('a ratio claim is refuted by a single bad input', refuted.consistent === false);
+      s.is('naming the offender', refuted.violations.length, 1);
+      const survives = w.apAssess([{ approx: 19, optimal: 10 }, { approx: 11, optimal: 10 }], 2);
+      s.ok('and survives when nothing exceeds it', survives.consistent === true);
+      s.near('reporting the worst seen', survives.worst, 1.9, 1e-9);
+    }
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 2000);

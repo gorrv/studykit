@@ -2,7 +2,7 @@
       <div class="topic-header">
         <div class="topic-eyebrow">Revision</div>
         <h1>Cram sheet</h1>
-        <div class="topic-subtitle">all five topics on one page</div>
+        <div class="topic-subtitle">every topic on one page</div>
       </div>
 
       <h2 id="cr-defs">Topic 01 &middot; machines and languages</h2>
@@ -278,6 +278,53 @@
           <li>Giving one direction of a ≤<sub>p</sub> argument.</li>
           <li>&ldquo;2SAT is easy because clauses are small&rdquo; — 3SAT&rsquo;s are small too. It is
             easy because two literals make an implication.</li>
+        </ul>
+      </div>
+
+      <h2 id="cr-t7">Topic 07 &middot; approximation &amp; TSP</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        <strong>TSP<sub>dec</sub></strong> — complete weighted graph (V,d) and a value D; True iff some
+        Hamiltonian cycle has length ≤ D. <strong>NP-complete.</strong><br>
+        <strong>TSP</strong> — the same graph; return the <em>shortest</em> Hamiltonian cycle.<br><br>
+        <strong>R<sub>M</sub>(w) = max( C<sub>approx</sub>/C<sub>global</sub> ,
+        C<sub>global</sub>/C<sub>approx</sub> ) ≥ 1</strong><br>
+        <strong>R-approximable</strong>: a polynomial-time M with R<sub>M</sub>(w) ≤ R for
+        <strong>all</strong> w.<br>
+        <strong>Unapproximable</strong>: not R-approximable for <em>any</em> fixed R.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The R = 2 proof, as a chain</div>
+        length_of(H<sub>approx</sub>) ≤ length_of(H<sub>0</sub>) &nbsp;<em>(swaps only shorten)</em><br>
+        &nbsp;&nbsp;≤ 2 · length_of(T<sub>0</sub>) &nbsp;<em>(preorder walks each tree edge twice)</em><br>
+        &nbsp;&nbsp;≤ 2 · length_of(T) &nbsp;<em>(T<sub>0</sub> is a MINIMUM spanning tree)</em><br>
+        &nbsp;&nbsp;≤ 2 · length_of(H<sub>global</sub>) &nbsp;<em>(T is the optimal tour minus an edge)</em><br><br>
+        The factor of 2 is earned at line two, by the traversal — <strong>not</strong> by the swaps.
+        And line two needs the <strong>triangle inequality</strong>, so the theorem is about
+        <em>metric</em> TSP. Christofides (1976) improves the ratio to <strong>3/2</strong>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Unapproximability, in one line</div>
+        Given a HAMILTONIAN instance and a claimed ratio R, set d = 1 on edges and
+        <strong>nR + 1</strong> on non-edges. Then the cheapest tour is ≤ nR <strong>iff</strong> G has
+        a Hamiltonian cycle — so an R-approximation would decide an NP-complete problem in polynomial
+        time. The penalty is chosen <em>after</em> R, which is why no R works.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>&ldquo;TSP is 2-approximable&rdquo; without <strong>metric</strong>. Unqualified it is
+            false.</li>
+          <li>Treating a ratio as typical rather than worst-case. Examples refute; only proofs
+            establish.</li>
+          <li>Thinking the swaps earn the factor of 2. They earn nothing; they only avoid harm.</li>
+          <li>Reconnecting a 2-opt swap so each path closes on itself — two cycles, not a tour.</li>
+          <li>Forgetting TSP needs a <strong>complete</strong> graph.</li>
+          <li>Confusing 2OPT&rsquo;s local optimum with the global one.</li>
         </ul>
       </div>
     </section>
