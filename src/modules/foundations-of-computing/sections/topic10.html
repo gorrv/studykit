@@ -1,0 +1,400 @@
+<section id="topic10" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 10 · The Limits of Computation</div>
+        <h1>Problems No Machine Can Solve</h1>
+        <div class="topic-subtitle">countability, the universal machine, halting, and the Entscheidungsproblem</div>
+      </div>
+
+      <p>Every previous topic asked how <em>expensive</em> a problem is. This one asks whether it can
+      be solved at all, and the answer for some perfectly well-posed questions is no &mdash; not
+      &ldquo;not yet&rdquo;, not &ldquo;not efficiently&rdquo;, but never, by any machine, however
+      long you wait. The argument is short, and it turns on a single move: a machine is a finite
+      object, so a machine can be handed a description of itself.</p>
+
+      <!-- ===== DECIDABILITY ===== -->
+      <h2 id="t10-dec">Decidable and undecidable</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        <strong>The Church&ndash;Turing thesis.</strong> Any language that can be effectively computed
+        by some finite process can be recognised by a Turing machine.<br><br>
+        <strong>Notation.</strong> M(w) = 1 if M accepts w, 0 if M rejects w, and ↑ if M does not halt
+        on w.<br><br>
+        <strong>Decidable.</strong> L is decidable if some machine M is<br>
+        &nbsp;&nbsp;<em>sound</em>: M(w) = 1 ⇒ w ∈ L<br>
+        &nbsp;&nbsp;<em>complete</em>: w ∈ L ⇒ M(w) = 1<br>
+        &nbsp;&nbsp;<em>terminating</em>: T<sub>M</sub>(w) &lt; ∞ for all w ∈ Σ*
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Drop the third condition and you get something weaker but useful</div>
+        Sound and complete but not necessarily terminating is called
+        <strong>recognisable</strong> (or semi-decidable): the machine accepts every word of L, and on
+        words outside L it may simply run forever. You can confirm a &ldquo;yes&rdquo; by waiting; you
+        can never confirm a &ldquo;no&rdquo;, because waiting longer always remains an option.<br><br>
+        The halting problem sits exactly here. It is recognisable — simulate, and accept if the machine
+        stops — and it is not decidable, which is what the rest of this topic proves. The slide defines
+        decidable and stops; the distinction is where most of the interest lives.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Is every language decidable?</div>
+        No, and the reason is a counting argument before it is anything else. There are only countably
+        many Turing machines, because a machine is a finite string over a finite alphabet and those
+        can be listed. But there are uncountably many languages, since a language is an arbitrary
+        subset of the countable set Σ*. So machines run out long before languages do — most languages
+        have no machine at all, for the same reason most real numbers have no name.<br><br>
+        That argument shows undecidable languages <em>exist</em>. It does not hand you one, and it says
+        nothing about whether the ones we care about are among them. The diagonal construction below
+        does hand you one, and the halting problem is one we care about.
+      </div>
+
+      <h3 id="t10-entool">&#128736;&#65039; Listing every word</h3>
+
+      <div class="tool" data-run="runEnum">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>The enumeration, and the bijection it gives you</h3>
+        </div>
+        <div class="tool-desc">Shortest first, alphabetical within a length. The tool checks the
+          index &rarr; word and word &rarr; index maps really are inverse on every word shown, because
+          the diagonal argument depends on &ldquo;the i-th word&rdquo; being well defined.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="en-alpha">alphabet</label>
+            <input type="text" id="en-alpha" value="01" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="en-count">how many</label>
+            <input type="number" id="en-count" value="20" min="1" max="200">
+          </div>
+          <button class="tool-btn" onclick="runEnum()">List ▶</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="en-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== ENCODING ===== -->
+      <h2 id="t10-enc">Encoding machines as strings</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The encodings</div>
+        <strong>Tuples.</strong> ⟨w₀, w₁, …, wₙ⟩ := # w₀ # w₁ # … # wₙ #<br>
+        <strong>Finite functions.</strong> ⟨f⟩ := ⟨ ⟨a₁, f(a₁)⟩, ⟨a₂, f(a₂)⟩, …, ⟨aₙ, f(aₙ)⟩ ⟩ —
+        effectively a 2 × n matrix.<br>
+        <strong>Machines.</strong> code(M) := ⟨ q<sub>init</sub>, q<sub>accept</sub>,
+        q<sub>reject</sub>, ⟨δ⟩ ⟩<br><br>
+        A binary alternative is also offered: transcribe each character as
+        0 ↦ 00, 1 ↦ 01, # ↦ 11.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Neither encoding, as printed, can be decoded</div>
+        The tuple format is described as built from strings over the <em>expanded</em> alphabet
+        Σ ∪ {#}, so a component may itself contain a separator. Then
+        <code>#0#1#</code> is both the pair ⟨0, 1⟩ and the one-element tuple containing the string
+        <code>0#1</code>. Reading it back, nothing distinguishes them.<br><br>
+        This is not hypothetical: code(M) nests tuples inside tuples — δ is encoded as a tuple of
+        pairs — so its components contain separators by construction.<br><br>
+        The binary code is offered as the alternative, and <strong>it does not fix the
+        problem</strong>: it gives the data character # and the separator the same pattern,
+        <code>11</code>, so the two encodings above are still identical bit for bit. What fixes it is
+        reserving a pattern the data can never produce — code # as <code>10</code> and keep
+        <code>11</code> for the separator alone. The tool shows all three side by side and checks the
+        repaired code is injective by exhaustion.
+      </div>
+
+      <h3 id="t10-cdtool">&#128736;&#65039; Encoding, and the collision</h3>
+
+      <div class="tool" data-run="runEncode">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Encode a tuple three ways and try to read it back</h3>
+        </div>
+        <div class="tool-desc">Put a <code>#</code> inside one of the components and watch the plain
+          encoding stop being decodable. The comparison table at the bottom is the point.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="cd-parts">components, comma separated</label>
+            <input type="text" id="cd-parts" value="0, 1, 0#1" spellcheck="false">
+          </div>
+          <button class="tool-btn" onclick="runEncode()">Encode ▶</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="cd-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The universal machine</div>
+        A <strong>universal Turing machine</strong> M<sub>u</sub> takes as input a pair
+        ⟨code(M), w⟩ and satisfies<br><br>
+        <strong>M<sub>u</sub>( ⟨code(M), w⟩ ) = M(w)</strong><br><br>
+        — it accepts if M accepts, rejects if M rejects, and fails to halt if M fails to halt. It is an
+        interpreter: it reads the software code(M) and simulates M on w.
+      </div>
+
+      <h3 id="t10-utool">&#128736;&#65039; A universal machine, actually run</h3>
+
+      <div class="tool" data-run="runUniversal">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Encode a machine, decode it, and run both</h3>
+        </div>
+        <div class="tool-desc">Not a diagram of a universal machine — the encoding is produced, parsed
+          back into a machine, and both machines are run on the same words. If the encoding lost
+          anything the verdicts would part company, and the table would say so.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="ut-text">the machine M</label>
+            <textarea id="ut-text" rows="8" spellcheck="false">start: even
+accept: acc
+reject: rej
+even 0 even 0 >
+even 1 odd 1 >
+even _ acc _ >
+odd 0 odd 0 >
+odd 1 even 1 >
+odd _ rej _ ></textarea>
+          </div>
+          <div class="tool-field" style="flex:1 1 180px;">
+            <label for="ut-words">words to try</label>
+            <input type="text" id="ut-words" value="ε, 0, 1, 11, 101, 1111" spellcheck="false">
+          </div>
+          <button class="tool-btn" onclick="runUniversal()">Encode and run ▶</button>
+          <button class="tool-btn secondary" onclick="utmPreset('parity')">Even number of 1s</button>
+          <button class="tool-btn secondary" onclick="utmPreset('ones')">Only 1s</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="ut-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== DIAGONAL ===== -->
+      <h2 id="t10-diag">A language no machine recognises</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Theorem: there is an undecidable language</div>
+        <strong>Step 1.</strong> Enumerate every word over the alphabet: w₀, w₁, w₂, ….<br>
+        <strong>Step 2.</strong> Enumerate every Turing machine: M₀, M₁, M₂, … — possible because
+        there are only as many machines as there are codes for machines.<br>
+        <strong>Step 3.</strong> Let
+        <strong>L = { w<sub>i</sub> ∈ Σ* : M<sub>i</sub> does not accept w<sub>i</sub> }</strong>,
+        so w<sub>i</sub> ∈ L ⟺ M<sub>i</sub> does not accept w<sub>i</sub>.<br>
+        <strong>Step 4.</strong> If L were decidable it would be the language of some machine
+        M<sub>j</sub> on the list. But then w<sub>j</sub> ∈ Language(M<sub>j</sub>) ⟺
+        w<sub>j</sub> ∉ L, so Language(M<sub>j</sub>) ≠ L. Contradiction. ∎
+      </div>
+
+      <p>The construction is worth seeing as a table. Machines down the side, words along the top, a
+      tick where the machine accepts the word. L is built by walking the diagonal and flipping every
+      entry, which guarantees that L disagrees with row i at column i &mdash; and so with every row
+      somewhere.</p>
+
+      <h3 id="t10-dgtool">&#128736;&#65039; Walk the diagonal</h3>
+
+      <div class="tool" data-run="runDiagonal">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>The table, the diagonal, and where every row fails</h3>
+        </div>
+        <div class="tool-desc">Starts on the table from the slides. Edit it or randomise it as often
+          as you like — the tool reports, for each machine, exactly which words it disagrees with L
+          about, and no table will ever produce a row equal to L.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="dg-text">✓ where M<sub>i</sub> accepts w<sub>j</sub></label>
+            <textarea id="dg-text" rows="6" spellcheck="false">✓ ✗ ✓ ✓ ✗ ✓ ✗ ✗ ✓
+✗ ✗ ✓ ✗ ✗ ✓ ✓ ✗ ✗
+✓ ✗ ✗ ✓ ✓ ✗ ✓ ✓ ✗
+✗ ✓ ✓ ✓ ✗ ✓ ✗ ✗ ✓
+✗ ✓ ✗ ✓ ✗ ✗ ✗ ✓ ✗</textarea>
+          </div>
+          <button class="tool-btn" onclick="runDiagonal()">Diagonalise ▶</button>
+          <button class="tool-btn secondary" onclick="dgPreset()">The slide&rsquo;s table</button>
+          <button class="tool-btn secondary" onclick="dgRandomise()">Randomise</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="dg-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== HALTING ===== -->
+      <h2 id="t10-halt">The halting problem</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write this out exactly</div>
+        <strong>HALT<sub>TM</sub></strong><br>
+        <strong>Input)</strong> An encoding code(M) of a machine, and an input word w ∈ Σ*.<br>
+        <strong>Output)</strong> True if and only if M terminates on input w.<br><br>
+        HALT<sub>TM</sub> = { ⟨code(M), w⟩ : M terminates on input w }
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Theorem: HALT<sub>TM</sub> is undecidable</div>
+        <strong>Step 1.</strong> Suppose there is a sound, complete, terminating algorithm
+        <code>halt</code> with <code>halt(⟨code(M), w⟩)</code> = 1 if M(w) ∈ {0, 1} and 0 if
+        M(w) = ↑.<br>
+        <strong>Step 2.</strong> Build a computable <code>clone</code> taking w to ⟨w, w⟩.<br>
+        <strong>Step 3.</strong> Build M* so that
+        <strong>M*(w) = 1 ⟺ halt(clone(w)) = 0</strong> — accept when halt says &ldquo;does not
+        halt&rdquo;, and otherwise loop forever.<br>
+        <strong>Step 4.</strong> Feed M* its own code:
+        M*(code(M*)) = 1 ⟺ halt(⟨code(M*), code(M*)⟩) = 0 ⟺ M*(code(M*)) = ↑.<br>
+        <strong>Step 5.</strong> M* halts exactly when it does not halt. Contradiction, so
+        <code>halt</code> does not exist. ∎
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">What this does and does not say</div>
+        It does <em>not</em> say halting is hard, or that we have not found the algorithm yet, or that
+        it needs too much time. There is no such algorithm. Any program claiming to decide halting
+        for all inputs is wrong on at least one, and the proof tells you how to construct that
+        input.<br><br>
+        It also does not say you can never tell whether a <em>particular</em> program halts. Plenty of
+        individual cases are easy. What fails is the general procedure, and that is a strictly stronger
+        claim than any statement about any one program.
+      </div>
+
+      <h3 id="t10-hltool">&#128736;&#65039; Deciding halting, honestly</h3>
+
+      <div class="tool" data-run="runHalting">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Three answers, not two</h3>
+        </div>
+        <div class="tool-desc">The simulator can prove a machine halts, can sometimes prove it never
+          will — if it revisits a configuration it must repeat forever — and otherwise has to say it
+          does not know. Raising the cap moves that third category; it never empties it.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="hp-text">the machine</label>
+            <textarea id="hp-text" rows="6" spellcheck="false">start: q0
+accept: acc
+reject: rej
+q0 1 q1 1 >
+q1 1 q0 1 <
+q0 _ acc _ ></textarea>
+          </div>
+          <div class="tool-field">
+            <label for="hp-word">input</label>
+            <input type="text" id="hp-word" value="11" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="hp-cap">step cap</label>
+            <input type="number" id="hp-cap" value="200" min="10" max="5000">
+          </div>
+          <button class="tool-btn" onclick="runHalting()">Attempt ▶</button>
+          <button class="tool-btn secondary" onclick="hpPreset('halts')">Halts</button>
+          <button class="tool-btn secondary" onclick="hpPreset('loops')">Provably loops</button>
+          <button class="tool-btn secondary" onclick="hpPreset('runaway')">Unknown</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="hp-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== THE CATALOGUE ===== -->
+      <h2 id="t10-more">Other undecidable problems</h2>
+
+      <div class="tool" data-run="runCatalogue">
+        <div class="tool-header">
+          <span class="tool-badge">Reference</span>
+          <h3>The catalogue, with the reduction that kills each one</h3>
+        </div>
+        <div class="tool-desc">Each is undecidable, and each is undecidable <em>because</em> deciding
+          it would decide something already known to be impossible.</div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="ud-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== ENTSCHEIDUNGSPROBLEM ===== -->
+      <h2 id="t10-ents">The Entscheidungsproblem</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write this out exactly</div>
+        <strong>The Entscheidungsproblem (the decision problem)</strong><br>
+        <strong>Input)</strong> A predicate formula F.<br>
+        <strong>Output)</strong> True if and only if F is a tautology.<br><br>
+        <strong>Theorem.</strong> The Entscheidungsproblem is undecidable.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The proof, and why it needs predicate logic</div>
+        <strong>Step 1.</strong> Cook&ndash;Levin built, for a machine M and word w, a
+        <em>propositional</em> formula F<sub>M,w</sub> satisfiable exactly when M accepts w within a
+        polynomial number of steps.<br>
+        <strong>Step 2.</strong> That bound is the obstacle. Expressing &ldquo;M will
+        <em>eventually</em> accept&rdquo; propositionally would need an infinite disjunction
+        S<sub>q</sub>,₀ ∨ S<sub>q</sub>,₁ ∨ S<sub>q</sub>,₂ ∨ … , which is not a formula.<br>
+        <strong>Step 3.</strong> With predicate symbols carrying the time as an argument —
+        C<sub>a</sub>(i, t) for &ldquo;cell i holds a at time t&rdquo;, H(i, t) for the head position,
+        S<sub>q</sub>(t) for the state — that infinite disjunction becomes
+        <strong>∃t S<sub>q</sub>(t)</strong>.<br>
+        <strong>Step 4.</strong> So there is a predicate formula F<sub>M,w</sub> satisfiable exactly
+        when M eventually accepts w. That reduces the Accepting problem to the complement of validity,
+        and since A<sub>TM</sub> is undecidable, so is the Entscheidungsproblem. ∎
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Two details worth getting right</div>
+        <strong>Satisfiability and validity are complements, not the same thing.</strong> F is
+        satisfiable exactly when ¬F is <em>not</em> a tautology. The reduction therefore lands on the
+        complement of the Entscheidungsproblem — which the slide says, and which is easy to skate
+        past. Undecidability transfers to complements anyway, since a decider for a language gives one
+        for its complement by swapping the answers.<br><br>
+        <strong>The reduction only needs to be computable, not polynomial.</strong> The slide calls it
+        a polynomial reduction. It is one, but the extra strength is not used: for an undecidability
+        argument all that matters is that the translation is something a machine can carry out. Saying
+        &ldquo;polynomial&rdquo; suggests a complexity result where this is a computability one.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Where this came from</div>
+        Hilbert posed the Entscheidungsproblem in 1928 as a challenge: find a procedure deciding the
+        validity of any statement of first-order logic. Turing&rsquo;s 1936 paper
+        &ldquo;On Computable Numbers, with an Application to the Entscheidungsproblem&rdquo; answered
+        it in the negative — and the machines were invented as a means to that end, not the other way
+        round. The whole apparatus of this course exists because someone needed a precise definition of
+        &ldquo;procedure&rdquo; in order to prove that a particular procedure does not exist.
+      </div>
+
+      <!-- ===== EXAM ===== -->
+      <h2 id="t10-exam">Exam takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">What is most likely to be asked</div>
+        <strong>Define decidable.</strong> Sound, complete, terminating — all three, and know that
+        dropping the third gives recognisable.<br><br>
+        <strong>State the Church&ndash;Turing thesis</strong>, and know it is a thesis, not a theorem:
+        it identifies an informal notion with a formal one, so it cannot be proved.<br><br>
+        <strong>Run the diagonal argument.</strong> Enumerate words, enumerate machines, define L by
+        flipping the diagonal, and show no row can equal it.<br><br>
+        <strong>Prove HALT<sub>TM</sub> undecidable.</strong> Assume halt, clone the input, build M* to
+        do the opposite, feed it its own code.<br><br>
+        <strong>Name the other undecidable problems</strong> and, for each, the reduction: A, R, E, EQ,
+        REGULAR, and the Entscheidungsproblem.<br><br>
+        <strong>Get the direction of a reduction right.</strong> Reduce a known-undecidable problem
+        <em>to</em> the one you are asking about. The hardness travels along the arrow.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>Saying halting is &ldquo;too hard to compute&rdquo;. It is not hard; it is impossible.</li>
+          <li>Reducing the wrong way and concluding nothing.</li>
+          <li>Confusing undecidable with NP-hard. Different axis entirely: NP-hard problems are all
+            decidable.</li>
+          <li>Claiming the counting argument identifies a specific undecidable language. It only shows
+            one exists.</li>
+          <li>Forgetting that undecidable languages can still be <em>recognisable</em>, and that
+            HALT is.</li>
+          <li>Treating the Church&ndash;Turing thesis as something that was proved.</li>
+        </ul>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The one-sentence version</div>
+        A machine is a finite string, so a machine can be handed its own description and asked to
+        predict itself — and any machine that could always answer correctly could be rewired to do
+        the opposite of its own prediction, which nothing can do.
+      </div>
+
+    </section>

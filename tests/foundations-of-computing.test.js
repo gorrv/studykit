@@ -2246,6 +2246,143 @@ module.exports = async function run() {
     }
   }
 
+  /* ---------------- Topic 10 · undecidability ---------------- */
+  {
+    /* ---- enumerating Σ* ---- */
+    {
+      s.same('the first twelve words, shortest first',
+        w.enWords(12),
+        ['', '0', '1', '00', '01', '10', '11', '000', '001', '010', '011', '100']);
+      let bad = 0;
+      for (let i = 0; i < 400; i++) {
+        const a = w.enWordAt(i), b = a.ok ? w.enIndexOf(a.word) : null;
+        if (!a.ok || !b || !b.ok || b.index !== i) bad++;
+      }
+      s.is('index and word are inverse on the first 400', bad, 0);
+      s.is('a three-letter alphabet works too',
+        w.enWords(5, ['a', 'b', 'c']).join(','), ',a,b,c,aa');
+      s.ok('a symbol outside the alphabet is rejected', w.enIndexOf('2').ok === false);
+    }
+
+    /* ---- the encoding, and both of its ambiguities ---- */
+    {
+      const am = w.enAmbiguity();
+      s.ok('the plain #-tuple collides', am.flat.collide,
+        `${am.flat.pair} vs ${am.flat.single}`);
+      s.ok('the slide’s binary code collides too, for the same reason', am.slide.collide,
+        `${am.slide.pair} vs ${am.slide.single}`);
+      s.ok('reserving the separator pattern separates them', am.fixed.collide === false,
+        `${am.fixed.pair} vs ${am.fixed.single}`);
+
+      const inj = w.enCodeIsInjective(3, 2);
+      s.ok('a decent number of tuples was checked', inj.tested > 2000, `${inj.tested}`);
+      s.is('the repaired code is injective on all of them', inj.clashes, 0,
+        inj.witness ? JSON.stringify(inj.witness) : null);
+
+      s.is('the binary code round-trips', w.enBinDecode(w.enBin('0#1').bits).text, '0#1');
+      s.same('and so does a coded tuple',
+        w.enUntupleBin(w.enTupleBin(['0', '1', '0#1']).bits).parts, ['0', '1', '0#1']);
+    }
+
+    /* ---- the universal machine, checked by running both ---- */
+    {
+      const words = ['', '0', '1', '01', '11', '101', '1111', '0110', '10101'];
+      ['parity', 'ones'].forEach(k => {
+        const r = w.enRoundTrip(w.EN_PRESETS[k], words, 400);
+        s.ok(`${k} encodes and decodes`, r.ok, r.error);
+        if (!r.ok) return;
+        s.ok(`${k}: M_u agrees with M on every word`, r.same,
+          JSON.stringify(r.rows.filter(x => !x.agree)));
+        s.ok(`${k}: the machine actually discriminates`,
+          new Set(r.rows.map(x => x.original)).size > 1);
+      });
+      // the parity machine's verdicts must be right, not merely self-consistent
+      const par = w.enRoundTrip(w.EN_PRESETS.parity, words, 400);
+      let wrong = 0;
+      par.rows.forEach(row => {
+        const ones = row.w.split('').filter(c => c === '1').length;
+        const want = ones % 2 === 0 ? 'accept' : 'reject';
+        if (row.original !== want) wrong++;
+      });
+      s.is('and the parity machine really accepts the even-parity words', wrong, 0);
+    }
+
+    /* ---- diagonalisation ---- */
+    {
+      const g = w.dgParse(w.DG_PRESET);
+      s.ok('the slide’s table parses', g.ok, g.error);
+      const d = w.dgDiagonal(g);
+      s.same('L holds exactly the words the slide lists', d.members, [1, 2, 4]);
+      s.same('and L is the diagonal flipped, entry for entry',
+        d.inL, d.diag.map(x => !x));
+      s.same('with the membership list agreeing with it',
+        d.members, d.inL.map((y, i) => (y ? i : -1)).filter(i => i >= 0));
+      s.ok('no row equals L', d.anyRowEqualsL === false);
+      s.ok('and every row differs from L at its own index', d.everyRowDiffersOnDiagonal);
+
+      let bad = 0, n = 0;
+      for (let t = 0; t < 500; t++) {
+        const k = ri(3, 7), rows = [];
+        for (let i = 0; i < k; i++) {
+          let r = '';
+          for (let j = 0; j < k; j++) r += Math.random() < 0.5 ? '1' : '0';
+          rows.push(r);
+        }
+        const gg = w.dgParse(rows.join('\n'));
+        if (!gg.ok) continue;
+        n++;
+        const dd = w.dgDiagonal(gg);
+        if (dd.anyRowEqualsL || !dd.everyRowDiffersOnDiagonal) bad++;
+      }
+      s.ok('a good spread of random tables was tried', n > 400, `${n}`);
+      s.is('no row ever equals L, in any of them', bad, 0);
+
+      s.ok('a ragged table is refused', w.dgParse('11\n111').ok === false);
+      s.ok('and one with fewer columns than rows is refused',
+        w.dgParse('11\n11\n11').ok === false);
+    }
+
+    /* ---- the halting contradiction ---- */
+    {
+      const c = w.hpContradiction();
+      s.is('both assumptions about halt are considered', c.cases.length, 2);
+      s.ok('and both contradict', c.contradictory,
+        JSON.stringify(c.cases.map(x => x.consistent)));
+
+      const cases = [
+        ['halts', 'start: q0\naccept: acc\nq0 1 acc 1 >\nq0 _ acc _ >', '1', 'halts', true],
+        ['loops', 'start: q0\naccept: acc\nq0 1 q1 1 >\nq1 1 q0 1 <\nq0 _ acc _ >', '11',
+          'never halts', true],
+        ['runaway', 'start: q0\naccept: acc\nq0 1 q0 1 >\nq0 _ q0 _ >', '1', 'unknown', false]
+      ];
+      cases.forEach(([label, txt, word, want, proven]) => {
+        const p = w.tmParse(txt);
+        if (!p.ok) { s.ok(`${label} parses`, false, p.error); return; }
+        const a = w.hpAttempt(p.m, word, 300);
+        s.is(`a ${label} machine is reported as "${want}"`, a.answer, want);
+        s.is(`and that answer is ${proven ? '' : 'not '}a proof`, a.proven, proven);
+      });
+    }
+
+    /* ---- the catalogue and the direction of a reduction ---- */
+    {
+      s.ok('every catalogue entry has a reduction attached',
+        w.UD_PROBLEMS.every(p => p.how && p.how.length > 20));
+      s.ok('and each names its input and output',
+        w.UD_PROBLEMS.every(p => p.input && p.output && p.set));
+      s.ok('reducing a known-undecidable problem TO the new one is valid',
+        w.udDirection('HALT', 'B', 'to-is-undecidable').valid);
+      s.ok('the other direction is not',
+        w.udDirection('HALT', 'B', 'from-is-undecidable').valid === false);
+
+      s.ok('sound + complete + terminating is decidable',
+        w.udClassify({ sound: true, complete: true, terminating: true }).decidable);
+      const r = w.udClassify({ sound: true, complete: true, terminating: false });
+      s.ok('sound + complete alone is recognisable but not decidable',
+        r.recognisable && !r.decidable);
+    }
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 2000);

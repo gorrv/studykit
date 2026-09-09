@@ -464,4 +464,45 @@
         </ul>
       </div>
 
+      <h2 id="cr-t10">Topic 10 &middot; the limits of computation</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        <strong>M(w)</strong> = 1 if M accepts, 0 if M rejects, ↑ if M does not halt.<br><br>
+        <strong>Decidable</strong> — some M is <em>sound</em> (M(w) = 1 ⇒ w ∈ L), <em>complete</em>
+        (w ∈ L ⇒ M(w) = 1) and <em>terminating</em> (T<sub>M</sub>(w) &lt; ∞ for all w).<br>
+        <strong>Recognisable</strong> — sound and complete, termination not required.<br><br>
+        <strong>Church–Turing thesis.</strong> Any language effectively computable by a finite process
+        is recognisable by a Turing machine. A <em>thesis</em>, not a theorem.<br><br>
+        <strong>Encodings.</strong> ⟨w₀, …, wₙ⟩ = #w₀#…#wₙ#; a finite function as a tuple of pairs;
+        code(M) = ⟨q<sub>init</sub>, q<sub>acc</sub>, q<sub>rej</sub>, ⟨δ⟩⟩.<br>
+        <strong>Universal machine.</strong> M<sub>u</sub>(⟨code(M), w⟩) = M(w).
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The two proofs</div>
+        <strong>An undecidable language exists.</strong> Enumerate words w₀, w₁, …, and machines
+        M₀, M₁, …. Put L = { w<sub>i</sub> : M<sub>i</sub> does not accept w<sub>i</sub> }. Any
+        M<sub>j</sub> differs from L at w<sub>j</sub>, so no machine has L as its language.<br><br>
+        <strong>HALT<sub>TM</sub> is undecidable.</strong> Assume <code>halt</code>. Build M* which
+        clones its input, asks halt, then loops if halt says "halts" and accepts if it says "does not".
+        Then M*(code(M*)) halts ⟺ it does not halt. ∎<br><br>
+        <strong>Others:</strong> A<sub>TM</sub>, R<sub>TM</sub>, E<sub>TM</sub>, EQ<sub>TM</sub>,
+        REGULAR<sub>TM</sub>, and the <strong>Entscheidungsproblem</strong> (is a predicate formula a
+        tautology?) — the last via Cook–Levin plus ∃t, reducing A<sub>TM</sub> to the complement of
+        validity.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>Saying halting is "too hard". It is impossible, not expensive.</li>
+          <li>Getting the reduction backwards. Reduce the <em>known-undecidable</em> problem TO the
+            new one.</li>
+          <li>Confusing undecidable with NP-hard. NP-hard problems are all decidable.</li>
+          <li>Thinking the counting argument names an undecidable language. It only shows one exists.</li>
+          <li>Forgetting HALT is <em>recognisable</em> — you can confirm "yes" and never "no".</li>
+          <li>Calling Church–Turing a theorem.</li>
+        </ul>
+      </div>
     </section>
