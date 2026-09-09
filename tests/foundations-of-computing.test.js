@@ -1621,9 +1621,354 @@ module.exports = async function run() {
     }
   }
 
+  /* ---------------- Topic 08 · linear and integer programming ----------------
+
+     Two engines solve every linear program here and they share no code: the
+     simplex method walks corner to corner, and lpSolveByVertices enumerates
+     every intersection of constraint boundaries and picks the best feasible
+     one. Neither is trusted; they are made to agree.
+  */
+  {
+    const fr = w.fr, frStr = w.frStr, frCmp = w.frCmp, frNum = w.frNum;
+    const eq = (a, b) => frCmp(a, b) === 0;
+
+    /* ---- exact arithmetic, because everything rests on it ---- */
+    {
+      s.is('1/2 + 1/3 is 5/6', frStr(w.frAdd(fr(1, 2), fr(1, 3))), '5/6');
+      s.is('fractions reduce', frStr(fr(6, 8)), '3/4');
+      s.is('and normalise the sign to the numerator', frStr(fr(1, -2)), '-1/2');
+      s.is('0.5 parses exactly', frStr(w.frParse('0.5')), '1/2');
+      s.is('as does 13/3', frStr(w.frParse('13/3')), '13/3');
+      s.is('13/3 is never shown as a decimal', w.frShow(fr(13, 3)), '13/3');
+      s.is('but 5/2 is', w.frShow(fr(5, 2)), '2.5');
+
+      // A hundred random rationals: a/b + c/d - c/d must return exactly a/b.
+      let drift = 0;
+      for (let i = 0; i < 400; i++) {
+        const a = fr(ri(-40, 40), ri(1, 30)), b = fr(ri(-40, 40), ri(1, 30));
+        if (!eq(w.frSub(w.frAdd(a, b), b), a)) drift++;
+      }
+      s.is('adding and subtracting the same rational is exactly the identity', drift, 0);
+    }
+
+    /* ---- the lecture's program, against the lecture's own figures ---- */
+    const lp = w.lpParse(w.LP_PRESETS.lecture);
+    s.ok('the lecture program parses', lp.ok, lp.error);
+    s.same('with the variables it names', lp.vars, ['x', 'y']);
+    s.is('three constraints written, plus one per variable for x ≥ 0',
+      lp.cons.length, 5);
+
+    {
+      const sol = w.lpSolveByVertices(lp);
+      s.is('the feasible region has five vertices', sol.verts.length, 5);
+      const pts = sol.verts.map(v => `(${frStr(v.x[0])},${frStr(v.x[1])})`).sort();
+      s.same('and they are the ones on the slide',
+        pts, ['(0,0)', '(0,5/2)', '(1,3)', '(4,3/2)', '(5,0)']);
+      s.is('the optimum is at (4, 3/2)', `${frStr(sol.x[0])},${frStr(sol.x[1])}`, '4,3/2');
+      s.is('with C = 25/2', frStr(sol.obj), '25/2');
+      s.ok('and it is unique', sol.multiple === false);
+    }
+
+    /* ---- simplex reproduces the slides, tableau for tableau ---- */
+    {
+      const run = w.spRun(lp);
+      s.ok('simplex terminates optimally', run.ok && run.status === 'optimal');
+      s.is('in three pivots, as the slides show', run.pivots, 3);
+      s.ok('agreeing with vertex enumeration', run.agrees);
+      s.ok('and returning a point that satisfies the constraints', run.pointFeasible);
+      s.ok('with the tableau feasible at every round', run.lostFeasibility === null);
+
+      // Guarded: a broken pivot rule changes how many rounds there are, and
+      // an unguarded run.rounds[3].T[3] then throws, which costs one nameless
+      // "suite crashed" instead of the several named failures below.
+      const show = r => (r && r.T ? r.T.map(row => row.map(w.frShow)) : null);
+      s.is('there are four tableaux to compare', run.rounds.length, 4);
+      s.same('round 1 matches the slide entry for entry', show(run.rounds[1]), [
+        ['4', '0', '1', '-1', '0', '0', '10'],
+        ['-0.5', '1', '0', '0.5', '0', '0', '2.5'],
+        ['2', '0', '0', '-1', '1', '0', '2'],
+        ['-3.5', '0', '0', '1.5', '0', '1', '7.5']]);
+      s.same('and so does round 2', show(run.rounds[2]), [
+        ['0', '0', '1', '1', '-2', '0', '6'],
+        ['0', '1', '0', '0.25', '0.25', '0', '3'],
+        ['1', '0', '0', '-0.5', '0.5', '0', '1'],
+        ['0', '0', '0', '-0.25', '1.75', '1', '11']]);
+
+      // Round 3 does NOT match: the slide prints 2.25 for the s3 coefficient
+      // of the final row. Checked here a second way, by the identity the row
+      // asserts — C = 12.5 - 0.25 s1 - L s3 must hold for all x and y, and
+      // substituting s1 = 15-3x-2y, s3 = 7-x-2y forces L = 5/4 from the x
+      // coefficient and again from the y coefficient.
+      const final = (run.rounds[3] && run.rounds[3].T ? run.rounds[3].T[3] : null) ||
+        [fr(0), fr(0), fr(0), fr(0), fr(0), fr(0), fr(0)];
+      s.is('the final cost row has s1 coefficient 1/4', frStr(final[2]), '1/4');
+      s.is('and s3 coefficient 5/4, where the slide prints 2.25', frStr(final[4]), '5/4');
+      const L = w.frSub(fr(2), fr(3, 4));                    // from matching x
+      const L2 = w.frDiv(w.frSub(fr(3), fr(1, 2)), fr(2));   // from matching y
+      s.ok('both coefficient matches give the same value', eq(L, L2));
+      s.ok('and it is what the tableau produced', eq(L, final[4]), frStr(L));
+      s.is('the constant then works out to zero',
+        frStr(w.frSub(w.frSub(fr(25, 2), w.frMul(fr(1, 4), fr(15))), w.frMul(L, fr(7)))), '0');
+      s.is('and the reported optimum is unaffected', frStr(run.cost), '25/2');
+    }
+
+    /* ---- step 4 as printed breaks on a degenerate program ---- */
+    {
+      const dg = w.lpParse(w.LP_PRESETS.degenerate);
+      const truth = w.lpSolveByVertices(dg);
+      s.is('the degenerate program has optimum 10 at (2,2)',
+        `${frStr(truth.obj)}@${frStr(truth.x[0])},${frStr(truth.x[1])}`, '10@2,2');
+
+      const std = w.spRun(dg, { rule: 'standard' });
+      s.ok('the standard rule agrees with vertex enumeration', std.agrees);
+      s.ok('keeping every right-hand side non-negative', std.lostFeasibility === null);
+
+      const deck = w.spRun(dg, { rule: 'deck' });
+      s.ok('the slide\'s both-positive rule skips a zero-quotient row',
+        deck.rounds.some(r => r.degenerateSkipped));
+      s.ok('after which the tableau is no longer feasible', deck.lostFeasibility !== null);
+      s.ok('and the point it finally reports breaks a constraint',
+        w.lpCheck(dg, deck.x).feasible === false);
+      s.ok('while claiming a value ABOVE the true optimum, which is the dangerous part',
+        frCmp(deck.cost, truth.obj) > 0, `${frStr(deck.cost)} vs ${frStr(truth.obj)}`);
+    }
+
+    /* ---- and it cannot start at all on a ≥ constraint ---- */
+    {
+      const en = w.lpParse(w.LP_PRESETS.energy);
+      s.ok('the energy program parses', en.ok, en.error);
+      const built = w.spBuild(en);
+      s.ok('the lecture tableau refuses to be built on it', built.ok === false);
+      s.ok('naming the phase-one problem', built.needsPhaseOne === true);
+      const tp = w.spTwoPhase(en);
+      s.ok('the phase-one method solves it', tp.ok && tp.status === 'optimal');
+      s.ok('using an artificial variable', tp.artificials > 0);
+      s.ok('and returning a feasible point', tp.feasible);
+      s.ok('that agrees with vertex enumeration',
+        eq(tp.obj, w.lpSolveByVertices(en).obj), frStr(tp.obj));
+    }
+
+    /* ---- the three outcomes ---- */
+    {
+      s.is('an empty region is reported as infeasible',
+        w.lpSolveByVertices(w.lpParse(w.LP_PRESETS.empty)).status, 'infeasible');
+      s.is('an improving unbounded direction is reported as unbounded',
+        w.lpSolveByVertices(w.lpParse(w.LP_PRESETS.unbounded)).status, 'unbounded');
+      const many = w.lpSolveByVertices(w.lpParse(w.LP_PRESETS.many));
+      s.ok('a contour parallel to an edge gives multiple optima', many.multiple);
+      s.is('two vertices tie', many.ties.length, 2);
+      s.ok('a strict inequality is rejected rather than silently relaxed',
+        w.lpParse('max x\nx < 1').ok === false);
+    }
+
+    /* ---- Klee and Minty: the prediction is computed, not fitted ---- */
+    for (let n = 0; n <= 5; n++) {
+      const km = w.spKleeMinty(n);
+      const run = w.spRun(w.lpParse(km.text), { cap: 2000, check: false });
+      s.is(`Klee–Minty n=${n} takes 2^${n + 1}-1 = ${km.predicted} pivots`,
+        run.pivots, km.predicted);
+      s.is(`and reaches 5^${n + 1} = ${km.optimum}`, frNum(run.cost), km.optimum);
+    }
+
+    /* ---- branch and bound ---- */
+    {
+      const bb = w.ipBranchBound(lp);
+      s.is('branch and bound explores the slide\'s five nodes', bb.explored, 5);
+      s.is('every branch excluded the point that caused it', bb.stuck, 0);
+      s.ok('and nothing hit the node cap',
+        bb.nodes.every(n => n.status !== 'capped') && bb.explored < 200);
+      s.is('and returns (3,2) with C = 12',
+        `${frStr(bb.x[0])},${frStr(bb.x[1])}@${frStr(bb.obj)}`, '3,2@12');
+      s.is('no node disagreed between the two relaxation engines', bb.disagreements.length, 0);
+
+      const left = bb.nodes.find(n => n.label === 'y <= 1') || { x: [fr(0)], obj: fr(0) };
+      s.is('the y ≤ 1 child has x = 13/3, not the slide\'s 4.3', frStr(left.x[0]), '13/3');
+      s.is('and objective 35/3, not 11.6', frStr(left.obj), '35/3');
+      const right = bb.nodes.find(n => n.label === 'y >= 2');
+      s.ok('the y ≥ 2 child exists', !!right);
+      s.ok('and is exactly the case the lecture tableau cannot start on',
+        !!right && w.spBuild(right.lp).needsPhaseOne === true);
+
+      const brute = w.ipBrute(lp);
+      s.ok('brute force over the lattice agrees', eq(brute.obj, bb.obj));
+      s.is('having found 16 feasible integer points', brute.feasible, 16);
+
+      const bounded = w.ipBranchBound(lp, { bound: true });
+      s.ok('adding the bounding step does not change the answer', eq(bounded.obj, bb.obj));
+      s.ok('and it does prune', bounded.pruned > 0);
+
+      // Random programs: branch and bound must equal brute force every time.
+      let checked = 0, bad = 0, first = null;
+      for (let t = 0; t < 120; t++) {
+        const text = `max ${ri(1, 6)}x + ${ri(1, 6)}y\n` +
+          `${ri(1, 4)}x + ${ri(1, 4)}y <= ${ri(6, 22)}\n` +
+          `${ri(1, 4)}x + ${ri(1, 4)}y <= ${ri(6, 22)}`;
+        const p = w.lpParse(text);
+        if (!p.ok) continue;
+        const a = w.ipBranchBound(p, { bound: true, cap: 200 });
+        const b = w.ipBrute(p);
+        if (!a.ok || !b.ok || !a.obj || !b.obj) continue;
+        checked++;
+        if (a.stuck) { bad++; if (!first) first = text + ' (branch made no progress)'; }
+        if (!eq(a.obj, b.obj)) { bad++; if (!first) first = text; }
+        if (w.lpCheck(p, a.x).feasible === false) { bad++; if (!first) first = text + ' (infeasible)'; }
+        if (a.x.some(v => !w.frInt(v))) { bad++; if (!first) first = text + ' (not integral)'; }
+      }
+      s.ok('enough random programs were checked', checked > 80, `${checked}`);
+      s.is('branch and bound matches brute force on every one, feasibly and integrally',
+        bad, 0, first);
+    }
+
+    /* ---- SAT ≤p IP, decided twice by unrelated means ---- */
+    {
+      const cls = [['P', 'Q', '~R'], ['~P', 'Q', 'R'], ['~Q', 'S']];
+      const red = w.ipFromCnf(cls);
+      s.is('a clause becomes a ≥ 1 constraint over its literals\' variables',
+        red.clauseRows[0], 'xP + xQ + xNR >= 1');
+      s.is('and each variable gets two constraints', red.pairRows.length, 8);
+
+      const chk = w.ipCheckReduction(cls);
+      s.ok('the Topic 5 solver was actually reached', chk.satSolvable !== null, chk.satError);
+      s.ok('and both routes agree on the slide example', chk.agree === true);
+
+      const unsat = w.ipCheckReduction([['P'], ['~P']]);
+      s.ok('an unsatisfiable formula gives an unsolvable integer program',
+        unsat.agree === true && unsat.ipSolvable === false);
+
+      // Which half of the pairing constraint is load-bearing? Build the
+      // reduction with and without the ">= 1" row and test the equivalence
+      // both ways, against brute-force satisfiability. The claim in the
+      // notes is that only "<= 1" is needed for correctness.
+      {
+        const solvable = prog => {
+          const pick = new Array(prog.n);
+          let found = false;
+          (function rec(i) {
+            if (found) return;
+            if (i === prog.n) {
+              if (w.lpCheck(prog, pick.map(v => fr(v))).feasible) found = true;
+              return;
+            }
+            for (let b = 0; b <= 2 && !found; b++) { pick[i] = b; rec(i + 1); }
+          })(0);
+          return found;
+        };
+        const build = (cl, vs, withGe) => {
+          const col = l => (l[0] === '~' ? 'xN' + l.slice(1) : 'x' + l);
+          const rows = ['max ' + vs.map(v => 'x' + v).join(' + ')];
+          cl.forEach(c => rows.push(c.map(col).join(' + ') + ' >= 1'));
+          vs.forEach(v => {
+            rows.push('x' + v + ' + xN' + v + ' <= 1');
+            if (withGe) rows.push('x' + v + ' + xN' + v + ' >= 1');
+          });
+          return w.lpParse(rows.join('\n'));
+        };
+        const satBrute = (cl, vs) => {
+          for (let mask = 0; mask < (1 << vs.length); mask++) {
+            const a = {};
+            vs.forEach((v, i) => { a[v] = !!(mask & (1 << i)); });
+            if (cl.every(c => c.some(l => (l[0] === '~' ? !a[l.slice(1)] : a[l])))) return true;
+          }
+          return false;
+        };
+        // Two propositional variables is enough to produce plenty of
+        // unsatisfiable formulas, and keeps the 3^(2k) enumeration cheap.
+        let seen = 0, unsat = 0, withBad = 0, withoutBad = 0, bothOnesOk = 0;
+        for (let t = 0; t < 200; t++) {
+          const vs = ['P', 'Q'].slice(0, ri(1, 2));
+          const lits = [];
+          vs.forEach(v => { lits.push(v, '~' + v); });
+          const cl = [];
+          for (let i = 0; i < ri(1, 6); i++) {
+            const pool = lits.slice(), c = [];
+            const width = ri(1, Math.min(3, pool.length));
+            for (let j = 0; j < width; j++) c.push(pool.splice(ri(0, pool.length - 1), 1)[0]);
+            cl.push(c);
+          }
+          const truth = satBrute(cl, vs);
+          seen++; if (!truth) unsat++;
+          if (solvable(build(cl, vs, true)) !== truth) withBad++;
+          if (solvable(build(cl, vs, false)) !== truth) withoutBad++;
+          // and with NEITHER half, every formula becomes solvable by setting
+          // both variables of every pair to 1 — which is what "<= 1" prevents
+          if (!truth) {
+            const rows = ['max ' + vs.map(v => 'x' + v).join(' + ')];
+            cl.forEach(c => rows.push(c.map(l => (l[0] === '~' ? 'xN' + l.slice(1) : 'x' + l))
+              .join(' + ') + ' >= 1'));
+            if (solvable(w.lpParse(rows.join('\n')))) bothOnesOk++;
+          }
+        }
+        s.ok('the pairing check saw unsatisfiable formulas too', unsat > 8, `${unsat} of ${seen}`);
+        s.ok('and satisfiable ones', seen - unsat > 8, `${seen - unsat} of ${seen}`);
+        s.is('the reduction as stated is correct on all of them', withBad, 0);
+        s.is('and stays correct with the ">= 1" half removed', withoutBad, 0);
+        s.is('while removing "<= 1" makes every unsatisfiable formula solvable',
+          bothOnesOk, unsat);
+      }
+
+      let n = 0, disagree = 0, undecided = 0, sats = 0, first = null;
+      for (let t = 0; t < 400; t++) {
+        const vs = ['P', 'Q', 'R', 'S'].slice(0, ri(1, 4));
+        const lits = [];
+        vs.forEach(v => { lits.push(v, '~' + v); });
+        const cl = [];
+        for (let i = 0; i < ri(1, 8); i++) {
+          const pool = lits.slice(), c = [];
+          const width = ri(1, Math.min(3, pool.length));
+          for (let j = 0; j < width; j++) c.push(pool.splice(ri(0, pool.length - 1), 1)[0]);
+          cl.push(c);
+        }
+        const r = w.ipCheckReduction(cl, vs);
+        if (!r.ok) continue;
+        n++;
+        if (r.satSolvable) sats++;
+        if (r.agree === null) { undecided++; if (!first) first = JSON.stringify(cl); }
+        else if (r.agree === false) { disagree++; if (!first) first = JSON.stringify(cl); }
+      }
+      s.ok('a healthy sample of formulas was decided', n > 300, `${n}`);
+      s.ok('containing both satisfiable and unsatisfiable ones',
+        sats > 40 && n - sats > 40, `${sats} satisfiable of ${n}`);
+      s.is('none was left undecided, which would make the check vacuous', undecided, 0, first);
+      s.is('"F is satisfiable" matches "IP_F has an integer solution" every time',
+        disagree, 0, first);
+    }
+
+    /* ---- the assignment example ---- */
+    {
+      const spec = w.IP_MATCHING_PRESET;
+      const built = w.ipMatching(spec);
+      s.ok('the assignment program builds', built.ok, built.error);
+      s.is('with one variable per edge', built.vars.length, spec.edges.length);
+
+      const brute = w.ipMatchingBrute(spec);
+      s.ok('brute force over 0/1 assignments finds one', brute.ok && brute.best);
+      const bb = w.ipBranchBound(w.lpParse(built.text), { bound: true, cap: 600 });
+      s.is('and branch and bound matches it', frNum(bb.obj), brute.best.count);
+      s.ok('every variable of the answer is 0 or 1',
+        bb.x.every(v => frNum(v) === 0 || frNum(v) === 1));
+      s.is('and the relaxation was integral, so no branching was needed', bb.explored, 1);
+
+      // capacities and requirements, checked directly rather than trusted
+      const load = {}, cover = {};
+      w.lpParse(built.text).vars.forEach((nm, i) => {
+        if (frNum(bb.x[i]) <= 0) return;
+        const [, wk, tk] = nm.split('_');
+        load[wk] = (load[wk] || 0) + 1;
+        cover[tk] = (cover[tk] || 0) + 1;
+      });
+      s.ok('no worker is over capacity',
+        spec.workers.every(v => (load[v.id] || 0) <= v.capacity), JSON.stringify(load));
+      s.ok('and every task requirement is met',
+        spec.tasks.every(t => (cover[t.id] || 0) >= t.requires), JSON.stringify(cover));
+    }
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 2000);
 
   return s;
 };
+
+/** A small integer in [lo, hi], for the randomised checks above. */
+function ri(lo, hi) { return lo + Math.floor(Math.random() * (hi - lo + 1)); }

@@ -327,4 +327,88 @@
           <li>Confusing 2OPT&rsquo;s local optimum with the global one.</li>
         </ul>
       </div>
+
+      <h2 id="cr-t8">Topic 08 &middot; linear &amp; integer programming</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        <strong>LP</strong> — Input: constraints A<strong>x</strong> ≤ <strong>b</strong> and a linear
+        f : ℝ<sup>n</sup> → ℝ. Output: <strong>x</strong> ∈ (ℝ<sup>≥0</sup>)<sup>n</sup> satisfying
+        them with f(<strong>x</strong>) maximal.<br>
+        <strong>IP</strong> — identical, but <strong>x</strong> ∈ (ℤ<sup>≥0</sup>)<sup>n</sup>.<br><br>
+        <strong>Feasible region</strong> R = { <strong>x</strong> ∈ ℝ<sup>n</sup> : <strong>x</strong>
+        is a solution }.<br>
+        <strong>Optimal set</strong> { <strong>x</strong> ∈ R : ∀<strong>y</strong> ∈ R,
+        f(<strong>x</strong>) ≥ f(<strong>y</strong>) } ⊆ R.<br><br>
+        Non-negativity is <em>implicit</em> in both. Inequalities are non-strict, or the optimum need
+        not exist.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Simplex, in seven lines</div>
+        <strong>1</strong> Slack form: a·x ≤ b becomes a·x + s = b, so s = b − a·x, with s ≥ 0 iff the
+        constraint holds and s = 0 iff it is tight. Cost row holds the objective
+        <em>negated</em>.<br>
+        <strong>2</strong> Pivot column = most negative entry in the final row.<br>
+        <strong>3</strong> Quotients = right-hand side ÷ pivot-column entry.<br>
+        <strong>4</strong> Pivot row = smallest quotient with a <strong>positive denominator</strong>
+        and a <strong>non-negative numerator</strong>.<br>
+        <strong>5</strong> R<sub>piv</sub> ← (1/pivot)·R<sub>piv</sub>; every other
+        R<sub>i</sub> ← R<sub>i</sub> − (R<sub>i</sub>-entry / pivot)·R<sub>piv</sub>.<br>
+        <strong>6</strong> Repeat until no negatives remain in the final row.<br>
+        <strong>7</strong> Read off: a column that is all zeros bar a single 1 is basic and takes that
+        row's right-hand side; everything else is 0.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Facts to quote</div>
+        The optimum of a linear objective over a convex region is attained at a <strong>vertex</strong>
+        — which is why checking corners works at all, and why there are three possible outcomes: a
+        unique solution, infinitely many (contour parallel to an edge), or none (region empty, or
+        unbounded in an improving direction).<br><br>
+        <strong>Klee–Minty (1972)</strong> — simplex is exponential in the worst case; their program
+        takes 2<sup>n+1</sup> − 1 pivots on n+1 variables.<br>
+        <strong>Khachiyan (1979)</strong> — LP is solvable in polynomial time, by the ellipsoid
+        method. Not a statement about simplex.<br>
+        <strong>IP is NP-hard</strong> — by SAT ≤<sub>p</sub> IP.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">SAT ≤<sub>p</sub> IP, in one line</div>
+        Two variables x<sub>P</sub>, x<sub>¬P</sub> per propositional variable. Each clause becomes
+        <strong>sum of its literals' variables ≥ 1</strong>. Each variable gets both
+        <strong>x<sub>P</sub> + x<sub>¬P</sub> ≤ 1</strong> and <strong>≥ 1</strong>, which force the
+        sum to 1 and so — over the <em>integers</em> — force exactly one of them to be 1. Drop
+        integrality and x<sub>P</sub> = x<sub>¬P</sub> = ½ satisfies everything, which is the whole
+        difference between LP and IP in one fraction.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">BRANCH-AND-BOUND</div>
+        Solve the relaxation. Integral ⟹ done. Otherwise pick a fractional x<sub>i</sub> = a<sub>i</sub>
+        and recurse on LP ∪ {x<sub>i</sub> ≤ ⌊a<sub>i</sub>⌋} and LP ∪ {x<sub>i</sub> ≥ ⌈a<sub>i</sub>⌉},
+        returning whichever child maximises f. The branches are disjoint and lose no integer point.
+        <br><br>
+        The relaxation's optimum is an <strong>upper bound</strong> on the integer optimum — that is
+        what the <em>bound</em> in the name is for: prune any node that cannot beat the best integer
+        solution so far.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li>Forgetting x ≥ 0. It supplies two edges of the region and usually two of the vertices.</li>
+          <li>Not negating the objective in the cost row.</li>
+          <li>Sign errors converting 2y − x ≤ 5 — the row is (−1, 2), not (1, 2).</li>
+          <li>Requiring the quotient's numerator to be strictly positive. Zero is allowed, and skipping
+            it can leave the tableau infeasible.</li>
+          <li>Rounding a relaxation's answer to get the integer one. It is an upper bound; the integer
+            optimum is often at a different point entirely.</li>
+          <li>Saying integer programming is NP-<em>complete</em> when the reduction gives
+            NP-<em>hard</em>.</li>
+          <li>Claiming Khachiyan made simplex polynomial. Different algorithm.</li>
+          <li>Starting the tableau on a program with a ≥ constraint. There is no feasible corner at the
+            origin; that needs a phase-one method.</li>
+        </ul>
+      </div>
     </section>

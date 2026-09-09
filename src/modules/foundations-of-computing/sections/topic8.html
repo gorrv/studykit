@@ -1,0 +1,505 @@
+<section id="topic8" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 08 · Linear Programming</div>
+        <h1>Optimising Under Constraint</h1>
+        <div class="topic-subtitle">feasible regions, the simplex method, and what integrality costs</div>
+      </div>
+
+      <p>Topic 7 took an optimisation problem that was hopeless and settled for a guaranteed-good
+      answer. This topic takes a class of optimisation problems that are <em>not</em> hopeless — you
+      can have the exact optimum, in polynomial time — and then shows how little it takes to destroy
+      that. Add three letters to the problem statement, <strong>x ∈ ℤ</strong>, and a problem in
+      <strong>P</strong> becomes <strong>NP</strong>-hard.</p>
+
+      <!-- ===== LINEAR PROGRAMMING ===== -->
+      <h2 id="t8-lp">What a linear program is</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write these out exactly</div>
+        <strong>Linear objective function</strong> — the quantity to be maximised or minimised.<br>
+        <strong>Linear constraints</strong> — a set of linear inequalities restricting the feasible
+        solutions.<br><br>
+        <strong>LP</strong><br>
+        <strong>Input)</strong> A set of linear constraints A<strong>x</strong> ≤ <strong>b</strong>,
+        and a linear objective function f : ℝ<sup>n</sup> → ℝ.<br>
+        <strong>Output)</strong> A solution <strong>x</strong> ∈ (ℝ<sup>≥0</sup>)<sup>n</sup> such that
+        (i) <strong>x</strong> satisfies A<strong>x</strong> ≤ <strong>b</strong> and (ii)
+        f(<strong>x</strong>) is maximal.<br><br>
+        <strong>Feasible region</strong> R = { <strong>x</strong> ∈ ℝ<sup>n</sup> : <strong>x</strong>
+        is a solution }.<br>
+        <strong>Optimal solutions</strong> { <strong>x</strong> ∈ R : ∀<strong>y</strong> ∈ R
+        ( f(<strong>x</strong>) ≥ f(<strong>y</strong>) ) } ⊆ R.
+      </div>
+
+      <p>Two details in that definition earn their place. The output is drawn from
+      (ℝ<sup>≥0</sup>)<sup>n</sup>, so <strong>every variable is implicitly non-negative</strong> —
+      x ≥ 0 and y ≥ 0 are constraints you never have to write and must never forget, because they are
+      two of the edges of the region below. And the inequalities are <strong>non-strict</strong>. That
+      is not decoration: maximise x subject to x &lt; 1 has no solution at all, because the region is
+      not closed and the supremum is never attained.</p>
+
+      <div class="callout tip">
+        <div class="callout-label">Matrix form</div>
+        The constraints 3x + 2y ≤ 15, 2y − x ≤ 5, x + 2y ≤ 7 are written more compactly by stacking
+        the coefficients into a matrix and the right-hand sides into a vector:<br><br>
+        A = [ [3, 2], [−1, 2], [1, 2] ] &nbsp;&nbsp; <strong>b</strong> = (15, 5, 7)
+        &nbsp;&nbsp; giving &nbsp; A<strong>x</strong> ≤ <strong>b</strong>.<br><br>
+        Watch the sign: <em>2y − x</em> becomes the row (−1, 2), not (1, 2). Rows are in the order the
+        constraints are listed, and the columns in the order the variables are.
+      </div>
+
+      <p>Because the constraints are linear, the region they cut out is a convex polytope, and because
+      the objective is linear its contours are parallel straight lines. Slide a line across a convex
+      polygon and the last point it touches is a <strong>corner</strong>. That is the whole geometric
+      content of the topic, and every algorithm below is a different way of finding the right corner
+      without visiting all of them.</p>
+
+      <h3 id="t8-lrtool">&#128736;&#65039; The feasible region and its vertices</h3>
+
+      <div class="tool" data-run="runFeasible">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Draw the region, list every corner</h3>
+        </div>
+        <div class="tool-desc">Solved by brute force — every way of choosing n constraints, solved as
+          a system of equations, kept if the result satisfies the others. Exact fractions throughout,
+          so an answer of 13/3 is reported as 13/3. Non-negativity is added for you.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="lr-text">the program</label>
+            <textarea id="lr-text" rows="5" spellcheck="false">max 2x + 3y
+3x + 2y &lt;= 15
+2y - x &lt;= 5
+x + 2y &lt;= 7</textarea>
+          </div>
+          <button class="tool-btn" onclick="runFeasible()">Solve ▶</button>
+          <button class="tool-btn secondary" onclick="lpPreset('lecture')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="lpPreset('many')">Infinitely many optima</button>
+          <button class="tool-btn secondary" onclick="lpPreset('empty')">No solution</button>
+          <button class="tool-btn secondary" onclick="lpPreset('unbounded')">Unbounded</button>
+          <button class="tool-btn secondary" onclick="lpPreset('energy')">Energy mix</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="lr-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Three outcomes, and the slide says so</div>
+        A linear program has <strong>a unique solution</strong>, <strong>infinitely many</strong>, or
+        <strong>none</strong>. Infinitely many happens when the objective contour is parallel to an
+        edge, so two adjacent vertices tie and every point between them is optimal too. None happens
+        two quite different ways: the region can be <em>empty</em>, or it can be <em>unbounded</em> in
+        a direction that improves the objective. Both presets above are worth running, because the
+        exam answer &ldquo;no solution&rdquo; is only half a mark.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Modelling: the energy mix</div>
+        The lecture's worked example is worth doing yourself, because building the program is the part
+        that gets examined. Five sources, with CO₂ in tonne/GWh, cost in GBP/kWh and capacity in GW:
+        <table style="margin:8px 0;">
+          <tr><th></th><th>Gas</th><th>Coal</th><th>Solar</th><th>Wind</th><th>Nuclear</th></tr>
+          <tr><th>CO₂</th><td>500</td><td>1000</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><th>cost</th><td>40</td><td>80</td><td>22</td><td>22</td><td>120</td></tr>
+          <tr><th>capacity</th><td>32</td><td>8</td><td>13.5</td><td>24</td><td>10</td></tr>
+        </table>
+        <strong>1)</strong> A variable per source: G, C, S, W, N. &nbsp;
+        <strong>2)</strong> Capacity: G ≤ 32, C ≤ 8, S ≤ 13.5, W ≤ 24, N ≤ 10. &nbsp;
+        <strong>3)</strong> Meet demand: G + C + S + W + N ≥ demand. &nbsp;
+        <strong>4)</strong> Emissions: 0.5G + 1C ≤ target. &nbsp;
+        <strong>5)</strong> Minimise 40G + 80C + 22S + 22W + 120N.<br><br>
+        Two things to notice. The emissions row uses 0.5 and 1 rather than 500 and 1000 — the numbers
+        have been divided through by 1000, which is legitimate because scaling both sides of an
+        inequality by a positive constant changes nothing. And the units in the table do not actually
+        line up: capacity is a power (GW), cost is per unit of energy (per kWh), emissions are per GWh.
+        The program is consistent only if you read every variable as being in the same unit throughout,
+        which the slide never states. Say so if you are asked to critique the model.
+      </div>
+
+      <!-- ===== SIMPLEX ===== -->
+      <h2 id="t8-simplex">The simplex method</h2>
+
+      <p>Dantzig, 1946–47, out of operations research for the US Air Force; named after the
+      <em>simplex</em>, the n-dimensional analogue of a triangle, after the shape of the feasible
+      region. The idea is to start at a corner and walk to a neighbouring corner that improves the
+      objective, repeating until no neighbour is better — at which point convexity guarantees you are
+      at the global optimum, not merely a local one.</p>
+
+      <div class="callout exam">
+        <div class="callout-label">Slack form</div>
+        A <strong>slack variable</strong> turns each inequality into an equation, by naming exactly how
+        much room is left in that constraint:<br><br>
+        3x + 2y ≤ 15 &nbsp;⟹&nbsp; 3x + 2y + s₁ = 15 &nbsp;⟹&nbsp; s₁ = 15 − 3x − 2y<br>
+        2y − x ≤ 5 &nbsp;⟹&nbsp; −x + 2y + s₂ = 5 &nbsp;⟹&nbsp; s₂ = 5 + x − 2y<br>
+        x + 2y ≤ 7 &nbsp;⟹&nbsp; x + 2y + s₃ = 7 &nbsp;⟹&nbsp; s₃ = 7 − x − 2y<br><br>
+        x and y are the <strong>independent</strong> variables; s₁, s₂, s₃ are
+        <strong>dependent</strong> — pick the first two and the rest follow. The constraint is
+        satisfied exactly when its slack is ≥ 0, so <em>a slack of zero means that constraint is
+        tight</em>, which is the same as saying you are sitting on that edge. The objective becomes one
+        more dependent variable, the <strong>cost</strong>: C = 2x + 3y.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The seven steps</div>
+        <strong>1)</strong> Build the initial tableau from the slack form plus the cost equation, the
+        cost row written with the objective coefficients <em>negated</em> (because it is stored as
+        C − 2x − 3y = 0).<br>
+        <strong>2)</strong> Pivot column: the most negative coefficient in the final row.<br>
+        <strong>3)</strong> Row quotients: right-hand side ÷ the entry in the pivot column.<br>
+        <strong>4)</strong> Pivot row: the smallest quotient with a positive denominator.<br>
+        <strong>5)</strong> Pivot value = the entry in both. Scale the pivot row by 1/pivot, then
+        subtract multiples of it from every other row to clear the column.<br>
+        <strong>6)</strong> Repeat until no negative coefficients remain in the final row.<br>
+        <strong>7)</strong> Read off: a variable whose column is all zeros bar a single 1 takes that
+        row's right-hand side; every other variable is 0.
+      </div>
+
+      <p>Step 2 is doing something specific: a negative entry in the cost row means increasing that
+      variable would <em>raise</em> C, so a row with no negative entries left means nothing can be
+      improved. Step 4 is asking how far the entering variable can grow before some slack hits zero —
+      the first constraint to become tight is the one you run into, and its row is the pivot.</p>
+
+      <h3 id="t8-sxtool">&#128736;&#65039; Every tableau, one round at a time</h3>
+
+      <div class="tool" data-run="runSimplex">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Run the simplex method</h3>
+        </div>
+        <div class="tool-desc">Every round shows the pivot column, the quotients including the ones
+          that were skipped and why, the row operations, and what the tableau reads off as. The answer
+          is checked against enumerating the vertices, which shares no code with any of this. Use ⏮ ◀ ▶
+          to step through the rounds.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="sx-text">the program</label>
+            <textarea id="sx-text" rows="5" spellcheck="false">max 2x + 3y
+3x + 2y &lt;= 15
+2y - x &lt;= 5
+x + 2y &lt;= 7</textarea>
+          </div>
+          <div class="tool-field">
+            <label for="sx-rule">step 4 rule</label>
+            <select id="sx-rule">
+              <option value="standard">numerator ≥ 0 (standard)</option>
+              <option value="deck">numerator &gt; 0 (the slide)</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runSimplex()">Run ▶</button>
+          <button class="tool-btn secondary" onclick="spPreset('lecture')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="spPreset('degenerate')">Degenerate</button>
+          <button class="tool-btn secondary" onclick="spPreset('energy')">Energy mix</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="sx-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The final tableau on the slide has an arithmetic slip</div>
+        Rounds 1 and 2 in the tool reproduce the lecture's tableaux entry for entry. Round 3 does not:
+        the slide's last row reads <code>0.25s₁ + 2.25s₃ + C = 12.5</code>, and the s₃ coefficient
+        should be <strong>1.25</strong>.<br><br>
+        You can check it without doing the pivot at all. The final cost row is an identity in x and y,
+        so substitute the slack definitions into C = 12.5 − 0.25s₁ − λs₃ and match coefficients:
+        s₁ = 15 − 3x − 2y and s₃ = 7 − x − 2y give a coefficient of x of 0.75 + λ, which must equal 2,
+        so λ = 1.25; the y coefficient 0.5 + 2λ = 3 agrees, and the constant
+        12.5 − 3.75 − 7(1.25) = 0 as it must.<br><br>
+        The reported answer — x = 4, y = 1.5, C = 12.5 — is unaffected, and so is everything built on
+        it later. Also worth noting: the round 2 row operations on the slide are written
+        <code>R₂ ← (R₃ − …R₃)</code> where they mean R₂, and round 3 divides by 2 where the pivot value
+        is 1. The tool prints the operations it actually performed.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Step 4 as stated is wrong on degenerate problems</div>
+        The slide asks for the smallest quotient where <em>both the numerator and denominator are
+        positive</em>. The standard rule asks for a numerator that is <strong>non-negative</strong>,
+        and the difference is exactly a right-hand side of zero.<br><br>
+        Run the <strong>Degenerate</strong> preset both ways. On <code>max 3x + 2y</code> subject to
+        <code>x + y ≤ 4</code>, <code>x − y ≤ 0</code>, <code>x ≤ 3</code>, the second row has a
+        right-hand side of 0, so its quotient is 0 — the smallest there is. The slide's rule skips it
+        as "not positive" and pivots elsewhere; the next tableau has a negative right-hand side, which
+        means it is describing a corner <em>outside</em> the region, and the method finishes by
+        reporting x = 3, y = 1 with C = 11. That point breaks x − y ≤ 0, and the true optimum is
+        x = y = 2 with C = 10. An answer that is both infeasible and larger than the optimum is the
+        worst kind of wrong, because nothing about it looks suspicious.<br><br>
+        A related gap: with degenerate pivots the method can also <em>cycle</em>, returning to a
+        tableau it has already seen. Bland's rule — always take the lowest-indexed eligible column and
+        row — is the standard cure. It is slower, and it is what the phase-one solver in this module
+        uses, precisely because nobody is watching that one run.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">And it cannot start on the lecture's own energy example</div>
+        The tableau begins at the corner where every variable is zero and every slack holds its whole
+        constraint. That is a real corner only if every right-hand side is non-negative once the
+        constraint is written as ≤. The energy program's <code>G + C + S + W + N ≥ demand</code> becomes
+        a ≤ row with a negative right-hand side, so setting everything to zero breaks it, and there is
+        no starting corner to walk from.<br><br>
+        The fix is a <strong>phase-one</strong> method: add an artificial variable to each awkward row,
+        minimise the sum of the artificials — a program that <em>does</em> have an obvious starting
+        corner — and if you can drive them all to zero you have found a genuine corner to begin the
+        real objective from. If you cannot, the region is empty. The slides never mention this, and the
+        tool falls back to it and says so. It matters again in the next section, because branching adds
+        <code>y ≥ 2</code>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Two theorems to quote</div>
+        <strong>Klee–Minty (1972).</strong> The worst-case running time of the simplex method is
+        <strong>exponential</strong>. Their program is a cube distorted so that the
+        most-negative-coefficient rule walks every one of its 2<sup>n+1</sup> corners.<br><br>
+        <strong>Khachiyan (1979).</strong> Linear programming is solvable in <strong>polynomial
+        time</strong> — by the ellipsoid method, not by simplex.<br><br>
+        These do not conflict. Klee–Minty is about one algorithm; Khachiyan is about the problem. In
+        practice simplex is the one people run, because its bad cases are contrived and its typical
+        behaviour is excellent — the reverse of the usual situation, where the proof is comforting and
+        the practice is not.
+      </div>
+
+      <h3 id="t8-kmtool">&#128736;&#65039; Klee and Minty's cube</h3>
+
+      <div class="tool" data-run="runKlee">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Watch the pivot count double</h3>
+        </div>
+        <div class="tool-desc">Builds the lecture's program for each n and runs the real simplex method
+          on it, counting pivots. The prediction is not fitted to the data — 2<sup>n+1</sup> − 1 is
+          computed independently and the tool reports whether every row matches.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="km-n">up to n</label>
+            <input type="number" id="km-n" value="5" min="0" max="8" step="1">
+          </div>
+          <button class="tool-btn" onclick="runKlee()">Run ▶</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="km-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== INTEGER PROGRAMMING ===== -->
+      <h2 id="t8-ip">Integer programming</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Write this out exactly</div>
+        <strong>IP</strong><br>
+        <strong>Input)</strong> A set of linear constraints A<strong>x</strong> ≤ <strong>b</strong>,
+        and a linear objective function f : ℝ<sup>n</sup> → ℝ.<br>
+        <strong>Output)</strong> A solution <strong>x</strong> ∈ (ℤ<sup>≥0</sup>)<sup>n</sup> such that
+        (i) <strong>x</strong> satisfies the constraints and (ii) f(<strong>x</strong>) is maximal.
+        <br><br>
+        Word for word the LP definition, with ℝ replaced by ℤ in one place. That is the entire
+        difference, and it is the difference between <strong>P</strong> and
+        <strong>NP</strong>-hard.<br><br>
+        <strong>Variants.</strong> <em>Mixed integer linear programming</em> (MILP): some variables
+        must be integers, others may not be. <em>Zero-one integer programming</em>: every variable is
+         0 or 1.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Modelling: assignment as an integer program</div>
+        Workers with capacities, tasks with requirements, an edge wherever a worker can do a task.<br>
+        <strong>1)</strong> A variable x<sub>i,j</sub> per edge, with x<sub>i,j</sub> ≤ 1. &nbsp;
+        <strong>2)</strong> Per worker: Σ<sub>j</sub> x<sub>i,j</sub> ≤ capacity of i. &nbsp;
+        <strong>3)</strong> Per task: Σ<sub>i</sub> x<sub>i,j</sub> ≥ requirement of j. &nbsp;
+        <strong>4)</strong> Maximise Σ<sub>i,j</sub> x<sub>i,j</sub>.<br><br>
+        Two slips to be aware of on the slide. Step 5 restates the task constraint as
+        &ldquo;Σ<sub>j</sub> x<sub>i,j</sub> ≥ requirements of j&rdquo;, summing over the wrong index —
+        it must be over the <em>workers</em> i, as step 3 correctly has it, otherwise the constraint
+        does not mention task j at all. And the result is called a <em>maximal</em> matching, where
+        what the program finds is a <em>maximum</em> one; with capacities above 1 it is not a matching
+        in the usual sense either, but a degree-constrained subgraph.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Linear relaxation and BRANCH-AND-BOUND</div>
+        The <strong>linear relaxation</strong> of an integer program is the same program with the
+        integrality requirement dropped. It can be solved quickly, and its optimum is always at least
+        as good as the integer optimum — so it is an <strong>upper bound</strong>.<br><br>
+        <code>BRANCH-AND-BOUND (LP):</code><br>
+        <strong>1.</strong> Find a solution <strong>a</strong> to the linear relaxation of LP<br>
+        <strong>2.</strong> If <strong>a</strong> ∈ ℤ<sup>n</sup>, return <strong>a</strong><br>
+        <strong>3.</strong> Else:<br>
+        <strong>4.</strong>&nbsp;&nbsp; Choose a non-integer x<sub>i</sub> = a<sub>i</sub> to branch on<br>
+        <strong>5.</strong>&nbsp;&nbsp; <strong>a</strong><sub>L</sub> = BRANCH-AND-BOUND
+          (LP ∪ { x<sub>i</sub> ≤ ⌊a<sub>i</sub>⌋ })<br>
+        <strong>6.</strong>&nbsp;&nbsp; <strong>a</strong><sub>R</sub> = BRANCH-AND-BOUND
+          (LP ∪ { x<sub>i</sub> ≥ ⌈a<sub>i</sub>⌉ })<br>
+        <strong>7.</strong>&nbsp;&nbsp; Return whichever of them maximises f.<br><br>
+        The two branches are exhaustive and disjoint: no integer point has
+        ⌊a<sub>i</sub>⌋ &lt; x<sub>i</sub> &lt; ⌈a<sub>i</sub>⌉, so nothing is lost by cutting the
+        fractional value out, and every integer point still lies in one side or the other.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The pseudocode has no bounding step in it</div>
+        Read lines 5 and 6 again: both children are always explored, whatever has already been found.
+        Nothing in the algorithm ever uses a bound to avoid work, which makes the name half false — as
+        written it is branch-and-<em>branch</em>, a complete enumeration of the tree.<br><br>
+        The missing line is the one that earns the name: if a node's relaxation is already no better
+        than the best <em>integer</em> solution found so far, then nothing below that node can beat it
+        either, because the relaxation bounds everything beneath it — so prune it unexplored. The tool
+        runs with and without, and reports what the difference costs. On the lecture's five-node
+        example it costs nothing, which is exactly why the omission passes unnoticed.<br><br>
+        Two smaller gaps: there is no case for a subproblem being <em>infeasible</em> (adding y ≥ 2 can
+        empty the region), and no case for it being unbounded, in which case the recursion never
+        terminates.
+      </div>
+
+      <h3 id="t8-bbtool">&#128736;&#65039; Branch and bound, node by node</h3>
+
+      <div class="tool" data-run="runBranch">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Build the tree and check the answer</h3>
+        </div>
+        <div class="tool-desc">Each node's relaxation is solved by the phase-one method — necessary,
+          because a branch like <code>y ≥ 2</code> is exactly the case the lecture's tableau cannot
+          start on — and cross-checked against vertex enumeration wherever the node is small enough.
+          The final answer is checked against testing every lattice point one by one.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="bb-text">the program (integrality is assumed)</label>
+            <textarea id="bb-text" rows="5" spellcheck="false">max 2x + 3y
+3x + 2y &lt;= 15
+2y - x &lt;= 5
+x + 2y &lt;= 7</textarea>
+          </div>
+          <div class="tool-field">
+            <label for="bb-bound">bounding step</label>
+            <select id="bb-bound">
+              <option value="off">off — as the slide is written</option>
+              <option value="on">on — prune by the bound</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runBranch()">Run ▶</button>
+          <button class="tool-btn secondary" onclick="bbPreset('lecture')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="bbPreset('matching')">Assignment problem</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="bb-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The lecture's tree, and one number in it</div>
+        The relaxation gives x = 4, y = 1.5 with C = 12.5. Branching on y:<br>
+        <strong>y ≤ 1</strong> gives x = 13/3, y = 1, C = 35/3 — still fractional, so branch again on
+        x, giving (4, 1) with C = 11 and (5, 0) with C = 10.<br>
+        <strong>y ≥ 2</strong> gives x = 3, y = 2, C = 12, already integral.<br>
+        The best integer solution is therefore <strong>x = 3, y = 2, C = 12</strong>, which brute force
+        over all 16 feasible lattice points confirms.<br><br>
+        The slide writes the y ≤ 1 node as x = 4.3, C = 11.6. It is 13/3 = 4.333… and 35/3 = 11.667,
+        so 11.6 is the truncation of a recurring decimal rather than a rounding of it. Nothing depends
+        on it — the node is discarded either way — but write the fraction in an exam and you cannot be
+        marked down for it. The slide's final comparison also pairs C = 11 with the point (5, 0), and
+        (5, 0) gives 10; the 11 belongs to (4, 1).
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Theorem: integer programming is NP-hard</div>
+        By reduction <strong>SAT ≤<sub>p</sub> IP</strong>. Given a CNF formula F:<br>
+        <strong>1)</strong> For each propositional variable P, introduce two numerical variables
+        x<sub>P</sub> and x<sub>¬P</sub>.<br>
+        <strong>2)</strong> Each clause becomes a constraint that at least one of its literals is
+        chosen: (P ∨ Q ∨ ¬R) becomes (x<sub>P</sub> + x<sub>Q</sub> + x<sub>¬R</sub>) ≥ 1.<br>
+        <strong>3)</strong> For each variable add both (x<sub>P</sub> + x<sub>¬P</sub>) ≤ 1 and
+        (x<sub>P</sub> + x<sub>¬P</sub>) ≥ 1.<br>
+        <strong>4)</strong> Then F is satisfiable ⟺ IP<sub>F</sub> has an integer solution.<br><br>
+        Step 3 is the clever part. The two inequalities together force
+        x<sub>P</sub> + x<sub>¬P</sub> = 1, and since both are non-negative <em>integers</em>, exactly
+        one of them is 1 — so a pair of linear inequalities has encoded a Boolean choice. The
+        construction is clearly polynomial: two variables and two constraints per propositional
+        variable, one constraint per clause.<br><br>
+        Note the theorem says NP-<strong>hard</strong>, not NP-complete. Hardness is all the reduction
+        gives you; membership of NP needs the separate argument that an optimal solution can be written
+        down in polynomial space.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Two things the reduction does not actually need</div>
+        Worth knowing if you are asked to justify each part rather than recite it.<br><br>
+        <strong>The objective does no work.</strong> The claim is &ldquo;F is satisfiable ⟺
+        IP<sub>F</sub> has an integer <em>solution</em>&rdquo; — a question about feasibility, not
+        optimality. Any objective at all will do, which is why the slide never says what to maximise.
+        <br><br>
+        <strong>Only half of the pairing constraint is load-bearing.</strong> Drop
+        x<sub>P</sub> + x<sub>¬P</sub> ≥ 1 and keep only ≤ 1, and the equivalence still holds: a
+        solution may now leave both at 0, so P is assigned nothing, but every clause still has a
+        literal set to 1 and that partial assignment extends to a satisfying one. Checked here over
+        500 random formulas, 116 of them unsatisfiable, with no mismatch either way. The ≤ 1 half is
+        the one you cannot lose — without it x<sub>P</sub> = x<sub>¬P</sub> = 1 satisfies every clause
+        of every formula. The ≥ 1 half is there to make the recovered assignment <em>total</em>, which
+        is worth having and is not the same as being necessary.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Where the integrality actually bites</div>
+        Drop the integrality from that reduction and it collapses immediately:
+        x<sub>P</sub> = x<sub>¬P</sub> = ½ satisfies every constraint of every formula, satisfiable or
+        not. The linear relaxation of an encoded SAT instance is trivially solvable and tells you
+        nothing. That is the cleanest statement of what the extra three letters buy — and of why
+        branch-and-bound has to exist at all.
+      </div>
+
+      <h3 id="t8-sitool">&#128736;&#65039; SAT ≤<sub>p</sub> IP</h3>
+
+      <div class="tool" data-run="runSatIp">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Turn a formula into an integer program</h3>
+        </div>
+        <div class="tool-desc">The formula is decided by the Topic 5 DPLL solver and the integer
+          program is decided by enumeration, independently. If the reduction were wrong the two would
+          disagree, and the tool would say so rather than quietly reporting one of them.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 260px;">
+            <label for="si-text">CNF, one clause per line</label>
+            <textarea id="si-text" rows="4" spellcheck="false">(P | Q | ~R)
+(~P | Q | R)
+(~Q | S)</textarea>
+          </div>
+          <button class="tool-btn" onclick="runSatIp()">Reduce ▶</button>
+          <button class="tool-btn secondary" onclick="satIpPreset('lecture')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="satIpPreset('unsat')">Unsatisfiable</button>
+          <button class="tool-btn secondary" onclick="satIpPreset('tight')">All four clauses on P, Q</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="si-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== EXAM ===== -->
+      <h2 id="t8-exam">Exam takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">What is most likely to be asked</div>
+        <strong>Build a program from a word problem.</strong> A variable per decision, a constraint per
+        limit, the objective last. Say which direction you are optimising and remember that
+        non-negativity is free.<br><br>
+        <strong>Convert to slack form and build the initial tableau.</strong> Negate the objective
+        coefficients in the cost row. Get the sign of a term like 2y − x right.<br><br>
+        <strong>Do two rounds of simplex by hand.</strong> Most negative in the last row picks the
+        column; smallest non-negative quotient picks the row; scale, then clear. Keep fractions.<br><br>
+        <strong>Read off a solution from a final tableau.</strong> Unit column ⟹ basic ⟹ takes that
+        row's right-hand side. Everything else is zero. A zero slack means that constraint is tight.
+        <br><br>
+        <strong>Branch and bound, one level.</strong> Solve the relaxation, pick a fractional variable,
+        write down both subproblems with their floor and ceiling bounds, and say which child wins.
+        <br><br>
+        <strong>State and use the reduction.</strong> Two variables per propositional variable, one ≥ 1
+        constraint per clause, the ≤ 1 and ≥ 1 pair per variable, and the sentence about why that pair
+        forces a 0/1 choice.<br><br>
+        <strong>Name the theorems.</strong> Klee–Minty 1972: simplex is exponential in the worst case.
+        Khachiyan 1979: LP is in P. IP is NP-hard by SAT ≤<sub>p</sub> IP.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The one-sentence version</div>
+        A linear program is a convex region and a straight objective, so the answer sits at a corner and
+        can be found in polynomial time; requiring the corner to have whole-number coordinates removes
+        the geometry that made it easy, and the best you can then do is solve the easy version
+        repeatedly on smaller and smaller pieces.
+      </div>
+
+    </section>
