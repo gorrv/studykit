@@ -7,6 +7,7 @@
   var BOOT = { after: [], errors: [] };
 
   function boot() {
+    navInit();         // make sure exactly one section is showing
     snapshotTools();   // capture pristine inputs before any tool edits them
     ixLive();          // wire live re-runs
     IX.initReveal();   // restore the reader's "how much lies ahead" choice

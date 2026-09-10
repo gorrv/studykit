@@ -333,15 +333,7 @@
   .cram-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
   @media (max-width: 800px) { .cram-grid { grid-template-columns: 1fr; } }
   @keyframes nsFlash { 0%, 22% { background: rgba(var(--highlight-rgb), 0.45); } 100% { background: transparent; } }
-  @media print { .search-box, .search-results { display: none !important; } }
-  @media print {
-    aside, .tool, .no-print { display: none !important; }
-    .topic-section { display: block !important; }
-    main { padding: 0; max-width: 100%; }
-    .cram-grid { grid-template-columns: 1fr 1fr; }
-  }
-  /* Section switching */
-  .topic-section { display: none; }
+  @media print { .cram-grid { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 900px) {
     .layout { grid-template-columns: 1fr; }
     aside { position: relative; height: auto; }

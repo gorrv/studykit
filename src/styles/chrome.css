@@ -375,7 +375,22 @@
   .sr-snip mark, mark.ns-mark { background: rgba(var(--highlight-rgb), 0.6); color: var(--ink);
     padding: 0 1px; border-radius: 2px; }
   .search-flash { animation: nsFlash 2.4s ease-out; border-radius: 4px; }
+  /* ============================================================
+     SECTION SWITCHING
+     One section at a time. This lives here rather than in each module's
+     stylesheet because a module that forgets it does not look broken —
+     every section simply renders at once, stacked, and clicking a nav
+     title appears to do nothing (it scrolls to the top, where the first
+     section still is). Two modules shipped that way before this moved.
+     Printing wants the opposite: everything, in order.
+     ============================================================ */
+  .topic-section { display: none; }
   .topic-section.active { display: block; }
+  @media print {
+    aside, .tool, .no-print, .search-box, .search-results { display: none !important; }
+    .topic-section { display: block !important; }
+    main { padding: 0; max-width: 100%; }
+  }
 
   /* A short aside under a tool's output: what the numbers mean, or what to
      try next. Muted so it reads as commentary, not as part of the result. */

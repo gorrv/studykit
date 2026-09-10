@@ -136,6 +136,61 @@ async function checkStructure(s, m) {
     .filter(h => h && !m.doc.getElementById(h));
   s.ok('no dead internal links', dead.length === 0, [...new Set(dead)].join(', '));
 
+  /* Exactly one section is showing, and the nav can change which.
+   *
+   * The rule that hides the others lived in each module's own stylesheet,
+   * so two modules simply never had it: every section rendered at once,
+   * stacked, and clicking a nav title scrolled to the top of a very long
+   * page where the first section still was. Nothing threw, no link was
+   * dead, and every check above passed. The only way to catch it is to ask
+   * what is actually visible.
+   */
+  {
+    const W = m.window;
+    const secs = m.$$('.topic-section');
+    const visible = () => secs.filter(x => W.getComputedStyle(x).display !== 'none');
+
+    s.is('exactly one section is visible on load', visible().length, 1,
+      visible().map(x => x.id).join(', ') || 'none at all');
+
+    const titles = m.$$('nav a[onclick*="showSection"]');
+    s.ok('the nav offers a way into the sections', titles.length > 0);
+
+    let wrong = 0, first = null;
+    titles.forEach(a => {
+      const want = /showSection\(\s*'([^']+)'/.exec(a.getAttribute('onclick') || '');
+      if (!want) return;
+      a.click();
+      const now = visible();
+      if (now.length !== 1 || now[0].id !== want[1]) {
+        wrong++;
+        if (!first) {
+          first = `"${(a.textContent || '').trim().slice(0, 30)}" should show ${want[1]}, ` +
+            `showing ${now.map(x => x.id).join(',') || 'nothing'}`;
+        }
+      }
+      /* And if the link also carries an anchor, that anchor has to live in
+         the section the link just opened — otherwise it jumps into a
+         section that is hidden. */
+      const href = a.getAttribute('href') || '';
+      if (href.length > 1 && href[0] === '#') {
+        const el = m.doc.getElementById(href.slice(1));
+        const sec = el && el.closest ? el.closest('.topic-section') : null;
+        if (sec && sec.id !== want[1]) {
+          wrong++;
+          if (!first) first = `${href} lives in ${sec.id}, but the link opens ${want[1]}`;
+        }
+      }
+    });
+    s.is('every nav link opens the section it names', wrong, 0, first);
+
+    /* Put it back, so later checks see the page as it loads. */
+    if (secs.length) {
+      secs.forEach(x => x.classList.remove('active'));
+      secs[0].classList.add('active');
+    }
+  }
+
   s.ok('no NUL bytes in source', m.raw.indexOf('\u0000') < 0);
   s.ok('has a title', !!m.doc.title, m.doc.title);
 

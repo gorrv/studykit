@@ -1330,12 +1330,7 @@
   .cram-card ul { margin: 0; padding-left: 18px; }
   .cram-card li { font-size: 13px; margin-bottom: 5px; line-height: 1.45; }
   .cram-card .term { font-weight: 600; color: var(--ink); }
-  @media print {
-    aside, .tool, .no-print { display: none !important; }
-    .topic-section { display: block !important; }
-    main { padding: 0; max-width: 100%; }
-    .cram-grid { grid-template-columns: 1fr 1fr; }
-  }
+  @media print { .cram-grid { grid-template-columns: 1fr 1fr; } }
 
   /* ===== Topic 9 components ===== */
   /* JVM thread state machine */
@@ -1473,10 +1468,6 @@
   .mock-progress-bar { flex: 1; min-width: 120px; height: 8px; background: var(--rule); border-radius: 4px; overflow: hidden; }
   .mock-progress-fill { height: 100%; background: var(--accent-3); width: 0; transition: width 0.3s; }
   .mock-tag { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 1px 7px; border-radius: 8px; background: var(--tint-n); color: var(--ink-muted); margin-left: 6px; }
-
-  /* Hide topics by default, show via JS */
-  .topic-section { display: none; }
-  .topic-section.active { display: block; }
 
   /* Mobile */
   @media (max-width: 900px) {
