@@ -705,6 +705,268 @@ module.exports = async function run() {
         ' << (a<b?b:a).getSpeed() << endl; }').out, ['400,120']);
   }
 
+  /* ---------------- Topic 4 · value categories, overloads, ownership ---------------- */
+  {
+    /* The engine's own claims first, so a failure says which rule broke
+       rather than only that g++ disagreed somewhere. */
+    s.is('a variable is an lvalue', w.VC_EXPRS['x'].cat, 'lvalue');
+    s.is('a function returning by value gives an rvalue', w.VC_EXPRS['byValue()'].cat, 'rvalue');
+    s.is('a function returning a reference gives an lvalue', w.VC_EXPRS['byRef()'].cat, 'lvalue');
+    s.is('std::move gives an rvalue', w.VC_EXPRS['std::move(x)'].cat, 'rvalue');
+    s.ok('a plain reference refuses a temporary', w.vcBind('byValue()', 'ref').legal === false);
+    s.ok('a const reference accepts one', w.vcBind('byValue()', 'constref').legal);
+    s.ok('an rvalue reference refuses a variable', w.vcBind('x', 'rvalueref').legal === false);
+    s.ok('and accepts std::move of one', w.vcBind('std::move(x)', 'rvalueref').legal);
+
+    s.is('an rvalue prefers the && overload',
+      w.ovPick(['constref', 'rvalueref'], 'rvalue').chosen, 'rvalueref');
+    s.is('an lvalue prefers the plain reference',
+      w.ovPick(['ref', 'constref'], 'lvalue').chosen, 'ref');
+    s.is('a const lvalue can only use the const reference',
+      w.ovPick(['ref', 'constref', 'rvalueref'], 'constlvalue').chosen, 'constref');
+    s.ok('and with only a plain reference declared, it does not compile',
+      w.ovPick(['ref'], 'constlvalue').compiles === false);
+    s.ok('a temporary does not bind to a plain reference either',
+      w.ovPick(['ref'], 'rvalue').compiles === false);
+    s.is('without a && overload the const reference takes the temporary, and copies',
+      w.ovPick(['constref'], 'rvalue').copies, true);
+
+    const mv = w.upRun(w.UP_PRESETS.move.ops);
+    s.same('moving deletes what the target held, then hands the pointer over',
+      mv.out, ['deleted 2', 'a is empty', 'deleted 1']);
+    s.ok('copying is refused', w.upRun(w.UP_PRESETS.copy.ops).compiles === false);
+    s.same('release reports the object as leaked', w.upRun(w.UP_PRESETS.release.ops).leaked, [1]);
+    /* And says so by there being no delete, not merely by labelling one.
+       A trace that both deleted it and called it leaked would be wrong
+       in the more dangerous direction. */
+    s.same('and nothing is deleted',
+      w.upRun(w.UP_PRESETS.release.ops).out.filter(l => /^deleted/.test(l)), []);
+    s.same('while an ordinary scope exit deletes exactly once',
+      w.upRun(w.UP_PRESETS.scope.ops).out.filter(l => /^deleted/.test(l)), ['deleted 1']);
+    s.same('reset deletes what was held', w.upRun(w.UP_PRESETS.reset.ops).out,
+      ['deleted 1', 'deleted 2']);
+    s.ok('dereferencing after a move compiles — it is a run-time mistake',
+      w.upRun(w.UP_PRESETS.useAfterMove.ops).compiles);
+  }
+
+  if (HAVE_GPP) {
+    /* Every cell of the binding table, compiled. */
+    let bad = 0, n = 0, first = null;
+    Object.keys(w.VC_EXPRS).forEach(e => {
+      Object.keys(w.VC_BINDINGS).forEach(b => {
+        const mine = w.vcBind(e, b).legal;
+        const real = cxx(w.vcSource(e, b));
+        n++;
+        if (mine !== real.compiles) {
+          bad++;
+          if (!first) first = `${e} bound to ${b}: engine ${mine}, g++ ${real.compiles}` +
+            (real.error ? ' :: ' + real.error : '');
+        }
+      });
+    });
+    s.is(`g++ agrees on all ${n} expression/binding pairs`, bad, 0, first);
+    s.ok('and the table is not all one answer',
+      w.vcTable().some(r => r.cells.ref) && w.vcTable().some(r => !r.cells.ref));
+
+    /* Every overload subset against every argument. */
+    const subsets = [];
+    for (let m2 = 1; m2 < 8; m2++) {
+      const set = [];
+      if (m2 & 1) set.push('ref');
+      if (m2 & 2) set.push('constref');
+      if (m2 & 4) set.push('rvalueref');
+      subsets.push(set);
+    }
+    let ovBad = 0, ovN = 0, ovFirst = null;
+    subsets.forEach(set => Object.keys(w.OV_ARGS).forEach(a => {
+      const mine = w.ovPick(set, a);
+      const real = cxx(w.ovSource(set, a));
+      ovN++;
+      const chosen = real.compiles ? real.out[0] : null;
+      if (mine.compiles !== real.compiles || (real.compiles && mine.chosen !== chosen)) {
+        ovBad++;
+        if (!ovFirst) ovFirst = `[${set.join(', ')}] called with ${a}: engine ` +
+          `${mine.compiles ? mine.chosen : 'no compile'}, g++ ${chosen || 'no compile'}`;
+      }
+    }));
+    s.is(`g++ picks the same overload in all ${ovN} cases`, ovBad, 0, ovFirst);
+
+    /* The ownership traces, run for real. Each Res prints when destroyed,
+       so the order and count of deletes is observable. */
+    Object.keys(w.UP_PRESETS).forEach(k => {
+      const ops = w.UP_PRESETS[k].ops;
+      const mine = w.upRun(ops);
+      const real = cxx(w.upSource(ops));
+      s.is(`"${k}": engine and g++ agree on whether it compiles`,
+        mine.compiles, real.compiles, real.error);
+      /* The use-after-move program is undefined at run time, so its
+         output is not something to assert on — only that it built. */
+      if (mine.compiles && real.compiles && k !== 'useAfterMove') {
+        s.same(`"${k}": and on every delete, in order`, mine.out, real.out);
+      }
+    });
+    s.ok('release really does leak — g++ never prints that delete',
+      cxx(w.upSource(w.UP_PRESETS.release.ops)).out.join('|').indexOf('deleted') < 0);
+  }
+
+  /* ---------------- Topic 5 · inheritance, layout, casts ---------------- */
+  {
+    s.is('without virtual, the declared type wins',
+      w.dpCall({ isVirtual: false, staticType: 'Coordinate', dynamicType: 'Bikes', how: 'ref' }).runs,
+      'Coordinate');
+    s.is('with virtual, the object wins',
+      w.dpCall({ isVirtual: true, staticType: 'Coordinate', dynamicType: 'Bikes', how: 'ref' }).runs,
+      'Bikes');
+    s.ok('copying into a base variable slices, virtual or not',
+      w.dpCall({ isVirtual: true, staticType: 'Coordinate', dynamicType: 'Bikes',
+                 how: 'value' }).sliced);
+    s.is('and a sliced object runs the base version',
+      w.dpCall({ isVirtual: true, staticType: 'Coordinate', dynamicType: 'Bikes',
+                 how: 'value' }).runs, 'Coordinate');
+    s.ok('naming a Coordinate through a Bikes reference is refused',
+      w.dpCall({ isVirtual: true, staticType: 'Bikes', dynamicType: 'Coordinate',
+                 how: 'ref' }).ok === false);
+
+    s.is('two ints', w.lyLayout(w.LY_PRESETS.plain.spec).size, 8);
+    s.is('plus one in a derived class', w.lyLayout(w.LY_PRESETS.derived.spec).size, 12);
+    s.is('a virtual function adds eight bytes',
+      w.lyLayout(w.LY_PRESETS.virtualBase.spec).size, 24);
+    s.is('the second base of two starts after the first',
+      w.lyLayout(w.LY_PRESETS.multiple.spec).baseOffsets[1].offset, 8);
+    s.is('and a vtable in the first base moves it',
+      w.lyLayout(w.LY_PRESETS.multipleVirtual.spec).baseOffsets[1].offset, 16);
+    s.is('the first base always starts at zero',
+      w.lyLayout(w.LY_PRESETS.multiple.spec).baseOffsets[0].offset, 0);
+
+    s.is('finding out whether it is a Bikes needs dynamic_cast',
+      w.ctChoose('downUnknown', 'dynamic_cast').right, 'dynamic_cast');
+    s.ok('static_cast is the wrong answer there',
+      w.ctChoose('downUnknown', 'static_cast').correct === false);
+    s.is('going up needs no cast', w.ctChoose('up', 'static_cast').right, 'no cast needed');
+    s.is('removing const needs const_cast',
+      w.ctChoose('removeConst', 'const_cast').right, 'const_cast');
+  }
+
+  if (HAVE_GPP) {
+    /* Dispatch: all four ways of reaching the object, both types, both
+       with and without virtual. */
+    let dpBad = 0, dpN = 0, dpFirst = null, dpVaried = new Set();
+    [false, true].forEach(isVirtual =>
+      ['Coordinate', 'Bikes'].forEach(staticType =>
+        ['Coordinate', 'Bikes'].forEach(dynamicType =>
+          ['ref', 'ptr', 'value', 'object'].forEach(how => {
+            const opts = { isVirtual, staticType, dynamicType, how };
+            const mine = w.dpCall(opts);
+            const real = cxx(w.dpSource(opts));
+            dpN++;
+            if (!mine.ok) {
+              if (real.compiles) {
+                dpBad++;
+                if (!dpFirst) dpFirst = `${JSON.stringify(opts)}: engine refuses, g++ does not`;
+              }
+              return;
+            }
+            if (!real.compiles) {
+              dpBad++;
+              if (!dpFirst) dpFirst = `${JSON.stringify(opts)}: g++ will not build it`;
+              return;
+            }
+            dpVaried.add(real.out[0]);
+            if (real.out[0] !== mine.output) {
+              dpBad++;
+              if (!dpFirst) dpFirst = `${JSON.stringify(opts)}: engine ${mine.output}, ` +
+                `g++ ${real.out[0]}`;
+            }
+          }))));
+    s.is(`g++ agrees on all ${dpN} dispatch cases`, dpBad, 0, dpFirst);
+    s.is('and the cases do not all give the same answer', dpVaried.size, 2);
+
+    /* Layout: every offset, measured. */
+    let lyBad = 0, lyFirst = null;
+    Object.keys(w.LY_PRESETS).forEach(k => {
+      const spec = w.LY_PRESETS[k].spec;
+      const mine = w.lyLayout(spec);
+      const real = cxx(w.lySource(spec));
+      if (!real.compiles) {
+        lyBad++;
+        if (!lyFirst) lyFirst = `${k} did not compile: ${real.error}`;
+        return;
+      }
+      const got = {};
+      real.out.forEach(line => {
+        const bits = line.split('=');
+        got[bits[0]] = +bits[1];
+      });
+      if (got.size !== mine.size) {
+        lyBad++;
+        if (!lyFirst) lyFirst = `${k}: engine sizeof ${mine.size}, g++ ${got.size}`;
+      }
+      mine.all.forEach(f => {
+        if (f.vptr || f.pad) return;
+        if (got[f.name] !== f.offset) {
+          lyBad++;
+          if (!lyFirst) lyFirst = `${k}: ${f.name} at ${f.offset}, g++ says ${got[f.name]}`;
+        }
+      });
+      mine.baseOffsets.forEach(b => {
+        if (!b.name) return;
+        if (got['base ' + b.name] !== b.offset) {
+          lyBad++;
+          if (!lyFirst) lyFirst = `${k}: base ${b.name} at ${b.offset}, ` +
+            `g++ says ${got['base ' + b.name]}`;
+        }
+      });
+    });
+    s.is('every offset and size matches what g++ produces', lyBad, 0, lyFirst);
+
+    /* Casts: which ones the compiler will even accept. */
+    const castCases = [
+      ['numeric', 'static_cast', true], ['numeric', 'dynamic_cast', false],
+      ['numeric', 'reinterpret_cast', false], ['numeric', 'const_cast', false],
+      ['removeConst', 'const_cast', true], ['removeConst', 'static_cast', false],
+      ['unrelated', 'static_cast', false], ['unrelated', 'dynamic_cast', false],
+      ['unrelated', 'reinterpret_cast', true],
+      ['downUnknown', 'dynamic_cast', true], ['downUnknown', 'static_cast', true]
+    ];
+    let ctBad = 0, ctFirst = null;
+    castCases.forEach(([c, k, want]) => {
+      const r = cxx(w.ctSource(c, k));
+      if (r.compiles !== want) {
+        ctBad++;
+        if (!ctFirst) ctFirst = `${k} for "${c}": g++ ${r.compiles}, expected ${want}`;
+      }
+    });
+    s.is('the casts compile exactly where the engine says they should', ctBad, 0, ctFirst);
+    s.same('and only dynamic_cast reports the failure — static_cast hands back a pointer anyway',
+      [cxx(w.ctSource('downUnknown', 'dynamic_cast')).out[0],
+       cxx(w.ctSource('downUnknown', 'static_cast')).out[0]], ['1', '0']);
+
+    /* The two claims from the notes that are easiest to get wrong. */
+    const H5 = '#include <iostream>\n#include <memory>\n#include <vector>\nusing namespace std;\n' +
+      'struct B { int x; B():x(0){} virtual void f(){ cout << "B"; } virtual ~B(){} };\n' +
+      'struct D : B { int y; D():y(0){} void f() override { cout << "D"; } };\n';
+    s.same('deleting through a base pointer without a virtual destructor skips the derived one',
+      cxx('#include <iostream>\nusing namespace std;\n' +
+        'struct B { ~B(){ cout << "~B" << endl; } };\n' +
+        'struct D : B { ~D(){ cout << "~D" << endl; } };\n' +
+        'int main(){ B * p = new D(); delete p; }').out, ['~B']);
+    s.same('with a virtual destructor both run, derived first',
+      cxx('#include <iostream>\nusing namespace std;\n' +
+        'struct B { virtual ~B(){ cout << "~B" << endl; } };\n' +
+        'struct D : B { ~D(){ cout << "~D" << endl; } };\n' +
+        'int main(){ B * p = new D(); delete p; }').out, ['~D', '~B']);
+    s.is('push_back with a raw pointer is refused for a vector of unique_ptr',
+      cxx(H5 + 'int main(){ vector<unique_ptr<B> > v; v.push_back(new D()); }').compiles, false);
+    s.same('emplace_back is the way in, and dispatch still works',
+      cxx(H5 + 'int main(){ vector<unique_ptr<B> > v; v.emplace_back(new D());' +
+        ' v[0]->f(); cout << endl; }').out, ['D']);
+    s.is('a pure virtual function makes the class impossible to instantiate',
+      cxx('struct B { virtual void f() = 0; };\nint main(){ B b; (void)b; }').compiles, false);
+    s.is('dynamic_cast needs a vtable',
+      cxx('struct B { int x; };\nstruct D : B { int y; };\n' +
+        'int main(){ B b; B * p = &b; D * d = dynamic_cast<D*>(p); (void)d; }').compiles, false);
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 1200);

@@ -205,4 +205,122 @@
           <li>Expecting <code>insert</code>/<code>emplace</code> to overwrite an existing key.</li>
         </ul>
       </div>
+    
+      <h2 id="cr-t4">Topic 04 &middot; ownership and moving</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Value categories</div>
+        <strong>lvalue</strong> &mdash; names something that is still there afterwards: a variable,
+        <code>*p</code>, <code>a[i]</code>, a call returning <code>T &amp;</code>.<br>
+        <strong>rvalue</strong> &mdash; a temporary: a literal, <code>a + b</code>, a call returning
+        <code>T</code>, and <code>std::move(x)</code>.<br><br>
+        <table class="pp-table">
+          <thead><tr><th></th><th>lvalue</th><th>rvalue</th></tr></thead>
+          <tbody>
+            <tr><td><code>T y</code></td><td>yes</td><td>yes</td></tr>
+            <tr><td><code>T &amp; y</code></td><td>yes</td><td><strong>no</strong></td></tr>
+            <tr><td><code>const T &amp; y</code></td><td>yes</td><td>yes &mdash; and extends its life</td></tr>
+            <tr><td><code>T &amp;&amp; y</code></td><td><strong>no</strong></td><td>yes</td></tr>
+          </tbody>
+        </table>
+        The classic failure: <code>void f(double &amp;)</code> called with an <code>int</code>. The
+        conversion makes a temporary and the non-const reference will not bind.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Moving</div>
+        A <code>T &amp;&amp;</code> parameter means <em>this argument is expendable</em>, so the
+        function may take its contents. That is all move semantics is.
+        <pre class="pp-snippet">unique_ptr &amp; operator=(unique_ptr &amp;&amp; other) {
+  delete d; d = other.d; other.d = nullptr; return *this;
+}</pre>
+        <strong>Overload preference:</strong> for an rvalue, <code>T &amp;&amp;</code> beats
+        <code>const T &amp;</code>; for a modifiable lvalue, <code>T &amp;</code> beats
+        <code>const T &amp;</code>; <code>const T &amp;</code> is the fallback that takes
+        everything.<br><br>
+        <strong><code>std::move</code> is a cast.</strong> It moves nothing; it makes an lvalue look
+        like an rvalue so the stealing overload is picked. A moved-from object is valid and
+        unspecified &mdash; usually empty.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">unique_ptr</div>
+        Deletes what it owns when it goes out of scope. Copy constructor and copy assignment are
+        <code>= delete</code>d, so there is exactly one owner; move constructor and move assignment
+        hand ownership over.<br><br>
+        <code>get()</code> &mdash; the raw pointer, ownership unchanged. Never delete it.<br>
+        <code>reset(q)</code> &mdash; <strong>deletes</strong> what was held, then takes
+        <code>q</code>.<br>
+        <code>release()</code> &mdash; hands back the raw pointer and <strong>deletes
+        nothing</strong>. Drop it and it leaks.<br>
+        <code>explicit operator bool()</code> &mdash; so <code>if (p)</code> works. Without
+        <code>explicit</code>, <code>p + 1</code> also compiles.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Flags and traps</div>
+        <code>-Wall -Werror -g -D_GLIBCXX_DEBUG</code> &mdash; more warnings, warnings as errors,
+        debug info, and standard-library bounds checking.<br>
+        Comparing <code>int i</code> with <code>v.size()</code> is a warning; cast or change the
+        type.<br>
+        A Makefile recipe line must start with a <strong>tab</strong>.<br>
+        A non-void function with no <code>return</code> compiles by default and is undefined at run
+        time &mdash; one of the things <code>-Wall -Werror</code> catches.
+      </div>
+
+      <h2 id="cr-t5">Topic 05 &middot; inheritance</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Syntax</div>
+        <code>class Bikes : public Coordinate</code> instead of <code>extends</code>. Base built in
+        the initialiser list, <code>: Coordinate(x, y)</code>, not the body. Base version reached as
+        <code>Coordinate::printDetails()</code>; there is no <code>super</code>.<br><br>
+        <code>virtual void f() = 0;</code> makes the function pure virtual and the class abstract.
+        No <code>abstract</code> keyword.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Dispatch</div>
+        <strong>Without <code>virtual</code>, the declared type decides</strong>, at compile time.
+        A <code>Coordinate &amp;</code> referring to a Bikes calls
+        <code>Coordinate::printDetails</code>. This is the opposite of Java.<br><br>
+        <strong>With <code>virtual</code>, the object decides.</strong> Every object of the class
+        carries a hidden first member pointing at its class&rsquo;s vtable, and the call reads the
+        address from there. Cost: 8 bytes per object, one indirection per call.<br><br>
+        <code>override</code> is optional and worth writing &mdash; it turns a mistyped signature
+        into an error.<br><br>
+        <strong>Virtual destructor</strong> whenever a class has any virtual function, or deleting
+        through a base pointer never destroys the derived part.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Layout</div>
+        Members in order, base subobjects first, each aligned to its own size; the vtable pointer,
+        if any, before all of them.<br>
+        two ints &rarr; 8 &nbsp;&middot;&nbsp; plus one more int in a derived class &rarr; 12
+        &nbsp;&middot;&nbsp; add a virtual function &rarr; 16 and 24.<br><br>
+        With <strong>multiple inheritance</strong> only the first base sits at offset 0; converting
+        to a pointer to any later base shifts the address, and casting back shifts it back.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Slicing</div>
+        <code>Coordinate c = someBikes;</code> copies only the Coordinate part, silently, and what
+        remains behaves as a Coordinate even through virtual calls. So:
+        <code>vector&lt;Coordinate&gt;</code> slices; <code>vector&lt;Coordinate*&gt;</code> works
+        but leaves deleting to you; <code>vector&lt;unique_ptr&lt;Coordinate&gt; &gt;</code> with
+        <code>emplace_back(new Bikes(...))</code> is the answer.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The four casts</div>
+        <strong>static_cast</strong> &mdash; checks at compile time that the types are related;
+        nothing at run time. Downcasting with it is undefined if you are wrong.<br>
+        <strong>dynamic_cast</strong> &mdash; checks at run time. <code>nullptr</code> on failure
+        for pointers, <code>std::bad_cast</code> for references. Needs a vtable: a non-polymorphic
+        source is a compile error.<br>
+        <strong>const_cast</strong> &mdash; the only one that removes const.<br>
+        <strong>reinterpret_cast</strong> &mdash; no checks of any kind.<br><br>
+        Casting <em>up</em>, derived to base, needs no cast at all.
+      </div>
     </section>

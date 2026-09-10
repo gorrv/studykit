@@ -1,0 +1,395 @@
+<section id="topic5" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 05 · Inheritance</div>
+        <h1>Base Classes, and What It Costs</h1>
+        <div class="topic-subtitle">virtual functions, object layout, slicing, and the four casts</div>
+      </div>
+
+      <p>Inheritance in C++ looks like inheritance in Java for about ten lines, and then stops. The
+      differences all come from one decision: a C++ object is a lump of memory, not a reference to
+      one. Once you know what that lump looks like, everything else in this topic — why a function
+      call can pick the wrong body, why copying an object can silently lose half of it, why there
+      are four different casts — follows from it.</p>
+
+      <!-- ===== THE BASICS ===== -->
+      <h2 id="t5-basics">Deriving a class</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The syntax, next to the Java you know</div>
+        <pre class="pp-snippet">class Bikes : public Coordinate {
+protected:
+  int howMany;
+public:
+  Bikes(const int xIn, const int yIn, const int howManyIn)
+    : Coordinate(xIn, yIn),      // instead of super(xIn, yIn);
+      howMany(howManyIn)
+  {}
+
+  void printDetails() {
+    Coordinate::printDetails();  // instead of super.printDetails();
+    cout &lt;&lt; ": " &lt;&lt; howMany &lt;&lt; " bikes";
+  }
+};</pre>
+        <code>: public Coordinate</code> instead of <code>extends</code>. The base is constructed
+        in the <strong>initialiser list</strong>, not in the body — by the time the body runs the
+        base is already built. And the base version of a function is reached by naming it,
+        <code>Coordinate::printDetails()</code>, since there is no <code>super</code>.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">public, protected, private members</div>
+        <code>private</code> members are the base class’s own business and a derived class cannot
+        touch them. <code>protected</code> means the derived class can. Use <code>protected</code>
+        sparingly: it is part of your interface to every subclass anyone ever writes, and just as
+        hard to change later as a public member.
+      </div>
+
+      <!-- ===== IN MEMORY ===== -->
+      <h2 id="t5-memory">The object in memory</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">One member after another, base first</div>
+        An object is its members laid out in order, and a derived object is the base object
+        followed by the new members. So <code>sizeof(Coordinate)</code> is 8 — two ints — and
+        <code>sizeof(Bikes)</code> is 12.<br><br>
+        This is why a <code>Bikes *</code> converts to a <code>Coordinate *</code> for nothing: the
+        first eight bytes of a Bikes <em>are</em> a valid Coordinate. The conversion changes the
+        type, not the address.
+      </div>
+
+      <h3 id="t5-lytool">&#128736;&#65039; What the object looks like</h3>
+
+      <div class="tool" data-run="runLayout">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Object layout</h3>
+        </div>
+        <div class="tool-desc">Every offset here is what the compiler actually produces —
+          the test suite compares each one against g++.</div>
+        <div class="tool-output" id="ly-output"></div>
+      </div>
+
+      <!-- ===== DISPATCH ===== -->
+      <h2 id="t5-dispatch">Which function runs</h2>
+
+      <div class="callout warn">
+        <div class="callout-label">This is the surprise</div>
+        <pre class="pp-snippet">void someFunction(Coordinate &amp; c) {
+  c.printDetails();
+  cout &lt;&lt; endl;
+}
+
+int main() {
+  Bikes strand(20,10,100);
+  strand.printDetails();   // 20,10: 100 bikes
+  cout &lt;&lt; endl;
+  someFunction(strand);    // 20,10
+}</pre>
+        The same object, the same function name, two different answers. Inside
+        <code>someFunction</code>, <code>c</code> is declared <code>Coordinate &amp;</code>, so the
+        compiler resolves the call to <code>Coordinate::printDetails</code> and fixes that address
+        at compile time. It never looks at what the object really is.<br><br>
+        In Java every method is virtual and this cannot happen. In C++ it is the default, because
+        it is faster and because you only pay for what you ask for.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Asking for the Java behaviour</div>
+        <pre class="pp-snippet">class Coordinate {
+public:
+  virtual void printDetails() { ... }
+  virtual ~Coordinate() {}
+};
+
+class Bikes : public Coordinate {
+public:
+  void printDetails() override { ... }
+};</pre>
+        <strong><code>virtual</code></strong> on the base class function means: decide at run time,
+        from what the object really is. Once the base declares it virtual, every override is
+        virtual too, whether or not it says so.<br><br>
+        <strong><code>override</code></strong> is optional and worth writing anyway. It asks the
+        compiler to check that you really are overriding something — so a typo in the name, or a
+        parameter type that does not quite match, becomes an error instead of a second, unrelated
+        function that never gets called.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">If you inherit, make the destructor virtual</div>
+        <pre class="pp-snippet">Coordinate * c = new Bikes(3,4,100);
+delete c;   // which destructor?</pre>
+        The same rule applies to destructors, and here getting it wrong leaks. With a non-virtual
+        destructor, <code>delete c</code> runs <code>~Coordinate</code> only — the Bikes part is
+        never destroyed, so anything it owned is lost.<br><br>
+        The rule of thumb: <strong>if a class has any virtual function, give it a virtual
+        destructor.</strong> If it has one it is meant to be inherited from, and if it is meant to
+        be inherited from someone will eventually delete a derived object through a base pointer.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Abstract classes</div>
+        <pre class="pp-snippet">virtual void printDetails() = 0;</pre>
+        <code>= 0</code> makes the function <strong>pure virtual</strong>: declared, not defined.
+        A class with one cannot be instantiated, and neither can a derived class that has not
+        implemented it. There is no <code>abstract</code> keyword — the <code>= 0</code> is the
+        whole mechanism, and an interface is simply a class where every function is pure virtual.
+      </div>
+
+      <h3 id="t5-dptool">&#128736;&#65039; Which body runs</h3>
+
+      <div class="tool" data-run="runDispatch">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Static and dynamic dispatch</h3>
+        </div>
+        <div class="tool-desc">One object, one call, four ways of naming it. The interesting cases
+          are the ones where the declared type and the real type differ.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="dp-real">the object really is</label>
+            <select id="dp-real" onchange="runDispatch()">
+              <option value="Bikes">a Bikes</option>
+              <option value="Coordinate">a Coordinate</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="dp-how">reached through</label>
+            <select id="dp-how" onchange="dpToggleStatic()">
+              <option value="ref">a reference</option>
+              <option value="ptr">a pointer</option>
+              <option value="value">a copy</option>
+              <option value="object">the variable itself</option>
+            </select>
+          </div>
+          <div class="tool-field" id="dp-static-field">
+            <label for="dp-static">declared as</label>
+            <select id="dp-static" onchange="runDispatch()">
+              <option value="Coordinate">Coordinate</option>
+              <option value="Bikes">Bikes</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label>&nbsp;</label>
+            <label class="ck"><input type="checkbox" id="dp-virtual" onchange="runDispatch()">
+              printDetails is <code>virtual</code></label>
+          </div>
+        </div>
+        <div class="tool-output" id="dp-output"></div>
+      </div>
+
+      <!-- ===== SLICING ===== -->
+      <h2 id="t5-slicing">Objects, not references</h2>
+
+      <div class="callout warn">
+        <div class="callout-label">What does this do?</div>
+        <pre class="pp-snippet">Coordinate c = Bikes(3,4,100);</pre>
+        In Java the equivalent line stores a reference and the object stays a Bikes. Here
+        <code>c</code> <em>is</em> a Coordinate — eight bytes of it — and the Bikes is copied into
+        that space. Only the Coordinate part fits, so only the Coordinate part is copied. The
+        <code>howMany</code> is gone.<br><br>
+        It compiles without a murmur, and afterwards <code>c</code> is a genuine Coordinate: even
+        with <code>virtual</code>, the base version of every function is what runs. This is
+        <strong>slicing</strong>, and it is why polymorphic code passes <code>Base &amp;</code> or
+        <code>Base *</code> and never <code>Base</code>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Holding a mixture of derived types</div>
+        <pre class="pp-snippet">vector&lt;Coordinate&gt; v;                    // sliced: each element is a Coordinate
+vector&lt;Coordinate *&gt; v;                  // works, but who deletes them?
+vector&lt;unique_ptr&lt;Coordinate&gt; &gt; v;       // works, and cleans up</pre>
+        A <code>vector&lt;Coordinate&gt;</code> is that many Coordinate objects end to end, so
+        there is nowhere for a Bikes to live. Pointers solve that — every element is eight bytes
+        and the objects live elsewhere — at the cost of putting you back in charge of deleting
+        them. A vector of unique_ptr gives you both: derived objects, and destruction handled when
+        the vector goes.
+        <pre class="pp-snippet">vector&lt;unique_ptr&lt;Coordinate&gt; &gt; c;
+c.emplace_back(new Bikes(3,4,100));</pre>
+        <code>push_back</code> wants a <code>unique_ptr</code> and you have a raw pointer;
+        the conversion is <code>explicit</code>, so it is refused. <code>emplace_back</code>
+        constructs the element in place from the arguments you give it, which is exactly what is
+        needed here.
+      </div>
+
+      <!-- ===== VTABLES ===== -->
+      <h2 id="t5-vtable">How virtual functions work</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">A hidden first member</div>
+        Each class with virtual functions gets a <strong>vtable</strong>: a small array holding the
+        address of each virtual function for that class. Coordinate’s table points at
+        <code>Coordinate::printDetails</code>; Bikes’ table points at
+        <code>Bikes::printDetails</code>.<br><br>
+        Every object of such a class carries a hidden extra member — a pointer to its class’s
+        table — placed first, before your own members. A virtual call reads the address from the
+        table and jumps there, so the answer depends on the object rather than the declaration.
+        <br><br>
+        That is the whole mechanism, and it explains the numbers: an object with virtual functions
+        is eight bytes bigger, and a virtual call is one indirection slower than a direct one.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">You only pay for what you use</div>
+        This is the design principle the language keeps returning to. Virtual dispatch is not free,
+        so it is not the default; a class with no virtual functions has no vtable pointer and its
+        objects are exactly as big as their members. The trade is that you have to know to ask.
+      </div>
+
+      <!-- ===== CASTS ===== -->
+      <h2 id="t5-casts">The four casts</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Why four rather than one</div>
+        C-style <code>(Bikes *) p</code> does whichever of these will work, without saying which,
+        and cannot be searched for. The four named casts each do one thing, and the compiler can
+        refuse the ones that make no sense.
+        <table class="pp-table">
+          <thead><tr><th>cast</th><th>checks</th><th>if it cannot</th></tr></thead>
+          <tbody>
+            <tr><td><code>static_cast</code></td>
+                <td>at compile time, that the types are related</td>
+                <td>does not compile</td></tr>
+            <tr><td><code>dynamic_cast</code></td>
+                <td>at run time, what the object really is</td>
+                <td><code>nullptr</code>, or throws for references</td></tr>
+            <tr><td><code>const_cast</code></td>
+                <td>that const is the only difference</td>
+                <td>does not compile</td></tr>
+            <tr><td><code>reinterpret_cast</code></td>
+                <td>nothing whatsoever</td>
+                <td>it never refuses</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">dynamic_cast is instanceof and the cast together</div>
+        <pre class="pp-snippet">void someFunction(Coordinate * c) {
+  Bikes * b = dynamic_cast&lt;Bikes*&gt;(c);
+  if (b) {
+    cout &lt;&lt; b-&gt;howMany &lt;&lt; endl;
+  } else {
+    cout &lt;&lt; "not a Bikes" &lt;&lt; endl;
+  }
+}</pre>
+        At run time it compares the object’s vtable pointer with the one Bikes objects have. Two
+        consequences worth remembering: <strong>it needs a vtable</strong>, so a class with no
+        virtual functions cannot be the source of one — that is a compile error, not a failed
+        cast; and <strong>for references it throws</strong> <code>std::bad_cast</code>, since a
+        reference has no null to return.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">static_cast down does not check anything</div>
+        <pre class="pp-snippet">Bikes * b = static_cast&lt;Bikes*&gt;(c);   // compiles whatever c points at</pre>
+        The compile-time check is only that Bikes is derived from Coordinate. Whether
+        <code>c</code> points at one is your problem, and if it does not, reading
+        <code>b-&gt;howMany</code> reads whatever memory happens to follow. Use it when you already
+        know; use <code>dynamic_cast</code> when the point is to find out.
+      </div>
+
+      <h3 id="t5-cttool">&#128736;&#65039; Which cast</h3>
+
+      <div class="tool" data-run="runCast">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Pick the cast</h3>
+        </div>
+        <div class="tool-desc">Eight situations. Some of them have a right answer that is not a
+          cast at all.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="cw-case">the situation</label>
+            <select id="cw-case" onchange="runCast()">
+              <option value="numeric">int to double</option>
+              <option value="downKnown">base pointer, known to be derived</option>
+              <option value="downUnknown">base pointer, might be derived</option>
+              <option value="downRef">base reference, might be derived</option>
+              <option value="up">derived pointer to base pointer</option>
+              <option value="removeConst">calling a non-const function on a const pointer</option>
+              <option value="bits">reading an object as raw ints</option>
+              <option value="unrelated">two entirely unrelated types</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-output" id="cw-output"></div>
+      </div>
+
+      <!-- ===== MULTIPLE INHERITANCE ===== -->
+      <h2 id="t5-multiple">Inheriting from more than one class</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Allowed, and it moves the address</div>
+        <pre class="pp-snippet">class Bikes : public Coordinate, public StreetAddress {
+  ...
+  Bikes(int xIn, int yIn, const string &amp; pc, int n, int howManyIn)
+    : Coordinate(xIn, yIn), StreetAddress(pc, n), howMany(howManyIn)
+  {}
+};</pre>
+        The base subobjects are laid out in the order they are listed, then the new members. Only
+        the first base can start at offset zero, so:
+        <pre class="pp-snippet">Bikes * b = new Bikes(...);
+Coordinate * c = b;      // same address
+StreetAddress * a = b;   // b plus the size of the Coordinate part</pre>
+        The compiler adjusts the pointer silently, and adjusts it back when you cast the other way.
+        The offset depends on the exact layout — add a virtual function to the first base and every
+        later offset moves by eight — which is a reason to let the compiler do this arithmetic and
+        never do it yourself.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The two questions it raises</div>
+        <strong>Both bases have a function with the same name.</strong> Naming it is ambiguous and
+        the compiler stops. Say which you meant:
+        <code>b.Coordinate::describe()</code>.<br><br>
+        <strong>D inherits from B and C, which both inherit from A.</strong> By default a D
+        contains <em>two</em> A subobjects, so <code>d.v</code> is ambiguous and
+        <code>d.B::v</code> and <code>d.C::v</code> are different variables. Writing
+        <code>class B : virtual public A</code> makes the A shared, so there is one — at the cost
+        of a more complicated layout, since the shared base can no longer sit at a fixed offset.
+        <br><br>
+        This is the complication Java avoided by allowing only one base class, and giving
+        interfaces no data to duplicate.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="t5-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember five things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>Without <code>virtual</code>, the declared type decides which body runs.</strong>
+            The object’s real type is never consulted. This is the opposite of Java and the source
+            of most surprises.</li>
+          <li><strong>A vtable pointer is a hidden first member</strong>, added to every object of a
+            class with virtual functions. Eight bytes per object, one indirection per call.</li>
+          <li><strong>Copying a derived object into a base variable slices it.</strong> No warning.
+            Pass references or pointers.</li>
+          <li><strong>If a class has virtual functions, give it a virtual destructor</strong>, or
+            deleting through a base pointer will not destroy the derived part.</li>
+          <li><strong><code>dynamic_cast</code> asks, <code>static_cast</code> assumes.</strong>
+            The first costs a run-time check and needs a vtable; the second costs nothing and is
+            undefined if you are wrong.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Forgetting <code>virtual</code> and concluding that C++ dispatch is broken.</li>
+          <li><code>vector&lt;Base&gt;</code> when the elements are derived — every one is
+            sliced.</li>
+          <li>Deleting through a base pointer with a non-virtual destructor.</li>
+          <li>Using the result of <code>dynamic_cast</code> without checking it for null.</li>
+          <li><code>dynamic_cast</code> on a class with no virtual functions — a compile error
+            about the source not being polymorphic.</li>
+          <li>Assuming a base pointer and a derived pointer to the same object print the same
+            address. With multiple inheritance, not always.</li>
+          <li>Constructing a base in the constructor <em>body</em> rather than the initialiser
+            list — by then it has already been built, with whatever constructor took no arguments,
+            and if there is not one the code will not compile.</li>
+        </ul>
+      </div>
+
+    </section>

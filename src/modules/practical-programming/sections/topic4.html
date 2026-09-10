@@ -1,0 +1,422 @@
+<section id="topic4" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 04 · Ownership and Moving</div>
+        <h1>Who Deletes It?</h1>
+        <div class="topic-subtitle">unique_ptr, lvalues and rvalues, move semantics</div>
+      </div>
+
+      <p>Topic 2 left you with a rule: every <code>new</code> needs a <code>delete</code>, and
+      getting that right by hand across every early return, exception and branch is a job nobody
+      does perfectly. This topic is the way out. One class holds the pointer and deletes it when it
+      goes out of scope, and the type system is used to guarantee that exactly one thing owns it at
+      a time.</p>
+
+      <p>Making that guarantee hold turns out to need a piece of the language that looks unrelated:
+      the difference between a variable and a temporary. Most of this topic is really about that
+      difference, because it is what lets the compiler tell <em>this object is about to be thrown
+      away</em> from <em>this object is still in use</em> — and once it can tell, it can move
+      things instead of copying them.</p>
+
+      <!-- ===== UNIQUE_PTR ===== -->
+      <h2 id="t4-unique">A pointer that cleans up after itself</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The whole idea, in a class</div>
+        <pre class="pp-snippet">template&lt;typename T&gt;
+class unique_ptr {
+private:
+  T * d;
+public:
+  unique_ptr(T * dIn) : d(dIn)     {}
+  unique_ptr()        : d(nullptr) {}
+  ~unique_ptr() { delete d; }
+
+  unique_ptr(const unique_ptr &amp; other)             = delete;
+  unique_ptr &amp; operator=(const unique_ptr &amp; other) = delete;
+
+  T &amp; operator*()  const { return *d; }
+  T * operator-&gt;() const { return d; }
+};</pre>
+        Three ideas, and that is the entire class.<br><br>
+        <strong>1. The destructor deletes.</strong> Put one on the stack and the delete happens
+        when it goes out of scope — including when you return early, and including when an
+        exception is thrown past you.<br>
+        <strong>2. Copying is banned.</strong> <code>= delete</code> removes a function. If copying
+        were allowed, two objects would hold the same pointer and both destructors would run.<br>
+        <strong>3. It behaves like a pointer.</strong> <code>operator*</code> and
+        <code>operator-&gt;</code> are overloaded, so code that used a raw pointer mostly does not
+        notice.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Using it</div>
+        <pre class="pp-snippet">{
+  unique_ptr&lt;Coordinate&gt; c(new Coordinate(3,4));
+  cout &lt;&lt; *c &lt;&lt; endl;
+}   // the Coordinate is deleted here</pre>
+        No <code>delete</code> anywhere, and no way to forget one. This is the pattern the rest of
+        modern C++ is built on: a resource is owned by an object, and the object’s lifetime is the
+        resource’s lifetime.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Banning copies breaks something useful</div>
+        <pre class="pp-snippet">unique_ptr&lt;Coordinate&gt; makeOne() {
+  return unique_ptr&lt;Coordinate&gt;(new Coordinate(3,4));
+}
+
+int main() {
+  unique_ptr&lt;Coordinate&gt; a;
+  a = makeOne();      // ???
+}</pre>
+        With the class above, this <strong>does not compile</strong> — the assignment operator is
+        the deleted one. But it obviously should work: the thing on the right is a temporary that
+        is about to be destroyed anyway, so nobody would be left holding a second copy of the
+        pointer.<br><br>
+        The real <code>std::unique_ptr</code> accepts it. What it has that the class above does not
+        is an <strong>overload for temporaries</strong> — and to write one, you need a way to say
+        “this parameter is only ever a temporary”.
+      </div>
+
+      <!-- ===== LVALUES AND RVALUES ===== -->
+      <h2 id="t4-values">Variables and temporaries</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The distinction</div>
+        An <strong>lvalue</strong> names something that is still there afterwards — a variable, an
+        array element, whatever a reference refers to, anything you could take the address of.<br>
+        An <strong>rvalue</strong> is a value that exists only inside the expression it appears
+        in: the result of an arithmetic operation, a literal, whatever a function returns by
+        value.<br><br>
+        The names come from where they may appear:
+        <pre class="pp-snippet">int a = 3;        // a is an lvalue, 3 is an rvalue
+int b = a + 7;    // a + 7 is an rvalue
+
+3 = a;            // error: an rvalue cannot be assigned to
+a * 2 = 3;        // error: same reason</pre>
+        The rule that matters is not about assignment, though. It is about references.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">What a reference may name</div>
+        <pre class="pp-snippet">int byValue() { int a = 3, b = 4; return a + b; }
+
+int   y = byValue();   // fine: copy the value out of the temporary
+int &amp; y = byValue();   // error</pre>
+        The second line asks for a reference to a temporary that ceases to exist at the semicolon.
+        If it were allowed, <code>y += 7</code> on the next line would be writing to memory that no
+        longer belongs to anything. So a plain <code>&amp;</code> reference binds only to lvalues.
+        <br><br>
+        With a function that returns a reference, the same call is an lvalue and the same line is
+        fine:
+        <pre class="pp-snippet">class OneInt {
+  int x;
+public:
+  int &amp; getX() { return x; }
+};
+
+OneInt foo;
+int &amp; y = foo.getX();   // fine: names foo.x, which still exists
+++y;                    // foo.x is now 1</pre>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Where this bites in ordinary code</div>
+        <pre class="pp-snippet">void increment(double &amp; d) { d += 1; }
+
+int main() {
+  int x = 7;
+  increment(x);   // error
+}</pre>
+        Nothing here mentions temporaries, and yet: converting the <code>int</code> to a
+        <code>double</code> produces one, and <code>double &amp;</code> will not bind to it. Which
+        is a mercy — if it did bind, the function would faithfully increment a temporary that is
+        discarded on the next line, and <code>x</code> would never change.<br><br>
+        <strong>const references are the exception.</strong> A <code>const double &amp;</code>
+        binds to that temporary quite happily, and the temporary’s lifetime is extended to match
+        the reference. It is safe precisely because you cannot write through it, so there is no
+        change to lose. This is why so many parameters are <code>const T &amp;</code>: it is the
+        one form that takes everything.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The same trap with an iterator</div>
+        <pre class="pp-snippet">iterator insert(iterator &amp; position, const T &amp; value);
+
+LinkedList&lt;int&gt; foo;
+foo.insert(foo.begin(), 42);   // error</pre>
+        <code>begin()</code> returns an iterator <em>by value</em>, so the argument is a temporary
+        and the non-const reference will not bind. Take the iterator by value or by const
+        reference and the call is fine. Iterators are small; by value is the normal choice, which
+        is why the standard containers do it that way.
+      </div>
+
+      <h3 id="t4-vctool">&#128736;&#65039; What binds to what</h3>
+
+      <div class="tool" data-run="runBind">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>References and expressions</h3>
+        </div>
+        <div class="tool-desc">Pick an expression and a way of binding to it. Two of the four take
+          everything; the other two are the ones exams ask about.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="vc-expr">the expression</label>
+            <select id="vc-expr">
+              <option value="x">x</option>
+              <option value="x + 7">x + 7</option>
+              <option value="42">42</option>
+              <option value="byValue()">byValue() &mdash; returns int</option>
+              <option value="byRef()">byRef() &mdash; returns int &amp;</option>
+              <option value="obj.getX()">obj.getX() &mdash; returns int &amp;</option>
+              <option value="obj.copyX()">obj.copyX() &mdash; returns int</option>
+              <option value="*p">*p</option>
+              <option value="arr[0]">arr[0]</option>
+              <option value="std::move(x)">std::move(x)</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="vc-bind">bound to</label>
+            <select id="vc-bind">
+              <option value="value">int y</option>
+              <option value="ref" selected>int &amp; y</option>
+              <option value="constref">const int &amp; y</option>
+              <option value="rvalueref">int &amp;&amp; y</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-output" id="vc-output"></div>
+      </div>
+
+      <!-- ===== RVALUE REFERENCES ===== -->
+      <h2 id="t4-rvalue">Rvalue references</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">A reference that only takes temporaries</div>
+        <code>T &amp;&amp;</code> is a reference that binds to rvalues and refuses lvalues — the
+        exact opposite of <code>T &amp;</code>. On its own that sounds useless. Its point is what
+        it tells you: <strong>whatever you have been handed is about to be destroyed, so you may
+        take it apart.</strong>
+        <pre class="pp-snippet">unique_ptr &amp; operator=(unique_ptr &amp;&amp; other) {
+  delete d;               // throw away what we had
+  d = other.d;            // take theirs
+  other.d = nullptr;      // leave them holding nothing
+  return *this;
+}</pre>
+        Now <code>a = makeOne();</code> compiles. The temporary is an rvalue, so this overload is
+        chosen rather than the deleted copy assignment, and the pointer is handed over instead of
+        duplicated. There is still exactly one owner at every moment — which was the point of
+        banning copies in the first place.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The move constructor is the same idea</div>
+        <pre class="pp-snippet">unique_ptr(unique_ptr &amp;&amp; other) : d(other.d) {
+  other.d = nullptr;
+}</pre>
+        Take the pointer, null out the source. A moved-from object must be left in a state where
+        its destructor is safe to run — here, holding <code>nullptr</code>, which
+        <code>delete</code> is happy with.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why everyone else gets faster too</div>
+        <pre class="pp-snippet">vector&lt;int&gt; massiveVector() {
+  vector&lt;int&gt; toReturn(1000000);
+  return toReturn;
+}
+
+vector&lt;int&gt; a;
+a = massiveVector();</pre>
+        Without an rvalue-reference overload, the assignment takes a const reference and has to
+        copy: allocate a million ints, copy a million ints, then destroy the original. With one, it
+        takes the pointer to the existing array and nulls the source — a couple of assignments,
+        regardless of size.<br><br>
+        Nothing at the call site changed. The overload gets picked automatically because the
+        argument is a temporary, which is why this arrived in C++11 and made existing code faster
+        without anyone editing it.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">std::move does not move anything</div>
+        <pre class="pp-snippet">vector&lt;int&gt; numbers(1000000);
+vector&lt;int&gt; a(std::move(numbers));
+
+cout &lt;&lt; numbers.size() &lt;&lt; endl;   // 0
+cout &lt;&lt; a.size() &lt;&lt; endl;         // 1000000</pre>
+        It is a cast, and nothing else. It takes an lvalue and hands back the same object described
+        as an rvalue, so that overload resolution picks the stealing version. The moving is done by
+        the constructor that gets chosen, not by <code>std::move</code>.<br><br>
+        What it costs you is the promise implied by writing it: <code>numbers</code> still exists
+        and is still a valid vector, but you have said you no longer care what is in it. Reading it
+        afterwards is legal and almost always a bug.
+      </div>
+
+      <h3 id="t4-ovtool">&#128736;&#65039; Which one gets called</h3>
+
+      <div class="tool" data-run="runOverload">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Overload resolution</h3>
+        </div>
+        <div class="tool-desc">Declare some subset of the three overloads, call with something, and
+          see which is viable and which is preferred.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label>declared overloads</label>
+            <div class="ov-checks">
+              <label class="ck"><input type="checkbox" id="ov-ref"> <code>f(Thing &amp;)</code></label>
+              <label class="ck"><input type="checkbox" id="ov-constref" checked>
+                <code>f(const Thing &amp;)</code></label>
+              <label class="ck"><input type="checkbox" id="ov-rvalueref">
+                <code>f(Thing &amp;&amp;)</code></label>
+            </div>
+          </div>
+          <div class="tool-field">
+            <label for="ov-arg">called with</label>
+            <select id="ov-arg">
+              <option value="lvalue">thing &mdash; a variable</option>
+              <option value="constlvalue">kthing &mdash; a const variable</option>
+              <option value="rvalue">Thing() &mdash; a temporary</option>
+              <option value="moved">std::move(thing)</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-output" id="ov-output"></div>
+      </div>
+
+      <!-- ===== THE REST OF UNIQUE_PTR ===== -->
+      <h2 id="t4-rest">The rest of the class</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Converting to bool</div>
+        <pre class="pp-snippet">explicit operator bool() const { return d != nullptr; }</pre>
+        A conversion operator: it says what happens when an object of this type is used where a
+        <code>bool</code> is wanted. So <code>if (p)</code> asks whether the pointer holds
+        anything, exactly as it would for a raw pointer.
+        <pre class="pp-snippet">if (foo) { cout &lt;&lt; *foo &lt;&lt; endl; }
+else     { cout &lt;&lt; "foo is null\n"; }</pre>
+        <strong>The <code>explicit</code> matters.</strong> Without it, the conversion applies
+        anywhere a number would do, and <code>p + 1</code> quietly compiles as
+        <code>true + 1</code>, giving 2. Marked <code>explicit</code>, the conversion is used only
+        where a condition is expected — which is the only place it makes sense.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">get, reset, release</div>
+        <table class="pp-table">
+          <thead><tr><th>call</th><th>what it does</th><th>who owns it afterwards</th></tr></thead>
+          <tbody>
+            <tr><td><code>p.get()</code></td>
+                <td>hands back the raw pointer</td>
+                <td>still the unique_ptr — do not delete what you get</td></tr>
+            <tr><td><code>p.reset(q)</code></td>
+                <td><strong>deletes</strong> what it held, then takes <code>q</code></td>
+                <td>the unique_ptr, now owning <code>q</code></td></tr>
+            <tr><td><code>p.release()</code></td>
+                <td>hands back the raw pointer and forgets it. <strong>Deletes nothing.</strong></td>
+                <td>you. If you drop it, it leaks</td></tr>
+          </tbody>
+        </table>
+        <code>reset</code> and <code>release</code> are the pair people mix up. One frees, the
+        other hands over. <code>release</code> is how you pass ownership out to something that is
+        not a unique_ptr; used by accident it is a straightforward leak.
+      </div>
+
+      <h3 id="t4-uptool">&#128736;&#65039; Who owns it</h3>
+
+      <div class="tool" data-run="runOwnership">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Ownership tracer</h3>
+        </div>
+        <div class="tool-desc">Short programs, line by line: who holds what, when the delete
+          happens, and what the program prints.</div>
+        <div class="tool-output" id="up-output"></div>
+      </div>
+
+      <!-- ===== COMPILER HELP ===== -->
+      <h2 id="t4-compiler">Getting the compiler to help</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Four flags worth knowing</div>
+        <pre class="pp-snippet">g++ -std=c++11 -Wall -Werror -g -D_GLIBCXX_DEBUG -o exec source.cc</pre>
+        <strong>-Wall</strong> — ask for the warnings that are off by default. The name means “all”
+        but does not mean all; <code>-Wextra</code> asks for more.<br>
+        <strong>-Werror</strong> — turn warnings into errors, so they cannot be scrolled past.
+        Standard on most large projects, and the reason is discipline rather than pedantry: a
+        warning nobody fixes is noise that hides the next one.<br>
+        <strong>-g</strong> — keep the information a debugger needs to name your functions and
+        lines.<br>
+        <strong>-D_GLIBCXX_DEBUG</strong> — turn on the standard library’s own checking. Indexing a
+        vector past its end, or dereferencing <code>end()</code>, becomes a clear message at the
+        moment it happens instead of a mysterious crash later. It makes the code substantially
+        slower, so it is a development setting, not a shipping one.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The warning everyone meets first</div>
+        <pre class="pp-snippet">vector&lt;int&gt; numbers(5);
+for (int i = 0; i &lt; numbers.size(); ++i) { ... }</pre>
+        <code>size()</code> returns an unsigned type, <code>i</code> is signed, and comparing them
+        is a warning — with <code>-Werror</code>, a build failure. It is not fussing over nothing:
+        if the signed value is negative it converts to an enormous unsigned one and the comparison
+        comes out backwards.<br><br>
+        Cast it, <code>for (int i = 0; i &lt; (int) numbers.size(); ++i)</code>, or use the
+        matching type, or avoid the question with a range-for.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Too many flags to type</div>
+        <pre class="pp-snippet">exec: source.cc
+	g++ -std=c++11 -Wall -Werror -g -D_GLIBCXX_DEBUG -o exec source.cc</pre>
+        A <code>Makefile</code> gives a target, the files it depends on, and the command to rebuild
+        it. If <code>source.cc</code> is newer than <code>exec</code>, the command runs; otherwise
+        it does not.<br><br>
+        <strong>The line under the target must begin with a tab.</strong> Spaces produce an error
+        that does not mention whitespace, and it is the first thing to check when a Makefile
+        refuses to work.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="t4-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember five things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>An lvalue names something that survives the line; an rvalue does not.</strong>
+            <code>&amp;</code> binds only to the first, <code>&amp;&amp;</code> only to the second,
+            and <code>const &amp;</code> binds to both — which is why it is everywhere.</li>
+          <li><strong>An rvalue reference parameter means the argument is expendable</strong>, so
+            the function may take its contents rather than copy them. That is all move semantics
+            is.</li>
+          <li><strong><code>std::move</code> is a cast.</strong> It performs no move. It makes an
+            lvalue look like an rvalue so that the stealing overload is chosen.</li>
+          <li><strong>unique_ptr deletes what it owns when it goes out of scope, and cannot be
+            copied</strong> — only moved. One owner, always.</li>
+          <li><strong><code>reset</code> deletes, <code>release</code> hands over.</strong> Mixing
+            them up leaks or double-frees.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Expecting <code>int &amp; r = f();</code> to work because
+            <code>int r = f();</code> does.</li>
+          <li>Passing an <code>int</code> to a function taking <code>double &amp;</code> and
+            wondering why it will not compile — the conversion makes a temporary.</li>
+          <li>Reading a variable after <code>std::move</code>. It compiles, and it is empty.</li>
+          <li>Writing <code>operator bool()</code> without <code>explicit</code>, so the object
+            silently takes part in arithmetic.</li>
+          <li>Using <code>release()</code> when you meant <code>reset()</code>, which leaks; or
+            deleting what <code>get()</code> returned, which double-frees.</li>
+          <li>A function returning a non-void type with no <code>return</code> on some path. It
+            compiles by default and is undefined at runtime — one of many reasons for
+            <code>-Wall -Werror</code>.</li>
+        </ul>
+      </div>
+
+    </section>
