@@ -145,4 +145,64 @@
           <li>Returning by value from <code>operator=</code>.</li>
         </ul>
       </div>
+
+      <h2 id="cr-t3">Topic 03 &middot; templates and the STL</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Templates</div>
+        <code>template&lt;typename T&gt; class C { T * elements; ... };</code> &mdash; the argument is
+        part of the type, and the compiler generates the class once per type used.<br><br>
+        <code>template&lt;typename T&gt; const T &amp; max(const T &amp;, const T &amp;);</code>
+        &mdash; call as <code>max&lt;int&gt;(a,b)</code> or let <strong>deduction</strong> work it
+        out. Two different argument types make deduction <em>fail</em>; it never promotes one to the
+        other.<br><br>
+        <code>pair&lt;A,B&gt;</code> has <code>first</code> and <code>second</code>.
+        <code>tuple&lt;...&gt;</code> is read with <strong><code>std::get&lt;0&gt;(t)</code></strong>
+        &mdash; a free function, and the index must be a compile-time constant.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Iterators</div>
+        <code>begin()</code> is the first element; <code>end()</code> is <em>past</em> the last and
+        must never be dereferenced. Loop with <code>!=</code>, not <code>&lt;</code>.<br><br>
+        <strong>insert(itr, x)</strong> &mdash; inserts <em>before</em> itr, returns an iterator to
+        the new element.<br>
+        <strong>erase(itr)</strong> &mdash; returns an iterator to what is now there. Use
+        <code>itr = c.erase(itr);</code> when removing in a loop.<br>
+        <strong>find(k)</strong> &mdash; returns <code>end()</code> if absent. Check before
+        dereferencing.<br><br>
+        Vector iterators support <code>begin() + 2</code> (contiguous); list iterators do not
+        (nodes and links). A range-for is exactly a begin/end loop &mdash; anything with both can be
+        used with it, including your own classes.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Function objects and maps</div>
+        A class with <code>operator()</code> is a function object; <code>comp(a,b)</code> is
+        <code>comp.operator()(a,b)</code>. It can carry state, which a function pointer cannot. Pass
+        one in when <code>operator&lt;</code> would have to mean two different things.<br><br>
+        <code>map</code> is a search tree ordered by key, using
+        <code>less&lt;K&gt;</code> by default:
+        <code>template&lt;typename K, typename V, typename Comp = less&lt;K&gt;&gt;</code>.<br><br>
+        An element is <strong><code>pair&lt;const K, V&gt;</code></strong> &mdash; the key is const
+        because the tree is ordered by it. Loop with <code>auto &amp;</code>.<br><br>
+        <code>insert</code> copies a finished pair; <code>emplace</code> forwards the pieces to the
+        node&rsquo;s constructor (perfect forwarding), as
+        <code>emplace_back</code> does for a vector. Both return
+        <code>pair&lt;iterator, bool&gt;</code>, and <strong>both do nothing if the key is already
+        there</strong>. <code>m[k] = v</code> does overwrite.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li><code>t.get&lt;0&gt;()</code> instead of <code>std::get&lt;0&gt;(t)</code>.</li>
+          <li><code>pair&lt;int,string&gt; &amp;</code> looping a map &mdash; the key is const.</li>
+          <li>Expecting deduction to promote <code>int</code> and <code>double</code>.</li>
+          <li>Dereferencing <code>end()</code>, or <code>find</code>&rsquo;s result unchecked.</li>
+          <li><code>++itr</code> after <code>erase(itr)</code>.</li>
+          <li><code>begin() + 2</code> on a list.</li>
+          <li>Expecting <code>insert</code>/<code>emplace</code> to overwrite an existing key.</li>
+        </ul>
+      </div>
     </section>

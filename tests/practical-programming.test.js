@@ -26,17 +26,52 @@ const { loadModule, Suite, checkStructure, checkQuestionBank } = require('./lib/
 const HAVE_GPP = spawnSync('g++', ['--version'], { encoding: 'utf8' }).status === 0;
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'pp-'));
 
+/* Running a child process safely here takes more care than it looks.
+   spawnSync's `timeout` sends SIGTERM by default and then waits for the child
+   to exit; and even once the child is gone, it goes on waiting for the stdout
+   pipe to close, which a surviving grandchild (g++ forks cc1plus and as) can
+   hold open indefinitely. Because spawnSync blocks the event loop, the suite
+   then hangs with no output and cannot even be interrupted -- SIGTERM to the
+   test runner is never handled.
+
+   So: kill with SIGKILL, which cannot be ignored, and give the child real
+   files for stdout and stderr rather than pipes, so there is nothing left to
+   wait on. Reading the files afterwards gives the same output. A stuck child
+   now costs its timeout and is reported, which is what a test run is for. */
+function runSync(cmd, args, ms, extraEnv) {
+  const o = path.join(TMP, 'out'), e = path.join(TMP, 'err');
+  const fo = fs.openSync(o, 'w'), fe = fs.openSync(e, 'w');
+  let r;
+  try {
+    r = spawnSync(cmd, args, {
+      stdio: ['ignore', fo, fe],
+      timeout: ms,
+      killSignal: 'SIGKILL',
+      env: extraEnv ? Object.assign({}, process.env, extraEnv) : process.env
+    });
+  } finally {
+    fs.closeSync(fo);
+    fs.closeSync(fe);
+  }
+  return {
+    status: r.status,
+    signal: r.signal,
+    stdout: fs.readFileSync(o, 'utf8'),
+    stderr: fs.readFileSync(e, 'utf8')
+  };
+}
+
 /** Compile and run a C++ program. Returns { compiles, out }. */
 function cxx(source) {
   const src = path.join(TMP, 'p.cc');
   const bin = path.join(TMP, 'p');
   fs.writeFileSync(src, source);
-  const c = spawnSync('g++', ['-std=c++11', '-o', bin, src], { encoding: 'utf8', timeout: 30000 });
+  const c = runSync('g++', ['-std=c++11', '-o', bin, src], 30000);
   if (c.status !== 0) {
     const line = (c.stderr || '').split('\n').find(l => /error:/.test(l)) || '';
     return { compiles: false, error: line.trim() };
   }
-  const r = spawnSync(bin, [], { encoding: 'utf8', timeout: 10000 });
+  const r = runSync(bin, [], 10000);
   return { compiles: true, out: (r.stdout || '').trim().split('\n').filter(Boolean) };
 }
 
@@ -45,10 +80,18 @@ function asan(source) {
   const src = path.join(TMP, 'a.cc');
   const bin = path.join(TMP, 'a');
   fs.writeFileSync(src, source);
-  const c = spawnSync('g++', ['-std=c++11', '-g', '-fsanitize=address', '-o', bin, src],
-    { encoding: 'utf8', timeout: 60000 });
+  const c = runSync('g++', ['-std=c++11', '-g', '-fsanitize=address', '-o', bin, src], 60000);
   if (c.status !== 0) return { compiles: false };
-  const r = spawnSync(bin, [], { encoding: 'utf8', timeout: 40000 });
+  const r = runSync(bin, [], 20000, {
+    /* Deterministic reports rather than whatever the environment asks for. */
+    ASAN_OPTIONS: 'detect_leaks=1:abort_on_error=0:exitcode=1',
+    LSAN_OPTIONS: 'report_objects=0'
+  });
+  /* Killed rather than exited: the sanitizer deadlocked, which tells us
+     nothing about the program. Report it as such instead of reading its
+     empty output as "no leak, no abort". */
+  if (r.signal === 'SIGKILL') return { compiles: true, out: [], leaked: 0, aborted: false,
+                                       stalled: true };
   const err = r.stderr || '';
   const m = /SUMMARY: AddressSanitizer: (\d+) byte\(s\) leaked/.exec(err);
   const leaked = m ? +m[1] : 0;
@@ -408,7 +451,7 @@ module.exports = async function run() {
 
   /* The Rule of Three, every combination, against AddressSanitizer. */
   if (HAVE_GPP) {
-    let n = 0, bad = 0, skipped = 0, first = null;
+    let n = 0, bad = 0, skipped = 0, first = null, stalled = 0;
     let sawLeak = 0, sawAbort = 0, sawClean = 0;
 
     ['copy', 'assign', 'self'].forEach(scenario => {
@@ -420,6 +463,7 @@ module.exports = async function run() {
             const sim = w.rtSimulate(opts);
             const real = asan(w.rtGenerate(opts).source);
             n++;
+            if (real.stalled) { stalled++; return; }
             if (!real.compiles) {
               bad++;
               if (!first) first = `${JSON.stringify(opts)} did not compile`;
@@ -467,6 +511,10 @@ module.exports = async function run() {
     s.ok('and ones that crash', sawAbort > 3, `${sawAbort}`);
     s.ok('some leak checks were skipped because the program aborted first',
       skipped > 0, `${skipped} — reported, not silently passed`);
+    /* A sanitizer deadlock is not a result. Tolerated, but never quietly:
+       if most of the run stalled, the block below proved nothing. */
+    s.ok('the sanitizer did not stall on more than a couple of programs',
+      stalled <= 2, stalled ? `${stalled} of ${n} runs were killed after deadlocking` : null);
 
     /* The specific findings the notes make. */
     const shallowCopy = w.rtSimulate({ copy: 'default', assign: 'default', dtor: false,
@@ -493,6 +541,168 @@ module.exports = async function run() {
       w.rtAdvice({ copy: 'deep', assign: 'default', dtor: true }).complete === false);
     s.ok('and a complete one',
       w.rtAdvice({ copy: 'deep', assign: 'deep-delete-guard', dtor: true }).complete);
+  }
+
+  /* ---------------- Topic 3 · templates, iterators, containers ---------------- */
+  {
+    /* Type deduction: T appears twice, so both must agree. */
+    s.is('two ints deduce T = int', w.tdDeduce(['T', 'T'], ['int', 'int']).deduced.T, 'int');
+    s.ok('an int and a double make deduction fail',
+      w.tdDeduce(['T', 'T'], ['int', 'double']).fails);
+    s.ok('two doubles are fine', w.tdDeduce(['T', 'T'], ['double', 'double']).fails === false);
+    s.ok('an argument count mismatch fails', w.tdDeduce(['T', 'T'], ['int']).fails);
+    s.ok('one odd argument out of three still fails',
+      w.tdDeduce(['T', 'T', 'T'], ['int', 'int', 'double']).fails);
+    s.ok('a concrete parameter given the wrong type fails',
+      w.tdDeduce(['int', 'T'], ['double', 'int']).fails);
+    s.ok('and the same concrete parameter given the right one does not',
+      w.tdDeduce(['int', 'T'], ['int', 'string']).fails === false);
+    s.is('two parameters deduce independently',
+      JSON.stringify(w.tdDeduce(['T', 'U'], ['int', 'double']).deduced), '{"T":"int","U":"double"}');
+
+    /* Range-for element binding — the slide-61 case is the one that matters. */
+    const cases = [
+      ['vector<int>', { kind: 'ref', type: 'int' }, true],
+      ['vector<int>', { kind: 'constref', type: 'int' }, true],
+      ['vector<int>', { kind: 'value', type: 'int' }, true],
+      ['vector<int>', { kind: 'autoref' }, true],
+      ['set<int>', { kind: 'ref', type: 'int' }, false],
+      ['set<int>', { kind: 'constref', type: 'int' }, true],
+      ['map<int,string>', { kind: 'ref', type: 'pair<int, string>' }, false],
+      ['map<int,string>', { kind: 'value', type: 'pair<int, string>' }, true],
+      ['map<int,string>', { kind: 'constref', type: 'pair<const int, string>' }, true],
+      ['map<int,string>', { kind: 'autoref' }, true]
+    ];
+    cases.forEach(([c, decl, want]) => {
+      const r = w.rfBind(c, decl);
+      s.is(`${c} taken as ${decl.kind}${decl.type ? ' ' + decl.type : ''}`, r.legal, want, r.why);
+    });
+    s.is('a map element is pair<const int, string>',
+      w.rfBind('map<int,string>', { kind: 'autoref' }).elem, 'pair<const int, string>');
+
+    /* Containers: what insert, erase and find do. */
+    const li = w.ctRun('list', w.CT_PRESETS.listInsert.ops);
+    s.same('insert goes before the iterator', li.items, ['1', '10', '2', '3']);
+    s.is('and returns an iterator to the new element', li.items[li.iters.newItr], '10');
+    s.is('while the original iterator still points at what it did',
+      li.items[li.iters.itr], '2');
+    const le = w.ctRun('list', w.CT_PRESETS.listErase.ops);
+    s.same('erase removes what the iterator pointed at', le.items, ['1', '3']);
+    s.is('and returns an iterator to what is now in that place',
+      le.items[le.iters.newItr], '3');
+    const mf = w.ctRun('map', w.CT_PRESETS.mapFind.ops);
+    s.is('find returns an iterator to the element it found',
+      mf.items[mf.iters.itr], '1194384→"Andrew"');
+    s.is('and end() when there is no such key', mf.iters.miss, mf.items.length);
+    s.is('dereferencing that is the error the slide warns about', mf.errors.length, 1);
+    s.ok('and a list cannot jump two places',
+      w.ctRun('list', w.CT_PRESETS.listJump.ops).errors.length > 0);
+    s.is('but a vector can',
+      w.ctRun('vector', w.CT_PRESETS.vectorJump.ops).errors.length, 0);
+    s.ok('dereferencing end() is refused',
+      w.ctRun('vector', w.CT_PRESETS.endDeref.ops).errors.length > 0);
+    const me = w.ctRun('map', w.CT_PRESETS.mapEmplace.ops);
+    s.same('emplace on an existing key changes nothing',
+      me.items, ['1194384→"Andrew"', '1234567→"Someone"']);
+    const ma = w.ctRun('map', w.CT_PRESETS.mapAssign.ops);
+    s.same('but operator[] overwrites', ma.items, ['1194384→"Andrew Coles"']);
+    const so = w.ctRun('set', w.CT_PRESETS.setOrder.ops);
+    s.same('a set sorts and de-duplicates', so.items, ['2', '7', '9']);
+  }
+
+  /* Every one of those, put to g++. */
+  if (HAVE_GPP) {
+    const H = ['#include <iostream>', '#include <string>', '#include <vector>', '#include <list>',
+               '#include <set>', '#include <map>', '#include <tuple>', '#include <utility>',
+               'using namespace std;'].join('\n') + '\n';
+
+    /* The two errors in the deck. */
+    s.is('slide 8: ans.get<0>() does not compile',
+      cxx(H + 'int main(){ tuple<int,int,bool> a(3,7,true); cout << a.get<0>() << endl; }').compiles,
+      false);
+    s.same('std::get<0>(ans) is the accessor',
+      cxx(H + 'int main(){ tuple<int,int,bool> a(3,7,true);\n' +
+        ' cout << get<0>(a) << "," << get<1>(a) << "," << get<2>(a) << endl; }').out, ['3,7,1']);
+
+    const MAP = 'int main(){ map<int,string> m; m[1]="a"; m[2]="b";\n';
+    s.is('slide 61: pair<int,string> & does not bind to a map element',
+      cxx(H + MAP + ' for (pair<int,string> & e : m) cout << e.first; }').compiles, false);
+    s.same('auto & does', cxx(H + MAP + ' for (auto & e : m) cout << e.first; cout << endl; }').out,
+      ['12']);
+    s.same('and so does a copy',
+      cxx(H + MAP + ' for (pair<int,string> e : m) cout << e.first; cout << endl; }').out, ['12']);
+
+    /* Deduction. */
+    const MAXT = 'template<typename T> const T & mymax(const T & a, const T & b)' +
+      '{ return a < b ? b : a; }\n';
+    s.is('deduction with two ints compiles',
+      cxx(H + MAXT + 'int main(){ int a=3,b=4; cout << mymax(a,b) << endl; }').out.join(''), '4');
+    s.is('with an int and a double it does not',
+      cxx(H + MAXT + 'int main(){ int a=3; double b=4.5; cout << mymax(a,b) << endl; }').compiles,
+      false);
+    s.is('unless T is given explicitly',
+      cxx(H + MAXT + 'int main(){ int a=3; double b=4.5;' +
+        ' cout << mymax<double>(a,b) << endl; }').out.join(''), '4.5');
+
+    /* Element binding, each case compiled. */
+    const bind = [
+      ['vector<int> c{1,2};', 'int &', true], ['vector<int> c{1,2};', 'const int &', true],
+      ['set<int> c{1,2};', 'int &', false], ['set<int> c{1,2};', 'const int &', true],
+      ['map<int,string> c; c[1]="a";', 'pair<int, string> &', false],
+      ['map<int,string> c; c[1]="a";', 'const pair<const int, string> &', true],
+      ['map<int,string> c; c[1]="a";', 'auto &', true]
+    ];
+    let bad = 0, first = null;
+    bind.forEach(([decl, elem, want]) => {
+      const r = cxx(H + `int main(){ ${decl} for (${elem} e : c) { (void)e; } }`);
+      if (r.compiles !== want) {
+        bad++;
+        if (!first) first = `${decl} with ${elem}: g++ says ${r.compiles}, expected ${want}`;
+      }
+    });
+    s.is('g++ agrees on every element-binding case', bad, 0, first);
+
+    /* insert / erase / find return values. */
+    s.same('the iterator passed to insert still names the same element',
+      cxx(H + 'int main(){ list<int> a{1,2,3}; auto i=a.begin(); ++i;' +
+        ' auto n=a.insert(i,10); cout << *n << "|" << *i << endl; }').out, ['10|2']);
+    s.same('list insert returns the new element and inserts before',
+      cxx(H + 'int main(){ list<int> a{1,2,3}; auto i=a.begin(); ++i;' +
+        ' auto n=a.insert(i,10); cout << *n << "|"; for(int x:a) cout << x; cout << endl; }').out,
+      ['10|11023']);
+    s.same('list erase returns what is now there',
+      cxx(H + 'int main(){ list<int> a{1,2,3}; auto i=a.begin(); ++i;' +
+        ' auto n=a.erase(i); cout << *n << "|"; for(int x:a) cout << x; cout << endl; }').out,
+      ['3|13']);
+    s.same('find returns end() when absent',
+      cxx(H + 'int main(){ set<int> a{1,2,3};' +
+        ' cout << (a.find(7)==a.end()) << (a.find(2)==a.end()) << endl; }').out, ['10']);
+    s.same('emplace on an existing key changes nothing and reports false',
+      cxx(H + 'int main(){ map<int,string> k; k.emplace(1,"Andrew");' +
+        ' auto r = k.emplace(1,"Coles");' +
+        ' cout << r.second << "|" << r.first->second << "|" << k.size() << endl; }').out,
+      ['0|Andrew|1']);
+    s.same('operator[] does overwrite',
+      cxx(H + 'int main(){ map<int,string> k; k.emplace(1,"Andrew"); k[1]="Coles";' +
+        ' cout << k[1] << "|" << k.size() << endl; }').out, ['Coles|1']);
+    s.is('a list iterator cannot jump',
+      cxx(H + 'int main(){ list<int> a{1,2,3}; auto i = a.begin() + 2; (void)i; }').compiles, false);
+    s.is('a vector iterator can',
+      cxx(H + 'int main(){ vector<int> a{1,2,3}; auto i = a.begin() + 2;' +
+        ' cout << *i << endl; }').out.join(''), '3');
+
+    /* Function objects and a custom map comparator. */
+    s.same('a comparator picks range rather than speed',
+      cxx(H + 'class Car { double sp, rg; public: Car(double a,double b):sp(a),rg(b){}' +
+        ' double getRange() const { return rg; } double getSpeed() const { return sp; }' +
+        ' bool operator<(const Car&o) const { return sp < o.sp; } };\n' +
+        'struct LTByRange { bool operator()(const Car&a,const Car&b) const' +
+        ' { return a.getRange() < b.getRange(); } };\n' +
+        'template<typename T,typename C> const T & mymax(const T&a,const T&b,C c)' +
+        ' { return c(a,b) ? b : a; }\n' +
+        'int main(){ Car a(120,300), b(100,400);' +
+        ' cout << mymax(a,b,LTByRange()).getRange() << ","' +
+        ' << (a<b?b:a).getSpeed() << endl; }').out, ['400,120']);
   }
 
   /* ---------------- question bank ---------------- */

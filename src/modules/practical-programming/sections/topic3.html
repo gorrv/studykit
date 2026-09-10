@@ -1,0 +1,388 @@
+<section id="topic3" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 03 · Templates and the STL</div>
+        <h1>Write It Once, For Any Type</h1>
+        <div class="topic-subtitle">templates, containers, iterators, function objects and maps</div>
+      </div>
+
+      <p>Weeks 1 and 2 were about one object at a time. This week is about the machinery for holding
+      many of them, and about writing code that does not care what type it holds. Java reaches for
+      generics and <code>Object</code>; C++ generates a separate copy of your code for each type,
+      which is why it costs nothing at runtime and why the error messages are so long.</p>
+
+      <!-- ===== TEMPLATES ===== -->
+      <h2 id="t3-tmpl">Templates</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">From two classes to one</div>
+        <pre class="pp-snippet">template&lt;typename T&gt;
+class template_array {
+private:
+  T * elements;
+  int arraySize;
+public:
+  template_array(const int s) : elements(new T[s]), arraySize(s) {}
+  ~template_array() { delete [] elements; }
+  T &amp; operator[](const int idx) { return elements[idx]; }
+  int size() const { return arraySize; }
+};</pre>
+        Everywhere <code>int</code> appeared, put <code>T</code>. The template argument is
+        <strong>part of the type</strong>:<br>
+        <code>template_array&lt;int&gt; a(10);</code> and
+        <code>template_array&lt;double&gt; b(5);</code> are two unrelated types, and the compiler
+        generates the class separately for each.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Two of the standard ones</div>
+        <code>std::pair&lt;A, B&gt;</code> holds two values, <code>first</code> and
+        <code>second</code> — the usual way to return two things at once.<br>
+        <code>std::tuple&lt;A, B, C, …&gt;</code> holds any number.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The slide reads a tuple the wrong way</div>
+        Slide 8 prints <code>ans.get&lt;0&gt;()</code>. A tuple has no member called
+        <code>get</code>, and that line does not compile. The accessor is a <em>free function
+        template</em>:<br><br>
+        <code>std::get&lt;0&gt;(ans)</code><br><br>
+        The index has to be a compile-time constant, because the type of what comes back depends on
+        it — <code>get&lt;0&gt;</code> and <code>get&lt;2&gt;</code> have different return types, so
+        it could never be an ordinary runtime argument. That is also why there is no
+        <code>ans[i]</code>.
+      </div>
+
+      <h3 id="t3-tdtool">&#128736;&#65039; What is T?</h3>
+
+      <div class="tool" data-run="runDeduce">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Template type deduction</h3>
+        </div>
+        <div class="tool-desc">Give the two arguments different types and watch deduction refuse
+          rather than convert.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="td-a">a is</label>
+            <select id="td-a">
+              <option value="int">int</option>
+              <option value="double">double</option>
+              <option value="string">string</option>
+              <option value="char">char</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="td-b">b is</label>
+            <select id="td-b">
+              <option value="int">int</option>
+              <option value="double">double</option>
+              <option value="string">string</option>
+              <option value="char">char</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="td-explicit">T</label>
+            <select id="td-explicit">
+              <option value="deduce">let it deduce</option>
+              <option value="int">given as int</option>
+              <option value="double">given as double</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runDeduce()">Deduce ▶</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="td-output" class="tool-output"></div>
+      </div>
+
+      <!-- ===== THE STL ===== -->
+      <h2 id="t3-stl">The Standard Template Library</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">What is in it</div>
+        The C++ standard splits into the <strong>core</strong> — syntax and language features — and
+        the <strong>standard library</strong>, of which the STL is the container and algorithm part.
+        It is optional, in the sense that you reach it through <code>#include</code>, and you should
+        essentially always use it.
+        <table style="margin:8px 0 0;">
+          <tr><th><code>vector</code></th><td>a growable array</td><td>~ Java ArrayList</td></tr>
+          <tr><th><code>list</code></th><td>a doubly linked list</td><td>~ LinkedList</td></tr>
+          <tr><th><code>set</code></th><td>a sorted set</td><td>~ TreeSet</td></tr>
+          <tr><th><code>unordered_set</code></th><td>a hash set</td><td>~ HashSet</td></tr>
+          <tr><th><code>map</code></th><td>a sorted key–value store</td><td>~ TreeMap</td></tr>
+          <tr><th><code>deque</code></th><td>a double-ended queue</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- ===== LOOPING ===== -->
+      <h2 id="t3-loop">Looping, auto, and iterators</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The range-for, and the three ways to take the element</div>
+        <pre class="pp-snippet">for (int &amp; item : p)          // modify the container's elements
+for (const int &amp; item : p)    // read them, no copy
+for (int item : p)            // a copy of each — changes go nowhere
+for (auto &amp; item : p)        // whatever the element is, by reference</pre>
+        <code>auto</code> works out the element type for you, and picks up
+        <code>const</code> when the container is const. That is not just less typing: it is the
+        version that keeps compiling when the container’s element type changes.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Iterators</div>
+        <pre class="pp-snippet">vector&lt;int&gt;::iterator itr = a.begin();
+cout &lt;&lt; *itr &lt;&lt; endl;    // dereference, as with a pointer
+++itr;                    // move to the next element</pre>
+        <code>::</code> names a type defined inside a class, the way Java writes
+        <code>BorderLayout.NORTH</code>. An iterator is a pointer in disguise — for a vector it
+        genuinely wraps a <code>T *</code>, with <code>operator*</code> and <code>operator++</code>
+        written to do the obvious things.<br><br>
+        <strong><code>end()</code> points past the last element.</strong> For a vector of size 10
+        the elements are 0 to 9 and <code>end()</code> is position 10. It exists to be compared
+        against; dereferencing it is undefined behaviour.
+        <pre class="pp-snippet">for (auto itr = a.begin(), e = a.end(); itr != e; ++itr)</pre>
+        Note <code>!=</code> rather than <code>&lt;</code>: not every iterator supports ordering,
+        but they all support comparison for equality.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">There is no magic in the range-for</div>
+        <code>for (int &amp; element : a)</code> <em>is</em> the loop above, written out by the
+        compiler. Anything with a <code>begin()</code> and an <code>end()</code> can be used with it
+        — standard containers, and any class of your own that provides them.
+      </div>
+
+      <h3 id="t3-rftool">&#128736;&#65039; Will this loop compile?</h3>
+
+      <div class="tool" data-run="runRangeFor">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Range-for element types</h3>
+        </div>
+        <div class="tool-desc">Pick a container and an element declaration. The tool shows what one
+          element actually is, whether your declaration can bind to it, and what the loop desugars
+          to. Try <code>map</code> with <code>pair&lt;int, string&gt; &amp;</code>.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="rf-container">container</label>
+            <select id="rf-container">
+              <option value="vector&lt;int&gt;">vector&lt;int&gt;</option>
+              <option value="list&lt;int&gt;">list&lt;int&gt;</option>
+              <option value="set&lt;int&gt;">set&lt;int&gt;</option>
+              <option value="map&lt;int,string&gt;">map&lt;int,string&gt;</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="rf-kind">taken as</label>
+            <select id="rf-kind">
+              <option value="ref">T &amp;</option>
+              <option value="constref">const T &amp;</option>
+              <option value="value">T (a copy)</option>
+              <option value="autoref">auto &amp;</option>
+              <option value="constautoref">const auto &amp;</option>
+              <option value="auto">auto (a copy)</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="rf-type">where T is</label>
+            <select id="rf-type">
+              <option value="int">int</option>
+              <option value="string">string</option>
+              <option value="pair&lt;int, string&gt;">pair&lt;int, string&gt;</option>
+              <option value="pair&lt;const int, string&gt;">pair&lt;const int, string&gt;</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runRangeFor()">Check ▶</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="rf-output" class="tool-output"></div>
+      </div>
+
+      <h3 id="t3-cttool">&#128736;&#65039; What the container does</h3>
+
+      <div class="tool" data-run="runContainer">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Iterators, insert, erase and find</h3>
+        </div>
+        <div class="tool-desc">Each row is the container after one operation, with the iterators drawn
+          where they point. The things worth being certain about are what <code>insert</code> and
+          <code>erase</code> return.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 240px;">
+            <label for="ct-preset">scenario</label>
+            <select id="ct-preset">
+              <option value="listInsert">list · insert before an iterator</option>
+              <option value="listErase">list · erase</option>
+              <option value="vectorJump">vector · begin() + 2</option>
+              <option value="listJump">list · begin() + 2 (refused)</option>
+              <option value="endDeref">vector · dereferencing end()</option>
+              <option value="mapEmplace">map · emplace an existing key</option>
+              <option value="mapAssign">map · operator[] overwrites</option>
+              <option value="mapFind">map · find, hit and miss</option>
+              <option value="setOrder">set · order and duplicates</option>
+            </select>
+          </div>
+          <button class="tool-btn" onclick="runContainer()">Run ▶</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div id="ct-output" class="tool-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">insert, erase and find</div>
+        <strong>insert</strong> puts the new element <em>before</em> the iterator and returns an
+        iterator to what it inserted.<br>
+        <strong>erase</strong> removes what the iterator points at and returns an iterator to what is
+        now in that position — what used to be next. That return value is what makes
+        <code>itr = c.erase(itr);</code> the correct way to remove inside a loop; incrementing after
+        an erase uses an iterator that no longer means anything.<br>
+        <strong>find</strong> returns <code>end()</code> when there is no match. Compare against
+        <code>end()</code> <em>before</em> dereferencing.<br><br>
+        Vector iterators support <code>begin() + 2</code>, because the elements are contiguous and
+        that is arithmetic. List iterators do not — a list is nodes joined by pointers, so you have
+        to walk it.
+      </div>
+
+      <!-- ===== FUNCTION OBJECTS ===== -->
+      <h2 id="t3-func">Template functions and function objects</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">A function that takes any type</div>
+        <pre class="pp-snippet">template&lt;typename T&gt;
+const T &amp; max(const T &amp; a, const T &amp; b) {
+  if (a &lt; b) { return b; } else { return a; }
+}</pre>
+        Call it as <code>max&lt;int&gt;(a, b)</code>, or just <code>max(a, b)</code> and let
+        <strong>type deduction</strong> work T out from the arguments. Note the requirement hiding in
+        the body: whatever T is, it must support <code>&lt;</code>.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Only one operator&lt; per type — so pass the comparison in</div>
+        <pre class="pp-snippet">class LTByRange {
+public:
+  bool operator()(const Car &amp; a, const Car &amp; b) const {
+    return (a.getRange() &lt; b.getRange());
+  }
+};</pre>
+        A class with <code>operator()</code> is a <strong>function object</strong>, and
+        <code>comp(a, b)</code> is <code>comp.operator()(a, b)</code>. It can be passed like a value
+        and called like a function — so a template can take the comparison as a parameter:
+        <pre class="pp-snippet">template&lt;typename T, typename Comp&gt;
+const T &amp; max(const T &amp; a, const T &amp; b, Comp comp) {
+  if (comp(a, b)) { return b; } else { return a; }
+}
+
+Car highestRange = max(a, b, LTByRange());</pre>
+        Both T and Comp are deduced. A function object can also carry state, which a plain function
+        pointer cannot — that is the reason the STL is built around them.
+      </div>
+
+      <!-- ===== MAPS ===== -->
+      <h2 id="t3-map">std::map</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">How it works</div>
+        A map is an associative container built as a <strong>binary search tree indexed by key</strong>.
+        Each node’s left subtree holds smaller keys and its right subtree larger ones, so the map
+        needs to be able to say when one key is less than another. By default it uses
+        <code>&lt;</code>, through a function object:
+        <pre class="pp-snippet">template&lt;typename T&gt;
+class less {
+public:
+  bool operator()(const T &amp; lhs, const T &amp; rhs) const { return (lhs &lt; rhs); }
+};
+
+template&lt;typename K, typename V, typename Comp = less&lt;K&gt; &gt;
+class map { protected: Comp comp; ... };</pre>
+        Supply your own as the third argument when <code>&lt;</code> is not what you want:
+        <code>map&lt;SomeClass, int, SomeClassLT&gt; myMap;</code>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Looping over a map — the slide’s version does not compile</div>
+        Slide 61 writes:
+        <pre class="pp-snippet">for (pair&lt;int,string&gt; &amp; elem : kNumbers)   // ✗</pre>
+        A map element is a <code>pair&lt;<strong>const</strong> int, string&gt;</code>. The key is
+        const because the tree is <em>ordered by it</em> — changing a key in place would leave the
+        map sorted wrongly, with no way to notice. So there is no
+        <code>pair&lt;int, string&gt;</code> for that reference to bind to.<br><br>
+        Any of these work:
+        <pre class="pp-snippet">for (auto &amp; elem : kNumbers)                          // ✓ and the usual choice
+for (const pair&lt;const int, string&gt; &amp; elem : kNumbers) // ✓ the full type
+for (pair&lt;int,string&gt; elem : kNumbers)                // ✓ but copies each element</pre>
+        This is exactly the case <code>auto</code> exists for, and the slides recommend it nine
+        slides earlier.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Getting things in and out</div>
+        <pre class="pp-snippet">kNumbers.insert(pair&lt;int,string&gt;(1194384, "Andrew"));  // build a pair, then copy it in
+kNumbers.emplace(1194384, "Andrew");                     // forward the arguments, build in place</pre>
+        <strong>insert</strong> takes a finished pair and the map copies it into a node.
+        <strong>emplace</strong> takes the pieces and hands them straight to the node’s constructor,
+        so no temporary pair is built and copied. That is <strong>perfect forwarding</strong>, and
+        <code>vector::emplace_back(4, -2)</code> is the same idea against
+        <code>push_back(Coordinate(4, -2))</code>.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Adding a key that is already there does nothing</div>
+        Not &ldquo;overwrites&rdquo; — <em>nothing</em>. Both <code>insert</code> and
+        <code>emplace</code> return a <code>pair&lt;iterator, bool&gt;</code>:<br>
+        <strong>first</strong> — an iterator to the element with that key, new or existing<br>
+        <strong>second</strong> — <code>true</code> if it was actually inserted
+        <pre class="pp-snippet">auto result = kNumbers.emplace(1194384, "Andrew Coles");
+cout &lt;&lt; result.second &lt;&lt; endl;              // 0 if the key was already there
+result.first-&gt;second = "Andrew Coles";       // force the value anyway
+
+kNumbers[1194384] = "Andrew Coles";          // ...or just this</pre>
+        <code>operator[]</code> <em>does</em> overwrite, and creates the entry when it is missing —
+        which is also why <code>m[k]</code> is not available on a const map.
+      </div>
+
+      <!-- ===== EXAM ===== -->
+      <h2 id="t3-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">What to be able to do without thinking</div>
+        <strong>Turn a concrete class into a template.</strong> Replace the type with
+        <code>T</code>, add <code>template&lt;typename T&gt;</code>, remember the argument is part of
+        the type.<br><br>
+        <strong>Say what T is deduced to be</strong>, and why two different argument types make
+        deduction fail rather than convert.<br><br>
+        <strong>Write an iterator loop</strong> with <code>begin()</code>, <code>!=&nbsp;end()</code>
+        and <code>++</code>, and say what <code>end()</code> is.<br><br>
+        <strong>Know what insert and erase return</strong>, and why erase’s return value is what lets
+        you remove inside a loop.<br><br>
+        <strong>Write a function object</strong> — a class with <code>operator()</code> — and pass it
+        to a template as a comparator.<br><br>
+        <strong>Loop over a map correctly</strong>, and say why the element type has a const key.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Traps</div>
+        <ul style="margin:6px 0 0;">
+          <li><code>tuple.get&lt;0&gt;()</code> — it is <code>std::get&lt;0&gt;(tuple)</code>.</li>
+          <li><code>pair&lt;int,string&gt; &amp;</code> when looping a map. The key is const.</li>
+          <li>Expecting deduction to promote <code>int</code> and <code>double</code> to a common
+            type.</li>
+          <li>Dereferencing <code>end()</code>, or using <code>find</code>’s result without checking
+            it first.</li>
+          <li><code>++itr</code> after <code>erase(itr)</code>. Use the returned iterator.</li>
+          <li><code>begin() + 2</code> on a list.</li>
+          <li>Expecting <code>insert</code> or <code>emplace</code> to overwrite an existing key.</li>
+          <li>Forgetting that a container’s <code>operator&lt;</code> requirement means your class
+            needs one before it can be a set element or a map key.</li>
+        </ul>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The one-sentence version</div>
+        A template is a recipe the compiler follows once per type you use it with, and the STL is
+        that idea applied to every container and algorithm you would otherwise write badly yourself —
+        with iterators as the common language that lets any algorithm work on any container.
+      </div>
+
+    </section>

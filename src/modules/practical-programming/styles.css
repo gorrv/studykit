@@ -284,3 +284,52 @@
     color: var(--ink-muted);
   }
   .rt-mwhen { font-size: 10.5px; color: var(--ink-soft); }
+
+  /* ---------- Topic 03 · templates and containers ---------- */
+
+  .td-call, .rf-elem, .rf-desugar, .td-inst {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--surface-2);
+    padding: 10px 13px;
+    margin: 12px 0;
+  }
+  .td-call { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; }
+  .rf-elem code { font-size: 13px; font-weight: 600; }
+
+  .ct-steps { margin: 14px 0 4px; }
+  .ct-step {
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 10px 13px;
+    margin-bottom: 9px;
+    background: var(--surface-2);
+  }
+  .ct-op {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .ct-row { display: flex; flex-wrap: wrap; gap: 5px; align-items: flex-start; margin: 6px 0; }
+  .ct-cell {
+    border: 1px solid var(--pp-obj-edge);
+    background: var(--pp-obj);
+    border-radius: 6px;
+    padding: 5px 9px;
+    min-width: 40px;
+    text-align: center;
+  }
+  .ct-cell.end { background: var(--surface-3); border-style: dashed; color: var(--ink-soft); }
+  .ct-cell.pointed { border-color: var(--pp-shared-edge); background: var(--pp-shared); }
+  .ct-val { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+  .ct-ptr {
+    display: block;
+    margin-top: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--accent-2);
+    font-weight: 600;
+  }
