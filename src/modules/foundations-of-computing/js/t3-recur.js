@@ -3,7 +3,7 @@
 
      A recurrence defines T(n) in terms of smaller values of T. To
      turn it into a closed form you guess the answer and prove it by
-     induction, which the lectures call the method of substitution:
+     induction, sometimes called the method of substitution:
 
          Base case)      the formula holds at the smallest n
          Inductive case) assume it holds at k (or at all m ≤ k),
@@ -39,7 +39,7 @@
    *             | floor/ceil brackets
    *
    * Juxtaposition means multiplication, so 2T(n-1) and 9T(n/3) parse
-   * the way they are written on a slide.
+   * the way they are written on paper.
    *
    * @param {function(number): number} T  called for T(...) subterms
    * @returns {{ok: true, f: function(number): number} | {ok: false, error}}

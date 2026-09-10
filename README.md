@@ -35,7 +35,7 @@ change an input and everything downstream recomputes.
 marked by the same code the tools use, so you can't learn the answers by repetition. Every question
 explains its own working when you get it wrong.
 
-**Every figure is computed.** No screenshots of lecture slides. The overfitting plots come from a
+**Every figure is computed.** Nothing is a screenshot. The overfitting plots come from a
 real polynomial fit; the ε-greedy curves from a 400-run simulation; the dendrogram from an actual
 complete-linkage merge; the A\* map from the real graph.
 

@@ -52,14 +52,14 @@
 
   function pbPreset(which) {
     var el = document.getElementById('pb-text');
-    if (el) el.value = PB_PRESETS[which] || PB_PRESETS.lecture;
+    if (el) el.value = PB_PRESETS[which] || PB_PRESETS.worked;
     runDist();
   }
 
   function runDist() {
     var out = document.getElementById('pb-output');
     if (!out) return;
-    var d = pbRead('pb-text', PB_PRESETS.lecture);
+    var d = pbRead('pb-text', PB_PRESETS.worked);
     if (!d.ok) return pbBad('pb-output', d);
 
     var mu = pbMean(d), v = pbVar(d), m2 = pbMoment(d, 2);
@@ -92,7 +92,7 @@
     h += '<div class="pb-two">' +
       '<div class="pb-half"><div class="pb-cap">The definition</div>' +
         'Var[X] = E[(X − μ)²] = ' + frShow(v.direct) + '</div>' +
-      '<div class="pb-half"><div class="pb-cap">The theorem on slide 13</div>' +
+      '<div class="pb-half"><div class="pb-cap">The shortcut theorem</div>' +
         'E[X²] − E[X]² = ' + frShow(m2) + ' − ' + frShow(frMul(mu, mu)) + ' = ' +
         frShow(v.shortcut) + '</div></div>';
 
@@ -151,8 +151,8 @@
 
     if (!r.nonNegative && !r.holds) {
       h += '<div class="callout warn" style="margin:14px 0;">' +
-        '<div class="callout-label">This is a counterexample to the slide as written</div>' +
-        'The slide states Markov’s inequality with no condition on X at all. Here the bound fails, ' +
+        '<div class="callout-label">This is a counterexample to the usual statement</div>' +
+        'Markov’s inequality is often stated with no condition on X at all. Here the bound fails, ' +
         'and it fails because the missing hypothesis <strong>X ≥ 0</strong> is missing. With a ' +
         'negative mean, multiplying it by a larger a moves the threshold <em>down</em>, so the event ' +
         'gets more likely rather than less — the inequality runs backwards. Write the hypothesis down ' +
@@ -234,7 +234,7 @@
 
   function ptmPreset(which) {
     var el = document.getElementById('pt-text');
-    if (el) el.value = PTM_PRESETS[which] || PTM_PRESETS.lecture;
+    if (el) el.value = PTM_PRESETS[which] || PTM_PRESETS.worked;
     var w = document.getElementById('pt-word');
     if (w) w.value = which === 'biased' ? '' : (which === 'deterministic' ? '111' : '111');
     runPtm();
@@ -244,7 +244,7 @@
     var out = document.getElementById('pt-output');
     if (!out) return;
     var el = document.getElementById('pt-text');
-    var p = ptmParse((el ? el.value : '') || PTM_PRESETS.lecture);
+    var p = ptmParse((el ? el.value : '') || PTM_PRESETS.worked);
     if (!p.ok) return pbBad('pt-output', p);
 
     var word = ((document.getElementById('pt-word') || {}).value || '');
@@ -378,7 +378,7 @@
         h += '<div class="pc-zpp"><div class="pb-cap">ZPP ⊆ BPP, on a concrete runtime</div>' +
           'Take a Las Vegas machine whose running time is the distribution below, cut it off at ' +
           'K = 3·E[T] = ' + frShow(z.K) + ' steps, and flip a coin if it has not finished.' +
-          '<table class="pc-table"><tr><th></th><th>this machine</th><th>the slide’s bound</th>' +
+          '<table class="pc-table"><tr><th></th><th>this machine</th><th>the usual bound</th>' +
           '<th>the honest bound</th></tr>' +
           '<tr><th>Prob(accept | w ∈ L)</th><td>' + frShow(z.accIn) + '</td><td>≥ ' +
             frShow(z.slideBoundIn) + '</td><td>≥ ' + frShow(z.honestBoundIn) + '</td></tr>' +

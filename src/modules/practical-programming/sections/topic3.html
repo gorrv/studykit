@@ -6,7 +6,7 @@
         <div class="topic-subtitle">templates, containers, iterators, function objects and maps</div>
       </div>
 
-      <p>Weeks 1 and 2 were about one object at a time. This week is about the machinery for holding
+      <p>Topics 1 and 2 were about one object at a time. This one is about the machinery for holding
       many of them, and about writing code that does not care what type it holds. Java reaches for
       generics and <code>Object</code>; C++ generates a separate copy of your code for each type,
       which is why it costs nothing at runtime and why the error messages are so long.</p>
@@ -42,8 +42,8 @@ public:
       </div>
 
       <div class="callout warn">
-        <div class="callout-label">The slide reads a tuple the wrong way</div>
-        Slide 8 prints <code>ans.get&lt;0&gt;()</code>. A tuple has no member called
+        <div class="callout-label">A tuple is not read the way it looks</div>
+        It looks as though you would write <code>ans.get&lt;0&gt;()</code>. A tuple has no member called
         <code>get</code>, and that line does not compile. The accessor is a <em>free function
         template</em>:<br><br>
         <code>std::get&lt;0&gt;(ans)</code><br><br>
@@ -301,8 +301,8 @@ class map { protected: Comp comp; ... };</pre>
       </div>
 
       <div class="callout warn">
-        <div class="callout-label">Looping over a map — the slide’s version does not compile</div>
-        Slide 61 writes:
+        <div class="callout-label">Looping over a map — the obvious version does not compile</div>
+        The obvious version:
         <pre class="pp-snippet">for (pair&lt;int,string&gt; &amp; elem : kNumbers)   // ✗</pre>
         A map element is a <code>pair&lt;<strong>const</strong> int, string&gt;</code>. The key is
         const because the tree is <em>ordered by it</em> — changing a key in place would leave the
@@ -312,8 +312,7 @@ class map { protected: Comp comp; ... };</pre>
         <pre class="pp-snippet">for (auto &amp; elem : kNumbers)                          // ✓ and the usual choice
 for (const pair&lt;const int, string&gt; &amp; elem : kNumbers) // ✓ the full type
 for (pair&lt;int,string&gt; elem : kNumbers)                // ✓ but copies each element</pre>
-        This is exactly the case <code>auto</code> exists for, and the slides recommend it nine
-        slides earlier.
+        This is exactly the case <code>auto</code> exists for.
       </div>
 
       <div class="callout exam">

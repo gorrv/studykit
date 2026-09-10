@@ -34,7 +34,7 @@
         words outside L it may simply run forever. You can confirm a &ldquo;yes&rdquo; by waiting; you
         can never confirm a &ldquo;no&rdquo;, because waiting longer always remains an option.<br><br>
         The halting problem sits exactly here. It is recognisable — simulate, and accept if the machine
-        stops — and it is not decidable, which is what the rest of this topic proves. The slide defines
+        stops — and it is not decidable, which is what the rest of this topic proves. It is usually defined
         decidable and stops; the distinction is where most of the interest lives.
       </div>
 
@@ -197,7 +197,7 @@ odd _ rej _ ></textarea>
           <span class="tool-badge">Practice tool</span>
           <h3>The table, the diagonal, and where every row fails</h3>
         </div>
-        <div class="tool-desc">Starts on the table from the slides. Edit it or randomise it as often
+        <div class="tool-desc">Starts on the standard worked table. Edit it or randomise it as often
           as you like — the tool reports, for each machine, exactly which words it disagrees with L
           about, and no table will ever produce a row equal to L.</div>
         <div class="tool-controls">
@@ -210,7 +210,7 @@ odd _ rej _ ></textarea>
 ✗ ✓ ✗ ✓ ✗ ✗ ✗ ✓ ✗</textarea>
           </div>
           <button class="tool-btn" onclick="runDiagonal()">Diagonalise ▶</button>
-          <button class="tool-btn secondary" onclick="dgPreset()">The slide&rsquo;s table</button>
+          <button class="tool-btn secondary" onclick="dgPreset()">The worked table</button>
           <button class="tool-btn secondary" onclick="dgRandomise()">Randomise</button>
         </div>
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
@@ -337,10 +337,10 @@ q0 _ acc _ ></textarea>
         <div class="callout-label">Two details worth getting right</div>
         <strong>Satisfiability and validity are complements, not the same thing.</strong> F is
         satisfiable exactly when ¬F is <em>not</em> a tautology. The reduction therefore lands on the
-        complement of the Entscheidungsproblem — which the slide says, and which is easy to skate
+        complement of the Entscheidungsproblem — which is easy to skate
         past. Undecidability transfers to complements anyway, since a decider for a language gives one
         for its complement by swapping the answers.<br><br>
-        <strong>The reduction only needs to be computable, not polynomial.</strong> The slide calls it
+        <strong>The reduction only needs to be computable, not polynomial.</strong> It is often called
         a polynomial reduction. It is one, but the extra strength is not used: for an undecidability
         argument all that matters is that the translation is something a machine can carry out. Saying
         &ldquo;polynomial&rdquo; suggests a complexity result where this is a computability one.

@@ -2,13 +2,13 @@
      TOPIC 08 · linear programs, in exact arithmetic
      ------------------------------------------------------------
      Every number here is a rational, not a float. That is not
-     fussiness. The lecture's own tableau is full of 0.25, 1.75 and
+     fussiness. The standard tableau is full of 0.25, 1.75 and
      2.5; one branch-and-bound subproblem has optimum x = 13/3,
-     which the slide rounds to 4.3 and then reports a cost of 11.6
-     when it is 35/3 = 11.6667; and the final cost row on slide 18
+     which the usual write-up rounds to 4.3 and then reports a cost of 11.6
+     when it is 35/3 = 11.6667; and the final cost row
      contains an arithmetic slip that floating point would have
      buried under a rounding excuse. Exact arithmetic means a
-     disagreement with the deck is always a real disagreement.
+     disagreement with the worked answer is always a real disagreement.
 
      The other decision worth naming: the optimum is found here by
      enumerating the vertices of the feasible region, NOT by the
@@ -132,7 +132,7 @@
      x + 2y  <= 7
 
      Non-negativity is implicit for every variable, because the LP
-     problem as the lecture defines it outputs x in (R>=0)^n. Those
+     problem as the standard treatment defines it outputs x in (R>=0)^n. Those
      rows are kept in the constraint list but marked, so the tools
      can show them separately from what the user typed.
   */
@@ -368,7 +368,7 @@
           'optimum with it, so no finite maximum exists.'
         : (ties.length > 1
             ? 'The optimum is attained at ' + ties.length + ' vertices, so every point on the edge ' +
-              'between them is optimal too — the "infinitely many solutions" case on the slide.'
+              'between them is optimal too — the "infinitely many solutions" case.'
             : 'A unique optimal vertex.')
     };
   }
@@ -419,10 +419,10 @@
     return { ok: true, pts: pts.map(function (p) { return p.v; }), ring: pts };
   }
 
-  /* ---------- the lecture's programs ---------- */
+  /* ---------- the standard programs ---------- */
 
   var LP_PRESETS = {
-    lecture: 'max 2x + 3y\n3x + 2y <= 15\n2y - x <= 5\nx + 2y <= 7',
+    worked: 'max 2x + 3y\n3x + 2y <= 15\n2y - x <= 5\nx + 2y <= 7',
     unique:  'max 3x + y\nx + y <= 4\nx <= 3\ny <= 3',
     many:    'max 2x + 2y\nx + y <= 4\nx <= 3\ny <= 3',
     empty:   'max x + y\nx + y <= 2\nx + y >= 5',

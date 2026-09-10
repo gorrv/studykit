@@ -192,7 +192,7 @@
       check: textCheck(right),
       explain: 'Closing each path on itself gives two separate cycles — every vertex is still ' +
         'covered, but it is not a single Hamiltonian cycle. You have to join each path to the ' +
-        '<em>other</em> one. This is what the slides&rsquo; Step 4, &ldquo;make sure the swap does ' +
+        '<em>other</em> one. This is what Step 4, &ldquo;make sure the swap does ' +
         'not disconnect the graph&rdquo;, is about; stated as a tour operation it is simply ' +
         '&ldquo;reverse the segment between the two removed edges&rdquo;.',
     };
@@ -222,7 +222,7 @@
   /* ---- Is this instance metric? ---- */
   QZ_GEN.push({ topic: 'approx', make: function () {
     var useMetric = Math.random() < 0.5;
-    var g = tspParse(TSP_PRESETS[useMetric ? qzPick(['lecture', 'cross', 'square']) : 'nonmetric']);
+    var g = tspParse(TSP_PRESETS[useMetric ? qzPick(['worked', 'cross', 'square']) : 'nonmetric']);
     if (!g.ok) throw new Error('retry');
     if (g.metric.ok !== useMetric) throw new Error('retry');
     var yes = 'Yes — the triangle inequality holds';

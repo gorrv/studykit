@@ -238,7 +238,7 @@ read(fd, buffer, 100);   <span style="color:#7eb892;">// looks like a function c
       </div>
 
       <h3>📘 Regaining control: cooperative vs non-cooperative (OSTEP)</h3>
-      <p>Here's a subtle problem the lectures gloss over: if a process is running on the CPU, then by definition <strong>the OS is not running</strong>. So how can the OS ever take back control to switch processes? Two approaches:</p>
+      <p>Here's a subtle problem that is usually glossed over: if a process is running on the CPU, then by definition <strong>the OS is not running</strong>. So how can the OS ever take back control to switch processes? Two approaches:</p>
 
       <div class="compare-2">
         <div class="mode-box user" style="background:#ecf4e6; border-color:var(--accent-3);">
@@ -278,7 +278,7 @@ read(fd, buffer, 100);   <span style="color:#7eb892;">// looks like a function c
       <!-- ===== Stack Recap ===== -->
       <h2 id="t1-stack">Stack Recap (bonus)</h2>
 
-      <p>The lectures include a stack refresher because system calls and procedure calls rely on it.</p>
+      <p>A stack refresher, because system calls and procedure calls rely on it.</p>
 
       <ul>
         <li>A <strong>stack</strong> is a memory region used like a stack of plates: <strong>last in, first out</strong>.</li>
@@ -305,7 +305,7 @@ read(fd, buffer, 100);   <span style="color:#7eb892;">// looks like a function c
 
       <!-- ===== STACK VISUALISER ===== -->
       <h3 id="t1-stacktool">🛠️ Interactive: Stack Push/Pop</h3>
-      <p>Get a feel for last-in-first-out. Push and pop values manually, or watch the recursive triangular-number example (from the lectures) push a frame per call and unwind back.</p>
+      <p>Get a feel for last-in-first-out. Push and pop values manually, or watch the recursive triangular-number example push a frame per call and unwind back.</p>
 
       <div class="tool" data-run="stkRender">
         <div class="tool-header">
@@ -349,6 +349,6 @@ read(fd, buffer, 100);   <span style="color:#7eb892;">// looks like a function c
         </ol>
       </div>
 
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 01 notes. Send Topic 02 slides whenever you're ready.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 01.</p>
 
     </section>

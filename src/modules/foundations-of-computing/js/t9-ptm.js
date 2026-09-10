@@ -16,7 +16,7 @@
      Running it produces a TREE rather than a sequence. The
      probability of a branch is the product along it, and the
      probability that the machine accepts is the sum over all
-     accepting branches — which is exactly what the slides say,
+     accepting branches — which is exactly what the usual write-up says,
      and is only true because distinct branches are disjoint
      events.
      ============================================================ */
@@ -206,11 +206,11 @@
   }
 
   var PTM_PRESETS = {
-    /* Reproduces the shape on slides 9 and 10: a 1/3 : 2/3 split at
+    /* Reproduces the usual worked shape: a 1/3 : 2/3 split at
        the root and again on the right, giving leaf probabilities
        1/3, 2/9 and 4/9. */
-    lecture:
-      '; the branching on slides 9-10: leaves at 1/3, 2/9 and 4/9\n' +
+    worked:
+      '; a worked branching: leaves at 1/3, 2/9 and 4/9\n' +
       'start: q0\naccept: qacc\nreject: qrej\n' +
       'q0 1 qacc 1 > 1/3\n' +
       'q0 1 q1 1 > 2/3\n' +

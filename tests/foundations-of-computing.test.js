@@ -253,7 +253,7 @@ module.exports = async function run() {
   /* ---------------- truth tables and normal forms ---------------- */
 
   {
-    // The formula worked through in the lecture slides, with its column
+    // The formula worked through in the standard treatment, with its column
     // of eight values, the rows its DNF is read from, and the rows its
     // CNF rules out. All three are published, so all three are pinned.
     const p = w.fmParse('(P | ~R) -> ~(~Q | R)');
@@ -284,7 +284,7 @@ module.exports = async function run() {
   }
 
   {
-    // The slides' second formula is false on all eight rows.
+    // The standard second formula is false on all eight rows.
     const p = w.fmParse('~(P -> Q) & ~(P | ~R)');
     s.ok('the second worked formula parses', p.ok, p.error);
     const t = w.fmTable(p.ast);
@@ -322,10 +322,10 @@ module.exports = async function run() {
   /* ---------------- SAT <=p CLIQUE ---------------- */
 
   {
-    // The graph the slides build, and the three 3-cliques they highlight.
+    // The graph the standard example builds, and the three 3-cliques highlighted.
     const F = w.fmParse('(P | ~Q | R) & (~P | ~Q | ~R) & (P | Q | ~R)');
     const cl = w.fmClauses(F.ast);
-    s.ok('the slides\' CNF yields three clauses', cl.ok && cl.clauses.length === 3, cl.error);
+    s.ok('the standard CNF yields three clauses', cl.ok && cl.clauses.length === 3, cl.error);
 
     const g = w.rdBuild(cl.clauses);
     s.is('the graph has nine vertices', g.vertices.length, 9);
@@ -542,7 +542,7 @@ module.exports = async function run() {
      TOPIC 03 — recurrences, induction, divide-and-conquer
 
      Two things are worth testing here that the earlier topics did not
-     have. First, the published tables: the lecture slides tabulate
+     have. First, the published tables: the published tables tabulate
      T(n) for Hanoi and for merge sort, so those sequences are pinned.
      Second, the inductive step, which is a stronger claim than "the
      values agree" -- and the tests below include a formula that
@@ -558,8 +558,8 @@ module.exports = async function run() {
     s.is('and gives the published 1, 3, 7, 15, 31, 63, 127, 255',
       [1, 2, 3, 4, 5, 6, 7, 8].map(n => r.T(n)).join(','), '1,3,7,15,31,63,127,255');
 
-    // The slide states 2T(n-1) - 1, which is constant at 1 and cannot be
-    // 2^n - 1. The proof on the following slide uses + 1. Pinned so the
+    // The usual write-up states 2T(n-1) - 1, which is constant at 1 and cannot be
+    // 2^n - 1. The proof in the proof that follows uses + 1. Pinned so the
     // distinction stays visible.
     const minus = w.rcBuild({ 1: 1 }, '2T(n-1) - 1');
     s.ok('2T(n-1) − 1 is constant at 1, so it is not 2^n − 1',
@@ -647,7 +647,7 @@ module.exports = async function run() {
 
   {
     const sol = w.mtSolve(9, 3, 'sqrt((n+1)^5)');
-    s.ok('lecture example 1 parses √((n+1)⁵)', sol.ok, sol.error);
+    s.ok('worked example 1 parses √((n+1)⁵)', sol.ok, sol.error);
     s.is('k = log₃(9) = 2', sol.kShown, 2);
     s.is('f ∈ Θ(n^2.5)', w.gwClassShow(sol.clsF), 'n²·⁵');
     s.is('Case 3', sol.caseNo, 3);
@@ -663,10 +663,10 @@ module.exports = async function run() {
 
   {
     const sol = w.mtSolve(2, 3, 'log2(5n^2)');
-    s.ok('lecture example 3 parses log₂(5n²)', sol.ok, sol.error);
+    s.ok('worked example 3 parses log₂(5n²)', sol.ok, sol.error);
     s.is('f ∈ Θ(log n)', w.gwClassShow(sol.clsF), 'log n');
     s.is('Case 1', sol.caseNo, 1);
-    // The slide prints 1.5849 for log_3(2). That is log_2(3); the bases are
+    // The usual write-up prints 1.5849 for log_3(2). That is log_2(3); the bases are
     // swapped. The answer happens to survive, which is exactly why it is
     // worth pinning both numbers.
     s.ok('k = log₃(2) ≈ 0.6309', Math.abs(sol.k - 0.6309) < 1e-3, sol.k);
@@ -746,14 +746,14 @@ module.exports = async function run() {
   /* ---------------- Topic 4 · graphs ---------------- */
   {
     const g = w.grParse(w.GR_PRESETS.search);
-    s.ok('the lecture search graph parses', g.ok, g.error);
+    s.ok('the example search graph parses', g.ok, g.error);
     s.is('9 vertices', g.nV, 9);
     s.is('13 edges', g.nE, 13);
     s.ok('and is read as directed', g.directed === true);
 
-    // ---- BFS, against the slide ----
+    // ---- BFS, against the expected values ----
     const b = w.grBfs(g, 'A');
-    s.is('BFS from A reproduces the lecture visit order',
+    s.is('BFS from A reproduces the expected visit order',
       b.order.join(' '), 'A B E G C F H D I');
     s.is('and every vertex is reached', b.reached, 9);
     s.is('D sits at distance 3', b.dist.D, 3);
@@ -774,9 +774,9 @@ module.exports = async function run() {
       s.is('BFS distances agree with independent relaxation', bad.length, 0, bad.join(','));
     }
 
-    // ---- DFS, against the slide's timestamps ----
+    // ---- DFS, against the expected timestamps ----
     const d = w.grDfs(g, 'A');
-    s.is('DFS stamps A 1/10/18/21, as the slide does', d.show('A'), '1/10/18/21');
+    s.is('DFS stamps A 1/10/18/21, as expected', d.show('A'), '1/10/18/21');
     s.is('E 11/14/17', d.show('E'), '11/14/17');
     s.is('G 2/9', d.show('G'), '2/9');
     s.is('H 3/8', d.show('H'), '3/8');
@@ -834,12 +834,12 @@ module.exports = async function run() {
   /* ---------------- Topic 4 · spanning trees ---------------- */
   {
     const g = w.grParse(w.GR_PRESETS.mst);
-    s.ok('the lecture MST graph parses', g.ok, g.error);
+    s.ok('the example MST graph parses', g.ok, g.error);
     s.ok('as undirected and weighted', g.directed === false && g.weighted === true);
     s.is('14 edges', g.nE, 14);
 
     const k = w.mstKruskal(g), p = w.mstPrim(g, 'A');
-    s.is('Kruskal totals 37, as the slide says', k.weight, 37);
+    s.is('Kruskal totals 37, as expected', k.weight, 37);
     s.is('Prim totals 37 too', p.weight, 37);
     s.ok('Kruskal returns a genuine spanning tree', w.mstIsTree(g, k.tree).ok,
       w.mstIsTree(g, k.tree).why.join(' '));
@@ -858,7 +858,7 @@ module.exports = async function run() {
     const show = t => w.mstSortEdges(t).map(e => [e.u, e.v].sort().join('') + ':' + e.w).join(' ');
     s.is('Kruskal takes A–H at the weight-8 tie',
       show(k.tree), 'GH:1 CI:2 FG:2 AB:4 CF:4 CD:7 AH:8 DE:9');
-    s.is('and the lecture Prim trace takes B–C instead, for the same total',
+    s.is('and the standard Prim trace takes B–C instead, for the same total',
       show(w.mstPrim(g, 'A', 'late').tree), 'GH:1 CI:2 FG:2 AB:4 CF:4 CD:7 BC:8 DE:9');
     s.ok('the two trees really are different',
       show(k.tree) !== show(w.mstPrim(g, 'A', 'late').tree));
@@ -968,16 +968,16 @@ module.exports = async function run() {
 
     // ---- SCC ----
     const g = w.grParse(w.GR_PRESETS.scc);
-    s.is('the lecture SCC graph has 10 vertices', g.nV, 10);
+    s.is('the example SCC graph has 10 vertices', g.nV, 10);
     const sc = w.sccFind(g);
     const asText = x => x.components.map(c => '{' + c.join(',') + '}').join(' ');
-    s.is('the components are the four on the slide',
+    s.is('the components are the expected four',
       asText(sc), '{A,B,C,D} {E,F,H} {G} {I,J}');
     s.ok('and they satisfy the definition, checked by plain reachability',
       w.sccCheck(g, sc.components).ok, w.sccCheck(g, sc.components).why.join(' '));
 
-    // The deck's own trace, reproduced exactly.
-    s.is('the lecture settings reproduce its finishing order',
+    // The usual own trace, reproduced exactly.
+    s.is('the matching settings reproduce its finishing order',
       w.tsFinish(g, { mode: 'listed', start: ['F', 'C'] }).order.join(' '),
       'C B A D F H G I J E');
 
@@ -1039,11 +1039,11 @@ module.exports = async function run() {
   /* ---------------- Topic 5 · greedy SAT ---------------- */
   {
     const p = w.stParse(w.ST_PRESETS.greedy);
-    s.ok('the lecture greedy example parses', p.ok, p.error);
+    s.ok('the worked greedy example parses', p.ok, p.error);
     s.is('7 clauses', p.nC, 7);
     s.is('over P, Q, R', p.vars.join(''), 'PQR');
 
-    // The eight hypercube scores on the slide, one assertion each,
+    // The eight hypercube scores on the usual write-up, one assertion each,
     // so a wrong one names itself.
     const land = w.gdLandscape(p.clauses, p.vars);
     s.ok('the landscape is computable', land.ok, land.error);
@@ -1073,9 +1073,9 @@ module.exports = async function run() {
     s.is('and one satisfying assignment', land.solutions.length, 1);
 
     // The point of the whole section: greedy is wrong, from the very
-    // start the lecture picks.
+    // start usually picked.
     const run = w.gdRun(p.clauses, p.vars, { P: true, Q: false, R: false });
-    s.ok('greedy from the deck start returns False', run.verdict === false);
+    s.ok('greedy from the usual starting point returns False', run.verdict === false);
     s.ok('having stopped at a local maximum rather than run out of iterations',
       run.stuck === true && !run.capped,
       run.capped ? 'it hit the iteration cap — it is taking non-improving moves'
@@ -1139,15 +1139,15 @@ module.exports = async function run() {
 
   /* ---------------- Topic 5 · DPLL ---------------- */
   {
-    // Pure literals, against the slide.
+    // Pure literals, against the expected values.
     const pure = w.stParse(w.ST_PRESETS.pure);
-    s.is('the deck pure-literal example gives P and ¬S',
+    s.is('the worked pure-literal example gives P and ¬S',
       w.dpPure(pure.clauses).map(l => (l.neg ? '~' : '') + l.v).join(','), 'P,~S');
 
-    // Unit propagation, against the slide, ending in the conflict the
-    // deck displays but does not name.
+    // Unit propagation, against the expected values, ending in the conflict the
+    // write-up displays but does not name.
     const unit = w.stParse(w.ST_PRESETS.unit);
-    s.is('the deck unit example starts with ¬Q and R',
+    s.is('the usual write-up unit example starts with ¬Q and R',
       w.dpUnits(unit.clauses).map(l => (l.neg ? '~' : '') + l.v).join(','), '~Q,R');
     const prop = w.dpPropagate(unit.clauses, {});
     s.ok('and propagation ends in a conflict', prop.conflict === true, prop.why);
@@ -1231,9 +1231,9 @@ module.exports = async function run() {
   {
     const p = w.stParse(w.ST_PRESETS.twosat);
     const r = w.tsSolve(p.clauses, p.vars);
-    s.ok('the lecture 2SAT example solves', r.ok, r.error);
+    s.ok('the standard treatment 2SAT example solves', r.ok, r.error);
     s.ok('and is satisfiable', r.sat === true);
-    s.is('with the two components the slide draws',
+    s.is('with the two components the usual write-up draws',
       r.components.map(c => '{' + c.join(',') + '}').sort().join(' '),
       '{P,Q,R} {¬P,¬Q,¬R}');
     s.ok('and the assignment it produces really satisfies every clause', r.verified,
@@ -1285,7 +1285,7 @@ module.exports = async function run() {
     // Horn.
     const h = w.stParse(w.ST_PRESETS.horn);
     const hr = w.hnSolve(h.clauses);
-    s.ok('the lecture Horn example is recognised as Horn', hr.ok, hr.error);
+    s.ok('the standard treatment Horn example is recognised as Horn', hr.ok, hr.error);
     s.is('forward chaining derives all five atoms', hr.known.join(','), 'P,Q,R,S,T');
     s.ok('and it is satisfiable', hr.sat === true);
     s.is('agreeing with exhaustive search', hr.sat, w.stBrute(h.clauses, h.vars).sat);
@@ -1328,9 +1328,9 @@ module.exports = async function run() {
     // SAT ≤p 3SAT.
     const wide = w.stParse(w.ST_PRESETS.wide);
     const three = w.tsTo3(wide.clauses, wide.vars);
-    s.is('the lecture wide clause is split to width 3', three.widest, 3);
+    s.is('the standard treatment wide clause is split to width 3', three.widest, 3);
     s.is('using one fresh variable', three.added, 1);
-    s.is('giving exactly the clauses on the slide',
+    s.is('giving exactly the clauses on the usual write-up',
       w.stShow(three.clauses), '(P ∨ ¬Q ∨ X1) ∧ (¬X1 ∨ R ∨ S) ∧ (Q ∨ ¬R ∨ ¬T)');
 
     {
@@ -1366,17 +1366,17 @@ module.exports = async function run() {
 
   /* ---------------- Topic 7 · TSP and 2OPT ---------------- */
   {
-    const g = w.tspParse(w.TSP_PRESETS.lecture);
-    s.ok('the lecture point set parses', g.ok, g.error);
+    const g = w.tspParse(w.TSP_PRESETS.worked);
+    s.ok('the standard treatment point set parses', g.ok, g.error);
     s.is('8 vertices', g.n, 8);
     s.ok('and being Euclidean, it satisfies the triangle inequality', g.metric.ok);
 
-    // The MST, the traversal and the three cycle lengths on the slide.
+    // The MST, the traversal and the three cycle lengths on the usual write-up.
     const mst = w.tspMst(g);
     s.is('the MST is the one drawn in red',
       mst.tree.map(e => e.u + e.v).sort().join(' '), 'AB AD BC BH DE EF EG');
     s.near('of weight 11.8929', mst.weight, 11.8929, 1e-4);
-    s.is('the preorder traversal is the slide\'s H0',
+    s.is('the preorder traversal is the usual H0',
       w.tspPreorder(g, mst.tree).join(','), 'A,B,C,H,D,E,F,G');
 
     const H0 = ['A', 'B', 'C', 'H', 'D', 'E', 'F', 'G'];
@@ -1384,14 +1384,14 @@ module.exports = async function run() {
     const H2 = ['A', 'B', 'C', 'H', 'F', 'G', 'E', 'D'];
     s.near('H1 is 16.08, as printed', w.tspLen(g, H1), 16.0843, 1e-3);
     s.near('H2 is 14.71, as printed', w.tspLen(g, H2), 14.7148, 1e-3);
-    // The slide says H0 is 19.06. It is 19.07 -- pinned so that a
-    // corrected deck shows up here rather than passing silently.
-    s.near('H0 is 19.0740 — the slide rounds it to 19.06, which is a hair low',
+    // The usual write-up says H0 is 19.06. It is 19.07 -- pinned so that a
+    // corrected write-up shows up here rather than passing silently.
+    s.near('H0 is 19.0740 — the usual write-up rounds it to 19.06, which is a hair low',
       w.tspLen(g, H0), 19.0740, 1e-3);
 
-    // Taking the best improving swap reproduces the slide exactly.
+    // Taking the best improving swap reproduces the usual write-up exactly.
     const best = w.tspTwoOpt(g, { pick: 'best' });
-    s.is('steepest descent reaches the answer in two swaps, as the slides do',
+    s.is('steepest descent reaches the answer in two swaps, as the usual write-up do',
       best.steps.filter(x => x.move).length, 2);
     s.is('via H1', best.steps[1].tour.join(','), H1.join(','));
     s.is('and then H2', best.steps[2].tour.join(','), H2.join(','));
@@ -1435,12 +1435,12 @@ module.exports = async function run() {
 
   /* ---------------- Topic 7 · the swap, and the proof chain ---------------- */
   {
-    const g = w.tspParse(w.TSP_PRESETS.lecture);
+    const g = w.tspParse(w.TSP_PRESETS.worked);
     const tour = ['A', 'B', 'C', 'H', 'D', 'E', 'F', 'G'];
 
     // The reconnection that is a tour, and the one that is not.
     const rec = w.tspReconnect(tour, 3, 7);
-    s.is('the valid reconnection is the slide\'s H1', rec.good.tour.join(','),
+    s.is('the valid reconnection is the usual H1', rec.good.tour.join(','),
       'A,B,C,H,G,F,E,D');
     s.is('and it is still a permutation of all 8 vertices',
       rec.good.tour.slice().sort().join(''), 'ABCDEFGH');
@@ -1596,7 +1596,7 @@ module.exports = async function run() {
       s.is('"cheapest tour ≤ nR" matches "has a Hamiltonian cycle" every time', bad, 0, first);
     }
 
-    // The binary search, and the slide's inverted condition.
+    // The binary search, and the usual inverted condition.
     {
       const g3 = w.tspParse(w.TSP_PRESETS.square);
       const good = w.apBinarySearch(g3, { buggy: false });
@@ -1766,9 +1766,9 @@ module.exports = async function run() {
       s.is('adding and subtracting the same rational is exactly the identity', drift, 0);
     }
 
-    /* ---- the lecture's program, against the lecture's own figures ---- */
-    const lp = w.lpParse(w.LP_PRESETS.lecture);
-    s.ok('the lecture program parses', lp.ok, lp.error);
+    /* ---- the standard program, against the standard own figures ---- */
+    const lp = w.lpParse(w.LP_PRESETS.worked);
+    s.ok('the standard treatment program parses', lp.ok, lp.error);
     s.same('with the variables it names', lp.vars, ['x', 'y']);
     s.is('three constraints written, plus one per variable for x ≥ 0',
       lp.cons.length, 5);
@@ -1777,18 +1777,18 @@ module.exports = async function run() {
       const sol = w.lpSolveByVertices(lp);
       s.is('the feasible region has five vertices', sol.verts.length, 5);
       const pts = sol.verts.map(v => `(${frStr(v.x[0])},${frStr(v.x[1])})`).sort();
-      s.same('and they are the ones on the slide',
+      s.same('and they are the ones on the usual write-up',
         pts, ['(0,0)', '(0,5/2)', '(1,3)', '(4,3/2)', '(5,0)']);
       s.is('the optimum is at (4, 3/2)', `${frStr(sol.x[0])},${frStr(sol.x[1])}`, '4,3/2');
       s.is('with C = 25/2', frStr(sol.obj), '25/2');
       s.ok('and it is unique', sol.multiple === false);
     }
 
-    /* ---- simplex reproduces the slides, tableau for tableau ---- */
+    /* ---- simplex reproduces the usual write-up, tableau for tableau ---- */
     {
       const run = w.spRun(lp);
       s.ok('simplex terminates optimally', run.ok && run.status === 'optimal');
-      s.is('in three pivots, as the slides show', run.pivots, 3);
+      s.is('in three pivots, as the usual write-up show', run.pivots, 3);
       s.ok('agreeing with vertex enumeration', run.agrees);
       s.ok('and returning a point that satisfies the constraints', run.pointFeasible);
       s.ok('with the tableau feasible at every round', run.lostFeasibility === null);
@@ -1798,7 +1798,7 @@ module.exports = async function run() {
       // "suite crashed" instead of the several named failures below.
       const show = r => (r && r.T ? r.T.map(row => row.map(w.frShow)) : null);
       s.is('there are four tableaux to compare', run.rounds.length, 4);
-      s.same('round 1 matches the slide entry for entry', show(run.rounds[1]), [
+      s.same('round 1 matches the usual write-up entry for entry', show(run.rounds[1]), [
         ['4', '0', '1', '-1', '0', '0', '10'],
         ['-0.5', '1', '0', '0.5', '0', '0', '2.5'],
         ['2', '0', '0', '-1', '1', '0', '2'],
@@ -1809,7 +1809,7 @@ module.exports = async function run() {
         ['1', '0', '0', '-0.5', '0.5', '0', '1'],
         ['0', '0', '0', '-0.25', '1.75', '1', '11']]);
 
-      // Round 3 does NOT match: the slide prints 2.25 for the s3 coefficient
+      // Round 3 does NOT match: the usual write-up prints 2.25 for the s3 coefficient
       // of the final row. Checked here a second way, by the identity the row
       // asserts — C = 12.5 - 0.25 s1 - L s3 must hold for all x and y, and
       // substituting s1 = 15-3x-2y, s3 = 7-x-2y forces L = 5/4 from the x
@@ -1817,7 +1817,7 @@ module.exports = async function run() {
       const final = (run.rounds[3] && run.rounds[3].T ? run.rounds[3].T[3] : null) ||
         [fr(0), fr(0), fr(0), fr(0), fr(0), fr(0), fr(0)];
       s.is('the final cost row has s1 coefficient 1/4', frStr(final[2]), '1/4');
-      s.is('and s3 coefficient 5/4, where the slide prints 2.25', frStr(final[4]), '5/4');
+      s.is('and s3 coefficient 5/4, where the usual write-up prints 2.25', frStr(final[4]), '5/4');
       const L = w.frSub(fr(2), fr(3, 4));                    // from matching x
       const L2 = w.frDiv(w.frSub(fr(3), fr(1, 2)), fr(2));   // from matching y
       s.ok('both coefficient matches give the same value', eq(L, L2));
@@ -1838,14 +1838,14 @@ module.exports = async function run() {
       s.ok('the standard rule agrees with vertex enumeration', std.agrees);
       s.ok('keeping every right-hand side non-negative', std.lostFeasibility === null);
 
-      const deck = w.spRun(dg, { rule: 'deck' });
-      s.ok('the slide\'s both-positive rule skips a zero-quotient row',
-        deck.rounds.some(r => r.degenerateSkipped));
-      s.ok('after which the tableau is no longer feasible', deck.lostFeasibility !== null);
+      const printed = w.spRun(dg, { rule: 'printed' });
+      s.ok('the usual both-positive rule skips a zero-quotient row',
+        printed.rounds.some(r => r.degenerateSkipped));
+      s.ok('after which the tableau is no longer feasible', printed.lostFeasibility !== null);
       s.ok('and the point it finally reports breaks a constraint',
-        w.lpCheck(dg, deck.x).feasible === false);
+        w.lpCheck(dg, printed.x).feasible === false);
       s.ok('while claiming a value ABOVE the true optimum, which is the dangerous part',
-        frCmp(deck.cost, truth.obj) > 0, `${frStr(deck.cost)} vs ${frStr(truth.obj)}`);
+        frCmp(printed.cost, truth.obj) > 0, `${frStr(printed.cost)} vs ${frStr(truth.obj)}`);
     }
 
     /* ---- and it cannot start at all on a ≥ constraint ---- */
@@ -1853,7 +1853,7 @@ module.exports = async function run() {
       const en = w.lpParse(w.LP_PRESETS.energy);
       s.ok('the energy program parses', en.ok, en.error);
       const built = w.spBuild(en);
-      s.ok('the lecture tableau refuses to be built on it', built.ok === false);
+      s.ok('the standard treatment tableau refuses to be built on it', built.ok === false);
       s.ok('naming the phase-one problem', built.needsPhaseOne === true);
       const tp = w.spTwoPhase(en);
       s.ok('the phase-one method solves it', tp.ok && tp.status === 'optimal');
@@ -1888,7 +1888,7 @@ module.exports = async function run() {
     /* ---- branch and bound ---- */
     {
       const bb = w.ipBranchBound(lp);
-      s.is('branch and bound explores the slide\'s five nodes', bb.explored, 5);
+      s.is('branch and bound explores the usual five nodes', bb.explored, 5);
       s.is('every branch excluded the point that caused it', bb.stuck, 0);
       s.ok('and nothing hit the node cap',
         bb.nodes.every(n => n.status !== 'capped') && bb.explored < 200);
@@ -1897,11 +1897,11 @@ module.exports = async function run() {
       s.is('no node disagreed between the two relaxation engines', bb.disagreements.length, 0);
 
       const left = bb.nodes.find(n => n.label === 'y <= 1') || { x: [fr(0)], obj: fr(0) };
-      s.is('the y ≤ 1 child has x = 13/3, not the slide\'s 4.3', frStr(left.x[0]), '13/3');
+      s.is('the y ≤ 1 child has x = 13/3, not the usual 4.3', frStr(left.x[0]), '13/3');
       s.is('and objective 35/3, not 11.6', frStr(left.obj), '35/3');
       const right = bb.nodes.find(n => n.label === 'y >= 2');
       s.ok('the y ≥ 2 child exists', !!right);
-      s.ok('and is exactly the case the lecture tableau cannot start on',
+      s.ok('and is exactly the case the standard treatment tableau cannot start on',
         !!right && w.spBuild(right.lp).needsPhaseOne === true);
 
       const brute = w.ipBrute(lp);
@@ -1944,7 +1944,7 @@ module.exports = async function run() {
 
       const chk = w.ipCheckReduction(cls);
       s.ok('the Topic 5 solver was actually reached', chk.satSolvable !== null, chk.satError);
-      s.ok('and both routes agree on the slide example', chk.agree === true);
+      s.ok('and both routes agree on the usual write-up example', chk.agree === true);
 
       const unsat = w.ipCheckReduction([['P'], ['~P']]);
       s.ok('an unsatisfiable formula gives an unsolvable integer program',
@@ -2087,13 +2087,13 @@ module.exports = async function run() {
     const fr = w.fr, frStr = w.frStr, frCmp = w.frCmp, frNum = w.frNum;
     const eq = (a, b) => frCmp(a, b) === 0;
 
-    /* ---- the lecture's own worked example ---- */
+    /* ---- the standard own worked example ---- */
     {
-      const d = w.pbParse(w.PB_PRESETS.lecture);
-      s.ok('the slide-10 distribution parses', d.ok, d.error);
+      const d = w.pbParse(w.PB_PRESETS.worked);
+      s.ok('the usual write-up-10 distribution parses', d.ok, d.error);
       s.ok('and its probabilities sum to exactly 1', d.sums, frStr(d.total));
       s.is('E[X] is 67/20', frStr(w.pbMean(d)), '67/20');
-      s.near('which is the 3.35 printed on the slide', frNum(w.pbMean(d)), 3.35, 1e-12);
+      s.near('which is the 3.35 printed on the usual write-up', frNum(w.pbMean(d)), 3.35, 1e-12);
 
       const v = w.pbVar(d);
       s.ok('the two variance formulas agree on it', v.agree,
@@ -2121,11 +2121,11 @@ module.exports = async function run() {
       s.is('E[(X−μ)²] equals E[X²]−E[X]² on every one', bad, 0, first);
     }
 
-    /* ---- Markov, and the hypothesis the slide omits ---- */
+    /* ---- Markov, and the hypothesis the usual write-up omits ---- */
     {
       const ce = w.mkCounterexample(fr(2));
       s.ok('X = −10 is not non-negative', ce.r.nonNegative === false);
-      s.ok('and the slide-as-stated bound fails on it', ce.r.holds === false,
+      s.ok('and the usual write-up-as-stated bound fails on it', ce.r.holds === false,
         `${frStr(ce.r.lhs)} vs ${frStr(ce.r.rhs)}`);
       s.is('the left-hand side is 1', frStr(ce.r.lhs), '1');
       s.is('while the claimed bound is 1/2', frStr(ce.r.rhs), '1/2');
@@ -2168,13 +2168,13 @@ module.exports = async function run() {
         frStr(w.pjParse(w.PJ_PRESETS.independent).covariance), '0');
     }
 
-    /* ---- the computation tree on slides 9 and 10 ---- */
+    /* ---- the worked computation tree ---- */
     {
-      const p = w.ptmParse(w.PTM_PRESETS.lecture);
-      s.ok('the lecture PTM parses', p.ok, p.error);
+      const p = w.ptmParse(w.PTM_PRESETS.worked);
+      s.ok('the standard treatment PTM parses', p.ok, p.error);
       const t = w.ptmTree(p.m, '111', { depth: 12 });
       s.ok('its leaf probabilities total exactly 1', t.exhaustive, frStr(t.total));
-      s.same('and are the 1/3, 2/9, 4/9 on the slide',
+      s.same('and are the 1/3, 2/9, 4/9 on the usual write-up',
         t.leaves.map(l => frStr(l.prob)).sort(), ['1/3', '2/9', '4/9'].sort());
       s.is('so Prob(accept) = 1/3 + 4/9 = 7/9', frStr(t.pAccept), '7/9');
       s.is('and Prob(reject) = 2/9', frStr(t.pReject), '2/9');
@@ -2203,7 +2203,7 @@ module.exports = async function run() {
 
     /* ---- BPP, ZPP, amplification ---- */
     {
-      s.ok('the lecture constants are in BPP', w.pcClassify(fr(2, 3), fr(1, 3), {}).inBPP);
+      s.ok('the standard treatment constants are in BPP', w.pcClassify(fr(2, 3), fr(1, 3), {}).inBPP);
       s.ok('always-right with expected polynomial time is in ZPP',
         w.pcClassify(fr(1), fr(0), {}).inZPP);
       s.ok('and is therefore in BPP too', w.pcClassify(fr(1), fr(0), {}).inBPP);
@@ -2221,7 +2221,7 @@ module.exports = async function run() {
       const rep = w.pcRepetitions(fr(2, 3), 1e-9);
       s.ok('a finite number of repetitions reaches 1e-9', rep.ok && rep.k > 1, `${rep.k}`);
 
-      /* ZPP ⊆ BPP, computed exactly rather than bounded. The slide drops the
+      /* ZPP ⊆ BPP, computed exactly rather than bounded. The usual write-up drops the
          coin's factor of ½; both its bound and the honest one must hold. */
       const geo = w.pbParse(w.PB_PRESETS.geometric);
       s.ok('the geometric runtime sums to 1', geo.ok && geo.sums);
@@ -2230,7 +2230,7 @@ module.exports = async function run() {
       s.ok('Markov’s bound on the tail holds', z.markovHolds, frStr(z.pOver));
       s.ok('and the construction meets BPP’s guarantees', z.meetsBPP,
         `${frStr(z.accIn)} / ${frStr(z.accOut)}`);
-      s.is('the slide’s bound on the error is 1/3', frStr(z.slideBoundOut), '1/3');
+      s.is('the usual write-up’s bound on the error is 1/3', frStr(z.slideBoundOut), '1/3');
       s.is('the honest bound, keeping the coin’s ½, is 1/6', frStr(z.honestBoundOut), '1/6');
       s.is('and on the other side, 2/3 against 5/6', frStr(z.honestBoundIn), '5/6');
       s.ok('the actual acceptance beats both', frCmp(z.accIn, z.honestBoundIn) >= 0 &&
@@ -2269,8 +2269,8 @@ module.exports = async function run() {
       const am = w.enAmbiguity();
       s.ok('the plain #-tuple collides', am.flat.collide,
         `${am.flat.pair} vs ${am.flat.single}`);
-      s.ok('the slide’s binary code collides too, for the same reason', am.slide.collide,
-        `${am.slide.pair} vs ${am.slide.single}`);
+      s.ok('the usual write-up’s binary code collides too, for the same reason', am.usual.collide,
+        `${am.usual.pair} vs ${am.usual.single}`);
       s.ok('reserving the separator pattern separates them', am.fixed.collide === false,
         `${am.fixed.pair} vs ${am.fixed.single}`);
 
@@ -2310,9 +2310,9 @@ module.exports = async function run() {
     /* ---- diagonalisation ---- */
     {
       const g = w.dgParse(w.DG_PRESET);
-      s.ok('the slide’s table parses', g.ok, g.error);
+      s.ok('the usual write-up’s table parses', g.ok, g.error);
       const d = w.dgDiagonal(g);
-      s.same('L holds exactly the words the slide lists', d.members, [1, 2, 4]);
+      s.same('L holds exactly the words the usual write-up lists', d.members, [1, 2, 4]);
       s.same('and L is the diagonal flipped, entry for entry',
         d.inL, d.diag.map(x => !x));
       s.same('with the membership list agreeing with it',

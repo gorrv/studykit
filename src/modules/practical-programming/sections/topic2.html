@@ -6,7 +6,7 @@
         <div class="topic-subtitle">pointers, delete, and the three functions you get for free</div>
       </div>
 
-      <p>Week 1 said C++ objects can be values. This week puts <code>new</code> back, and with it the
+      <p>Topic 1 said C++ objects can be values. This topic puts <code>new</code> back, and with it the
       question Java never asks: <strong>who frees this?</strong> Nothing collects your garbage, so
       ownership stops being an implementation detail and becomes part of what a class means.</p>
 
@@ -41,13 +41,13 @@ cout &lt;&lt; a-&gt;getX() &lt;&lt; endl;</pre>
       </div>
 
       <div class="callout warn">
-        <div class="callout-label">Pointers bring back the two things Week 1 removed</div>
+        <div class="callout-label">Pointers bring back the two things Topic 1 removed</div>
         <strong>They can be null.</strong> <code>string * s = nullptr; s-&gt;size();</code> compiles
         and then crashes — the C++ equivalent of a NullPointerException, without the exception. A
         reference could not have done this.<br><br>
         <strong>Comparing them compares addresses.</strong>
         <code>new string("Dave") == new string("Dave")</code> is <strong>false</strong>, exactly as in
-        Java, because there are two objects at two addresses. Week 1 said C++ fixes Java’s
+        Java, because there are two objects at two addresses. Topic 1 said C++ fixes Java’s
         <code>==</code> trap; this is the case where it does not, because now you are back to
         comparing handles. <code>*a == *b</code> compares the strings.
       </div>
@@ -61,7 +61,7 @@ cout &lt;&lt; a-&gt;getX() &lt;&lt; endl;</pre>
         </div>
         <div class="tool-desc">Given <code>string a("Hello");</code> and
           <code>string * b = new string("Hello");</code>, which declarations typecheck? The whole of
-          slide 10 is worked below.</div>
+          the six lines below are worked through in the tool.</div>
         <div class="tool-controls">
           <div class="tool-field" style="flex:1 1 260px;">
             <label for="pq-decl">a declaration</label>
@@ -112,7 +112,7 @@ a[i] = i;                  // the same as *(a + i)
 delete [] a;               // note the brackets</pre>
         <code>delete</code> and <code>delete []</code> are different operators, and using the wrong
         one is undefined behaviour rather than an error you will be told about. A raw array also has
-        no idea how long it is, which is why the slide’s <code>printArray(int *, int)</code> has to be
+        no idea how long it is, which is why <code>printArray(int *, int)</code> has to be
         handed the length separately and will happily read past the end if you lie to it.<br><br>
         <strong>Use <code>vector</code>.</strong> It knows its own size, and when it falls out of
         scope it frees its contents for you — so there is no <code>delete</code> to forget.
@@ -261,7 +261,7 @@ IHazStringPtr(const IHazStringPtr &amp; other)
                              : new string(*(other.str))) { }</pre>
         <code>new string(*(other.str))</code> is the whole idea: dereference their pointer to get
         their string, and construct a new string from it. The third version does it in the
-        initialiser list for the reason Week 1 gave — the member is built once rather than built
+        initialiser list for the reason Topic 1 gave — the member is built once rather than built
         and then overwritten.
       </div>
 
@@ -280,7 +280,7 @@ IHazStringPtr(const IHazStringPtr &amp; other)
       </div>
 
       <div class="callout warn">
-        <div class="callout-label">And that version is still wrong, in a way the slides do not reach</div>
+        <div class="callout-label">And that version is still wrong, in a way that is easy to miss</div>
         Try <code>a = a;</code> in the tool above with <strong>deep, deletes the old</strong>
         selected.<br><br>
         <code>if (str) delete str;</code> frees the string. Then
@@ -300,7 +300,7 @@ IHazStringPtr(const IHazStringPtr &amp; other)
         <div class="callout-label">The destructor, and the Rule of Three</div>
         <pre class="pp-snippet">~IHazStringPtr() { delete str; }</pre>
         Runs when the object goes out of scope. Without it, every IHazStringPtr ever created leaks
-        its string — the slide’s loop of 10 000 calls leaks 10 000 strings.<br><br>
+        its string — a loop of 10 000 calls leaks 10 000 strings.<br><br>
         <strong>The Rule of Three.</strong> If a class needs any one of the copy constructor, the
         assignment operator or the destructor, it almost certainly needs all three, because all three
         exist for the same reason: the class <em>owns</em> something the compiler does not know how to

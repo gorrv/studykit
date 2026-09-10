@@ -105,7 +105,7 @@
         '</div>';
     }
 
-    h += '<p class="tool-note">The lecture proves this algorithm runs in polynomial time and stops ' +
+    h += '<p class="tool-note">This algorithm provably runs in polynomial time and stops ' +
       'there. That proof is correct and it is not the whole story: an algorithm is only useful if it ' +
       'is <em>also right</em>. Greedy is <strong>sound but incomplete</strong> — when it says True it ' +
       'hands you an assignment you can check, but its False means only &ldquo;I got stuck&rdquo;. ' +
@@ -385,7 +385,7 @@
       'the set of atoms the rules force. Nothing else needs trying — if the minimal model breaks a ' +
       'goal clause, every larger model breaks it too.<br><br>' +
       'Horn and 2SAT are both in P for completely unrelated reasons — one is a graph question, the ' +
-      'other a fixed point — which is why the lecture&rsquo;s Venn diagram draws them overlapping ' +
+      'other a fixed point — which is why the usual Venn diagram draws them overlapping ' +
       'rather than nested.</p>';
 
     out.innerHTML = h;

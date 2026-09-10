@@ -146,7 +146,7 @@
     html += '</div>';
     if (leftmostInfinite) {
       html += `<div class="verdict bad">💥 <strong>The left-most branch is infinite.</strong> Prolog explores children left-to-right and depth-first, so it goes down this branch and <em>never comes back</em> — it produces no solutions and will result in an error, even though success branches exist further right in the tree.
-        <br><br>This is the lecture's point exactly: <strong>put base clauses before recursive ones</strong>. The program is <em>logically</em> unchanged — only the search order differs. It is also the concrete meaning of "SLD-resolution is complete, but Prolog's implementation is not".</div>`;
+        <br><br>This is the point exactly: <strong>put base clauses before recursive ones</strong>. The program is <em>logically</em> unchanged — only the search order differs. It is also the concrete meaning of "SLD-resolution is complete, but Prolog's implementation is not".</div>`;
     } else if (ctx.truncated) {
       html += `<div class="verdict warn">⚠ The tree was cut off at depth ${ctx.maxDepth} (or ${ctx.maxNodes} nodes) — a branch marked <em>⋮ cut off</em> continues further. Here the left-most branch does terminate, so Prolog reaches the solutions shown; the tree simply has infinitely many success branches (back-track for more).</div>`;
     }

@@ -105,14 +105,14 @@
 
     if (container === 'map<int,string>' && kind === 'ref' && type === 'pair<int, string>') {
       h += '<div class="callout warn" style="margin:14px 0;">' +
-        '<div class="callout-label">This is the line on slide 61, and it does not compile</div>' +
-        'The slide writes <code>for (pair&lt;int,string&gt; &amp; elem : kNumbers)</code>. A map ' +
+        '<div class="callout-label">This is the line everyone writes, and it does not compile</div>' +
+        'Writing <code>for (pair&lt;int,string&gt; &amp; elem : kNumbers)</code> looks right. A map ' +
         'element is a <code>pair&lt;const int, string&gt;</code> — the key is const, because a map ' +
         'is a search tree ordered by it and changing a key in place would leave the tree wrong. So ' +
         'there is no <code>pair&lt;int, string&gt;</code> anywhere for that reference to name.<br><br>' +
         'Three things work: drop the <code>&amp;</code> and take a copy; write the type out in full ' +
         'as <code>const pair&lt;const int, string&gt; &amp;</code>; or use <code>auto &amp;</code>, ' +
-        'which is what the slides themselves recommend nine slides earlier and is the reason ' +
+        'which is the reason ' +
         '<code>auto</code> earns its place.</div>';
     }
 

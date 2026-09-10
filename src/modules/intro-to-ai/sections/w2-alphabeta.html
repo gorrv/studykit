@@ -71,7 +71,7 @@
       <h2 id="ab-tool">Tool · Game tree solver</h2>
       <div class="tool" data-run="runGameTree">
         <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Minimax &amp; alpha-beta</h3></div>
-        <p class="tool-desc"><strong>Step through the alpha-beta walk one evaluation at a time</strong> and watch the bounds tighten until a cut fires. Enter any game tree as nested brackets; you also get the minimax value of every node and exactly which leaves get pruned. Defaults to the tree from the lectures.</p>
+        <p class="tool-desc"><strong>Step through the alpha-beta walk one evaluation at a time</strong> and watch the bounds tighten until a cut fires. Enter any game tree as nested brackets; you also get the minimax value of every node and exactly which leaves get pruned. Defaults to the worked tree.</p>
         <div class="tool-field" style="width:100%;">
           <label for="gt-tree">Tree — nested brackets, numbers at the leaves. e.g. <code>[[3,12,8],[2,4,6],[14,5,2]]</code></label>
           <textarea id="gt-tree" rows="3" spellcheck="false">[[3,12,8],[2,4,6],[14,5,2]]</textarea>
@@ -96,7 +96,7 @@
         <div class="callout-label">Things worth trying in it</div>
         <ul style="margin:6px 0 0 0;">
           <li><strong>Press ▶ play</strong> and watch the depth-first walk. Unvisited nodes are ghosted, so you see exactly how little of the tree alpha-beta ever touches.</li>
-          <li>The default tree — 7 of 9 leaves evaluated, the 4 and 6 under C pruned. That's the slide. <strong>Stop on the step marked "β ≤ α — prune"</strong> and look at the two bounds that caused it.</li>
+          <li>The default tree — 7 of 9 leaves evaluated, the 4 and 6 under C pruned. That's the worked answer. <strong>Stop on the step marked "β ≤ α — prune"</strong> and look at the two bounds that caused it.</li>
           <li>Reverse the last group to <code>[[3,12,8],[2,4,6],[2,5,14]]</code> — D now caps at ≤ 2 immediately and <strong>two more leaves vanish</strong>. Same answer, less work.</li>
           <li>Try a 3-level tree such as <code>[[[3,5],[6,9]],[[1,2],[0,7]]]</code> to see pruning cascade through the layers.</li>
           <li>Switch the root to <strong>MIN</strong> and watch every max and min swap while the pruning rule stays <code>β ≤ α</code>.</li>
@@ -117,7 +117,7 @@
         Cuts happen when a bound gets tight <em>early</em>. Finding a strong move immediately raises α at once and makes every later sibling easy to dismiss; stumbling on it last means you carried a useless bound the whole way. Real engines therefore spend effort <strong>guessing a good move order before searching</strong> — which is why "try the move that was best last time" is such a common trick.
       </div>
       <div class="callout">
-        <div class="callout-label">Summary of the deck</div>
+        <div class="callout-label">Summary</div>
         <ul style="margin:6px 0 0 0;">
           <li>With more than one agent, we need <strong>different approaches</strong>.</li>
           <li><strong>Adversarial search like minimax</strong> lets us consider the <strong>best-worst outcomes</strong> and make decisions to guide towards them.</li>

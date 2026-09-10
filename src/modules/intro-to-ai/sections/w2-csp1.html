@@ -90,7 +90,7 @@
       <!-- ===== QUEENS ===== -->
       <h2 id="cs-queens"><em>n</em>-Queens as a CSP</h2>
       <div class="callout exam">
-        <div class="callout-label">The formulation from the lectures</div>
+        <div class="callout-label">The standard formulation</div>
         <ul style="margin:6px 0 0 0;">
           <li><strong>X</strong> = {x<sub>ij</sub>} — one variable per <em>square</em> of the board.</li>
           <li><strong>D</strong> = {0, 1} — <em>empty</em> or <em>queen</em>.</li>
@@ -117,7 +117,7 @@
       </div>
       <div class="callout warn">
         <div class="callout-label">This is a deliberately clumsy modelling</div>
-        One variable per square means <strong>n² variables</strong> and a global sum constraint. A tighter model uses <strong>one variable per column</strong> with domain {1…n} = the row its queen sits in, which makes "no two in a column" free and reduces the problem to row and diagonal constraints. The lectures use the square version because it shows off <em>scope and relation</em> explicitly — but if a question asks you to "model n-Queens efficiently", the column version is the better answer.
+        One variable per square means <strong>n² variables</strong> and a global sum constraint. A tighter model uses <strong>one variable per column</strong> with domain {1…n} = the row its queen sits in, which makes "no two in a column" free and reduces the problem to row and diagonal constraints. The square version is the one usually used because it shows off <em>scope and relation</em> explicitly — but if a question asks you to "model n-Queens efficiently", the column version is the better answer.
       </div>
       <!-- ===== EXAM ===== -->
       <h2 id="cs-exam">Exam-style takeaways</h2>

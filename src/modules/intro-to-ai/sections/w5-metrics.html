@@ -25,7 +25,7 @@
         Given a classification algorithm and a test set, the <strong>accuracy</strong> is the <strong>proportion of correct predictions</strong> done by the algorithm <strong>over all predictions</strong> in the test set.
       </div>
       <div class="callout warn">
-        <div class="callout-label">The slide's question: "an algorithm has 99% accuracy. Is it good?"</div>
+        <div class="callout-label">The question: "an algorithm has 99% accuracy. Is it good?"</div>
         <strong>Well, it depends.</strong>
         <p style="margin:10px 0 0 0;"><strong>Example.</strong> An algorithm takes an X-ray image of a person's lungs and predicts a rare disease <em>D</em>. Assume <strong>1% of the population has disease D</strong>.</p>
         <p style="margin:10px 0 0 0;">A very simple algorithm achieves 99% accuracy. Which one?</p>
@@ -82,7 +82,7 @@
         <p style="margin:10px 0 0 0;">F1 is high <strong>only when both are high</strong>. Every classifier can trade one for the other (flag everything → recall 1, precision terrible; flag only the single most certain case → precision 1, recall terrible), so a single number that resists that trade is what you want.</p>
       </div>
       <!-- ===== THE QUESTION ===== -->
-      <h2 id="n-quiz">The slide's question, worked</h2>
+      <h2 id="n-quiz">That question, worked</h2>
       <div class="callout exam">
         <div class="callout-label">"Which of precision or sensitivity would have highlighted the weakness of the previous algorithm? Assume 0.01% of true positives."</div>
         <strong>Sensitivity (recall).</strong>
@@ -95,7 +95,7 @@
           <li><strong>Recall</strong> = 0 / (0 + 100) = <strong>0</strong> — exposes it immediately.</li>
           <li><strong>Precision</strong> = 0 / (0 + 0) = <strong>0/0, undefined</strong> — it cannot even be computed, so it tells you nothing.</li>
         </ul>
-        <p style="margin:12px 0 0 0;">That is what the slide's "<em>assume 0.01% of true positives</em>" is for. Let the model be very slightly less useless, so it flags a handful of cases and gets them right: now <strong>FP = 0</strong> still, so <strong>precision = 1.0 — a perfect score</strong> — while <strong>recall stays near 0</strong>.</p>
+        <p style="margin:12px 0 0 0;">That is what "<em>assume 0.01% of true positives</em>" is for. Let the model be very slightly less useless, so it flags a handful of cases and gets them right: now <strong>FP = 0</strong> still, so <strong>precision = 1.0 — a perfect score</strong> — while <strong>recall stays near 0</strong>.</p>
         <p style="margin:10px 0 0 0;"><strong>Precision would have looked perfect. Recall is the one that exposes the weakness.</strong></p>
       </div>
       <div class="callout tip">
@@ -104,7 +104,7 @@
         <p style="margin:10px 0 0 0;">Flip it and precision leads: for spam filtering, a missed spam is a mild annoyance but a real email in the junk folder is a disaster, so <strong>false positives</strong> are what hurt.</p>
       </div>
       <div class="callout exam">
-        <div class="callout-label">The deck's closing note on balanced test sets</div>
+        <div class="callout-label">A closing note on balanced test sets</div>
         <em>"What about a balanced test set, in which classes have equal number of samples? Accuracy not terrible, F1 score still interesting."</em>
         <p style="margin:10px 0 0 0;">Balance the classes 50/50 and the always-"no" trick collapses — it now scores 50%, not 99% — so accuracy becomes informative again. But F1 is <strong>still</strong> worth reporting, because accuracy still treats a miss and a false alarm as equally bad, and in most real problems they are not.</p>
       </div>
@@ -112,7 +112,7 @@
       <h2 id="n-tool">Tool · Confusion matrix &amp; classification metrics</h2>
       <div class="tool" data-run="runCM">
         <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Every metric, from four numbers</h3></div>
-        <p class="tool-desc">Two modes. <strong>Type the four counts</strong> for the slide's presets — or <strong>slide a decision threshold across two overlapping score distributions</strong> and watch precision and recall trade against each other in real time, with the precision–recall curve drawn underneath.</p>
+        <p class="tool-desc">Two modes. <strong>Type the four counts</strong> for the presets — or <strong>slide a decision threshold across two overlapping score distributions</strong> and watch precision and recall trade against each other in real time, with the precision–recall curve drawn underneath.</p>
         <div class="tool-controls">
           <div class="tool-field"><label for="cm-preset">Preset</label>
             <select id="cm-preset" onchange="cmPreset()">
@@ -138,8 +138,8 @@
         <ul style="margin:6px 0 0 0;">
           <li>Switch to <strong>slide a decision threshold</strong>, set prevalence to about 1%, and drag the threshold slowly to the right. <strong>Accuracy barely moves off 99% the entire way while recall collapses to zero</strong> — the rare-disease argument, as one continuous motion.</li>
           <li>In that mode, drag <strong>how good the model is</strong> to 0. The two distributions sit on top of each other and no threshold can separate them; the precision–recall curve flattens onto the prevalence line.</li>
-          <li>Step through the first four presets in order. Watch <strong>accuracy stay near 99% while recall swings from 0 to 1</strong> — the whole argument of this lecture in four clicks.</li>
-          <li>The <em>flags 0.01%</em> preset is the slide's question: <strong>precision 1.00, recall 0.01</strong>. Precision says the model is perfect.</li>
+          <li>Step through the first four presets in order. Watch <strong>accuracy stay near 99% while recall swings from 0 to 1</strong> — the whole argument of this topic in four clicks.</li>
+          <li>The <em>flags 0.01%</em> preset is the interesting case: <strong>precision 1.00, recall 0.01</strong>. Precision says the model is perfect.</li>
           <li>Compare <em>rare disease</em> against <em>balanced test set</em> for the same model and see accuracy become informative again.</li>
           <li>Set TP = 0, FP = 0 and see the tool report precision as <strong>undefined</strong> rather than quietly printing 0.</li>
           <li>On the precision–recall curve, notice you <strong>cannot move right without moving down</strong>. That trade is why a single number never settles the question, and why F1 (the dashed line) peaks somewhere in the middle.</li>
@@ -198,7 +198,7 @@
           <li><strong>Precision = TP / (TP + FP)</strong> — of what I flagged, how much was real. Punishes false alarms.</li>
           <li><strong>Sensitivity / recall = TP / (TP + FN)</strong> — of what was real, how much I caught. Punishes misses.</li>
           <li><strong>F1 = 2 / (recall<sup>−1</sup> + precision<sup>−1</sup>)</strong>, the harmonic mean — high only when <em>both</em> are high.</li>
-          <li><strong>Recall is the metric that exposes the always-"no" model</strong>; precision would report 1.00 or be undefined. This is the slide's question.</li>
+          <li><strong>Recall is the metric that exposes the always-"no" model</strong>; precision would report 1.00 or be undefined. That is the question above.</li>
           <li><strong>Neither precision nor recall uses TN</strong> — which is exactly why they survive class imbalance.</li>
           <li><strong>On a balanced test set</strong> accuracy is "not terrible", but F1 is still interesting.</li>
           <li><strong>MAE, MSE, RMSE</strong> — write all three formulas. MSE punishes large errors quadratically; RMSE restores the original units; RMSE ≥ MAE.</li>

@@ -66,8 +66,8 @@
         <strong>sound but incomplete</strong>: when it returns True it hands you an assignment you can
         check yourself, but when it returns False it has proved nothing at all. All it means is
         &ldquo;I ran out of uphill moves&rdquo;.<br><br>
-        This is not a hypothetical. On the lecture&rsquo;s own seven-clause example, starting from the
-        assignment the slides pick — <code>P := True, Q := False, R := False</code> — greedy scores 6,
+        This is not a hypothetical. On the seven-clause example above, starting from the
+        usual starting assignment — <code>P := True, Q := False, R := False</code> — greedy scores 6,
         finds that no single flip does better than 6, and returns <strong>False</strong>. The formula
         is satisfiable: <code>P := False, Q := True, R := True</code> satisfies all seven. Greedy
         cannot get there because the route passes through assignments that score <em>worse</em>.
@@ -102,7 +102,7 @@
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn secondary" onclick="gdPreset('greedy')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="gdPreset('greedy')">Worked example</button>
           <button class="tool-btn secondary" onclick="gdPreset('twosat')">A 2SAT formula</button>
           <button class="tool-btn secondary" onclick="gdPreset('unsat')">Unsatisfiable</button>
           <button class="tool-btn secondary" onclick="gdPreset('horn')">Horn clauses</button>
@@ -152,7 +152,7 @@
           Make it true. Every clause containing it is satisfied at a stroke, and because its negation
           appears nowhere, nothing is damaged.<br><br>
           It <strong>can never cause a conflict</strong>. It is free progress — which is exactly why
-          the deck calls it &ldquo;should&rdquo; rather than &ldquo;must&rdquo;.
+          it is usually phrased as &ldquo;should&rdquo; rather than &ldquo;must&rdquo;.
         </div>
       </div>
 
@@ -170,9 +170,9 @@
       </div>
 
       <div class="callout tip">
-        <div class="callout-label">Follow the lecture's unit propagation to its end</div>
-        The slides propagate <code>¬Q</code> and <code>R</code>, which forces <code>P</code>, which
-        leaves <code>S</code> and <code>¬S</code> both as unit clauses — and then the deck moves on.
+        <div class="callout-label">Follow the unit propagation to its end</div>
+        The usual walkthrough propagates <code>¬Q</code> and <code>R</code>, which forces <code>P</code>, which
+        leaves <code>S</code> and <code>¬S</code> both as unit clauses — and then stops there.
         That pair <em>is</em> the conclusion: S is forced both ways, so the branch has a conflict, and
         since no branching happened at all, <strong>that clause set is unsatisfiable</strong>. Running
         it in the tool below confirms it against exhaustive search.
@@ -280,7 +280,7 @@ R
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn secondary" onclick="r3Preset('wide')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="r3Preset('wide')">Worked example</button>
           <button class="tool-btn secondary" onclick="r3Preset('greedy')">Already narrow</button>
           <button class="tool-btn secondary" onclick="r3Preset('unsat')">Unsatisfiable</button>
         </div>
@@ -331,7 +331,7 @@ R
           <span class="tool-badge">Practice tool</span>
           <h3>Clauses to implications to components to an answer</h3>
         </div>
-        <div class="tool-desc">This calls the same SCC engine as Topic 4 — the deck says &ldquo;using
+        <div class="tool-desc">This calls the same SCC engine as Topic 4 — the standard recipe says &ldquo;using
           our strongly connected component algorithm&rdquo;, and here it literally is. The verdict is
           cross-checked against exhaustive search, and any assignment produced is checked against the
           clauses.</div>
@@ -346,7 +346,7 @@ R
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn secondary" onclick="twoPreset('twosat')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="twoPreset('twosat')">Worked example</button>
           <button class="tool-btn secondary" onclick="twoPreset('twobad')">Unsatisfiable</button>
           <button class="tool-btn secondary" onclick="twoPreset('greedy')">Try a 3-literal one</button>
         </div>
@@ -399,7 +399,7 @@ R
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn secondary" onclick="hornPreset('horn')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="hornPreset('horn')">Worked example</button>
           <button class="tool-btn secondary" onclick="hornPreset('unit')">Not Horn</button>
           <button class="tool-btn secondary" onclick="hornPreset('twosat')">A 2SAT formula</button>
         </div>
@@ -414,7 +414,7 @@ R
         <em>unique minimal model</em> reachable by a fixed-point computation. Neither contains the
         other: <code>(P ∨ Q)</code> is 2SAT but not Horn (two positive literals);
         <code>(¬P ∨ ¬Q ∨ R)</code> is Horn but not 2SAT (three literals). That is why the
-        lecture&rsquo;s diagram draws them as overlapping circles inside P, rather than one inside the
+        usual diagram draws them as overlapping circles inside P, rather than one inside the
         other.
       </div>
 
@@ -439,7 +439,7 @@ R
         <div class="callout-label">Traps</div>
         <ul style="margin:6px 0 0;">
           <li>Reading &ldquo;polynomial time&rdquo; as &ldquo;solves the problem&rdquo;. Greedy is the
-            counterexample, and it is on the slides.</li>
+            counterexample, and it is the standard one.</li>
           <li>Swapping the two DPLL rules. Unit = one literal <em>left in a clause</em>. Pure = one
             <em>sign across the whole formula</em>.</li>
           <li>Claiming pure literal elimination can cause a conflict. It cannot — that is its

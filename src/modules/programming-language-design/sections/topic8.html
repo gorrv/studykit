@@ -68,7 +68,7 @@
         <p style="margin:10px 0 0 0;">Without it, unifying <code>X</code> with <code>f(X)</code> builds a <em>cyclic</em> term and most Prologs will loop or print something infinite. It comes back at the end of this topic in the variable-renaming discussion.</p>
       </div>
       <div class="callout tip">
-        <div class="callout-label">Three more things the lectures say about the algorithm</div>
+        <div class="callout-label">Three more things worth knowing about the algorithm</div>
         <ul style="margin:6px 0 0 0;">
           <li>The rules are applied in a <strong>non-deterministic</strong> way until no rule can be applied or a failure arises.</li>
           <li>In the case of success, <strong>by changing each <code>=</code> in the final set of equations to <code>↦</code> we obtain the mgu</strong>.</li>
@@ -91,7 +91,7 @@
         <div class="unif-row done"><span class="u-rule">Output</span><span class="u-set">{ X ↦ 0, &nbsp;L ↦ [], &nbsp;Y ↦ [1, 2], &nbsp;U ↦ [0 | Z] }</span></div>
       </div>
       <div class="exc">
-        <div class="exc-n">Exercise · full solution given in the deck</div>
+        <div class="exc-n">Exercise · with a full solution</div>
         <h4>{ f(g(a), b) = f(X, b), &nbsp;X = g(Z), &nbsp;f(a, Y) = f(Z, Y) }</h4>
         <div class="unif" style="margin-top:10px;">
           <div class="unif-row start"><span class="u-rule">Input</span><span class="u-set">{ f(g(a),b) = f(X,b), &nbsp;X = g(Z), &nbsp;f(a,Y) = f(Z,Y) }</span></div>
@@ -263,7 +263,7 @@
           <li>Some goals need no program clauses — typically <strong>built-in predicates</strong>. E.g. <code>Y is 3+1</code> succeeds if Y can be unified with 4, so it succeeds if Y is free or already bound to 4, and fails otherwise.</li>
         </ul>
       </div>
-      <p>The deck's running example program, with clauses numbered:</p>
+      <p>The running example program, with clauses numbered:</p>
       <div class="numprog">
         <div class="cl"><span class="n">1</span><span>s(3).</span></div>
         <div class="cl"><span class="n">2</span><span>s(4).</span></div>
@@ -280,7 +280,7 @@
         <tr><td><code>:- s(2).</code></td><td><strong>false</strong> — a single failure node</td></tr>
         <tr><td><code>:- p(2), s(2).</code></td><td><strong>false</strong> — since <code>s(2)</code> fails</td></tr>
       </table>
-      <p>Build each of these in the tool below and compare with the lectures.</p>
+      <p>Build each of these in the tool below and compare.</p>
       <!-- ===== SLD TOOL ===== -->
       <h3 id="t8-sldtool">🛠️ Interactive: SLD-Resolution Tree Builder</h3>
       <p>Draws the complete tree: goals as nodes, the <strong>selected (left-most) literal highlighted</strong>, edges labelled with the <strong>clause number and mgu</strong>, success branches ending in <strong>□</strong> and dead ends marked <em>failure</em>. Infinite branches are cut off at a depth limit so you can see them growing.</p>
@@ -289,7 +289,7 @@
           <span class="tool-badge">Practice tool</span>
           <h3>Draw the SLD-resolution tree</h3>
         </div>
-        <div class="tool-desc">Children appear left-to-right in program order, exactly as the lecture prescribes. Failed unifications are not shown.</div>
+        <div class="tool-desc">Children appear left-to-right in program order, exactly as Prolog prescribes. Failed unifications are not shown.</div>
         <div class="tool-controls">
           <div class="tool-field" style="flex:1; min-width:280px;">
             <label>program (numbered in order)</label>
@@ -319,7 +319,7 @@ p(X) :- q(X), Y is X+1, s(Y).</textarea>
         <div id="sd-output" class="tool-output"></div>
       </div>
       <div class="exc">
-        <div class="exc-n">Exercise · solution given in the deck</div>
+        <div class="exc-n">Exercise · with a solution</div>
         <h4>SLD-tree for <code>:- length([2, 3], X).</code></h4>
         <div class="pl"><span class="at">length</span>([], 0).
 <span class="at">length</span>([<span class="v">H</span> | <span class="v">T</span>], <span class="v">N</span>) <span class="op">:-</span> length(<span class="v">T</span>, <span class="v">M</span>), <span class="v">N</span> <span class="op">is</span> <span class="v">M</span> + 1.</div>
@@ -381,7 +381,7 @@ p(X) :- q(X), Y is X+1, s(Y).</textarea>
           <li><strong>Computing a resolvent</strong> — select Gᵢ, find a clause whose head unifies with mgu σ, replace Gᵢ by the clause body, applying σ throughout. The <strong>composition of substitutions restricted to the query's variables</strong> is the answer.</li>
           <li><strong>Prolog's strategy</strong> — left-most literal, clauses top to bottom, <strong>depth-first</strong>. <em>SLD-resolution is complete but Prolog's implementation is not</em>, because depth-first search can get stuck in an infinite branch.</li>
           <li><strong>Draw SLD-trees</strong> — nodes are goals, edges are labelled with mgus, children in program order left-to-right, failed unifications not shown, <strong>□</strong> ends a success branch, dead ends marked <em>failure</em>. Trees may have success, failure <em>and infinite</em> branches.</li>
-          <li><strong>Reproduce the deck's trees</strong> — <code>likes(Z,prolog)</code>, <code>likes(Z,painting)</code>, the four goals on the s/r/q/p program, and <code>length([2,3],X)</code>.</li>
+          <li><strong>Reproduce the trees above</strong> — <code>likes(Z,prolog)</code>, <code>likes(Z,painting)</code>, the four goals on the s/r/q/p program, and <code>length([2,3],X)</code>.</li>
           <li><strong>Built-ins in a tree</strong> — <code>Y is 3+1</code> needs no program clause; it succeeds if Y is free or already bound to 4.</li>
           <li><strong>Back-tracking</strong> — failure branches back-track automatically, success branches on request; the <strong>cut <code>!</code></strong> means do not back-track beyond this point.</li>
           <li><strong>Clause order</strong> — put base clauses before recursive ones; the reversed <code>append</code> yields an infinite branch and no solutions, even though the program is <em>logically</em> the same.</li>

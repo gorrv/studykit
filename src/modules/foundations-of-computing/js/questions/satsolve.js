@@ -47,7 +47,7 @@
       answer: right,
       check: textCheck(right),
       explain: 'Greedy is <strong>sound but incomplete</strong>. True comes with an assignment you ' +
-        'can check; False means only that it reached a local maximum. On the lecture’s own ' +
+        'can check; False means only that it reached a local maximum. On the worked ' +
         'example it returns False from half of all starting assignments, and the formula is ' +
         'satisfiable. Polynomial time is worth nothing if the answer is wrong.',
     };
@@ -173,7 +173,7 @@
       check: textCheck(right),
       explain: 'A path x ⇝ y means &ldquo;x forces y&rdquo;. If x and ¬x share a component then x ' +
         'forces ¬x <em>and</em> ¬x forces x, so neither value survives. Components containing ' +
-        'several different variables are perfectly normal — the lecture example has {P, Q, R} as one ' +
+        'several different variables are perfectly normal — the worked example has {P, Q, R} as one ' +
         'component and is satisfiable. Cycles are likewise normal: they are what components are.',
     };
   } });
@@ -295,7 +295,7 @@
       check: textCheck(right),
       explain: '2SAT is in P because it is secretly a graph problem; Horn is in P because it has a ' +
         'unique minimal model reachable by a fixed point. Two unrelated reasons, which is why the ' +
-        'lecture draws them as overlapping circles rather than one inside the other. 3SAT is ' +
+        'usual diagram draws them as overlapping circles rather than one inside the other. 3SAT is ' +
         'NP-complete — a polynomial algorithm for it would prove P = NP.',
     };
   } });

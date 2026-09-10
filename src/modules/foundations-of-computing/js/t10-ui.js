@@ -50,7 +50,7 @@
 
     if (alpha.length === 2 && alpha[0] === '0' && alpha[1] === '1') {
       h += '<div class="callout warn" style="margin:14px 0;">' +
-        '<div class="callout-label">The slide’s list has two entries swapped</div>' +
+        '<div class="callout-label">Two entries are easy to swap</div>' +
         'It prints <code>ε, 1, 0, 00, 01, 10, 11, 000, …</code> — 1 before 0, and then every later ' +
         'block in the opposite order, 00 before 01 before 10 before 11. Either convention enumerates ' +
         'Σ*; mixing them means there is no rule saying which word w<sub>i</sub> is, and the diagonal ' +
@@ -116,10 +116,10 @@
       '<tr><th>plain</th><td>' + esc(am.flat.pair) + '</td><td>' + esc(am.flat.single) + '</td>' +
         '<td class="' + (am.flat.collide ? 'pc-no' : 'pc-ok') + '">' +
         (am.flat.collide ? 'identical' : 'distinct') + '</td></tr>' +
-      '<tr><th>the slide’s code<br><span class="cd-small">0→00, 1→01, #→11</span></th><td class="cd-bits">' +
-        esc(am.slide.pair) + '</td><td class="cd-bits">' + esc(am.slide.single) + '</td>' +
-        '<td class="' + (am.slide.collide ? 'pc-no' : 'pc-ok') + '">' +
-        (am.slide.collide ? 'still identical' : 'distinct') + '</td></tr>' +
+      '<tr><th>the usual repair<br><span class="cd-small">0→00, 1→01, #→11</span></th><td class="cd-bits">' +
+        esc(am.usual.pair) + '</td><td class="cd-bits">' + esc(am.usual.single) + '</td>' +
+        '<td class="' + (am.usual.collide ? 'pc-no' : 'pc-ok') + '">' +
+        (am.usual.collide ? 'still identical' : 'distinct') + '</td></tr>' +
       '<tr><th>a code that works<br><span class="cd-small">0→00, 1→01, #→10, sep→11</span></th>' +
         '<td class="cd-bits">' + esc(am.fixed.pair) + '</td><td class="cd-bits">' +
         esc(am.fixed.single) + '</td>' +
@@ -128,10 +128,10 @@
 
     var inj = enCodeIsInjective(3, 2);
     h += '<div class="callout warn" style="margin:14px 0;">' +
-      '<div class="callout-label">The slide’s repair does not repair it</div>' +
+      '<div class="callout-label">The usual repair does not repair it</div>' +
       'The tuple ⟨w₀, …, wₙ⟩ = #w₀#…#wₙ# is described as built from strings over Σ ∪ {#}, so a ' +
       'component may contain a separator — and then ⟨0, 1⟩ and ⟨"0#1"⟩ have the same encoding. The ' +
-      'slide offers a binary code as an alternative, but <strong>it gives the data character # and ' +
+      'usual fix is a binary code, but <strong>it gives the data character # and ' +
       'the separator the same pattern, 11</strong>, so the collision survives translation unchanged.' +
       '<br><br>What fixes it is reserving a pattern the data can never produce: code # as 10 and keep ' +
       '11 for the separator alone. Checked exhaustively over ' + inj.tested + ' tuples of up to three ' +

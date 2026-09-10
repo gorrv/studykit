@@ -18,10 +18,10 @@
      ============================================================ */
 
   /**
-     The table on the slides: rows are machines, columns are
+     The standard table: rows are machines, columns are
      words, and a cell says whether M_i accepts w_j.
 
-     Written with ✓ and ✗ (or 1 and 0, or the slide's own 3 and 7,
+     Written with ✓ and ✗ (or 1 and 0, or the 3 and 7 sometimes used,
      which are a checkmark and a cross in the font it was set in).
   */
   function dgParse(text) {
@@ -107,9 +107,9 @@
     };
   }
 
-  /** The slide's own table, so the tool starts on the figure being explained. */
+  /** The standard table, so the tool starts on the figure being explained. */
   var DG_PRESET =
-    '# the table on the halting deck: ✓ = M_i accepts w_j, ✗ = it does not\n' +
+    '# the standard halting table: ✓ = M_i accepts w_j, ✗ = it does not\n' +
     '✓ ✗ ✓ ✓ ✗ ✓ ✗ ✗ ✓\n' +
     '✗ ✗ ✓ ✗ ✗ ✓ ✓ ✗ ✗\n' +
     '✓ ✗ ✗ ✓ ✓ ✗ ✓ ✓ ✗\n' +
@@ -257,7 +257,7 @@
 
   /* ---------- decidable vs recognisable ----------
 
-     The slide defines decidable as sound + complete + terminating
+     The usual write-up defines decidable as sound + complete + terminating
      and leaves it there. Dropping only the third gives
      RECOGNISABLE, and the distinction is what makes HALT
      interesting: it is recognisable but not decidable, because you

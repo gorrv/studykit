@@ -481,22 +481,22 @@
     } });
     /* ---------- W9 · AI ethics ---------- */
     const ETHQ = [
-      { q: 'Which pair of questions does the lecture attach to the two columns of applications?', a: '"What are the hidden risks?" for well-intentioned; "Should we even build this?" for fundamentally problematic',
+      { q: 'Which pair of questions goes with the two columns of applications?', a: '"What are the hidden risks?" for well-intentioned; "Should we even build this?" for fundamentally problematic',
         c: ['"What are the hidden risks?" for well-intentioned; "Should we even build this?" for fundamentally problematic', 'Both columns get "what are the hidden risks?"', '"Who benefits?" and "who is harmed?"', '"Is it accurate?" and "is it fast?"'],
         e: 'The distinction matters: for the left column ethics is mitigation; for the right column no mitigation is the answer, and the question is whether the system should exist at all.' },
-      { q: 'The lecture links worse facial recognition on minorities to which immediate cause?', a: 'Lack of data',
+      { q: 'Worse facial recognition on minorities is linked to which immediate cause?', a: 'Lack of data',
         c: ['Lack of data', 'Poor camera hardware', 'Choice of loss function', 'Insufficient compute'],
-        e: 'From the policing slide: <strong>worse facial recognition performance on minorities due to lack of data → wrongful arrests / stop-and-search</strong>. In the causes taxonomy that is <strong>representation bias</strong>.' },
+        e: 'From the policing example: <strong>worse facial recognition performance on minorities due to lack of data → wrongful arrests / stop-and-search</strong>. In the causes taxonomy that is <strong>representation bias</strong>.' },
       { q: 'Which of these is listed under "automated defense" rather than "search for specific targets"?', a: 'Easier escalation and arms races',
         c: ['Easier escalation and arms races', 'Propagation of bias into war', 'More deaths', 'Wrongful arrests'],
         e: 'Targeting → propagation of bias into war, more deaths. Automated defense → dehumanization of war, loss of moral engagement, simplification of complex moral choices, easier escalation, arms races.' },
-      { q: 'How does the lecture define phrenology?', a: 'A disproved pseudoscience assuming gender, intelligence, criminality and internal states can be predicted from facial analysis',
+      { q: 'How is phrenology defined here?', a: 'A disproved pseudoscience assuming gender, intelligence, criminality and internal states can be predicted from facial analysis',
         c: ['A disproved pseudoscience assuming gender, intelligence, criminality and internal states can be predicted from facial analysis', 'The study of skull measurements in archaeology', 'A method for facial recognition using landmarks', 'A statistical technique for measuring bias'],
-        e: 'The lecture\'s charge is that current AI reviving it — predicting gender, sexuality, race, emotion, criminality from images — repeats the same error.' },
-      { q: 'Why does the lecture say predicting sexuality or criminality from faces is not fixable with better data?', a: 'They are social constructs or unobservable — only the subjects can say',
+        e: 'The charge is that current AI reviving it — predicting gender, sexuality, race, emotion, criminality from images — repeats the same error.' },
+      { q: 'Why is predicting sexuality or criminality from faces not fixable with better data?', a: 'They are social constructs or unobservable — only the subjects can say',
         c: ['They are social constructs or unobservable — only the subjects can say', 'The datasets are too small', 'Faces change over time', 'The models are not deep enough'],
         e: 'There is no ground truth to get right, so this is <strong>measurement bias</strong> in its purest form: wrong categorization of people. No amount of collection repairs a label that was never a property of the face.' },
-      { q: 'What does the lecture give as the consequence of AI being expensive?', a: 'Universities can\'t compete and poorer labs/countries can\'t afford it',
+      { q: 'What is the consequence of AI being expensive?', a: 'Universities can\'t compete and poorer labs/countries can\'t afford it',
         c: ['Universities can\'t compete and poorer labs/countries can\'t afford it', 'Models become less accurate', 'Research slows down globally', 'Open source becomes dominant'],
         e: 'Compute, hardware, money to train and house, and a Big Tech monopoly. The result is that university resources get used for <strong>Big Tech\'s priority problems</strong>.' },
       { q: 'Which is NOT one of the seven harm categories?', a: 'Economic harms',
@@ -508,7 +508,7 @@
       { q: 'Loss of the human right to contest a decision falls under which harm category?', a: 'Human agency',
         c: ['Human agency', 'Accountability', 'Fairness and dignity', 'Societal'],
         e: 'Human agency covers loss of control over algorithms, loss of the right to contest, over-delegation and loss of critical thinking — all of which can occur while the system works perfectly.' },
-      { q: 'How does the lecture subdivide privacy harms?', a: 'By setting: intimate spaces, work & school, public spaces',
+      { q: 'How are privacy harms subdivided?', a: 'By setting: intimate spaces, work & school, public spaces',
         c: ['By setting: intimate spaces, work & school, public spaces', 'By data type: images, text, audio', 'By actor: state, company, individual', 'By severity: minor, major, catastrophic'],
         e: 'Naming the setting is what earns the mark. "Privacy in public spaces" is the least intuitive and covers city-scale camera networks.' },
       { q: 'A hiring model shortlists fewer women. Which sub-type of fairness harm is this?', a: 'Allocative — distribution of opportunities',
@@ -516,7 +516,7 @@
         e: '<strong>Allocative harms are about who gets things; representational harms are about how people are portrayed.</strong> A shortlist is an opportunity.' },
       { q: 'An image generator returns only men for "CEO". Which sub-type?', a: 'Representational — stereotyping',
         c: ['Representational — stereotyping', 'Allocative — quality-of-service', 'Allocative — opportunities', 'Societal — cultural'],
-        e: 'Nobody is denied a resource; the harm is in the depiction. This is the lecture\'s GPT-3 / DALL·E example, captioned <strong>"All white male."</strong>' },
+        e: 'Nobody is denied a resource; the harm is in the depiction. This is the GPT-3 / DALL·E example, captioned <strong>"All white male."</strong>' },
       { q: 'Speech recognition works worse for some accents but is offered to everyone. Which sub-type?', a: 'Allocative — distribution of quality-of-service',
         c: ['Allocative — distribution of quality-of-service', 'Representational — alienating', 'Representational — erasing', 'Allocative — distribution of resources'],
         e: '<strong>Quality-of-service</strong> is the sub-type most often missed: the service is available to all, just not at the same standard. Gender Shades and pedestrian detection are both this.' },
@@ -535,7 +535,7 @@
       { q: 'Which family of harm-anticipation methods does "ethnography" belong to?', a: 'Qualitative methods',
         c: ['Qualitative methods', 'Quantitative measurement', 'Ablation studies', 'Critique'],
         e: 'The four families: quantitative measurement, ablation studies, <strong>qualitative methods</strong> (interviews, surveys, workshops, literature reviews, ethnography) and critique (speculation, logical or philosophical argument).' },
-      { q: 'What is an ablation study, as the lecture describes it?', a: 'Removing/changing data or algorithm parameters and observing the results',
+      { q: 'What is an ablation study?', a: 'Removing/changing data or algorithm parameters and observing the results',
         c: ['Removing/changing data or algorithm parameters and observing the results', 'Interviewing affected communities', 'Auditing a deployed system externally', 'Measuring carbon emissions of training'],
         e: 'One of the four anticipation families. It sits between the purely quantitative and the qualitative: you intervene, then measure.' },
       { q: 'What is direct discrimination also called?', a: 'Disparate treatment',
@@ -544,7 +544,7 @@
       { q: 'A model uses postcode, which correlates with race, and disadvantages one group. This is…', a: 'Indirect discrimination',
         c: ['Indirect discrimination', 'Direct discrimination', 'Not discrimination, since race is not used', 'World bias only'],
         e: 'Indirect discrimination = disparate impact: <strong>disadvantage even though the attribute is not explicitly considered</strong>. Deleting the protected attribute rules out direct discrimination and leaves indirect untouched.' },
-      { q: 'The lecture gives bias two senses in AI ethics. What are they?', a: 'Imbalance or tendency in data (input), and direct or indirect discrimination (output)',
+      { q: 'Bias has two senses in AI ethics. What are they?', a: 'Imbalance or tendency in data (input), and direct or indirect discrimination (output)',
         c: ['Imbalance or tendency in data (input), and direct or indirect discrimination (output)', 'Statistical bias and variance', 'Conscious and unconscious bias', 'Training bias and inference bias'],
         e: 'Connected but distinct: imbalanced data does not automatically produce discrimination, and discrimination can arise from balanced data via the label, the objective or the metric.' },
       { q: 'Which of the five causes of discrimination is NOT marked as the developer\'s fault?', a: 'World bias',
@@ -558,17 +558,17 @@
         e: '<strong>Wrong measurement</strong> — re-arrest measures policing as much as offending. This is how the ProPublica-style disparity arises.' },
       { q: 'An objective that maximises average accuracy sacrifices a small group. Which cause, and which fix?', a: 'Algorithm bias — fixed by a fairness function',
         c: ['Algorithm bias — fixed by a fairness function', 'Evaluation bias — fixed by a better test set', 'Representation bias — fixed by resampling', 'World bias — no fix exists'],
-        e: '<strong>Wrong choice of algorithm</strong>, and the lecture\'s remedy is the fairness-functions bullet: maximise the <em>minimum</em> accuracy instead of the average.' },
+        e: '<strong>Wrong choice of algorithm</strong>, and the remedy is the fairness-functions bullet: maximise the <em>minimum</em> accuracy instead of the average.' },
       { q: 'What did the ProPublica "Machine Bias" investigation find?', a: 'The algorithm more often mistakenly predicted high-risk for Black than White defendants',
         c: ['The algorithm more often mistakenly predicted high-risk for Black than White defendants', 'The algorithm refused to score Black defendants', 'The algorithm used race as an explicit input', 'The algorithm was less accurate overall than judges'],
         e: 'Note the precision: it is about <strong>mistaken</strong> high-risk predictions — a false-positive-rate difference between groups, not simply different score distributions.' },
-      { q: 'In the Gender Shades table on the slide, roughly what error rate do the worst systems reach on the darkest skin type?', a: 'About 47%',
+      { q: 'In the Gender Shades table, roughly what error rate do the worst systems reach on the darkest skin type?', a: 'About 47%',
         c: ['About 47%', 'About 25%', 'About 10%', 'About 5%'],
         e: 'Face++ 46.5% and IBM 46.8% — close to a coin flip on a <em>binary</em> task, against near-zero error on the lightest types. Microsoft\'s best-to-worst span is 0% (Type IV) to 25% (Type VI).' },
       { q: 'Why is the Gender Shades result described as "intersectional"?', a: 'The disparity is far larger for combinations of attributes than for either attribute alone',
         c: ['The disparity is far larger for combinations of attributes than for either attribute alone', 'It tested three companies at once', 'It combined images and text', 'It used intersecting training sets'],
         e: 'A system can look nearly even across gender overall and across skin type overall, yet fail badly at the intersection. <strong>Checking one attribute at a time is not enough.</strong>' },
-      { q: 'The lecture notes who is discovering these issues. What does it conclude?', a: 'The importance of lived experience and diversity',
+      { q: 'Who is discovering these issues, and what does that conclude?', a: 'The importance of lived experience and diversity',
         c: ['The importance of lived experience and diversity', 'The importance of larger datasets', 'The importance of peer review', 'The importance of regulation'],
         e: 'Women, Black scholars, LGBTQ researchers. The argument is practical: <strong>you cannot test for a harm you have not imagined</strong>, which is why team diversity is proposed as an error-detection mechanism.' },
       { q: 'Which principle covers "documentation and logging of data/decisions, explainability, informing when AI is used"?', a: 'Transparency',
@@ -580,9 +580,9 @@
       { q: 'Which principle covers "consent, anonymity, access, de-anonymization"?', a: 'Privacy',
         c: ['Privacy', 'Safety and robustness', 'Transparency', 'Accountability'],
         e: 'The seven principles map almost one-to-one onto the seven harms, with transparency as the extra — so if you can recall the harms you can reconstruct the table.' },
-      { q: 'What does the lecture mean by "Trustworthy AI"?', a: 'Design AND governance that leads to AI we can trust',
+      { q: 'What is meant by "Trustworthy AI"?', a: 'Design AND governance that leads to AI we can trust',
         c: ['Design AND governance that leads to AI we can trust', 'A model that reports its own confidence', 'An externally audited model', 'A model trained on verified data'],
-        e: 'The capitalised AND is the lecture\'s emphasis: a perfectly principled system inside an ungoverned organisation is not trustworthy, and vice versa.' },
+        e: 'The capitalised AND is deliberate: a perfectly principled system inside an ungoverned organisation is not trustworthy, and vice versa.' },
       { q: 'Reweighting and resampling differ how?', a: 'Reweighting changes each example\'s weight in training; resampling changes how often it is drawn',
         c: ['Reweighting changes each example\'s weight in training; resampling changes how often it is drawn', 'They are two names for the same method', 'Reweighting happens after training, resampling before', 'Reweighting applies to features, resampling to labels'],
         e: 'Both are bias-mitigation methods that leave the dataset itself alone — unlike <strong>dataset curation</strong>, which changes the data. Treating them as synonyms loses an easy mark.' },
@@ -595,16 +595,16 @@
       { q: 'Which is a named environmental mitigation method?', a: 'Code emission estimation, e.g. CodeCarbon',
         c: ['Code emission estimation, e.g. CodeCarbon', 'Differential privacy', 'Reweighting', 'Participatory design'],
         e: 'Two are named: emission estimation methods, and <strong>solving problems with smaller models</strong>. Measure first, then reduce.' },
-      { q: 'Why does the lecture hold developers responsible for harms?', a: 'Many harms are best anticipated by them and can only be tested or minimized by them',
+      { q: 'Why are developers held responsible for harms?', a: 'Many harms are best anticipated by them and can only be tested or minimized by them',
         c: ['Many harms are best anticipated by them and can only be tested or minimized by them', 'They have the most to gain financially', 'They sign off the deployment decision', 'They own the training data'],
         e: '<strong>Responsibility follows capability</strong>, not blame. Developers are also named as responsible for algorithm transparency, inefficiency and power consumption.' },
-      { q: 'Besides developers, who else does the lecture hold responsible?', a: 'The institution that designs the system, and the ethics board',
+      { q: 'Besides developers, who else is held responsible?', a: 'The institution that designs the system, and the ethics board',
         c: ['The institution that designs the system, and the ethics board', 'Only the end users', 'Only the regulator', 'Only management'],
-        e: 'The institution <strong>for allowing any of the harms to take place</strong>, the ethics board <strong>for passing an unethical product/application</strong>. The conclusion slide adds managers.' },
+        e: 'The institution <strong>for allowing any of the harms to take place</strong>, the ethics board <strong>for passing an unethical product/application</strong>. The conclusion adds managers.' },
       { q: 'Which item on the "minimising harms" list is the remedy when the organisation decides to proceed anyway?', a: 'Whistleblowing',
         c: ['Whistleblowing', 'Ethics boards', 'Participatory design', 'Balanced datasets'],
         e: 'It is last on the list for a reason: <strong>every other item assumes good faith.</strong> It is the remedy for the second causes branch — obvious risk, problematic task, deployed regardless.' },
-      { q: 'Why does the lecture recommend team diversity?', a: 'Marginalized communities have different lived experience, which is important to anticipate issues',
+      { q: 'Why does team diversity help?', a: 'Marginalized communities have different lived experience, which is important to anticipate issues',
         c: ['Marginalized communities have different lived experience, which is important to anticipate issues', 'It improves model accuracy directly', 'It is required by the EU AI Act', 'It reduces training costs'],
         e: 'The argument is about <strong>error detection</strong>: you cannot test for a harm you have not imagined, and what gets imagined is bounded by who is in the room.' }
     ];
@@ -616,7 +616,7 @@
       const c = qzPick(HARM_CASES);
       const nm = k => HARMS.filter(h => h.k === k)[0].n;
       return { topic: 'AI ethics · harm taxonomy', kind: 'choice',
-        prompt: `Which harm category would the lecture file this under?<br><br><em>${c.q}</em>`,
+        prompt: `Which harm category does this fall under?<br><br><em>${c.q}</em>`,
         choices: HARMS.map(h => h.n), answer: nm(c.a), check: textCheck(nm(c.a)), explain: c.e };
     } });
     /* generated: name the cause of discrimination */
@@ -624,14 +624,14 @@
       const c = qzPick(BIAS_CASES);
       const nm = k => BIAS.filter(b => b.k === k)[0].n;
       return { topic: 'AI ethics · causes of bias', kind: 'choice',
-        prompt: `Which cause of discrimination does the lecture name here?<br><br><em>${c.q}</em>`,
+        prompt: `Which cause of discrimination is this?<br><br><em>${c.q}</em>`,
         choices: BIAS.map(b => b.n), answer: nm(c.a), check: textCheck(nm(c.a)), explain: c.e };
     } });
     /* generated: developer's fault or not */
     QZ_GEN.push({ topic: 'ethics', make: () => {
       const b = qzPick(BIAS);
       return { topic: 'AI ethics · responsibility', kind: 'choice',
-        prompt: `Is <strong>${b.n}</strong> (${b.d.toLowerCase().replace(/\.$/, '')}) marked as the developer's fault on the causes slide?`,
+        prompt: `Is <strong>${b.n}</strong> (${b.d.toLowerCase().replace(/\.$/, '')}) marked as the developer's fault?`,
         choices: ['Yes', 'No'], answer: b.dev ? 'Yes' : 'No', check: textCheck(b.dev ? 'Yes' : 'No'),
         explain: b.dev
           ? `<strong>Yes</strong> — it carries the ★. Four of the five causes do; the only exception is <strong>world bias</strong>, because the data is an accurate record of an unequal world.`
@@ -665,7 +665,7 @@
         choices: ['Model A', 'Model B'], answer: ans, check: textCheck(ans),
         explain: `Overall accuracy weights by group size: Model A = ${ovr1.toFixed(2)}%, Model B = ${ovr2.toFixed(2)}% → <strong>Model A wins on the average</strong>.`
           + `<br>Minimum accuracy is the worst group: Model A = ${aMin1}%, Model B = ${aMin2}% → <strong>Model B wins on the minimum</strong>.`
-          + `<br><br>This is exactly the lecture's <strong>fairness functions</strong> bullet — “instead of maximizing average accuracy → maximize minimum accuracy”. `
+          + `<br><br>This is exactly the <strong>fairness functions</strong> bullet — “instead of maximizing average accuracy → maximize minimum accuracy”. `
           + `Group B is only ${nMin}% of the data, so its ${aMin1}% accuracy barely moves the overall number: <strong>the accuracy trap, arriving as evaluation bias.</strong>` };
     } });
     /* computed: classification metric from a confusion matrix */
@@ -711,9 +711,9 @@
     /* computed: diagnose under/overfitting from two errors */
     QZ_GEN.push({ topic: 'ml', make: () => {
       const cases = [
-        { tr: '1.89e−01', va: '3.79e−01', a: 'Underfitting', e: 'Both errors are high and of a similar size — the model is too simple to capture the pattern at all. This is the lectures\' degree-1 straight line.' },
-        { tr: '6.91e−03', va: '1.20e−02', a: 'About right', e: 'Both errors are low and close to each other. This is the bottom of the U — the lectures\' degree 4.' },
-        { tr: '3.22e−03', va: '1.76e+15', a: 'Overfitting', e: 'The <em>best</em> training error of the three, and a validation error fifteen orders of magnitude worse than a straight line. This is the lectures\' degree 29.' },
+        { tr: '1.89e−01', va: '3.79e−01', a: 'Underfitting', e: 'Both errors are high and of a similar size — the model is too simple to capture the pattern at all. This is the degree-1 straight line.' },
+        { tr: '6.91e−03', va: '1.20e−02', a: 'About right', e: 'Both errors are low and close to each other. This is the bottom of the U — degree 4.' },
+        { tr: '3.22e−03', va: '1.76e+15', a: 'Overfitting', e: 'The <em>best</em> training error of the three, and a validation error fifteen orders of magnitude worse than a straight line. This is degree 29.' },
         { tr: '2.0e−04', va: '9.1e−01', a: 'Overfitting', e: 'Training error near zero with validation error high is the signature of memorising the noise.' },
         { tr: '4.4e−01', va: '4.6e−01', a: 'Underfitting', e: 'Both high, both close: the model is not even fitting the data it was given.' }
       ];

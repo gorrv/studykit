@@ -1,7 +1,7 @@
   /* ============================================================
      TOPIC 06 · revision week
      ------------------------------------------------------------
-     There is no Topic 6 lecture — week 6 is the revision week — so
+     Topic 6 introduces nothing new — it is a consolidation topic — so
      this section has no new material in it and does not pretend
      to. It does two things instead.
 

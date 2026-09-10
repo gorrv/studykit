@@ -1,7 +1,7 @@
   /* ============================================================
      ASYMPTOTIC GROWTH — O, Ω AND Θ (Topic 02)
 
-     The definition from lectures:
+     The definition:
 
          f ∈ O(g)   ⟺   ∃c ∃N ∀n > N :  f(n) ≤ c · g(n)
          f ∈ Ω(g)   ⟺   ∃c ∃N ∀n > N :  f(n) ≥ c · g(n)
@@ -206,7 +206,7 @@
   }
 
   /**
-   * The ladder from the lecture slides, slowest first.
+   * The usual ladder, slowest first.
    *
    * Sorted by gwCmp rather than written down in order, so the ordering
    * shown to a reader is the one the comparison actually uses. If the

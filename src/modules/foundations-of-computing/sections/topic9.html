@@ -39,7 +39,7 @@
 
       <div class="callout tip">
         <div class="callout-label">Why the first attempt at variance fails</div>
-        The slide tries Var[X] = E[X − μ] first and gets <strong>zero, always</strong>. That is not an
+        Trying Var[X] = E[X − μ] first gives <strong>zero, always</strong>. That is not an
         accident of the example: by linearity E[X − μ] = E[X] − μ = 0 for every random variable there
         is. Deviations above and below the mean cancel exactly, which is what &ldquo;mean&rdquo; means.
         Squaring first is what stops the cancellation, and it is also what makes the units of Var[X]
@@ -55,7 +55,7 @@
           <h3>Compute E[X], Var[X] and σ from a distribution</h3>
         </div>
         <div class="tool-desc">Exact fractions throughout. The variance is computed twice — from the
-          definition and from the theorem on slide 13 — and the two are compared, so the theorem is
+          definition and from the shortcut theorem — and the two are compared, so the theorem is
           checked on your distribution rather than taken on trust.</div>
         <div class="tool-controls">
           <div class="tool-field" style="flex:1 1 260px;">
@@ -68,7 +68,7 @@
 6 0.25</textarea>
           </div>
           <button class="tool-btn" onclick="runDist()">Compute ▶</button>
-          <button class="tool-btn secondary" onclick="pbPreset('lecture')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="pbPreset('worked')">Worked example</button>
           <button class="tool-btn secondary" onclick="pbPreset('die')">Fair die</button>
           <button class="tool-btn secondary" onclick="pbPreset('skewed')">Nearly all mass at 0</button>
         </div>
@@ -118,7 +118,7 @@
       <h2 id="t9-markov">Markov&rsquo;s inequality</h2>
 
       <div class="callout exam">
-        <div class="callout-label">The theorem, with the hypothesis the slide omits</div>
+        <div class="callout-label">The theorem, with the hypothesis that is usually omitted</div>
         Let X be a <strong>non-negative</strong> random variable with expectation E[X]. Then for any
         a &gt; 0:<br><br>
         <strong>Prob( X ≥ a · E[X] ) ≤ 1/a</strong><br><br>
@@ -129,7 +129,7 @@
       </div>
 
       <div class="callout warn">
-        <div class="callout-label">The slide states it without X ≥ 0, and then it is false</div>
+        <div class="callout-label">Stated without X ≥ 0, it is false</div>
         As printed, the theorem reads &ldquo;let X be a random variable with expectation E[X]&rdquo;,
         with no condition on X. Take X = −10 always. Then E[X] = −10, and for a = 2 the claim is
         Prob(X ≥ −20) ≤ ½ — but that probability is <strong>1</strong>.<br><br>
@@ -149,7 +149,7 @@
         </div>
         <div class="tool-desc">The shaded bars are the event the left-hand side measures. The tool
           reports whether X ≥ 0 holds separately from whether the bound holds, because those are
-          different questions and the slide only asks one of them.</div>
+          different questions and the usual statement only asks one of them.</div>
         <div class="tool-controls">
           <div class="tool-field" style="flex:1 1 240px;">
             <label for="mk-text">the distribution</label>
@@ -228,7 +228,7 @@ q1 1 qacc 1 > 2/3</textarea>
             <input type="number" id="pt-depth" value="8" min="1" max="16">
           </div>
           <button class="tool-btn" onclick="runPtm()">Run ▶</button>
-          <button class="tool-btn secondary" onclick="ptmPreset('lecture')">Lecture tree</button>
+          <button class="tool-btn secondary" onclick="ptmPreset('worked')">Example tree</button>
           <button class="tool-btn secondary" onclick="ptmPreset('coin')">Fair coin</button>
           <button class="tool-btn secondary" onclick="ptmPreset('biased')">No time bound</button>
         </div>
@@ -287,7 +287,7 @@ q1 1 qacc 1 > 2/3</textarea>
         Prob(M′(w) = 1) ≥ 1 − Prob(T(n) &gt; 3E[T(n)]) ≥ <strong>2/3</strong>.<br>
         <strong>Step 6.</strong> M′ is a polynomial-time Monte Carlo algorithm, so L ∈ BPP. ∎<br><br>
         Markov is doing all the work, and it is legitimate here because T(n) is a running time and
-        therefore non-negative — the hypothesis the earlier slide omitted.
+        therefore non-negative — the hypothesis noted earlier.
       </div>
 
       <div class="callout tip">
@@ -329,7 +329,7 @@ q1 1 qacc 1 > 2/3</textarea>
         <div class="callout-label">The hierarchy, and what is actually known</div>
         <strong>Proved:</strong> P ⊆ ZPP ⊆ BPP ⊆ PSpace, and P ⊆ NP ⊆ PSpace, and P ⊆ co-NP ⊆
         PSpace.<br><br>
-        <strong>Open, and on the slide as questions:</strong> BPP ⊆ NP? NP ⊆ BPP? ZPP = P? BPP = P?
+        <strong>Open questions:</strong> BPP ⊆ NP? NP ⊆ BPP? ZPP = P? BPP = P?
         <br><br>
         The last one is the surprise. Most people meeting BPP for the first time assume randomness
         must buy something, and the current expectation among complexity theorists is the opposite:

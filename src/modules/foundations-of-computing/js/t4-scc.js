@@ -1,7 +1,7 @@
   /* ============================================================
      TOPIC 04 · topological sort, strongly connected components
      ------------------------------------------------------------
-     The lecture's SCC algorithm calls TOPOLOGICAL-SORT on a graph
+     The standard SCC algorithm calls TOPOLOGICAL-SORT on a graph
      that has cycles, which sounds like nonsense -- a cyclic graph
      has no topological order. It is not nonsense: what the routine
      actually computes is the reverse DFS finishing order, which
@@ -74,7 +74,7 @@
 
   /* ---------- Strongly connected components ---------- */
 
-  /** The lecture's algorithm: finishing order, then DFS on the
+  /** The standard algorithm: finishing order, then DFS on the
       transpose, taking components in that order. */
   function sccFind(g, opts) {
     if (!g.directed) return { ok: false, error: 'Strong connectivity is a property of directed graphs.' };

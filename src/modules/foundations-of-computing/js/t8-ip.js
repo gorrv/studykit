@@ -7,12 +7,12 @@
      by vertex enumeration, not by simplex. That is forced, not
      lazy: branching adds a row like y >= 2, whose <= form has a
      negative right-hand side, so the all-slacks corner is not
-     feasible and the lecture's tableau cannot even be started.
-     The slide says "solve the linear relaxation using the Simplex
+     feasible and the standard tableau cannot even be started.
+     The usual write-up says "solve the linear relaxation using the Simplex
      Method" and skips the part where you would need a phase-one
      method to do it.
 
-     Second, the pseudocode on the slide is branch-and-*branch*.
+     Second, the usual pseudocode is branch-and-*branch*.
      There is no bounding step anywhere in it: both children are
      always explored, whatever has already been found. Bounding is
      what makes the method worth its name, so it is here as a
@@ -47,13 +47,13 @@
   }
 
   /**
-     BRANCH-AND-BOUND, following the slide, with the bounding step
+     BRANCH-AND-BOUND, as usually written, with the bounding step
      available as an option.
 
      opts.bound   prune a node whose relaxation cannot beat the best
                   integer solution found so far (default false, to
-                  match the slide)
-     opts.branchOn 'first' (the slide's "choose a non-integer x_i")
+                  match the usual write-up)
+     opts.branchOn 'first' (the usual "choose a non-integer x_i")
                   or 'mostfrac'
      opts.cap     node limit
   */
@@ -121,7 +121,7 @@
       if (rel.status === 'infeasible') {
         node.status = 'infeasible';
         node.note = 'No point at all satisfies these constraints, so this whole subtree is dead. ' +
-          'The slide&rsquo;s pseudocode has no case for this.';
+          'The textbook pseudocode has no case for this.';
         return node;
       }
       if (rel.status === 'unbounded') {
@@ -232,7 +232,7 @@
   /* ---------- SAT <=p IP ---------- */
 
   /**
-     The reduction from slides 10-13. Each variable P becomes two
+     The reduction in the standard form. Each variable P becomes two
      numerical variables xP and xNP with
 
          xP + xNP <= 1     and     xP + xNP >= 1
@@ -378,10 +378,10 @@
   /* ---------- the matching example ---------- */
 
   /**
-     Slides 5-8. Workers with capacities, tasks with requirements,
+     The assignment example. Workers with capacities, tasks with requirements,
      an edge for every pair that can be assigned.
 
-     Two things about the slide's write-up. Step 5 states the task
+     Two things about the usual write-up. Step 5 states the task
      constraint as "sum over j of x_{i,j} >= requirements of j",
      summing over the wrong index — it should be over i, the
      workers, as step 3 correctly has it. And the result is called a

@@ -16,7 +16,7 @@
       </div>
       <!-- ===== WHY FORMAL ===== -->
       <h2 id="t3-why">Why formal? The <code>f(i++, --i)</code> problem</h2>
-      <p><strong>Informal semantics can be imprecise.</strong> The lecture opens with a single devastating example:</p>
+      <p><strong>Informal semantics can be imprecise.</strong> The topic opens with a single devastating example:</p>
       <p style="text-align:center; font-family:'Fraunces',serif; font-size:22px; font-style:italic; margin:22px 0;">What is the meaning of the C expression <code style="font-size:0.8em;">f(i++, --i)</code>?</p>
       <p>Everything about it seems well defined. From Topic 02 we know exactly what each operator does:</p>
       <ul>
@@ -51,7 +51,7 @@
         <div id="eo-output" class="tool-output"></div>
       </div>
       <div class="callout">
-        <div class="callout-label">The move the lecture makes next</div>
+        <div class="callout-label">The move to make next</div>
         <strong>The first approach to giving a precise, formal description of the behaviour of programming constructs was in terms of an abstract machine.</strong>
         <p style="margin:10px 0 0 0;">And, restating Topic 01's definition: <strong>an abstract machine is a transition system, which specifies an interpreter for the programming language.</strong> We give an example for a small imperative language: <strong>SIMP</strong>.</p>
       </div>
@@ -107,7 +107,7 @@ factorial := 1;
       <!-- ===== TREES ===== -->
       <h2 id="t3-trees">These grammars specify <em>trees</em></h2>
       <div class="callout exam">
-        <div class="callout-label">Straight from the lectures</div>
+        <div class="callout-label">The standard definition</div>
         <strong>The grammars specify the abstract syntax of SIMP, therefore rules specify labelled trees rather than strings.</strong>
         <ul style="margin:8px 0 0 0;">
           <li>The <strong>leaf nodes</strong> of the tree are labelled by elements of <strong>ℤ ∪ {True, False} ∪ L ∪ {skip}</strong>.</li>
@@ -267,7 +267,7 @@ factorial := 1;
         <div class="callout-label">The pattern — learn this, not the eleven rules</div>
         Every operator gets <strong>two</strong> rules, and they always have the same shape:
         <ol style="margin:8px 0 0 0;">
-          <li>A <strong>decomposition</strong> rule: the compound phrase is popped and replaced by <em>its sub-phrases followed by the operator token</em>. Nothing is computed. This is what the lecture later calls "phrase analysis".</li>
+          <li>A <strong>decomposition</strong> rule: the compound phrase is popped and replaced by <em>its sub-phrases followed by the operator token</em>. Nothing is computed. This is what is later called "phrase analysis".</li>
           <li>An <strong>application</strong> rule: the token surfaces on the control stack, its operands are now on the results stack, and it consumes them and pushes one value.</li>
         </ol>
         <p style="margin:10px 0 0 0;">Once you see that, the table is just the same idea repeated for ¬, ∧, op and bop.</p>
@@ -344,9 +344,9 @@ factorial := 1;
         <div class="trans-step final"><span class="ts-n">n</span><span class="ts-a">→</span><span class="ts-c">⟨nil, &nbsp;nil, &nbsp;m[l ↦ 0, factorial ↦ 24]⟩</span></div>
       </div>
       <div class="callout exam">
-        <div class="callout-label">The sentence the lecture ends this example with</div>
+        <div class="callout-label">The sentence this example ends on</div>
         <strong>The abstract machine describes the exact behaviour of a while loop.</strong> Compare with the informal definition: <em>"…the body of the loop is executed as long as the value of the expression is true."</em>
-        <p style="margin:10px 0 0 0;">The informal sentence is not <em>wrong</em> — it's just not a definition. It doesn't say when the expression is re-evaluated, what happens to the saved body, or in what order side-effects occur. The six transitions above answer all of that, mechanically. <strong>This contrast is the thesis of the whole lecture</strong>, and is very likely to be an essay-style exam question.</p>
+        <p style="margin:10px 0 0 0;">The informal sentence is not <em>wrong</em> — it's just not a definition. It doesn't say when the expression is re-evaluated, what happens to the saved body, or in what order side-effects occur. The six transitions above answer all of that, mechanically. <strong>This contrast is the thesis of the whole topic</strong>, and is very likely to be an essay-style exam question.</p>
       </div>
       <!-- ===== SIMP MACHINE TOOL ===== -->
       <h3 id="t3-simptool">🛠️ Interactive: SIMP Abstract Machine</h3>
@@ -395,10 +395,10 @@ while !l > 0 do
         Run the factorial example in the tool and count. The overwhelming majority of steps are decomposition rules — pulling phrases apart and pushing tokens. Only <code>op-apply</code>, <code>bop-apply</code> and <code>assign-apply</code> actually <em>compute</em> anything. That ratio <strong>is</strong> the disadvantage, and quoting it with a number from your own trace makes for a strong exam answer.
       </div>
       <div class="callout exam">
-        <div class="callout-label">The fix, and the bridge to next lecture</div>
+        <div class="callout-label">The fix, and the bridge to the next topic</div>
         <strong>Structural Approach to Operational Semantics.</strong> To overcome the previous problem, another approach to operational semantics based on transition systems was developed: <strong>the structural approach (Plotkin)</strong>.
         <p style="margin:10px 0 0 0;"><strong>Idea:</strong> the transitions for a compound statement should be defined <em>in terms of the transitions for its constituent sub-statements</em>. <strong>In other words: the definition should be inductive.</strong></p>
-        <p style="margin:10px 0 0 0;">Compare with Topic 01, which put it identically: <em>"each command is described in terms of its components."</em> The next lecture builds this alternative — and aim 3 of this lecture ("understand the differences between alternative semantic descriptions") is asking you to compare the two.</p>
+        <p style="margin:10px 0 0 0;">Compare with Topic 01, which put it identically: <em>"each command is described in terms of its components."</em> The next topic builds this alternative — and aim 3 of this one ("understand the differences between alternative semantic descriptions") is asking you to compare the two.</p>
       </div>
       <!-- ===== EXAM ===== -->
       <h2 id="t3-exam">Exam-style takeaways</h2>

@@ -2,7 +2,7 @@
      TOPIC 04 · graphs: parsing, BFS, DFS
      ------------------------------------------------------------
      Neighbour order is not an implementation detail here -- it is
-     what makes a trace reproducible, and the lecture traces only
+     what makes a trace reproducible, and the standard treatment traces only
      make sense once it is pinned down:
 
        BFS enqueues neighbours in the order listed, so it visits
@@ -10,9 +10,9 @@
        DFS pushes them in the order listed onto a STACK, so it
        explores them in the REVERSE of that order.
 
-     That is why the deck's DFS leaves A by way of G, when A's
+     That is why the usual DFS leaves A by way of G, when A's
      neighbours are B, E, G. Getting this backwards produces a
-     perfectly valid depth-first search that matches no slide.
+     perfectly valid depth-first search that matches neither presentation.
      ============================================================ */
 
   /** Parse a graph. Each line is `src OP tgt [tgt ...]`, OP being
@@ -93,17 +93,17 @@
     return (g.adj[v] || []).map(function (e) { return e.to; });
   }
 
-  /* The two Week 4 decks disagree about this, and it is worth being
+  /* The two standard presentations disagree about this, and it is worth being
      explicit rather than picking one and hoping.
 
-       The BFS/DFS deck pushes neighbours onto a stack and so explores
+       The stack-based presentation pushes neighbours onto a stack and so explores
        them in REVERSE of the listed order: A leaves for G, not B.
-       The SCC deck's TOPOLOGICAL-SORT explores them in the LISTED
+       The SCC presentation's TOPOLOGICAL-SORT explores them in the LISTED
        order: F leaves for E, not H.
 
      Both are depth-first search. Neither is wrong. But they produce
      different traces, so a tool that hard-codes one silently
-     contradicts half the slides. Hence a mode. */
+     contradicts half the write-ups. Hence a mode. */
   function grOrderNbrs(g, v, mode) {
     var ns = grNbrs(g, v);
     return mode === 'listed' ? ns : ns.slice().reverse();
@@ -166,10 +166,10 @@
 
   /* ---------- Depth-first search ---------- */
 
-  /** The deck's timestamp scheme. A vertex is stamped whenever control
+  /** The usual timestamp scheme. A vertex is stamped whenever control
       arrives at it: once on entry, once after each child returns; a
       leaf instead gets one closing stamp. So A, with three children,
-      carries four numbers -- which is what makes the slide's
+      carries four numbers -- which is what makes the usual
       1/10/18/21 reproducible rather than mysterious. */
   function grDfs(g, root, mode) {
     if (!g.adj[root]) return { ok: false, error: 'No vertex called ' + root + '.' };
@@ -230,7 +230,7 @@
 
     // "Select ANY unsorted vertex" leaves the starting vertex free, and
     // the choice changes the trace. Callers that want to reproduce a
-    // particular slide can say which vertices to start from.
+    // particular write-up can say which vertices to start from.
     var tryOrder = (opts.start || []).filter(function (v) { return g.adj[v]; })
       .concat(g.vertices);
 
@@ -270,7 +270,7 @@
     return grBfs(g, g.vertices[0]).reached === g.nV;
   }
 
-  /* ---------- Preset graphs from the lectures ---------- */
+  /* ---------- Preset graphs ---------- */
 
   var GR_PRESETS = {
     search: 'A > B E G\nB > C\nC > D\nE > C F G H\nF > D\nG > H\nH > I\nI > D',

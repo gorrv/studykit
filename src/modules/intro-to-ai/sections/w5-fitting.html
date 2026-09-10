@@ -14,7 +14,7 @@
         </ul>
       </div>
       <div class="callout tip">
-        <div class="callout-label">The gap between those two sentences is this entire lecture</div>
+        <div class="callout-label">The gap between those two sentences is this entire topic</div>
         <strong>The thing you care about is not the thing you can measure.</strong> You want low error on data that does not exist yet; all you can compute is error on the data in front of you. So you minimise the empirical error and <em>hope</em> it stands in for the generalisation error.
         <p style="margin:10px 0 0 0;">Underfitting and overfitting are the two ways that hope fails:</p>
         <ul style="margin:8px 0 0 0;">
@@ -43,7 +43,7 @@
       </div>
       <!-- ===== THREE PLOTS ===== -->
       <h2 id="g-three">The three plots</h2>
-      <p>The lectures fit polynomials of increasing degree to the same noisy sample of a smooth curve:</p>
+      <p>The standard demonstration fits polynomials of increasing degree to the same noisy sample of a smooth curve:</p>
       <table>
         <tr><th>Model</th><th>Train MSE</th><th>Validation MSE</th><th>Verdict</th></tr>
         <tr><td><strong>Degree 1</strong><br><span style="font-size:12.5px; color:var(--ink-muted);">a straight line</span></td>
@@ -77,7 +77,7 @@
       <!-- ===== COMPLEXITY ===== -->
       <h2 id="g-complex">Increasing model complexity</h2>
       <div class="callout exam">
-        <div class="callout-label">The slide</div>
+        <div class="callout-label">The figures</div>
         In this example, the <strong>degree of the polynomial can be understood as our model complexity</strong>. We would choose in this case the <strong>lower validation error, so degree of 4</strong>.
       </div>
       <p>Plotting both errors against degree gives the shape you should be able to draw from memory:</p>
@@ -123,7 +123,7 @@
       <!-- ===== VALIDATION ===== -->
       <h2 id="g-val">"Why validation and not test?"</h2>
       <div class="callout warn">
-        <div class="callout-label">The question in green on the final slide — answer it properly</div>
+        <div class="callout-label">The closing question — answer it properly</div>
         Because <strong>the moment you use a set to make a decision, it stops being untouched</strong> — and an untouched set was the entire point of having one.
         <p style="margin:10px 0 0 0;">If you try all eight degrees and pick the one with the lowest <em>test</em> error, you have fitted your choice of model to the test set. Its error is now an <strong>optimistic estimate</strong> of generalisation error: you selected it precisely <em>because</em> it happened to do well there, noise included. Report that number and you are quoting a best-of-eight, not an honest estimate.</p>
       </div>
@@ -137,7 +137,7 @@
         </table>
       </div>
       <div class="callout tip">
-        <div class="callout-label">Note the vocabulary shift in the lectures — it is deliberate</div>
+        <div class="callout-label">Note the vocabulary shift — it is deliberate</div>
         Part 2 defined only <strong>training</strong> and <strong>test</strong>. Part 3's plots are all labelled "<strong>Validation MSE</strong>". That is not an inconsistency: as soon as the polynomial degree became something to <em>choose</em>, a set was needed to choose it with, and the test set could not be spent on that.
         <p style="margin:10px 0 0 0;"><strong>The rule in one line: train on the training set, choose on the validation set, report on the test set — once.</strong></p>
       </div>
@@ -145,7 +145,7 @@
       <h2 id="g-tool">Tool · Fitting explorer</h2>
       <div class="tool" data-run="runFit">
         <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Underfit it, fit it, then destroy it</h3></div>
-        <p class="tool-desc"><strong>Drag the degree slider and watch the curve go from a straight line to a scribble</strong> — or press play and let it sweep through every degree. Samples noisy points from <code>cos(1.5πx)</code> exactly as the lectures do, splits them into training and validation, and plots both the fit and the U-shaped error curve.</p>
+        <p class="tool-desc"><strong>Drag the degree slider and watch the curve go from a straight line to a scribble</strong> — or press play and let it sweep through every degree. Samples noisy points from <code>cos(1.5πx)</code> in the usual way, splits them into training and validation, and plots both the fit and the U-shaped error curve.</p>
         <div id="ft-controls"></div>
         <div style="display:none;">
           <input type="text" id="ft-deg" value="4"><input type="text" id="ft-n" value="24">
@@ -158,14 +158,14 @@
       <div class="callout tip">
         <div class="callout-label">Things worth trying in it</div>
         <ul style="margin:6px 0 0 0;">
-          <li>The three defaults reproduce the lectures' three plots. On the default sample:
+          <li>The three defaults reproduce the three standard plots. On the default sample:
             <table style="margin:8px 0 0 0;">
               <tr><th>Degree</th><th>Train</th><th>Validation</th><th></th></tr>
               <tr><td><strong>1</strong></td><td>9.97e−02</td><td>4.13e−01</td><td>underfitting — a straight line through a curve</td></tr>
               <tr><td><strong>4</strong></td><td>1.21e−02</td><td>1.07e−02</td><td><strong>the minimum</strong> — both low and close</td></tr>
               <tr><td><strong>14</strong></td><td>3.87e−03</td><td>8.57e+04</td><td>overfitting — <em>best training score of the three</em></td></tr>
             </table>
-            <p style="margin:8px 0 0 0;">Same story as the lecture's 1.89e−01 / 6.91e−03 / 3.22e−03 against 3.79e−01 / 1.20e−02 / 1.76e+15 — different random draw, identical shape.</p></li>
+            <p style="margin:8px 0 0 0;">Same story as the reference figures 1.89e−01 / 6.91e−03 / 3.22e−03 against 3.79e−01 / 1.20e−02 / 1.76e+15 — different random draw, identical shape.</p></li>
           <li>Push the degree towards the number of training points and watch the fitted curve start spiking between the data while <strong>training error keeps falling</strong>.</li>
           <li>Look at the sweep table: <strong>the training column never rises; the validation column is U-shaped.</strong> The tool marks the minimum for you — that is the degree you would choose.</li>
           <li>Drop the training points to <strong>8</strong> and look at <strong>degree 7</strong>: training MSE <code>5.9e−22</code> — the polynomial passes <em>exactly</em> through all eight points, because 8 coefficients can always fit 8 points — while validation MSE is <strong>4.3e+02</strong>. That is overfitting in its purest possible form. Everything above degree 7 is reported as <strong>singular</strong>: more coefficients than data, and the fit is not even defined.</li>
@@ -182,7 +182,7 @@
           <li><strong>Underfitting</strong> = the model fails to capture the complexity of the training data. Too simple.</li>
           <li><strong>Overfitting</strong> = the model fits too much to the training data and fails to generalise. Too complex.</li>
           <li><strong>Be able to draw the two curves</strong> — training error monotonically decreasing then flat; validation error U-shaped.</li>
-          <li><strong>Choose the complexity at the minimum of the validation curve</strong> — in the lectures' example, <strong>degree 4</strong>.</li>
+          <li><strong>Choose the complexity at the minimum of the validation curve</strong> — in the worked example, <strong>degree 4</strong>.</li>
           <li><strong>Know the three sets of numbers</strong> — degree 1: train 1.89e−01, validation 3.79e−01. Degree 4: 6.91e−03, 1.20e−02. Degree 29: 3.22e−03, <strong>1.76e+15</strong>.</li>
           <li><strong>Training error alone can never tell you when to stop</strong>, because it only ever goes down as complexity rises.</li>
           <li><strong>Diagnose from the gap</strong> — both errors high and close = underfitting; training near zero and validation climbing = overfitting.</li>

@@ -304,10 +304,10 @@ sqrt · square :: <span class="ty">Integer</span> → <span class="ty">Float</sp
         <div class="hs"><span class="fn">elem'</span> :: <span class="ty">Eq</span> <span class="ty">a</span> => <span class="ty">a</span> -> [<span class="ty">a</span>] -> <span class="ty">Bool</span>
 <span class="fn">elem'</span> x [] = False
 <span class="fn">elem'</span> x (y : ys) = (x == y) || elem' x ys</div>
-        <p style="font-size:13px; color:var(--ink-soft);"><em>Solution worked out here — this one's sample-solution slide isn't in the deck.</em> Note the type: comparing <code>x</code> with elements forces the constraint <code>Eq a</code>, exactly the type-class mechanism from §7.1. Writing it as plain <code>a -&gt; [a] -&gt; Bool</code> would be <em>too general</em>, the same objection raised against <code>(+) :: a → a → a</code>.</p>
+        <p style="font-size:13px; color:var(--ink-soft);"><em>Solution worked out here.</em> Note the type: comparing <code>x</code> with elements forces the constraint <code>Eq a</code>, exactly the type-class mechanism from §7.1. Writing it as plain <code>a -&gt; [a] -&gt; Bool</code> would be <em>too general</em>, the same objection raised against <code>(+) :: a → a → a</code>.</p>
       </div>
       <div class="exc">
-        <div class="exc-n">Exercise · sample solution given in the deck</div>
+        <div class="exc-n">Exercise · with a worked solution</div>
         <h4>First <em>n</em> elements of a list</h4>
         <div class="hs"><span class="fn">take'</span> n l :: <span class="ty">Int</span> -> [<span class="ty">a</span>] -> [<span class="ty">a</span>]
 <span class="fn">take'</span> 0 l = []
@@ -334,7 +334,7 @@ sqrt · square :: <span class="ty">Integer</span> → <span class="ty">Float</sp
       <div class="hs"><span class="fn">isempty</span> <span class="fn">Empty</span> = True
 <span class="fn">isempty</span> (<span class="fn">Cons</span> x y) = False</div>
       <div class="exc">
-        <div class="exc-n">Exercise · sample solution given in the deck</div>
+        <div class="exc-n">Exercise · with a worked solution</div>
         <h4>Binary trees with data in the leaves</h4>
         <div class="hs"><span class="kw">data</span> <span class="ty">Tree</span> <span class="ty">a</span> = <span class="fn">Leaf</span> <span class="ty">a</span> | <span class="fn">Branch</span> (<span class="ty">Tree</span> <span class="ty">a</span>) (<span class="ty">Tree</span> <span class="ty">a</span>)
 
@@ -411,7 +411,7 @@ add (Succ x) y = Succ (add x y)</textarea>
         <div class="pf-step">…which is equal to <strong>Succ n</strong>, by the induction hypothesis.</div>
       </div>
       <div class="exc">
-        <div class="exc-n">Exercise · partly worked in the deck</div>
+        <div class="exc-n">Exercise · partly worked below</div>
         <h4>Prove <code>sumNat n = n(n+1)/2</code></h4>
         <div class="hs"><span class="fn">sumNat</span> x
   | x == 0    = 0
@@ -422,7 +422,7 @@ add (Succ x) y = Succ (add x y)</textarea>
           <div class="pf-step">sumNat 0 = (0 × 1)/2 = 0. &nbsp;<span class="pf-just">Indeed, 0 is the value returned by sumNat for the argument 0.</span></div>
           <div class="pf-lbl" style="margin-top:12px;">Induction hypothesis (IH)</div>
           <div class="pf-step">Assume that for a given argument n: &nbsp;<strong>sumNat n = n(n+1)/2</strong></div>
-          <div class="pf-lbl" style="margin-top:12px;">Induction step <span style="text-transform:none; font-style:italic; letter-spacing:0; color:var(--ink-muted);">— completed here; the deck's slide ends at the IH</span></div>
+          <div class="pf-lbl" style="margin-top:12px;">Induction step <span style="text-transform:none; font-style:italic; letter-spacing:0; color:var(--ink-muted);">— completed here; most write-ups stop at the IH</span></div>
           <div class="pf-step">Show <strong>sumNat (n+1) = (n+1)(n+2)/2</strong>.</div>
           <div class="pf-step">Since n+1 &gt; 0, the second guard applies: &nbsp;sumNat (n+1) = (n+1) + sumNat ((n+1)−1) = (n+1) + sumNat n</div>
           <div class="pf-step">By the IH: &nbsp;= (n+1) + n(n+1)/2</div>
@@ -661,7 +661,7 @@ collatz(x) = <span class="kw">if</span> x = 1 <span class="kw">then</span> 1 <sp
       </div>
       <!-- ===== SFUN TOOL ===== -->
       <h3 id="t6-sfuntool">🛠️ Interactive: SFUN Derivation Builder</h3>
-      <p>Enter an SFUN program and a closed term, and get the full <strong>⇓<sub>P</sub> derivation tree under both strategies</strong>, side by side. This reproduces every worked example and exercise in lectures 7.3 and 7.4 — including the two <code>max(3, square(2))</code> derivations.</p>
+      <p>Enter an SFUN program and a closed term, and get the full <strong>⇓<sub>P</sub> derivation tree under both strategies</strong>, side by side. This reproduces every worked example and exercise in this topic — including the two <code>max(3, square(2))</code> derivations.</p>
       <div class="tool" data-run="runSfun">
         <div class="tool-header">
           <span class="tool-badge">Practice tool</span>
@@ -788,7 +788,7 @@ max(x, y) = if x >= y then x else y</textarea>
         </div>
       </div>
       <div class="callout tip">
-        <div class="callout-label">Two details the lectures point out explicitly</div>
+        <div class="callout-label">Two details worth pointing out explicitly</div>
         <ul style="margin:6px 0 0 0;">
           <li>In the rule for applying a function f, <strong>if ⟨f⟩ = 0 the rule reduces to an axiom</strong>, because there are no arguments to check.</li>
           <li>In the <code>if</code> rule, <strong>both branches must have the <em>same</em> type τ</strong> — and τ can be either base type. That's the rule that made <code>error :: String → a</code> necessary back in §7.1.</li>

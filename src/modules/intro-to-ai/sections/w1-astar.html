@@ -7,7 +7,7 @@
       <!-- ===== BACKWARDS ===== -->
       <h2 id="a-backwards">The problem with UCS: it looks backwards</h2>
       <div class="callout exam">
-        <div class="callout-label">The observation the whole lecture turns on</div>
+        <div class="callout-label">The observation the whole topic turns on</div>
         UCS orders the frontier by <code>g(n)</code> — the cost <strong>already spent</strong> getting to <code>n</code>. That is information about the <strong>past</strong>. It says nothing about whether <code>n</code> is in the right direction.
         <p style="margin:10px 0 0 0;">So UCS is <strong>looking backwards, not forwards</strong>: it expands outward from the start in every direction equally, including directly away from the goal.</p>
       </div>
@@ -26,7 +26,7 @@
         <code>f(n) = h(n)</code> — expand whichever frontier node <em>looks</em> closest to the goal. Note <code>h(goal) = 0</code>, so the goal always wins once it's on the frontier.
       </div>
       <div class="callout warn">
-        <div class="callout-label">What it costs you — the slide's number</div>
+        <div class="callout-label">What it costs you</div>
         On the Romania map, greedy best-first returns
         <div class="pathbox">ARAD → D → F → BUCHAREST &nbsp;=&nbsp; 140 + 99 + 211 = <strong>450</strong></div>
         <p style="margin:10px 0 0 0;">The optimal route costs <strong>418</strong>. Greedy is fast and gets there, but it is <strong>not optimal</strong> — it walked into F because F <em>looked</em> close (h = 176), and only then discovered the last leg costs 211.</p>

@@ -25,7 +25,7 @@
       .replace(/[→]/g, '->');
 
     // A single formula if it has explicit conjunction; otherwise one
-    // clause per line, which is how the lecture writes its examples.
+    // clause per line, which is how the standard treatment writes its examples.
     if (/&/.test(s)) {
       var p = fmParse(s);
       if (!p.ok) return { ok: false, error: p.error };

@@ -13,7 +13,7 @@
                                unapproximable.
 
      Keeping both available is the point. "TSP is 2-approximable"
-     and "TSP is unapproximable" are both on the Week 7 slides, and
+     and "TSP is unapproximable" are both standard claims, and
      they are only consistent because the first silently assumes the
      triangle inequality and the second explicitly drops it.
      ============================================================ */
@@ -177,7 +177,7 @@
 
   /* ---------- The 2OPT swap move ----------
 
-     The labelling on the slide is worth getting right, because the
+     The labelling is worth getting right, because the
      wrong reconnection silently splits the tour into two cycles --
      which is exactly what its Step 4 is warning about.
 
@@ -218,7 +218,7 @@
 
   /** One SWAP-MOVE.
 
-      The lecture's pseudocode returns as soon as it finds an
+      The standard pseudocode returns as soon as it finds an
       improving pair ("first"), but its worked example takes the
       biggest available gain each round ("best") -- that is what
       produces its H0 -> H1 -> H2 in exactly two swaps rather than
@@ -258,7 +258,7 @@
   function tspTwoOpt(g, opts) {
     opts = opts || {};
     var cap = opts.cap || 500;
-    var pick = opts.pick || 'best';        // reproduces the lecture trace
+    var pick = opts.pick || 'best';        // reproduces the worked trace
     var mst = tspMst(g);
     var start = opts.start || tspPreorder(g, mst.tree, g.vertices[0]);
 
@@ -289,7 +289,7 @@
 
   /* ---------- The approximation ratio ---------- */
 
-  /** R_M(w) as the slides define it: always at least 1, whichever
+  /** R_M(w) as usually defined: always at least 1, whichever
       of the two costs is larger. For a MINIMISATION problem the
       approximate cost can never beat the optimum, so in practice
       this is always C_approx / C_global -- but the definition is
@@ -304,9 +304,9 @@
   /* ---------- Presets ---------- */
 
   var TSP_PRESETS = {
-    // The Week 7 worked example, read off the slide's grid. The MST,
+    // The worked example, read off the usual grid. The MST,
     // the preorder traversal and the H1/H2 lengths all reproduce.
-    lecture: 'A 1 0\nB 1 2\nC 0 3\nD 3 0\nE 4 1\nF 3 2\nG 5 2\nH 2 4',
+    worked: 'A 1 0\nB 1 2\nC 0 3\nD 3 0\nE 4 1\nF 3 2\nG 5 2\nH 2 4',
     square: 'A 0 0\nB 0 3\nC 4 3\nD 4 0',
     // Deliberately violates the triangle inequality: A-C is a huge
     // detour compared with going through B.

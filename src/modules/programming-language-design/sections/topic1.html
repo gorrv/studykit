@@ -4,9 +4,9 @@
         <h1>Paradigms, Syntax &amp; Semantics</h1>
         <div class="topic-subtitle">what a programming language actually <em>is</em></div>
       </div>
-      <p>This lecture is the map for the whole module. It answers one question — <strong>what are the parts of a programming language?</strong> — and the answer (<em>syntax, semantics, implementation</em>) becomes the structure of everything that follows. Almost every later topic is a deep dive into one of these three boxes.</p>
+      <p>This topic is the map for the whole module. It answers one question — <strong>what are the parts of a programming language?</strong> — and the answer (<em>syntax, semantics, implementation</em>) becomes the structure of everything that follows. Almost every later topic is a deep dive into one of these three boxes.</p>
       <div class="callout">
-        <div class="callout-label">The shape of the lecture</div>
+        <div class="callout-label">The shape of the topic</div>
         Role of languages → <strong>paradigms</strong> → the <strong>three components</strong> → then one pass through each component: <em>implementation</em> (compile / interpret / hybrid), <em>syntax</em> (concrete vs abstract, grammars, ambiguity), <em>semantics</em> (static vs dynamic; denotational / axiomatic / <strong>operational</strong>).
       </div>
       <!-- ===== Why ===== -->
@@ -69,7 +69,7 @@
       </div>
       <!-- ===== Three components ===== -->
       <h2 id="t1-components">Definition of a programming language: the three components</h2>
-      <p>This is the single most important slide of the lecture. <strong>A language has three main components.</strong></p>
+      <p>This is the single most important idea in the topic. <strong>A language has three main components.</strong></p>
       <div class="concept-grid">
         <div class="concept-card" data-num="1">
           <h3>Syntax</h3>
@@ -86,7 +86,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Why the order matters</div>
-        Syntax tells you which <em>strings</em> (or trees) are programs. Semantics attaches <em>meaning</em> to those trees. Implementation is the <em>machinery</em> that makes the meaning actually happen on hardware. Later in this lecture, abstract syntax is defined precisely as <em>"the syntax trees, to which a semantics is associated"</em> — that phrase is the hinge between components 1 and 2.
+        Syntax tells you which <em>strings</em> (or trees) are programs. Semantics attaches <em>meaning</em> to those trees. Implementation is the <em>machinery</em> that makes the meaning actually happen on hardware. Later in this topic, abstract syntax is defined precisely as <em>"the syntax trees, to which a semantics is associated"</em> — that phrase is the hinge between components 1 and 2.
       </div>
       <!-- ===== Architecture ===== -->
       <h2 id="t1-arch">Revision: computer architecture &amp; where language implementation sits</h2>
@@ -181,7 +181,7 @@ Repeat forever:
         <tr><td><strong>Hybrid</strong></td><td class="mid">~ Middle</td><td class="good">✓ Excellent</td><td class="good">✓ Good</td><td>Java bytecode, functional abstract machines</td></tr>
       </table>
       <div class="callout tip">
-        <div class="callout-label">📘 Worth knowing (background, not in the lectures)</div>
+        <div class="callout-label">📘 Worth knowing (background)</div>
         Real systems blur these categories. <strong>JIT compilation</strong> (as in modern JVMs) starts by interpreting bytecode and then compiles hot paths to machine code at run time — a hybrid of the hybrid. Note also the recurring idea: an <strong>interpreter <em>is</em> a machine</strong>, just one built in software. That idea comes back later as the <em>abstract machine</em> — a transition system that specifies an interpreter.
       </div>
       <!-- ===== FETCH-EXECUTE TOOL ===== -->
@@ -564,7 +564,7 @@ c3 -> c4</textarea>
       <div class="callout exam">
         <div class="callout-label">Definition</div>
         An <strong>abstract machine</strong> is a <em>transition system that specifies an interpreter</em> for a programming language.
-        <p style="margin:10px 0 0 0;">The lecture promises an example for a simple imperative language: <strong>SIMP</strong> — which is where Topic 02 onwards goes.</p>
+        <p style="margin:10px 0 0 0;">The promised example, for a simple imperative language: <strong>SIMP</strong> — which is where Topic 02 onwards goes.</p>
       </div>
       <table class="scorecard">
         <tr><th>Abstract machines</th><th>Verdict</th></tr>
@@ -583,7 +583,7 @@ c3 -> c4</textarea>
         <strong>3.</strong> The <strong>transition relation →</strong> says how one configuration steps to the next<br>
         <strong>4.</strong> <strong>SOS rules</strong> define → <em>inductively, by the shape of the tree</em><br>
         <strong>5.</strong> A <strong>run</strong> is a chain <code>i →* t</code> from an initial to a terminal configuration
-        <div class="caption">How the pieces of this lecture assemble into the method used for the rest of the module.</div>
+        <div class="caption">How the pieces of this topic assemble into the method used for the rest of the module.</div>
       </div>
       <!-- ===== ROADMAP ===== -->
       <h2 id="t1-roadmap">Where the course goes from here <span class="context-badge">roadmap</span></h2>
@@ -603,7 +603,7 @@ c3 -> c4</textarea>
       </div>
       <div class="callout tip">
         <div class="callout-label">Reading</div>
-        Every section of this lecture points at <strong>Chapter 1 of the textbook</strong> (Fernández) plus the reference list there. For history and evolution of programming languages, <strong>Sebesta's book</strong>. Compilation and interpretation are covered in depth in the <em>Compilers</em> course.
+        Every section of this topic points at <strong>Chapter 1 of the textbook</strong> (Fernández) plus the reference list there. For history and evolution of programming languages, <strong>Sebesta's book</strong>. Compilation and interpretation are covered in depth in the <em>Compilers</em> course.
       </div>
       <!-- ===== EXAM ===== -->
       <h2 id="t1-exam">Exam-style takeaways</h2>
@@ -630,5 +630,5 @@ c3 -> c4</textarea>
           <li><strong>Abstract machine</strong> — a transition system that specifies an interpreter for a language. Useful for implementation, not always easy for users → hence the <strong>structural</strong> approach, which defines execution <em>inductively</em>, each command in terms of its components.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 01 notes. Send Topic 02 slides whenever you're ready.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 01.</p>
     </section>

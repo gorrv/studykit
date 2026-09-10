@@ -22,7 +22,7 @@
         c: ['All arcs Z → X', 'All arcs X → Z', 'Only the arc just processed', 'None — the queue is processed once'],
         e: 'Shrinking X can break arcs that <em>point into</em> X, so <code>for each X_k in NEIGHBORS[Xᵢ]: add (X_k, Xᵢ) to queue</code>. Arcs out of X are unaffected.' },
       { q: 'On the Australia map, {SA = blue} cuts the neighbours’ possibilities from 243 to…', a: '32', c: ['32', '81', '64', '16'],
-        e: 'SA has <strong>five</strong> neighbours. Before: 3⁵ = 243. After removing blue from each: 2⁵ = <strong>32</strong>. That is the <strong>87%</strong> reduction the slide quotes.' },
+        e: 'SA has <strong>five</strong> neighbours. Before: 3⁵ = 243. After removing blue from each: 2⁵ = <strong>32</strong>. That is the <strong>87%</strong> reduction usually quoted.' },
       { q: 'How many constraints are in the Australia map-colouring CSP?', a: '9', c: ['9', '7', '5', '21'],
         e: 'SA≠WA, SA≠NT, SA≠Q, SA≠NSW, SA≠V, WA≠NT, NT≠Q, Q≠NSW, NSW≠V — <strong>nine</strong>. Five of them involve SA; T appears in none.' },
       { q: 'Backtracking search is a variation of which Topic 01 algorithm?', a: 'Depth-first search', c: ['Depth-first search', 'Breadth-first search', 'Uniform-cost search', 'A*'],

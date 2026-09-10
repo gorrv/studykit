@@ -199,7 +199,7 @@
       choices: choices.slice().sort(),
       answer: right,
       check: textCheck(right),
-      explain: '<code>get</code> is a free function template, not a member — the lecture slide’s ' +
+      explain: '<code>get</code> is a free function template, not a member, so ' +
         '<code>ans.get&lt;0&gt;()</code> does not compile. The index must be a compile-time ' +
         'constant, because the return type depends on it, which is also why there is no ' +
         '<code>ans[i]</code>.'

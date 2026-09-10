@@ -7,7 +7,7 @@
      exactly 1/3. Floating point would turn "is this at most 1/3?"
      into a question about rounding.
 
-     One thing to know before reading further. The lecture states
+     One thing to know before reading further. The standard treatment states
      Markov's inequality as
 
          Prob(X >= a E[X]) <= 1/a     for any a > 0
@@ -64,7 +64,7 @@
     };
   }
 
-  /** E[X] = sum over k of k * p_X(k) — the slide's definition, literally. */
+  /** E[X] = sum over k of k * p_X(k) — the usual definition, literally. */
   function pbMean(d) {
     return d.pts.reduce(function (s, x) { return frAdd(s, frMul(x.v, x.p)); }, fr(0));
   }
@@ -81,7 +81,7 @@
   /**
      Variance, both ways.
 
-     The lecture derives Var[X] = E[(X - mu)^2] and then states
+     The standard treatment derives Var[X] = E[(X - mu)^2] and then states
      Var[X] = E[X^2] - E[X]^2 as a theorem. Both are computed here
      and compared, so the theorem is checked on every distribution
      the tool is given rather than trusted.
@@ -100,7 +100,7 @@
     };
   }
 
-  /** Prob(X >= k), Prob(X <= k), Prob(X = k) — the slide's three forms. */
+  /** Prob(X >= k), Prob(X <= k), Prob(X = k) — the usual three forms. */
   function pbTail(d, k, rel) {
     return d.pts.reduce(function (s, x) {
       var c = frCmp(x.v, k);
@@ -113,7 +113,7 @@
      Markov's inequality, checked rather than asserted.
 
      Returns the two sides and, crucially, whether the hypothesis
-     the slide omits actually holds. When X can be negative the
+     the usual write-up omits actually holds. When X can be negative the
      bound is not merely unproven, it is false, and the tool says
      which of the two it is.
   */
@@ -135,8 +135,8 @@
       violates: !holds,
       note: negative.length
         ? 'This X takes negative values (' + negative.map(function (x) { return frShow(x.v); }).join(', ') +
-          '), so the slide’s statement does not apply — the theorem needs <strong>X ≥ 0</strong>, ' +
-          'a hypothesis the slide leaves out.'
+          '), so the unconditioned statement does not apply — the theorem needs <strong>X ≥ 0</strong>, ' +
+          'a hypothesis that is often left out.'
         : (frCmp(lhs, rhs) === 0
             ? 'The bound is met exactly. Markov is tight: a distribution putting 1/a of its mass at ' +
               'a·E[X] and the rest at 0 achieves equality, which is why no better bound is possible ' +
@@ -146,7 +146,7 @@
     };
   }
 
-  /** A witness that the slide's Markov, as stated, is false. */
+  /** A witness that the usual Markov, as stated, is false. */
   function mkCounterexample(a) {
     var d = pbParse('-10 1');
     var r = mkCheck(d, a || fr(2));
@@ -158,7 +158,7 @@
      E[X + Y] = E[X] + E[Y] for ANY two random variables, dependent
      or not. Var[X + Y] = Var[X] + Var[Y] needs independence. That
      asymmetry is the single most useful thing in the topic and the
-     slide does not draw attention to it, so the tool computes both
+     usual write-up does not draw attention to it, so the tool computes both
      on a joint distribution the user can make as dependent as they
      like.
   */
@@ -235,11 +235,11 @@
   }
 
   var PB_PRESETS = {
-    lecture: '# the distribution on slide 10 — E[X] should come out at 3.35\n' +
+    worked: '# a worked distribution — E[X] should come out at 3.35\n' +
              '1 0.15\n2 0.3\n3 0.15\n4 0.1\n5 0.05\n6 0.25',
     die:     '# a fair six-sided die\n1 1/6\n2 1/6\n3 1/6\n4 1/6\n5 1/6\n6 1/6',
     tight:   '# the distribution that makes Markov an equality at a = 3\n0 2/3\n3 1/3',
-    negative:'# X is never positive — the hypothesis the slide omits\n-10 1',
+    negative:'# X is never positive — the hypothesis usually omitted\n-10 1',
     skewed:  '# almost all the mass at 0, a little far out\n0 0.99\n100 0.01'
   };
 

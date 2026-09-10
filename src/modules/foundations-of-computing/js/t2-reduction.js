@@ -7,7 +7,7 @@
          w ∈ X   ⟺   f(w) ∈ Y
 
      The double arrow is the whole content, and it is what makes a
-     reduction hard to believe on a slide: you are asked to accept
+     reduction hard to believe on paper: you are asked to accept
      that a graph built out of a formula has a k-clique in exactly
      the cases where the formula has a satisfying assignment.
 
@@ -31,7 +31,7 @@
      formula, and the clique built from a model is checked to be a
      clique. Nothing here is asserted.
 
-     THE CONSTRUCTION (from the lecture slides)
+     THE CONSTRUCTION (the standard one)
 
        vertices — one per literal *occurrence*. The same literal in
                   two clauses gives two different vertices, which is
@@ -421,7 +421,7 @@
     var checkCost = (g.k * (g.k - 1)) / 2;
     h += '<p class="tool-note"><strong>Finding</strong> the clique took ' + r.steps +
       ' search steps. <strong>Checking</strong> one takes ' + checkCost + ' edge lookups — ' +
-      'k(k−1)/2, which is the k² of the lecture notes. That gap between finding and checking ' +
+      'k(k−1)/2, which is the k² quoted loosely elsewhere. That gap between finding and checking ' +
       'is what NP is.</p>';
 
     h += '<p class="tool-note">Both sides were computed independently: satisfiability by trying all ' +

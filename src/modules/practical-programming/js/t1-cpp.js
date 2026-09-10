@@ -1,7 +1,7 @@
   /* ============================================================
      TOPIC 01 · a value-and-reference tracer for a C++ subset
      ------------------------------------------------------------
-     Week 1's real subject is object identity: when does a line
+     Topic 1's real subject is object identity: when does a line
      make a NEW object, and when does it just give an existing one
      another name? Java answers that uniformly (everything is a
      reference); C++ does not, and the difference is where the
@@ -102,7 +102,7 @@
       // Coordinate a(4, -3);
       } else if ((m = /^Coordinate\s+(\w+)\s*\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)$/.exec(s))) {
         stmts.push({ kind: 'construct', name: m[1], x: +m[2], y: +m[3], line: ln, src: t });
-      // Coordinate a;   -- the deck's "this won't compile"
+      // Coordinate a;   -- the classic "this won't compile"
       } else if ((m = /^Coordinate\s+(\w+)$/.exec(s))) {
         stmts.push({ kind: 'default', name: m[1], line: ln, src: t });
       // a.setX(8);
@@ -294,7 +294,7 @@
      The same program as real C++, so a compiler can be asked
      whether the tracer is telling the truth.
 
-     Kept deliberately close to the deck's own Coordinate class.
+     Kept deliberately small: two ints and a couple of accessors.
   */
   function cppToSource(prog) {
     if (!prog.ok) return prog;
@@ -345,7 +345,7 @@
 
   var CPP_PRESETS = {
     copy:
-      '// Slide 17: b is a COPY of a, so changing a leaves b alone.\n' +
+      '// b is a COPY of a, so changing a leaves b alone.\n' +
       'Coordinate a(4, -3);\n' +
       'Coordinate b = a;\n' +
       'a.setX(8);\n' +
@@ -359,7 +359,7 @@
       'print a.getX();\n' +
       'print r.getX();\n',
     byvalue:
-      '// Slide 36: the function gets a copy, so main\'s object is untouched.\n' +
+      '// the function gets a copy, so main\'s object is untouched.\n' +
       'void moveXToZero(Coordinate in) {\n' +
       '  in.setX(0);\n' +
       '}\n' +
@@ -367,7 +367,7 @@
       'moveXToZero(a);\n' +
       'print a.getX();\n',
     byref:
-      '// Slide 38: one ampersand, and the same call now changes a.\n' +
+      '// one ampersand, and the same call now changes a.\n' +
       'void moveXToZero(Coordinate & in) {\n' +
       '  in.setX(0);\n' +
       '}\n' +
@@ -375,14 +375,14 @@
       'moveXToZero(a);\n' +
       'print a.getX();\n',
     constref:
-      '// Slide 46: const means look but do not touch — this is refused.\n' +
+      '// const means look but do not touch — this is refused.\n' +
       'void printX(const Coordinate & in) {\n' +
       '  in.setX(0);\n' +
       '}\n' +
       'Coordinate a(4, -3);\n' +
       'printX(a);\n',
     nodefault:
-      '// Slide 19: Coordinate has no constructor taking no arguments.\n' +
+      '// Coordinate has no constructor taking no arguments.\n' +
       'Coordinate a(4, 2);\n' +
       'Coordinate b;\n'
   };

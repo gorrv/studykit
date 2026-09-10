@@ -2,8 +2,8 @@
      W5 · MACHINE LEARNING — metrics and curve fitting
      ============================================================ */
   const CM_PRESETS = {
-    none:  { tp: 0,   fp: 0,   fn: 100, tn: 9900, note: 'The always-"no" model on 10,000 patients with 1% prevalence — the slide\'s example.' },
-    tiny:  { tp: 1,   fp: 0,   fn: 99,  tn: 9900, note: 'Flags 0.01% of the population and happens to be right every time. This is the "assume 0.01% of true positives" case from the slide.' },
+    none:  { tp: 0,   fp: 0,   fn: 100, tn: 9900, note: 'The always-"no" model on 10,000 patients with 1% prevalence — the standard example.' },
+    tiny:  { tp: 1,   fp: 0,   fn: 99,  tn: 9900, note: 'Flags 0.01% of the population and happens to be right every time. This is the "assume 0.01% of true positives" case.' },
     all:   { tp: 100, fp: 9900, fn: 0,  tn: 0,    note: 'The always-"yes" model — perfect recall, useless precision. The mirror image of the always-"no" model.' },
     good:  { tp: 82,  fp: 130, fn: 18,  tn: 9770, note: 'A model that actually works: catches 82 of the 100 real cases, at the cost of 130 false alarms.' },
     bal:   { tp: 82,  fp: 11,  fn: 18,  tn: 89,   note: 'The same model measured on a balanced test set — 100 positives and 100 negatives. Accuracy is informative again.' },

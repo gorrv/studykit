@@ -1,7 +1,7 @@
   /* ============================================================
      TOPIC 09 · BPP, ZPP, and the constants that do not matter
      ------------------------------------------------------------
-     The lecture's definitions, verbatim:
+     The standard definitions, verbatim:
 
        BPP  w not in L  =>  Prob(M(w) = 1) <= 1/3
             w in L      =>  Prob(M(w) = 1) >= 2/3
@@ -21,7 +21,7 @@
      widen gives the same class, which is what pcAmplify shows.
      ============================================================ */
 
-  /** Which of the lecture's two classes do these guarantees meet? */
+  /** Which of the standard two classes do these guarantees meet? */
   function pcClassify(pIn, pOut, opts) {
     opts = opts || {};
     var worstCasePoly = opts.worstCasePoly !== false;
@@ -62,7 +62,7 @@
             ? 'Bounded error either side of 1/2, worst-case polynomial time — a Monte Carlo ' +
               'algorithm, so L ∈ BPP.'
             : (straddles
-                ? 'This misses the lecture’s constants, but the two probabilities still sit on ' +
+                ? 'This misses the usual constants, but the two probabilities still sit on ' +
                   'opposite sides of 1/2 with a gap of ' + frShow(gap) + '. Repeating the machine and ' +
                   'taking a majority vote widens any such gap, so this is in BPP anyway — the 1/3 and ' +
                   '2/3 are a convention, not a boundary.'
@@ -117,14 +117,14 @@
   }
 
   /**
-     The lecture's proof that ZPP is contained in BPP, computed
+     The standard proof that ZPP is contained in BPP, computed
      exactly on a given runtime distribution rather than bounded.
 
      The construction: run the Las Vegas machine M for
      K = 3·E[T] steps. If it finished, answer what it answered.
      If it did not, flip a fair coin.
 
-     The slide bounds the failure probability by Prob(T > K) and
+     The usual write-up bounds the failure probability by Prob(T > K) and
      then applies Markov to get 1/3. It drops the factor of 1/2
      from the coin, which is safe in both directions but leaves a
      lot on the table: the honest bounds are 1/6 and 5/6.
@@ -157,14 +157,14 @@
       honestBoundOut: frMul(markov, half),                                // 1/6
       meetsBPP: frCmp(accIn, fr(2, 3)) >= 0 && frCmp(accOut, fr(1, 3)) <= 0,
       note: 'Markov gives Prob(T ≥ 3·E[T]) ≤ 1/3 whatever the distribution, and here the actual tail ' +
-        'is ' + frShow(pOver) + '. The slide then bounds the error by that tail alone; including the ' +
+        'is ' + frShow(pOver) + '. The usual proof bounds the error by that tail alone; including the ' +
         'coin’s factor of ½ would give 1/6 and 5/6 rather than 1/3 and 2/3. Both are valid — the ' +
         'simplification only throws away slack — but it is worth knowing the construction is more ' +
-        'comfortable than the slide makes it look.'
+        'comfortable than that bound makes it look.'
     };
   }
 
-  /* ---------- the hierarchy on the last slide ---------- */
+  /* ---------- the hierarchy at the end ---------- */
 
   var PC_HIERARCHY = [
     { id: 'P',      label: 'P',       blurb: 'decidable in deterministic polynomial time' },
@@ -176,11 +176,11 @@
   ];
 
   /* Containments that are actually proved, kept separate from the
-     ones the slide raises as questions. Getting these two lists the
+     ones the usual write-up raises as questions. Getting these two lists the
      wrong way round is the easiest mark to lose in this topic. */
   var PC_KNOWN = [
     { from: 'P', to: 'ZPP', why: 'a deterministic machine is a probabilistic one that never branches' },
-    { from: 'ZPP', to: 'BPP', why: 'the theorem proved on the slides: cut the Las Vegas machine off at ' +
+    { from: 'ZPP', to: 'BPP', why: 'the standard theorem: cut the Las Vegas machine off at ' +
       '3·E[T] and flip a coin, then Markov bounds the damage' },
     { from: 'P', to: 'NP', why: 'a machine that decides is a certificate checker that ignores the certificate' },
     { from: 'P', to: 'coNP', why: 'the same, on the complement' },

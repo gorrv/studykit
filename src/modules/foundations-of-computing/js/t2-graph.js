@@ -7,7 +7,7 @@
          CLIQUE       — k vertices, every pair joined
          HAMILTONIAN  — a cycle visiting every vertex exactly once
 
-     The lectures make the same argument for both. Searching is
+     The same argument is made for both. Searching is
      expensive — (n choose k) subsets for CLIQUE, n! permutations for
      HAMILTONIAN — but *checking* a candidate is cheap: k² edges for a
      clique, n edges for a cycle. That gap is the entire content of

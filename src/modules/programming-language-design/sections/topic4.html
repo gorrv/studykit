@@ -4,7 +4,7 @@
         <h1>Induction, Small-Step &amp; Big-Step</h1>
         <div class="topic-subtitle">the answer to the abstract machine's disadvantage</div>
       </div>
-      <p>Topic 03 ended with a complaint: the abstract machine works, but <em>"many transitions are doing just phrase analysis; only a few really perform computations."</em> This lecture gives the alternative — <strong>an operational semantics where the execution of programs is defined by induction</strong>.</p>
+      <p>Topic 03 ended with a complaint: the abstract machine works, but <em>"many transitions are doing just phrase analysis; only a few really perform computations."</em> This topic gives the alternative — <strong>an operational semantics where the execution of programs is defined by induction</strong>.</p>
       <div class="callout">
         <div class="callout-label">Aims &amp; structure</div>
         <ol style="margin:6px 0 0 0;">
@@ -72,7 +72,7 @@
       </div>
       <!-- ===== APPLICATION ===== -->
       <h2 id="t4-application">Application: expressions with defined locations always have a value</h2>
-      <p>The lecture proves a real theorem about SIMP with this machinery. Informally:</p>
+      <p>There is a real theorem about SIMP behind this machinery. Informally:</p>
       <div class="callout exam">
         <div class="callout-label">The property, in words</div>
         <strong>The semantics of SIMP guarantees that for any integer expression E appearing in a program working on a memory m, if E uses locations that are defined in m then the value of E is defined.</strong>
@@ -203,7 +203,7 @@
         <p style="margin:10px 0 0 0;">A question saying "prove by induction on the structure of E" wants the second; "prove by rule induction" or "prove for all derivations" wants the third.</p>
       </div>
       <div class="callout">
-        <div class="callout-label">The bridge to the rest of the lecture</div>
+        <div class="callout-label">The bridge to the rest of the topic</div>
         There are <strong>two styles of structural operational semantics</strong>:
         <ul style="margin:8px 0 0 0;">
           <li><strong>Small-step semantics:</strong> defined using a <em>reduction</em> relation.</li>
@@ -388,7 +388,7 @@
         </div>
       </div>
       <div class="callout exam">
-        <div class="callout-label">The <code>while</code> rule is the star of this lecture</div>
+        <div class="callout-label">The <code>while</code> rule is the star of this topic</div>
         <strong>⟨while B do C, s⟩ → ⟨if B then (C ; while B do C) else skip, s⟩</strong>
         <p style="margin:10px 0 0 0;">It is an <em>axiom</em> — no premise, no test evaluated, the store unchanged. The loop simply <strong>unfolds itself once into an <code>if</code></strong>, and everything else follows from the rules we already have. Compare Topic 03, where <code>while</code> needed three separate rules and had to save B and C on the results stack. Here, one rewriting does the job, because the <em>program text itself</em> is the machine's memory of what remains.</p>
       </div>
@@ -411,7 +411,7 @@
       </div>
       <!-- ===== SS TOOL ===== -->
       <h3 id="t4-sstool">🛠️ Interactive: Small-Step Reducer</h3>
-      <p>Reduce any SIMP program one step at a time and see the <strong>derivation tree that justifies each step</strong> — because, as the lecture stresses, a reduction is only valid if you can prove it. The tree is what an exam wants when it says "justify this transition".</p>
+      <p>Reduce any SIMP program one step at a time and see the <strong>derivation tree that justifies each step</strong> — because a reduction is only valid if you can prove it. The tree is what an exam wants when it says "justify this transition".</p>
       <div class="tool" data-run="ssRunAll">
         <div class="tool-header">
           <span class="tool-badge">Practice tool</span>
@@ -770,7 +770,7 @@
       <p style="font-size:14px;">Notice the final store is <strong>s′</strong>, not s″ — <em>l</em> has vanished, exactly as the rule prescribes.</p>
       <!-- ===== COMPARISON TOOL ===== -->
       <h3 id="t4-cmptool">🛠️ Interactive: Three Semantics, One Program</h3>
-      <p>Aim 3 of the lecture is to <em>understand the differences between alternative semantic descriptions</em>. Run one program through all three — Topic 03's abstract machine, small-step, and big-step — and compare what each produces.</p>
+      <p>Aim 3 is to <em>understand the differences between alternative semantic descriptions</em>. Run one program through all three — Topic 03's abstract machine, small-step, and big-step — and compare what each produces.</p>
       <div class="tool" data-run="runCompare">
         <div class="tool-header">
           <span class="tool-badge">Comparison tool</span>
@@ -823,5 +823,5 @@
           <li><strong>Variable declarations</strong> — syntax <code>C ::= begin loc x := E; C end</code>; the rule with its two side conditions (l fresh, C{x ↦ l} renaming); and the fact that <em>l is dropped from the store</em> in the conclusion, which is what makes scoping static.</li>
         </ol>
       </div>
-      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 04 notes. Send Topic 5 slides whenever you're ready.</p>
+      <p style="margin-top:48px; padding-top:24px; border-top:1px solid var(--rule); font-style:italic; color:var(--ink-muted); text-align:center;">End of Topic 04.</p>
     </section>

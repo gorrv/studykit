@@ -9,11 +9,11 @@
      rfBind     what a range-for loop desugars to, and whether the
                 element type you wrote can bind to what the
                 container yields -- which is exactly where the
-                slides' map loop goes wrong
+                obvious map loop goes wrong
      ctRun      what a container holds as begin/end/++/insert/erase
                 are applied, and where each iterator points
 
-     The map loop is worth stating plainly. Slide 61 writes
+     The map loop is worth stating plainly. The obvious version is
 
          for (pair<int,string> & elem : kNumbers)
 
@@ -22,7 +22,7 @@
      place would put the tree out of order -- so a non-const
      pair<int,string> & has nothing to bind to. Loop by value, by
      const reference to the right type, or with auto &, which is
-     what the slides themselves recommend nine slides earlier.
+     what auto is for.
      ============================================================ */
 
   /* ---------- template type deduction ---------- */
@@ -157,7 +157,7 @@
           '</code>. A non-const reference cannot bind to a temporary either, so there is no ' +
           'conversion to fall back on — this is a hard error.' +
           (c.elem === 'pair<const int, string>'
-            ? ' <strong>This is the mistake on slide 61.</strong> The key in a map element is ' +
+            ? ' <strong>This is the classic mistake.</strong> The key in a map element is ' +
               '<code>const</code>, so the element is <code>pair&lt;const int, string&gt;</code> and ' +
               'never <code>pair&lt;int, string&gt;</code>.'
             : '');
@@ -203,7 +203,7 @@
 
   /**
      A small model of vector, list, set and map, with the
-     operations the slides use. Every step records where each
+     operations that matter. Every step records where each
      named iterator points, because "the iterator returned by
      insert" and "the iterator returned by erase" are the two
      things worth being sure about.
@@ -242,7 +242,7 @@
           if (existing) {
             snapshot(op, isMap
               ? 'A node with key ' + op.key + ' is already there, so <strong>nothing happens</strong> ' +
-                '— the value stays ' + existing.value + '. This is the surprise on slide 67.'
+                '— the value stays ' + existing.value + '. This is the surprising part.'
               : 'Already in the set; nothing is added.');
             return;
           }

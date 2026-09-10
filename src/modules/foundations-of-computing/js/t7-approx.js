@@ -78,8 +78,8 @@
 
   /* ---------- TSP vs TSP_dec ----------
 
-     The lecture proves the two are equivalent by binary search on
-     the target length D. The loop condition on the slide is the
+     The standard treatment proves the two are equivalent by binary search on
+     the target length D. The loop condition as usually written is the
      wrong way round -- it continues WHILE the interval is smaller
      than the shortest edge, which is false from the start, so the
      search never runs and the algorithm returns an undefined route.

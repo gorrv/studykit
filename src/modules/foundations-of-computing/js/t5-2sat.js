@@ -1,11 +1,11 @@
   /* ============================================================
      TOPIC 05 · 2SAT, the implication graph, and Horn clauses
      ------------------------------------------------------------
-     The lecture solves 2SAT "using our strongly connected component
+     The standard treatment solves 2SAT "using our strongly connected component
      algorithm", so this file calls Topic 4's sccFind rather than
      reimplementing it. That is not laziness: it means a bug in the
      SCC engine shows up here too, and the cross-topic link the
-     slides claim is real in the code as well.
+     write-ups claim is real in the code as well.
 
      Why it works. Each 2-literal clause (a ∨ b) is two implications,
      ¬a → b and ¬b → a. A path x ⇝ y in that graph means "x forces
@@ -234,7 +234,7 @@
       // takes two because it needs no new bridge. Stopping the loop at
       // "more than three left" instead of "more than two" leaves a
       // four-literal clause at the end, which is invisible on the
-      // lecture's own k = 4 example and shows up at k = 5.
+      // worked k = 4 example and shows up at k = 5.
       var x = newVar();
       out.push([rest.shift(), rest.shift(), fmLit(x, false)]);
       var carry = x;

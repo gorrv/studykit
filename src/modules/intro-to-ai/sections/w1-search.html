@@ -66,7 +66,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">Tree vs graph — why the distinction keeps showing up</div>
-        The <em>graph</em> is the map, and it's finite. The <em>tree</em> is the set of all paths through that map, and it can be infinite. Algorithms walk the tree; the reached set is what keeps them from re-walking the same part of the graph forever. Whenever a slide says "complete <em>if redundant paths are prevented</em>", this is what it means.
+        The <em>graph</em> is the map, and it's finite. The <em>tree</em> is the set of all paths through that map, and it can be infinite. Algorithms walk the tree; the reached set is what keeps them from re-walking the same part of the graph forever. Whenever you see "complete <em>if redundant paths are prevented</em>", this is what it means.
       </div>
       <!-- ===== BFS ===== -->
       <h2 id="s-bfs">Breadth-first search</h2>
@@ -133,7 +133,7 @@
         <p style="margin:10px 0 0 0;">UCS finds the <strong>minimum-cost</strong> plan, <em>not</em> the minimum-<em>action</em> plan.</p>
       </div>
       <div class="callout">
-        <div class="callout-label">The slide's worked contrast</div>
+        <div class="callout-label">The worked contrast</div>
         On the same map, from <strong>D</strong> to <strong>BUCHAREST</strong>:
         <ul style="margin:8px 0 0 0;">
           <li><strong>BFS</strong> — D → F → BUCHAREST: <strong>2 actions</strong>, total cost 99 + 211 = <strong>310</strong></li>
@@ -156,7 +156,7 @@
       <h2 id="s-tool">Tool · Search explorer</h2>
       <div class="tool" data-run="runSearch">
         <div class="tool-header"><span class="tool-badge">Interactive</span><h3>Search explorer</h3></div>
-        <p class="tool-desc"><strong>The graph is drawn for you — drag the nodes apart, shift-click to move the start or goal, and step through the expansions one pop at a time</strong> watching the frontier light up. Switch between BFS, DFS, UCS, Greedy and A* with one click. Defaults to the Romania map from the lectures.</p>
+        <p class="tool-desc"><strong>The graph is drawn for you — drag the nodes apart, shift-click to move the start or goal, and step through the expansions one pop at a time</strong> watching the frontier light up. Switch between BFS, DFS, UCS, Greedy and A* with one click. Defaults to the standard Romania map.</p>
         <div class="tool-field" style="width:100%;">
           <label for="sx-graph">Graph — one edge per line: <code>FROM - TO : COST</code> (undirected)</label>
           <textarea id="sx-graph" rows="9" spellcheck="false">ARAD - A : 118
@@ -202,7 +202,7 @@ G:100  H:160  I:244  L:241  M:242  BUCHAREST:0</textarea>
         <div class="callout-label">Things worth trying in it</div>
         <ul style="margin:6px 0 0 0;">
           <li><strong>Press ▶ play</strong> on UCS and watch the frontier creep outwards in cost order. Then switch to <strong>A*</strong> and play it again — the heuristic drives it almost straight at the goal.</li>
-          <li>Shift-click <strong>D</strong> to make it the start, then compare <strong>BFS</strong> and <strong>UCS</strong> — 2 actions / cost <strong>310</strong> versus 3 actions / cost <strong>278</strong>, exactly the slide.</li>
+          <li>Shift-click <strong>D</strong> to make it the start, then compare <strong>BFS</strong> and <strong>UCS</strong> — 2 actions / cost <strong>310</strong> versus 3 actions / cost <strong>278</strong>, exactly as expected.</li>
           <li>Run <strong>DFS</strong> and notice the path it returns is neither shortest nor cheapest — it's simply the first branch it fell down.</li>
           <li>Blank out the heuristics and run <strong>A*</strong>: with <code>h ≡ 0</code> it expands exactly like UCS.</li>
           <li>Compare the <em>nodes expanded</em> count for UCS and A* from ARAD — <strong>13 against 6</strong>. Step both and watch <em>where</em> the six saved expansions were: UCS wastes them going the wrong way.</li>

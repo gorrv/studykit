@@ -152,7 +152,7 @@
       explain: 'The quotient says how far the entering variable can grow before that row&rsquo;s ' +
         'basic variable hits zero, so the smallest one is the first constraint you run into. The ' +
         'denominator must be positive, but the numerator only has to be <strong>non-negative</strong>. ' +
-        'The lecture slide asks for both to be positive, which skips a row whose right-hand side is ' +
+        'One common phrasing asks for both to be positive, which skips a row whose right-hand side is ' +
         'zero — and on a degenerate problem that is exactly the row that must be chosen, after which ' +
         'the tableau describes a corner outside the feasible region.'
     };

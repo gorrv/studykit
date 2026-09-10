@@ -25,7 +25,7 @@
     h += '<pre class="pp-snippet">' + esc(raw) + '</pre>';
     h += '<div class="verdict ' + (r.legal ? 'safe' : 'bad') + '">' + r.why + '</div>';
 
-    h += '<div class="pt-quiz"><div class="pp-cap">the whole of slide 10</div><table class="pt-table">' +
+    h += '<div class="pt-quiz"><div class="pp-cap">all six lines</div><table class="pt-table">' +
       '<tr><th></th><th>line</th><th>left is</th><th>right is</th><th></th></tr>';
     PT_QUIZ.forEach(function (q) {
       var res = ptCheck(q.decl, q.expr, PT_ENV);

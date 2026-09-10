@@ -417,12 +417,12 @@
     html += `<p class="ix-hint"><strong>Click the value buttons</strong> above to build any partial assignment you like, then
       <strong>step through AC-3 one arc at a time</strong> and watch the domains shrink. Checking X → Y only ever deletes from <strong>X</strong>.</p>`;
     if (AC.fcOk && !AC.acR.ok) {
-      html += `<div class="verdict safe"><strong>This is the slide's point, live.</strong>
+      html += `<div class="verdict safe"><strong>This is the point, live.</strong>
         Forward checking sees nothing wrong, but arc consistency proves the position is already dead —
         it compares <em>unassigned</em> variables against each other, which forward checking never does.
         <strong>Arc consistency detects failure earlier.</strong>
         <br><br><span style="font-size:13px;">Which variable ends up empty (here <strong>${esc(AC.acR.wipe)}</strong>) depends on the order arcs come off the queue —
-        the lectures' trace happens to empty SA. AC-3 only promises that <em>some</em> domain will empty, not which one.</span></div>`;
+        the usual trace happens to empty SA. AC-3 only promises that <em>some</em> domain will empty, not which one.</span></div>`;
     } else if (!AC.fcOk && !AC.acR.ok) {
       html += '<div class="verdict warn">Both detect the failure here. Un-assign one variable to find the point where only arc consistency notices.</div>';
     } else if (AC.fcOk && AC.acR.ok) {

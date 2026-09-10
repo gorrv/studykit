@@ -126,9 +126,9 @@
 
     h += '<p class="tool-note">A vertex collects a stamp every time control arrives at it: once on ' +
       'entry, and once more after each child returns. So a vertex with three children carries four ' +
-      'numbers, which is why the lecture slide shows A as 1/10/18/21 rather than a tidy pair. ' +
+      'numbers, which is why A comes out as 1/10/18/21 rather than a tidy pair. ' +
       'The <em>neighbour order</em> control matters: pushing neighbours onto a stack explores them ' +
-      'in reverse, which is what the Week 4 search slides do; the topological-sort slides walk them ' +
+      'in reverse, which is what the stack-based presentation does; the topological-sort version walks them ' +
       'in listed order instead. Same algorithm, different trace.</p>';
 
     out.innerHTML = h;
@@ -214,7 +214,7 @@
         'depends on the order the algorithm happens to consider them. What is guaranteed is the ' +
         'total, not the edge set.') +
       ' The <em>tie-break</em> control changes only which of the equally-good trees comes out — the ' +
-      'lecture&rsquo;s Prim trace resolves the weight-8 tie in favour of B–C, which is the ' +
+      'usual Prim trace resolves the weight-8 tie in favour of B–C, which is the ' +
       '&ldquo;most recent&rdquo; setting.</p>';
 
     out.innerHTML = h;
@@ -244,7 +244,7 @@
       h += '<p class="tool-note">This is the whole content of the DAG condition. A topological order ' +
         'exists <strong>exactly when</strong> the graph is acyclic — so &ldquo;find a topological ' +
         'sort&rdquo; and &ldquo;prove there is no cycle&rdquo; are the same task. Note what the ' +
-        'lecture&rsquo;s SCC algorithm does with this: it runs TOPOLOGICAL-SORT on a graph that ' +
+        'standard SCC algorithm does with this: it runs TOPOLOGICAL-SORT on a graph that ' +
         '<em>does</em> have cycles. What it gets back is not a topological order — it is the reverse ' +
         'finishing order, which is a perfectly good thing to want, and is exactly the order the ' +
         'second pass needs.</p>';

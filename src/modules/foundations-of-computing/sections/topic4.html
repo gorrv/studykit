@@ -16,7 +16,7 @@
         <div class="callout-label">The four algorithms, and the one idea each rests on</div>
         <strong>BFS and DFS</strong> differ by one data structure — a queue or a stack — and nothing
         else.<br>
-        <strong>Kruskal and Prim</strong> are both greedy, and both correct, and on the lecture graph
+        <strong>Kruskal and Prim</strong> are both greedy, and both correct, and on the example graph
         they return <em>different</em> trees.<br>
         <strong>Topological sort</strong> exists exactly when the graph has no cycle.<br>
         <strong>SCC</strong> uses depth-first search twice, the second time on the reversed graph.
@@ -115,7 +115,7 @@ I &gt; D</textarea>
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn secondary" onclick="grPreset('search')">Lecture graph</button>
+          <button class="tool-btn secondary" onclick="grPreset('search')">Example graph</button>
           <button class="tool-btn secondary" onclick="grPreset('dag')">A DAG</button>
           <button class="tool-btn secondary" onclick="grPreset('cyclic')">With a cycle</button>
           <button class="tool-btn secondary" onclick="grPreset('scc')">The SCC graph</button>
@@ -127,9 +127,9 @@ I &gt; D</textarea>
 
       <div class="callout warn">
         <div class="callout-label">A discrepancy worth knowing about</div>
-        The two Week 4 decks explore neighbours in <strong>opposite orders</strong>. The search slides
-        push neighbours onto a stack, so they come off in reverse: A&rsquo;s neighbours are B, E, G and
-        the search leaves for <strong>G</strong>. The topological-sort slides walk them in listed order
+        Depth-first search is often presented in two forms that explore neighbours in <strong>opposite
+        orders</strong>. Pushing neighbours onto a stack means they come off in reverse: A&rsquo;s
+        neighbours are B, E, G and the search leaves for <strong>G</strong>. Walking them in listed order
         instead, so F leaves for <strong>E</strong>, not H. Both are genuine depth-first searches and
         both are correct — but they produce different traces, which is worth knowing before you assume
         you have made an arithmetic error. The tool above has a control for it.
@@ -247,7 +247,7 @@ H - I:7</textarea>
 
       <div class="callout tip">
         <div class="callout-label">The thing to take from that tool</div>
-        On the lecture graph, Kruskal returns a tree containing <strong>A–H</strong> and Prim returns one
+        On the example graph, Kruskal returns a tree containing <strong>A–H</strong> and Prim returns one
         containing <strong>B–C</strong>. Both weigh 8. Both totals come to <strong>37</strong>. Brute
         force over all 662 spanning trees confirms 37 is the minimum and that exactly two trees achieve
         it — so both algorithms are right, and they have simply landed on different members of a tie.
@@ -417,7 +417,7 @@ shoes</textarea>
           <span class="tool-badge">Practice tool</span>
           <h3>Find the components — then check them against the definition</h3>
         </div>
-        <div class="tool-desc">The components are found by the lecture&rsquo;s two-pass algorithm, and
+        <div class="tool-desc">The components are found by the standard two-pass algorithm, and
           then checked by plain reachability that has never heard of it: every pair inside a component
           must reach each other both ways, and no outside vertex may belong. The component graph is
           built and tested for acyclicity, so the theorem is confirmed rather than quoted.</div>
@@ -445,7 +445,7 @@ J &gt; I</textarea>
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn secondary" onclick="sccPreset('scc')">Lecture graph</button>
+          <button class="tool-btn secondary" onclick="sccPreset('scc')">Example graph</button>
           <button class="tool-btn secondary" onclick="sccPreset('cyclic')">One small cycle</button>
           <button class="tool-btn secondary" onclick="sccPreset('dag')">A DAG</button>
           <button class="tool-btn secondary" onclick="sccPreset('search')">The search graph</button>

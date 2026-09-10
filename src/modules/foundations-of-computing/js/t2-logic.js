@@ -5,7 +5,7 @@
      that a formula, its disjunctive normal form and its conjunctive
      normal form all say the same thing.
 
-     The lectures prove that in two directions:
+     The standard proof goes in two directions:
 
        DNF — one conjunction per row where the formula is TRUE,
              joined by ∨. Any true row makes the whole thing true.
@@ -135,8 +135,8 @@
    * Every variable in the formula, in alphabetical order.
    *
    * Sorted rather than in order of appearance, because a truth table is
-   * something you compare against someone else's — the lecturer's, or
-   * your own from last week. Columns in P, Q, R order make the rows
+   * something you compare against someone else's — a worked answer, or
+   * your own from earlier. Columns in P, Q, R order make the rows
    * line up; columns in the order the variables happen to appear in the
    * text do not, and two correct tables would then look different.
    */
@@ -192,7 +192,7 @@
   /**
    * The full truth table.
    *
-   * Row order is the one the lecture slides use: all variables TRUE in
+   * Row order is the conventional one: all variables TRUE in
    * the first row, all FALSE in the last, counting down in binary with
    * TRUE as the high value. Row numbers here match the numbering used
    * when the notes say things like "read the DNF off rows 2, 5, 6, 7".
@@ -295,7 +295,7 @@
    * The check that matters: do the formula, its DNF and its CNF agree
    * on every assignment?
    *
-   * This is the theorem the lecture proves, evaluated rather than
+   * This is the theorem the standard treatment proves, evaluated rather than
    * trusted. It runs on every render, so a tool that got the normal
    * form wrong would say so on screen instead of teaching it.
    *
@@ -316,7 +316,7 @@
   /**
    * Satisfiability by exhaustion, and the first model found.
    *
-   * 2ⁿ rows is exactly the cost the lectures point at when they say a
+   * 2ⁿ rows is exactly the cost pointed at by the claim that a
    * truth table is not a polynomial-time decision procedure. The tool
    * reports the row count so the growth is visible rather than stated.
    */
@@ -396,7 +396,7 @@
     if (vars.length > 6) {
       out.innerHTML = '<div class="tool-error">' + vars.length + ' variables would need ' +
         Math.pow(2, vars.length) + ' rows. Six is the most this will draw — which is itself the point ' +
-        'the lectures make about truth tables.</div>';
+        'usually made about truth tables.</div>';
       return;
     }
     if (!vars.length) {

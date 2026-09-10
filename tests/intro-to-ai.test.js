@@ -75,7 +75,7 @@ module.exports = async function run() {
   const owns = w.DT.tree.cand.filter(c => c.name === 'OwnsHome')[0];
   s.near('Gini-Split(OwnsHome) = 64/135', owns.score, 64 / 135);
 
-  // The class labels the lecture slide gets wrong — read them off the vectors.
+  // The class labels that are easy to get wrong — read them off the vectors.
   const hasJobYes = w.DT.tree.kids.filter(k => k.val === 'Yes')[0].node;
   s.same('HasJob=Yes has vector [0,5,4]', hasJobYes.vec, [0, 5, 4]);
   s.ok('HasJob=Yes is labelled Low, not Medium', hasJobYes.cls === 'Low', hasJobYes.cls);

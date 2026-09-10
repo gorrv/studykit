@@ -6,7 +6,7 @@
      both are checkable — miGenerate and opGenerate emit real C++
      that the test suite hands to g++.
 
-     On the first, the slides say "A Journey -- this won't
+     Of the two, the first is the one that "won't
      compile!" for the version that assigns in the constructor
      body, and "This will compile" for the initialiser-list
      version. True for that class, but the rule underneath is not
@@ -101,10 +101,10 @@
   /* ---------- operator resolution ---------- */
 
   /**
-     The slide's recipe: for a == b with a of type A and b of type
+     The recipe: for a == b with a of type A and b of type
      B, provide EITHER a member on A taking a B, OR a free function
      taking both. The member form only works when you can edit A,
-     which is the point of slide 52 — you cannot edit a class the
+     which is the whole point — you cannot edit a class the
      system gave you.
   */
   function opEqCheck(where) {

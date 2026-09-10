@@ -133,11 +133,11 @@
 
     h += '<div class="callout warn" style="margin:14px 0;">' +
       '<div class="callout-label">The rule is not "assignment in the body is illegal"</div>' +
-      'The slides show one Journey that compiles and one that does not, which reads as a rule about ' +
+      'One version of Journey compiles and one does not, which reads as a rule about ' +
       'where you put the assignment. It is not. <strong>Members are constructed before the ' +
       'constructor body runs.</strong> Everything follows from that:<br><br>' +
       '• No default constructor on the member? Then there is nothing to construct it <em>with</em>, ' +
-      'and the body version cannot compile. That is the deck’s Journey.<br>' +
+      'and the body version cannot compile.<br>' +
       '• A default constructor exists? The body version compiles — and default-constructs, then ' +
       'assigns over it. Two operations where the list does one. Set the switches above to see it.<br>' +
       '• A <code>const</code> member, or a reference member? The list is the only option, whatever ' +
@@ -185,7 +185,7 @@
       '<code>bool operator==(const A &amp; lhs, const B &amp; rhs);</code><br><br>' +
       'The member form puts the operator on the <strong>left-hand</strong> type, because ' +
       '<code>a == b</code> means <code>a.operator==(b)</code>. That is fine until the left-hand type ' +
-      'is one the system gave you and you cannot edit — which is the situation slide 52 describes. ' +
+      'is one the library gave you and you cannot edit. ' +
       'The free function needs nobody’s permission, which is why it is the general answer.<br><br>' +
       'Both take the right-hand side by <strong>const reference</strong>: no copy, and a promise not ' +
       'to modify what you were only asked to compare. The member form is <code>const</code> too, so ' +

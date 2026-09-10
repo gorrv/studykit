@@ -59,7 +59,7 @@
           <li><strong>SELECT-UNASSIGNED-VARIABLE</strong> → the variable-ordering heuristics (MRV, degree).</li>
           <li><strong>ORDER-DOMAIN-VALUES</strong> → the value-ordering heuristic (LCV).</li>
         </ul>
-        <p style="margin:10px 0 0 0;">The extended version adds a third: an <strong>INFERENCE</strong> step after each assignment, which is where forward checking and arc consistency live. Everything in the rest of this deck is one of those three slots.</p>
+        <p style="margin:10px 0 0 0;">The extended version adds a third: an <strong>INFERENCE</strong> step after each assignment, which is where forward checking and arc consistency live. Everything in the rest of this topic is one of those three slots.</p>
       </div>
       <div class="callout warn">
         <div class="callout-label">Still not good enough</div>
@@ -129,7 +129,7 @@
         </ul>
         <p style="margin:10px 0 0 0;">Forward checking <strong>propagates information from assigned to unassigned variables</strong>.</p>
       </div>
-      <p>The lectures' worked run, on the Australia map:</p>
+      <p>The worked run, on the Australia map:</p>
       <table class="dom-table">
         <tr><th class="steplab">after</th><th>WA</th><th>NT</th><th>Q</th><th>NSW</th><th>V</th><th>SA</th><th>T</th></tr>
         <tr><td class="steplab">— start —</td>
@@ -334,11 +334,11 @@ NSW != V</textarea>
       </div>
       <div class="callout tip">
         <div class="callout-label">The demonstration to run</div>
-        With <code>WA=red, Q=green</code>, forward checking survives but AC-3 <strong>empties a domain</strong> — the slide's exact claim that arc consistency detects failure earlier. Then try <code>WA=red, Q=green, V=blue</code> and watch forward checking finally catch up.
+        With <code>WA=red, Q=green</code>, forward checking survives but AC-3 <strong>empties a domain</strong> — the exact claim that arc consistency detects failure earlier. Then try <code>WA=red, Q=green, V=blue</code> and watch forward checking finally catch up.
       </div>
       <div class="callout warn">
         <div class="callout-label">Which variable empties is not fixed — and that's fine</div>
-        The slide's trace ends with <strong>SA</strong> empty; the tool may report <strong>NT</strong>. Both are correct. After WA=red and Q=green, <strong>NT and SA are neighbours that have both been reduced to {blue}</strong>, so whichever arc — SA→NT or NT→SA — comes off the queue first is the one that wipes out.
+        The usual trace ends with <strong>SA</strong> empty; the tool may report <strong>NT</strong>. Both are correct. After WA=red and Q=green, <strong>NT and SA are neighbours that have both been reduced to {blue}</strong>, so whichever arc — SA→NT or NT→SA — comes off the queue first is the one that wipes out.
         <p style="margin:10px 0 0 0;">AC-3 gives no guarantee about <em>which</em> domain empties, only that <strong>if the CSP is arc-inconsistent, some domain will</strong>. In an exam, name the variable your own trace produces and show the arc that did it.</p>
       </div>
       <!-- ===== VALUE ===== -->
@@ -351,7 +351,7 @@ NSW != V</textarea>
         </ul>
       </div>
       <div class="callout">
-        <div class="callout-label">The numbers from the slide</div>
+        <div class="callout-label">The numbers</div>
         For <strong>{SA = blue}</strong>:
         <ul style="margin:8px 0 0 0;">
           <li>This state leaves <strong>3<sup>5</sup> = 243</strong> possible states for the neighbouring values — a lot of them invalid.</li>
@@ -365,7 +365,7 @@ NSW != V</textarea>
         SA has <strong>five</strong> neighbours (WA, NT, Q, NSW, V). Before propagation each has 3 colours: 3⁵ = 243. Setting SA = blue removes blue from every neighbour, leaving 2 each: 2⁵ = 32. And <strong>32/243 ≈ 0.13</strong>, so 87% of that subtree is gone from a single assignment — which is the whole argument for inference in one line.
       </div>
       <div class="callout">
-        <div class="callout-label">Summary of the deck</div>
+        <div class="callout-label">Summary</div>
         <ul style="margin:6px 0 0 0;">
           <li>Problems of assignment are <strong>less concerned with the path taken than the solution</strong>.</li>
           <li><strong>CSPs</strong> let us define assignment problems with specific variables, domains and constraints.</li>

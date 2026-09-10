@@ -1,7 +1,7 @@
   /* ============================================================
      TOPIC 08 · the simplex method, step by step
      ------------------------------------------------------------
-     The lecture states seven steps. They are implemented here
+     The standard treatment states seven steps. They are implemented here
      literally, including the parts that are wrong, because seeing
      the wrong rule fail is the fastest way to remember the right
      one:
@@ -10,8 +10,8 @@
        BOTH the numerator and denominator are positive". The
        standard rule needs numerator >= 0, not > 0. On a degenerate
        tableau — one with a zero on the right-hand side — the
-       lecture's rule skips the row it must pick and the next
-       tableau is no longer feasible. spRun(lp, {rule:'deck'})
+       printed rule skips the row it must pick and the next
+       tableau is no longer feasible. spRun(lp, {rule:'printed'})
        reproduces that; the default is the standard rule.
 
      Everything the method produces is checked against t8-lp.js,
@@ -28,7 +28,7 @@
      non-negative right-hand side: that is what makes "all slacks
      basic, all variables zero" a feasible corner to start from. A
      >= row, or a negative right-hand side, needs a phase-one
-     method the lecture never gives — which matters later, because
+     method the standard treatment never gives — which matters later, because
      branch-and-bound creates exactly those rows.
   */
   function spBuild(lp) {
@@ -45,8 +45,8 @@
         error: 'The constraint <code>' + esc(bad[0].src) + '</code> has a negative right-hand side ' +
           'once it is written as a &le; row. Setting every variable to zero then breaks it, so ' +
           '&ldquo;all slack variables basic&rdquo; is not a feasible starting corner and the ' +
-          'lecture&rsquo;s tableau cannot be built. Getting started needs a phase-one method, which ' +
-          'is not on the slides.' };
+          'usual tableau cannot be built. Getting started needs a phase-one method, which ' +
+          'is usually left out.' };
     }
     if (!user.length) return { ok: false, error: 'No constraints to make slack variables from.' };
 
@@ -106,7 +106,7 @@
       var numNonNeg = frCmp(num, fr(0)) >= 0;
       out.push({
         i: i, num: num, den: den, q: q,
-        // the lecture's rule vs the standard one
+        // the printed rule vs the standard one
         usableDeck: denPos && numPos,
         usable: denPos && numNonNeg,
         why: !denPos
@@ -114,7 +114,7 @@
           : (!numNonNeg ? 'right-hand side negative' : (!numPos ? 'right-hand side is zero (degenerate)' : ''))
       });
     }
-    var key = rule === 'deck' ? 'usableDeck' : 'usable';
+    var key = rule === 'printed' ? 'usableDeck' : 'usable';
     var pick = -1;
     out.forEach(function (r) {
       if (!r[key]) return;
@@ -198,7 +198,7 @@
 
   function spRun(lp, opts) {
     opts = opts || {};
-    var rule = opts.rule === 'deck' ? 'deck' : 'standard';
+    var rule = opts.rule === 'printed' ? 'printed' : 'standard';
     var cap = opts.cap || 60;
 
     var tab = spBuild(lp);
@@ -268,11 +268,11 @@
   }
 
   /* ============================================================
-     The phase-one method the slides leave out
+     The phase-one method the usual write-up leaves out
      ------------------------------------------------------------
-     spRun above is the lecture's method and, correctly, refuses to
+     spRun above is the standard method and, correctly, refuses to
      start when a constraint has a negative right-hand side. But
-     the lecture needs exactly that case twice over — its own
+     the standard treatment needs exactly that case twice over — its own
      energy example has a ">= demand" row, and branch-and-bound
      adds "y >= 2" at the first branch — so something has to fill
      the gap.
@@ -406,12 +406,12 @@
   /* ---------- Klee and Minty's cube ---------- */
 
   /**
-     The lecture's worst case, verbatim:
+     The standard worst case, verbatim:
 
        maximise   2^n x0 + 2^(n-1) x1 + ... + xn
        subject to 2 * sum_{j<i} 2^(i-j) xj + xi <= 5^(i+1)
 
-     (The slide writes x3 in the third constraint where it means
+     (The usual write-up writes x3 in the third constraint where it means
      x2.) With the most-negative-coefficient rule this takes
      2^(n+1) - 1 pivots on n+1 variables: the path visits every
      vertex of a squashed cube. The optimum is 5^(n+1), reached in

@@ -39,7 +39,7 @@
 
     return {
       topic: 'graphs · breadth-first search',
-      prompt: 'Run BFS from <code>' + root + '</code> on the lecture graph (neighbours in ' +
+      prompt: 'Run BFS from <code>' + root + '</code> on the example graph (neighbours in ' +
         'alphabetical order). In what order are the vertices visited?',
       placeholder: 'e.g. A B E G',
       answer: b.order.join(' '),
@@ -63,7 +63,7 @@
 
     return {
       topic: 'graphs · breadth-first search',
-      prompt: 'On the lecture graph, how many edges is the shortest path from <code>A</code> to ' +
+      prompt: 'On the example graph, how many edges is the shortest path from <code>A</code> to ' +
         '<code>' + v + '</code>?',
       placeholder: 'a whole number',
       answer: String(b.dist[v]),
@@ -84,7 +84,7 @@
 
     return {
       topic: 'graphs · depth-first search',
-      prompt: 'Running DFS from <code>A</code> on the lecture graph, how many timestamps does ' +
+      prompt: 'Running DFS from <code>A</code> on the example graph, how many timestamps does ' +
         '<code>' + v + '</code> collect?',
       placeholder: 'a whole number',
       answer: String(stamps.length),
@@ -121,7 +121,7 @@
     var k = mstKruskal(g);
     return {
       topic: 'graphs · minimum spanning trees',
-      prompt: 'What is the total weight of a minimum spanning tree of the lecture graph?',
+      prompt: 'What is the total weight of a minimum spanning tree of the example graph?',
       placeholder: 'a whole number',
       answer: String(k.weight),
       check: ghNum(k.weight),

@@ -74,7 +74,7 @@
 x + 2y &lt;= 7</textarea>
           </div>
           <button class="tool-btn" onclick="runFeasible()">Solve ▶</button>
-          <button class="tool-btn secondary" onclick="lpPreset('lecture')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="lpPreset('worked')">Worked example</button>
           <button class="tool-btn secondary" onclick="lpPreset('many')">Infinitely many optima</button>
           <button class="tool-btn secondary" onclick="lpPreset('empty')">No solution</button>
           <button class="tool-btn secondary" onclick="lpPreset('unbounded')">Unbounded</button>
@@ -85,7 +85,7 @@ x + 2y &lt;= 7</textarea>
       </div>
 
       <div class="callout exam">
-        <div class="callout-label">Three outcomes, and the slide says so</div>
+        <div class="callout-label">Three outcomes, and only three</div>
         A linear program has <strong>a unique solution</strong>, <strong>infinitely many</strong>, or
         <strong>none</strong>. Infinitely many happens when the objective contour is parallel to an
         edge, so two adjacent vertices tie and every point between them is optimal too. None happens
@@ -96,7 +96,7 @@ x + 2y &lt;= 7</textarea>
 
       <div class="callout tip">
         <div class="callout-label">Modelling: the energy mix</div>
-        The lecture's worked example is worth doing yourself, because building the program is the part
+        The worked example is worth doing yourself, because building the program is the part
         that gets examined. Five sources, with CO₂ in tonne/GWh, cost in GBP/kWh and capacity in GW:
         <table style="margin:8px 0;">
           <tr><th></th><th>Gas</th><th>Coal</th><th>Solar</th><th>Wind</th><th>Nuclear</th></tr>
@@ -114,7 +114,7 @@ x + 2y &lt;= 7</textarea>
         inequality by a positive constant changes nothing. And the units in the table do not actually
         line up: capacity is a power (GW), cost is per unit of energy (per kWh), emissions are per GWh.
         The program is consistent only if you read every variable as being in the same unit throughout,
-        which the slide never states. Say so if you are asked to critique the model.
+        which the model never states. Say so if you are asked to critique it.
       </div>
 
       <!-- ===== SIMPLEX ===== -->
@@ -183,11 +183,11 @@ x + 2y &lt;= 7</textarea>
             <label for="sx-rule">step 4 rule</label>
             <select id="sx-rule">
               <option value="standard">numerator ≥ 0 (standard)</option>
-              <option value="deck">numerator &gt; 0 (the slide)</option>
+              <option value="printed">numerator &gt; 0 (as usually written)</option>
             </select>
           </div>
           <button class="tool-btn" onclick="runSimplex()">Run ▶</button>
-          <button class="tool-btn secondary" onclick="spPreset('lecture')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="spPreset('worked')">Worked example</button>
           <button class="tool-btn secondary" onclick="spPreset('degenerate')">Degenerate</button>
           <button class="tool-btn secondary" onclick="spPreset('energy')">Energy mix</button>
         </div>
@@ -196,9 +196,9 @@ x + 2y &lt;= 7</textarea>
       </div>
 
       <div class="callout warn">
-        <div class="callout-label">The final tableau on the slide has an arithmetic slip</div>
-        Rounds 1 and 2 in the tool reproduce the lecture's tableaux entry for entry. Round 3 does not:
-        the slide's last row reads <code>0.25s₁ + 2.25s₃ + C = 12.5</code>, and the s₃ coefficient
+        <div class="callout-label">A worked tableau that is easy to get wrong</div>
+        Rounds 1 and 2 in the tool match the usual worked answer entry for entry. Round 3 does not:
+        the final cost row is often written <code>0.25s₁ + 2.25s₃ + C = 12.5</code>, and the s₃ coefficient
         should be <strong>1.25</strong>.<br><br>
         You can check it without doing the pivot at all. The final cost row is an identity in x and y,
         so substitute the slack definitions into C = 12.5 − 0.25s₁ − λs₃ and match coefficients:
@@ -206,19 +206,19 @@ x + 2y &lt;= 7</textarea>
         so λ = 1.25; the y coefficient 0.5 + 2λ = 3 agrees, and the constant
         12.5 − 3.75 − 7(1.25) = 0 as it must.<br><br>
         The reported answer — x = 4, y = 1.5, C = 12.5 — is unaffected, and so is everything built on
-        it later. Also worth noting: the round 2 row operations on the slide are written
+        it later. Also worth noting: the round 2 row operations are usually written
         <code>R₂ ← (R₃ − …R₃)</code> where they mean R₂, and round 3 divides by 2 where the pivot value
         is 1. The tool prints the operations it actually performed.
       </div>
 
       <div class="callout warn">
         <div class="callout-label">Step 4 as stated is wrong on degenerate problems</div>
-        The slide asks for the smallest quotient where <em>both the numerator and denominator are
+        One common phrasing asks for the smallest quotient where <em>both the numerator and denominator are
         positive</em>. The standard rule asks for a numerator that is <strong>non-negative</strong>,
         and the difference is exactly a right-hand side of zero.<br><br>
         Run the <strong>Degenerate</strong> preset both ways. On <code>max 3x + 2y</code> subject to
         <code>x + y ≤ 4</code>, <code>x − y ≤ 0</code>, <code>x ≤ 3</code>, the second row has a
-        right-hand side of 0, so its quotient is 0 — the smallest there is. The slide's rule skips it
+        right-hand side of 0, so its quotient is 0 — the smallest there is. That phrasing skips it
         as "not positive" and pivots elsewhere; the next tableau has a negative right-hand side, which
         means it is describing a corner <em>outside</em> the region, and the method finishes by
         reporting x = 3, y = 1 with C = 11. That point breaks x − y ≤ 0, and the true optimum is
@@ -231,7 +231,7 @@ x + 2y &lt;= 7</textarea>
       </div>
 
       <div class="callout warn">
-        <div class="callout-label">And it cannot start on the lecture's own energy example</div>
+        <div class="callout-label">And it cannot start on the energy example above</div>
         The tableau begins at the corner where every variable is zero and every slack holds its whole
         constraint. That is a real corner only if every right-hand side is non-negative once the
         constraint is written as ≤. The energy program's <code>G + C + S + W + N ≥ demand</code> becomes
@@ -240,7 +240,7 @@ x + 2y &lt;= 7</textarea>
         The fix is a <strong>phase-one</strong> method: add an artificial variable to each awkward row,
         minimise the sum of the artificials — a program that <em>does</em> have an obvious starting
         corner — and if you can drive them all to zero you have found a genuine corner to begin the
-        real objective from. If you cannot, the region is empty. The slides never mention this, and the
+        real objective from. If you cannot, the region is empty. This step is usually skipped over, and the
         tool falls back to it and says so. It matters again in the next section, because branching adds
         <code>y ≥ 2</code>.
       </div>
@@ -265,7 +265,7 @@ x + 2y &lt;= 7</textarea>
           <span class="tool-badge">Practice tool</span>
           <h3>Watch the pivot count double</h3>
         </div>
-        <div class="tool-desc">Builds the lecture's program for each n and runs the real simplex method
+        <div class="tool-desc">Builds the program for each n and runs the real simplex method
           on it, counting pivots. The prediction is not fitted to the data — 2<sup>n+1</sup> − 1 is
           computed independently and the tool reports whether every row matches.</div>
         <div class="tool-controls">
@@ -305,7 +305,7 @@ x + 2y &lt;= 7</textarea>
         <strong>2)</strong> Per worker: Σ<sub>j</sub> x<sub>i,j</sub> ≤ capacity of i. &nbsp;
         <strong>3)</strong> Per task: Σ<sub>i</sub> x<sub>i,j</sub> ≥ requirement of j. &nbsp;
         <strong>4)</strong> Maximise Σ<sub>i,j</sub> x<sub>i,j</sub>.<br><br>
-        Two slips to be aware of on the slide. Step 5 restates the task constraint as
+        Two slips to watch for in the usual write-up. Step 5 restates the task constraint as
         &ldquo;Σ<sub>j</sub> x<sub>i,j</sub> ≥ requirements of j&rdquo;, summing over the wrong index —
         it must be over the <em>workers</em> i, as step 3 correctly has it, otherwise the constraint
         does not mention task j at all. And the result is called a <em>maximal</em> matching, where
@@ -341,7 +341,7 @@ x + 2y &lt;= 7</textarea>
         The missing line is the one that earns the name: if a node's relaxation is already no better
         than the best <em>integer</em> solution found so far, then nothing below that node can beat it
         either, because the relaxation bounds everything beneath it — so prune it unexplored. The tool
-        runs with and without, and reports what the difference costs. On the lecture's five-node
+        runs with and without, and reports what the difference costs. On the five-node
         example it costs nothing, which is exactly why the omission passes unnoticed.<br><br>
         Two smaller gaps: there is no case for a subproblem being <em>infeasible</em> (adding y ≥ 2 can
         empty the region), and no case for it being unbounded, in which case the recursion never
@@ -356,7 +356,7 @@ x + 2y &lt;= 7</textarea>
           <h3>Build the tree and check the answer</h3>
         </div>
         <div class="tool-desc">Each node's relaxation is solved by the phase-one method — necessary,
-          because a branch like <code>y ≥ 2</code> is exactly the case the lecture's tableau cannot
+          because a branch like <code>y ≥ 2</code> is exactly the case the plain tableau cannot
           start on — and cross-checked against vertex enumeration wherever the node is small enough.
           The final answer is checked against testing every lattice point one by one.</div>
         <div class="tool-controls">
@@ -370,12 +370,12 @@ x + 2y &lt;= 7</textarea>
           <div class="tool-field">
             <label for="bb-bound">bounding step</label>
             <select id="bb-bound">
-              <option value="off">off — as the slide is written</option>
+              <option value="off">off — as usually written</option>
               <option value="on">on — prune by the bound</option>
             </select>
           </div>
           <button class="tool-btn" onclick="runBranch()">Run ▶</button>
-          <button class="tool-btn secondary" onclick="bbPreset('lecture')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="bbPreset('worked')">Worked example</button>
           <button class="tool-btn secondary" onclick="bbPreset('matching')">Assignment problem</button>
         </div>
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
@@ -383,17 +383,17 @@ x + 2y &lt;= 7</textarea>
       </div>
 
       <div class="callout tip">
-        <div class="callout-label">The lecture's tree, and one number in it</div>
+        <div class="callout-label">The worked tree, and one number in it</div>
         The relaxation gives x = 4, y = 1.5 with C = 12.5. Branching on y:<br>
         <strong>y ≤ 1</strong> gives x = 13/3, y = 1, C = 35/3 — still fractional, so branch again on
         x, giving (4, 1) with C = 11 and (5, 0) with C = 10.<br>
         <strong>y ≥ 2</strong> gives x = 3, y = 2, C = 12, already integral.<br>
         The best integer solution is therefore <strong>x = 3, y = 2, C = 12</strong>, which brute force
         over all 16 feasible lattice points confirms.<br><br>
-        The slide writes the y ≤ 1 node as x = 4.3, C = 11.6. It is 13/3 = 4.333… and 35/3 = 11.667,
+        The y ≤ 1 node is often written x = 4.3, C = 11.6. It is 13/3 = 4.333… and 35/3 = 11.667,
         so 11.6 is the truncation of a recurring decimal rather than a rounding of it. Nothing depends
         on it — the node is discarded either way — but write the fraction in an exam and you cannot be
-        marked down for it. The slide's final comparison also pairs C = 11 with the point (5, 0), and
+        marked down for it. The final comparison is also often written pairing C = 11 with the point (5, 0), and
         (5, 0) gives 10; the 11 belongs to (4, 1).
       </div>
 
@@ -422,7 +422,7 @@ x + 2y &lt;= 7</textarea>
         Worth knowing if you are asked to justify each part rather than recite it.<br><br>
         <strong>The objective does no work.</strong> The claim is &ldquo;F is satisfiable ⟺
         IP<sub>F</sub> has an integer <em>solution</em>&rdquo; — a question about feasibility, not
-        optimality. Any objective at all will do, which is why the slide never says what to maximise.
+        optimality. Any objective at all will do, which is why the reduction never says what to maximise.
         <br><br>
         <strong>Only half of the pairing constraint is load-bearing.</strong> Drop
         x<sub>P</sub> + x<sub>¬P</sub> ≥ 1 and keep only ≤ 1, and the equivalence still holds: a
@@ -461,7 +461,7 @@ x + 2y &lt;= 7</textarea>
 (~Q | S)</textarea>
           </div>
           <button class="tool-btn" onclick="runSatIp()">Reduce ▶</button>
-          <button class="tool-btn secondary" onclick="satIpPreset('lecture')">Lecture example</button>
+          <button class="tool-btn secondary" onclick="satIpPreset('worked')">Worked example</button>
           <button class="tool-btn secondary" onclick="satIpPreset('unsat')">Unsatisfiable</button>
           <button class="tool-btn secondary" onclick="satIpPreset('tight')">All four clauses on P, Q</button>
         </div>

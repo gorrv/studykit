@@ -1,7 +1,7 @@
   /* ============================================================
      TOPIC 05 · DPLL: pure literal elimination and unit propagation
      ------------------------------------------------------------
-     The two rules are easy to confuse, and the slides give the
+     The two rules are easy to confuse, and the usual write-up gives the
      distinction in one line each, so it is worth keeping sharp:
 
        A UNIT clause has one literal left. Its value is FORCED --
@@ -70,7 +70,7 @@
         }
       }
 
-      // Apply the whole round at once, which is how the lecture
+      // Apply the whole round at once, which is how the standard treatment
       // states the rule -- it reads off every unit clause it can see
       // and assigns them all before simplifying again.
       var bad = null;
@@ -128,7 +128,7 @@
     return { ok: true, conflict: false, asg: cur, clauses: work, applied: applied, steps: steps };
   }
 
-  /** DPLL as the lecture writes it, recording a full trace so the
+  /** DPLL as the standard treatment writes it, recording a full trace so the
       search tree can be drawn. `usePure` and `useUnit` are switches
       so the tool can show what each rule is actually buying. */
   function dpSolve(clauses, vars, opts) {
@@ -200,10 +200,10 @@
 
       node.branch = pick;
       node.result = 'branch';
-      node.note = 'Branch on ' + pick + '. Try False first, as the lecture does.';
+      node.note = 'Branch on ' + pick + '. Try False first, by convention.';
       decisions++;
 
-      // False first, matching the deck's step 5 then step 6.
+      // False first, matching the usual step 5 then step 6.
       var a = gdCopy(cur); a[pick] = false;
       var r = go(a, depth + 1, pick + ' := False');
       if (r) return r;

@@ -1,7 +1,7 @@
   /* ============================================================
      TOPIC 04 · minimum spanning trees: Kruskal and Prim
      ------------------------------------------------------------
-     Both are greedy, both are correct, and on the lecture graph
+     Both are greedy, both are correct, and on the example graph
      they return DIFFERENT trees of the same weight. That is not a
      bug in either -- it is what "minimum spanning tree" not being
      unique looks like, and it is the single most useful thing to
@@ -28,7 +28,7 @@
         if (rank[ra] === rank[rb]) rank[ra]++;
         return true;
       },
-      /** The components as the slides draw them: sorted sets. */
+      /** The components drawn the usual way: sorted sets. */
       groups: function () {
         var by = {}, self = this;
         vertices.forEach(function (v) {
@@ -88,7 +88,7 @@
 
   /* ---------- Prim ---------- */
 
-  /** The deck keeps a priority queue of edges rather than of
+  /** The usual write-up keeps a priority queue of edges rather than of
       vertices, and lets stale edges sit in the queue until they are
       dequeued and rejected -- which is why the trace shows crossed
       out entries. Reproduced faithfully, because those rejections
@@ -102,7 +102,7 @@
     inTree[root] = true;
 
     // Equal weights have to be broken somehow, and the choice is not
-    // cosmetic: on the lecture graph it decides whether the tree ends
+    // cosmetic: on the example graph it decides whether the tree ends
     // up with A–H or B–C, both weight 8. The total is 37 either way,
     // which is the point -- so the rule is a knob rather than a
     // hidden convention.

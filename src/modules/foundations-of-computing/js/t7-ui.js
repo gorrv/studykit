@@ -69,14 +69,14 @@
 
   function twoOptPreset(which) {
     var el = document.getElementById('to-text');
-    if (el) el.value = TSP_PRESETS[which] || TSP_PRESETS.lecture;
+    if (el) el.value = TSP_PRESETS[which] || TSP_PRESETS.worked;
     runTwoOpt();
   }
 
   function runTwoOpt() {
     var out = document.getElementById('to-output');
     if (!out) return;
-    var g = tspRead('to-text', TSP_PRESETS.lecture);
+    var g = tspRead('to-text', TSP_PRESETS.worked);
     if (!g.ok) return tspBad('to-output', g);
 
     var pick = ((document.getElementById('to-pick') || {}).value) || 'best';
@@ -130,9 +130,9 @@
       'which only ever shortens it. That chain is the whole proof of the ratio 2 — and note that ' +
       'the swaps are not what earns the guarantee. The guarantee is already there after step 2; ' +
       'the swaps just make the answer better in practice.<br><br>' +
-      'The <em>which swap</em> control matters: the lecture&rsquo;s SWAP-MOVE returns the ' +
+      'The <em>which swap</em> control matters: SWAP-MOVE as usually written returns the ' +
       '<em>first</em> improving pair it finds, but its worked example takes the <em>best</em> one ' +
-      'each round — which is why the slides reach the answer in two swaps where first-improvement ' +
+      'each round — which is why the worked answer takes two swaps where first-improvement ' +
       'needs six. Both are 2-opt, and here both finish in the same place.</p>';
 
     out.innerHTML = h;
@@ -144,7 +144,7 @@
   function runSwap() {
     var out = document.getElementById('sw-output');
     if (!out) return;
-    var g = tspRead('sw-text', TSP_PRESETS.lecture);
+    var g = tspRead('sw-text', TSP_PRESETS.worked);
     if (!g.ok) return tspBad('sw-output', g);
 
     var raw = ((document.getElementById('sw-tour') || {}).value || '').trim();
@@ -198,7 +198,7 @@
           esc(rec.bad.cycles[1].join(' ')) + '} ✗</td></tr>' +
       '</table>';
 
-    h += '<p class="tool-note">This is what the lecture&rsquo;s Step 4 — &ldquo;make sure the swap ' +
+    h += '<p class="tool-note">This is what Step 4 — &ldquo;make sure the swap ' +
       'does not disconnect the graph&rdquo; — is guarding against, and it is easy to get backwards. ' +
       'Removing two edges leaves two <strong>paths</strong>. Each has two ends. Joining end-to-end ' +
       '<em>across</em> the two paths gives a single tour; joining each path&rsquo;s own two ends ' +
@@ -360,7 +360,7 @@
     if (!g.ok) return tspBad('bi-output', g);
 
     var which = ((document.getElementById('bi-cond') || {}).value) || 'correct';
-    var run = apBinarySearch(g, { buggy: which === 'deck' });
+    var run = apBinarySearch(g, { buggy: which === 'printed' });
     if (!run.ok) { out.innerHTML = '<div class="verdict bad">' + esc(run.error) + '</div>'; return; }
 
     var h = tspSummary(g);
@@ -393,7 +393,7 @@
       'this binary search: each call to TSP-DEC halves the interval, and O(log) calls pin the ' +
       'optimum to within the shortest edge, which is enough because no tour length can fall ' +
       'strictly between two achievable values closer than that.<br><br>' +
-      '<strong>The loop condition on the slide is the wrong way round.</strong> It says continue ' +
+      '<strong>The loop condition is usually written the wrong way round.</strong> It says continue ' +
       '<em>while</em> the interval is smaller than the shortest edge; it should stop then. Switch ' +
       'the control above to see: as written, the loop body never runs at all.</p>';
 

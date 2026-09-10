@@ -76,7 +76,7 @@
     return {
       topic: 'random · variance',
       kind: 'choice',
-      prompt: 'The slide first tries to define variance as E[X − μ]. What is wrong with it?',
+      prompt: 'A first attempt at defining variance is E[X − μ]. What is wrong with it?',
       choices: choices.slice().sort(),
       answer: right,
       check: textCheck(right),
@@ -128,14 +128,14 @@
     };
   } });
 
-  /* ---- The hypothesis the slide omits ---- */
+  /* ---- The hypothesis the usual write-up omits ---- */
   QZ_GEN.push({ topic: 'random', make: function () {
     var right = 'X ≥ 0';
     var choices = [right, 'X is independent of a', 'E[X] > 1', 'X has finite variance'];
     return {
       topic: 'random · Markov',
       kind: 'choice',
-      prompt: 'Markov’s inequality needs one hypothesis on X that the lecture slide leaves out. ' +
+      prompt: 'Markov’s inequality needs one hypothesis on X that is often left out. ' +
         'Which?',
       choices: choices.slice().sort(),
       answer: right,

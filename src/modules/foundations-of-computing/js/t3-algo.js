@@ -5,14 +5,14 @@
      Conquer) solve them recursively
      Combine) put the answers back together
 
-     The recurrences in the lectures are *claimed* to describe these
+     The usual recurrences are *claimed* to describe these
      algorithms. That claim is checkable: run the algorithm, count
      what it actually does, and compare the count to the recurrence.
      Both functions here therefore return their real work — every
      Hanoi move, every merge-sort comparison — rather than just a
      total, so the count and the recurrence can be put side by side.
 
-     The merge-sort case is where it earns its keep. The slides give
+     The merge-sort case is where it earns its keep. The usual write-up gives
      the exact recurrence
 
          T(n) = T(⌊n/2⌋) + T(⌈n/2⌉) + n
@@ -97,7 +97,7 @@
     return { ok: true };
   }
 
-  /** The recurrence the lectures claim: T(1) = 1, T(n) = 2T(n−1) + 1. */
+  /** The recurrence usually claimed: T(1) = 1, T(n) = 2T(n−1) + 1. */
   function hanoiRecurrence(n) {
     var t = 1;
     for (var i = 2; i <= n; i++) t = 2 * t + 1;
@@ -109,7 +109,7 @@
   /**
    * MERGESORT, counting the comparisons the merge step actually makes.
    *
-   * The lectures charge n for the combine step, which is the length
+   * The usual analysis charges n for the combine step, which is the length
    * of the merged result — an upper bound on the comparisons, since
    * a merge stops comparing once one side runs out. Both numbers are
    * returned so the difference is visible instead of assumed away.
@@ -156,7 +156,7 @@
   }
 
   /**
-   * The two recurrences the slides give for merge sort.
+   * The two recurrences the usual write-up gives for merge sort.
    *
    *   exact  T(n) = T(⌊n/2⌋) + T(⌈n/2⌉) + n
    *   approx T(n) ≈ 2 T(⌈n/2⌉) + n
@@ -308,7 +308,7 @@
     });
     h += '</div>';
 
-    /* the two recurrences the slides give, side by side */
+    /* the two recurrences the usual write-up gives, side by side */
     h += '<table class="results-table mg-table"><tr><th>n</th>';
     for (var k = 1; k <= Math.min(12, Math.max(8, n)); k++) h += '<th>' + k + '</th>';
     h += '</tr><tr><td class="rc-lab">exact T(⌊n/2⌋)+T(⌈n/2⌉)+n</td>';
@@ -320,7 +320,7 @@
     }
     h += '</tr></table>';
 
-    h += '<p class="tool-note">The lecture slides give the exact recurrence and then tabulate the ' +
+    h += '<p class="tool-note">The usual presentation gives the exact recurrence and then tabulates the ' +
       'approximation; the two agree only when n is a power of two, and part company from n = 3. ' +
       'For this input the exact recurrence gives <strong>' + exact + '</strong> and the approximation <strong>' +
       approx + '</strong>.</p>';
@@ -329,7 +329,7 @@
       'a merge, which is exactly T(' + n + ') − ' + n + ' = ' + (exact - n) + ' — the recurrence charges n per ' +
       'merge level and 1 for each of the n leaves. The <strong>' + r.comparisons + '</strong> comparisons ' +
       'are fewer, because a merge stops comparing as soon as one side runs out; n is the upper bound the ' +
-      'lectures charge.</p>';
+      'standard analysis charges.</p>';
 
     out.innerHTML = h;
     ixTrace('mg', 'mg-output', { label: 'merge', reset: true });

@@ -476,7 +476,7 @@
   function adReset(kind) {
     if (kind === 'zero') AD.G.order.forEach(n => AD.h[n] = 0);
     else if (kind === 'true') AD.G.order.forEach(n => AD.h[n] = (n in AD.dist) ? AD.dist[n] : 0);
-    else if (kind === 'slides') {
+    else if (kind === 'standard') {
       const S = { ARAD: 366, A: 329, B: 374, C: 380, D: 253, E: 193, F: 176, G: 100, H: 160, I: 244, L: 241, M: 242, BUCHAREST: 0 };
       AD.G.order.forEach(n => AD.h[n] = S[n] === undefined ? 0 : S[n]);
     }
@@ -511,7 +511,7 @@
     html += '</table>';
     html += `<div class="ix-bar">
       <span class="ix-lab">set every h to:</span>
-      <button class="ix-btn" onclick="adReset('slides')">the lectures' values</button>
+      <button class="ix-btn" onclick="adReset('standard')">the standard values</button>
       <button class="ix-btn" onclick="adReset('zero')">0 (admissible, useless)</button>
       <button class="ix-btn" onclick="adReset('true')">the true cost (perfect)</button>
     </div>`;

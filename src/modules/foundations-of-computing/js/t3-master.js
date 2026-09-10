@@ -34,7 +34,7 @@
   /**
    * Reduce f(n) to its growth class, explaining the simplification.
    *
-   * Slides write things like √((n+1)⁵) and log₂(5n²), which are not
+   * Recurrences are written with things like √((n+1)⁵) and log₂(5n²), which are not
    * in the small grammar the growth engine reads — but both simplify
    * on sight, and the simplification is itself examinable:
    *
@@ -372,7 +372,7 @@
 
     h += '<p class="tool-note">The theorem needs T to be monotonically increasing, and Case 3 ' +
       'additionally needs a regularity condition — a·f(n/b) ≤ c·f(n) for some c &lt; 1 — which holds ' +
-      'for every f you are likely to meet but is what the dagger on the lecture slide refers to.</p>';
+      'for every f you are likely to meet, and it is what the usual dagger footnote refers to.</p>';
 
     out.innerHTML = h;
   }

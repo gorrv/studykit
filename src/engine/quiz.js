@@ -54,8 +54,8 @@
     html += '</div>';
     if (!QZ_GEN.length) {
       out.innerHTML = `<div class="quiz-prompt"><div class="qp-topic">no questions yet</div>
-        Questions are generated from the lecture material. Send the lectures and this fills up —
-        one set of generators per topic, marked automatically.</div>`;
+        Questions are generated per topic and marked automatically. This module has no
+        generators wired up yet.</div>`;
       return;
     }
     if (!qzCur) { out.innerHTML = html + '<div class="quiz-prompt">Press <strong>New question</strong> to start.</div>'; return; }

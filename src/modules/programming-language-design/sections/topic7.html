@@ -200,7 +200,7 @@ snowy(<span class="v">X</span>)</div>
       </div>
       <div class="callout tip">
         <div class="callout-label">Why <code>X-1</code> can't be passed directly — this catches everyone</div>
-        In Prolog, <code>X-1</code> is a <strong>term</strong> — the compound <code>-(X,1)</code> — not a computed number. It would be matched <em>syntactically</em> against <code>0</code> in the base case and never unify. Arithmetic only happens when you explicitly ask for it with <code>is</code>. This is the clearest example of what the disadvantages slide meant by <em>"efficient arithmetic … at the expense of the declarative semantics"</em>.
+        In Prolog, <code>X-1</code> is a <strong>term</strong> — the compound <code>-(X,1)</code> — not a computed number. It would be matched <em>syntactically</em> against <code>0</code> in the base case and never unify. Arithmetic only happens when you explicitly ask for it with <code>is</code>. This is the clearest example of what the list of disadvantages meant by <em>"efficient arithmetic … at the expense of the declarative semantics"</em>.
       </div>
       <h3>Variables are universally quantified</h3>
       <p><strong>Used in a program, all clauses are individually universally quantified on all variables.</strong> For example, the clauses</p>
@@ -253,7 +253,7 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
         <p style="margin:10px 0 0 0;">Notice that <strong>we always replace variables with terms (not the other way around)</strong>, because only variables can be replaced and <em>not all terms are variables</em>.</p>
       </div>
       <div class="callout warn">
-        <div class="callout-label">Application is <em>simultaneous</em> — the detail the lectures dwell on</div>
+        <div class="callout-label">Application is <em>simultaneous</em> — the detail worth dwell on</div>
         A substitution σ is applied to a term t or literal L by <strong>simultaneously</strong> replacing each variable occurring in dom(σ) by the term associated to it. The result is written <strong>tσ</strong> or <strong>Lσ</strong>.
         <p style="margin:10px 0 0 0;">Consider σ = {X ↦ Y, Y ↦ a}. <em>σ is a set.</em> If we applied it in sequence, say left to right, we would effectively replace <strong>X by a</strong> in t. <strong>In fact, we need to replace X by Y at the same time that we replace Y by a.</strong></p>
       </div>
@@ -294,8 +294,8 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn secondary" onclick="sbPreset('ex1')">slide example 1</button>
-          <button class="tool-btn secondary" onclick="sbPreset('ex2')">slide example 2</button>
+          <button class="tool-btn secondary" onclick="sbPreset('ex1')">Worked example 1</button>
+          <button class="tool-btn secondary" onclick="sbPreset('ex2')">Worked example 2</button>
           <button class="tool-btn danger" onclick="sbPreset('trap')">the {X↦Y, Y↦a} trap</button>
         </div>
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
@@ -376,7 +376,7 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
     move(1, <span class="v">X</span>, <span class="v">Y</span>, <span class="v">Z</span>),
     move(<span class="v">M</span>, <span class="v">Z</span>, <span class="v">Y</span>, <span class="v">X</span>).</div>
       <div class="exc">
-        <div class="exc-n">Exercise · sample solution given in the deck</div>
+        <div class="exc-n">Exercise · with a worked solution</div>
         <h4>hot/1 and heatwave/2</h4>
         <p style="font-size:14px;">With <code>temperature(X, Y)</code> giving the temperature Y on day X, and <code>follows(X, Y)</code> meaning day Y follows day X:</p>
         <div class="pl"><span class="at">hot</span>(<span class="v">Day</span>) <span class="op">:-</span>
@@ -404,7 +404,7 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
       <p>The predicate <code>append(S, T, U)</code> expresses that <em>the result of appending the list T onto the end of list S is the list U</em> (pre-defined):</p>
       <div class="pl"><span class="at">append</span>([], <span class="v">L</span>, <span class="v">L</span>).
 <span class="at">append</span>([<span class="v">X</span> | <span class="v">L</span>], <span class="v">Y</span>, [<span class="v">X</span> | <span class="v">Z</span>]) <span class="op">:-</span> append(<span class="v">L</span>, <span class="v">Y</span>, <span class="v">Z</span>).</div>
-      <p>The three queries the slide asks about — <em>what do they do, and what answers do they get?</em></p>
+      <p>Three queries worth asking about — <em>what do they do, and what answers do they get?</em></p>
       <table>
         <tr><th>Query</th><th>What it does</th><th>Answer</th></tr>
         <tr><td><code>:- append([0], [1, 2], U)</code></td><td>Concatenates, forwards</td><td><code>U = [0,1,2]</code></td></tr>
@@ -413,7 +413,7 @@ attends(<span class="v">X</span>, <span class="v">Y</span>) ∨ ¬registered(<sp
       </table>
       <p style="font-size:14px;">Once again: <em>one</em> predicate, used in three directions. Try all three in the interpreter below.</p>
       <div class="exc">
-        <div class="exc-n">Exercise · sample solutions given in the deck</div>
+        <div class="exc-n">Exercise · with worked solutions</div>
         <h4>member/2, length/2, reverse/2</h4>
         <div class="pl"><span class="at">member</span>(<span class="v">X</span>, [<span class="v">X</span> | _]).
 <span class="at">member</span>(<span class="v">X</span>, [_ | <span class="v">T</span>]) <span class="op">:-</span> member(<span class="v">X</span>, <span class="v">T</span>).
@@ -509,7 +509,7 @@ likes(X, P) :- based(P, Y), likes(X, Y).</textarea>
           <li>The resolution of a program clause with a goal can be made <strong>unique and deterministic</strong> (if we use program order and employ a selection function) — <strong>"Selective"</strong>.</li>
           <li>The resolvent of two clauses will either be empty or generate a <strong>new goal</strong> — <strong>"Linear"</strong>.</li>
         </ul>
-        <p style="margin:10px 0 0 0;">Selective · Linear · <strong>Definite</strong> — <strong>SLD</strong>-resolution, the semantics named on the Prolog slide. Topic 08 makes it formal. Notice this is an argument you can reconstruct: <em>the restriction to Horn clauses is not arbitrary, it is exactly what makes resolution deterministic enough to be a programming language.</em></p>
+        <p style="margin:10px 0 0 0;">Selective · Linear · <strong>Definite</strong> — <strong>SLD</strong>-resolution, the semantics Prolog is built on. Topic 08 makes it formal. Notice this is an argument you can reconstruct: <em>the restriction to Horn clauses is not arbitrary, it is exactly what makes resolution deterministic enough to be a programming language.</em></p>
       </div>
       <!-- ===== NAF ===== -->
       <h2 id="t7-naf">Negation as failure</h2>
@@ -534,7 +534,7 @@ likes(X, P) :- based(P, Y), likes(X, Y).</textarea>
       </table>
       <div class="callout tip">
         <div class="callout-label">Negation as failure is <em>not</em> logical negation</div>
-        It is negation relative to <em>what the program happens to say</em>. <code>\+ s(a)</code> succeeds not because the program asserts that s(a) is false, but because it fails to prove it — the <strong>closed-world assumption</strong>. Anything not derivable is treated as false. That's why the slide says these negative facts are "<em>indirectly assumed</em>".
+        It is negation relative to <em>what the program happens to say</em>. <code>\+ s(a)</code> succeeds not because the program asserts that s(a) is false, but because it fails to prove it — the <strong>closed-world assumption</strong>. Anything not derivable is treated as false. That's why these negative facts are called "<em>indirectly assumed</em>".
       </div>
       <h2 id="t7-disjunction">Language limitations: disjunction</h2>
       <div class="callout warn">
@@ -565,7 +565,7 @@ likes(X, P) :- based(P, Y), likes(X, Y).</textarea>
           <li><strong>Facts before rules</strong>; and why <code>X-1</code> cannot be passed directly to <code>factorial</code> — you must bind it with <code>is</code> first.</li>
           <li><strong>All clauses are universally quantified</strong> on all their variables — be able to write out the ∀-form of a rule.</li>
           <li><strong>Substitutions</strong> — a partial mapping from variables to terms with finite domain, σ = {X₁↦t₁,…}; dom(σ). We always replace <em>variables by terms</em>, never the reverse.</li>
-          <li><strong>Application is simultaneous</strong> — know the σ = {X↦Y, Y↦a} caution, and be able to compute tσ and Lσ for the two slide examples.</li>
+          <li><strong>Application is simultaneous</strong> — know the σ = {X↦Y, Y↦a} caution, and be able to compute tσ and Lσ for the two worked examples.</li>
           <li><strong>Order matters twice</strong> — clause order (resolution proceeds in program appearance order) and literal order (Prolog's <em>selection function always chooses the left-most literal</em>). Answers are a <em>by-product</em> of resolution.</li>
           <li><strong>Built-in predicates</strong> — operators, <code>is</code>, <code>call/1</code>, <code>fail/0</code>, <code>!/0</code> (cut), <code>','</code>, <code>=..</code>, <code>write</code>, <code>nl</code>. The <code>p/n</code> notation.</li>
           <li><strong>Lists</strong> — <code>[]</code>, <code>[X|L]</code>, the abbreviation; <code>[]</code> matches only the empty list and <code>[H|T]</code> only a non-empty one; head and tail. Write <code>member/2</code>, <code>length/2</code>, <code>reverse/2</code> (both versions) and <code>append/3</code>.</li>

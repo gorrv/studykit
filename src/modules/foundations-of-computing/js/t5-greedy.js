@@ -1,13 +1,13 @@
   /* ============================================================
      TOPIC 05 · GREEDY-SAT, and why polynomial is not the whole story
      ------------------------------------------------------------
-     The lecture proves this algorithm runs in polynomial time and
+     The standard treatment proves this algorithm runs in polynomial time and
      stops there, which invites exactly the wrong conclusion. It is
      polynomial AND it is wrong: it climbs to a local maximum and
      reports False from there, on formulas that are satisfiable.
 
-     The deck's own example demonstrates this and does not say so.
-     Starting at (True, False, False) -- the assignment the slide
+     The worked example demonstrates this and does not say so.
+     Starting at (True, False, False) -- the assignment the worked example
      picks -- greedy scores 6, every neighbour scores 6 or less, and
      it gives up. The formula is satisfiable: (False, True, True)
      scores 7. So the tools below always report the true answer
@@ -26,7 +26,7 @@
     return vars.map(function (v) { return asg[v] ? 'T' : 'F'; }).join('');
   }
 
-  /** Hill-climbing, as the deck writes it: at each step try every
+  /** Hill-climbing, as usually written: at each step try every
       single-variable flip, take the best STRICT improvement, and
       stop when none exists. */
   function gdRun(clauses, vars, start, cap) {
@@ -79,7 +79,7 @@
     return o;
   }
 
-  /** Every assignment with its score -- the hypercube the deck
+  /** Every assignment with its score -- the hypercube the worked example
       draws. Also identifies which of them are local maxima, since
       those are exactly the places greedy can strand itself. */
   function gdLandscape(clauses, vars) {
@@ -115,7 +115,7 @@
   }
 
   /** Run greedy from every possible start. Answers the question the
-      deck raises but leaves hanging: how often does it actually
+      worked example raises but leaves hanging: how often does it actually
       work? */
   function gdSurvey(clauses, vars) {
     if (vars.length > 12) return { ok: false, error: 'Too many variables to survey.' };

@@ -119,7 +119,7 @@ module.exports = async function run() {
 
   /* ---------------- the tracer, against a real compiler ---------------- */
   {
-    /* The presets first: these are the slides' own examples, so if any of
+    /* The presets first: these are the standard own examples, so if any of
        them disagrees with g++ the notes are teaching something false. */
     Object.keys(w.CPP_PRESETS).forEach(k => {
       const prog = w.cppParse(w.CPP_PRESETS[k]);
@@ -204,7 +204,7 @@ module.exports = async function run() {
     }
 
     /* The declarations above never call a function, so they never exercise
-       parameter passing — which is slides 36 to 38 and the place the copy /
+       parameter passing — which is where the copy /
        reference distinction actually bites in practice. Generate those too. */
     let callChecked = 0, callDisagree = 0, callFirst = null, callDiverged = 0;
     for (let t = 0; t < 40; t++) {
@@ -248,7 +248,7 @@ module.exports = async function run() {
       strawmanCaught > checked * 0.2, `${strawmanCaught} of ${checked} would catch it`);
   }
 
-  /* ---------------- the deck's own claims ---------------- */
+  /* ---------------- the usual own claims ---------------- */
   if (HAVE_GPP) {
     const COORD = [
       '#include <iostream>', '#include <vector>', '#include <string>',
@@ -265,43 +265,43 @@ module.exports = async function run() {
       '  Coordinate & getStart() { return start; } };'
     ].join('\n');
 
-    // slide 19 / 20 / 21 — the default constructor
-    s.is('slide 19: "Coordinate b;" does not compile without a default constructor',
+    // the default constructor
+    s.is('"Coordinate b;" does not compile without a default constructor',
       cxx(COORD + '\nint main(){ Coordinate a(4,2); Coordinate b; }').compiles, false);
-    s.is('slide 20: nor does vector<Coordinate> coords(2)',
+    s.is('nor does vector<Coordinate> coords(2)',
       cxx(COORD + '\nint main(){ std::vector<Coordinate> c(2); }').compiles, false);
-    s.is('slide 21: but push_back needs no default constructor',
+    s.is('but push_back needs no default constructor',
       cxx(COORD + '\nint main(){ std::vector<Coordinate> c; c.push_back(Coordinate(4,-2));' +
         ' cout << c.size() << endl; }').out.join(''), '1');
 
-    // slides 22 / 23 — the Journey
-    s.is('slide 22: assigning in the constructor body does not compile',
+    // the Journey
+    s.is('assigning in the constructor body does not compile',
       cxx(COORD + '\nclass J { Coordinate s; public: J(Coordinate a){ s = a; } };' +
         '\nint main(){ J j(Coordinate(1,1)); }').compiles, false);
-    s.is('slide 23: the initialiser list does',
+    s.is('the initialiser list does',
       cxx(COORD + '\nclass J { Coordinate s; public: J(Coordinate a) : s(a) { } };' +
         '\nint main(){ J j(Coordinate(1,1)); }').compiles, true);
 
-    // slides 42 / 43 — return by reference versus by value
-    s.same('slide 42: a reference to getStart() modifies the Journey',
+    // return by reference versus by value
+    s.same('a reference to getStart() modifies the Journey',
       cxx(JOURNEY + '\nint main(){ Journey j(Coordinate(1,1), Coordinate(10,3));' +
         ' Coordinate & a = j.getStart(); a.setX(0); cout << j.getStart().getX() << endl; }').out,
       ['0']);
-    s.same('slide 43: a copy of it does not',
+    s.same('a copy of it does not',
       cxx(JOURNEY + '\nint main(){ Journey j(Coordinate(1,1), Coordinate(10,3));' +
         ' Coordinate a = j.getStart(); a.setX(0); cout << j.getStart().getX() << endl; }').out,
       ['1']);
 
-    // slide 47 — const is contagious
+    // const is contagious
     const NOCONST = COORD.replace('int getX() const', 'int getX()');
-    s.is('slide 47: a non-const getter cannot be called through a const reference',
+    s.is('a non-const getter cannot be called through a const reference',
       cxx(NOCONST + '\nvoid p(const Coordinate & in){ cout << in.getX() << endl; }' +
         '\nint main(){ Coordinate a(4,2); p(a); }').compiles, false);
-    s.is('slide 47: marking it const fixes that',
+    s.is('marking it const fixes that',
       cxx(COORD + '\nvoid p(const Coordinate & in){ cout << in.getX() << endl; }' +
         '\nint main(){ Coordinate a(4,2); p(a); }').out.join(''), '4');
 
-    // slide 48 — the four-way quiz, one of which fails
+    // the four-way quiz, one of which fails
     const CJ = COORD + '\n' + [
       'class Journey { private: Coordinate start;',
       'public: Journey(Coordinate s) : start(s) { }',
@@ -314,22 +314,22 @@ module.exports = async function run() {
       ['[iv]  const Coordinate d = j.getStart();', 'const Coordinate d = j.getStart();', true]
     ];
     four.forEach(([label, line, want]) => {
-      s.is(`slide 48 ${label}`,
+      s.is(`binding ${label}`,
         cxx(CJ + `\nint main(){ Journey j(Coordinate(1,1)); ${line} (void)0; }`).compiles, want);
     });
 
-    // slides 55-60 — operator<<
-    s.is('slide 55: a void operator<< breaks the chain',
+    // operator<<
+    s.is('a void operator<< breaks the chain',
       cxx(COORD + '\nvoid operator<<(ostream & o, const Coordinate & r){ o << r.getX(); }' +
         '\nint main(){ Coordinate a(4,2); cout << a << endl; }').compiles, false);
-    s.same('slide 60: returning ostream & fixes it',
+    s.same('returning ostream & fixes it',
       cxx(COORD + '\nostream & operator<<(ostream & o, const Coordinate & r){' +
         ' o << r.getX() << "," << r.getY(); return o; }' +
         '\nint main(){ Coordinate a(-4,2); cout << "It is at " << a << endl; }').out,
       ['It is at -4,2']);
 
-    // slide 30 — string equality
-    s.same('slide 30: two equal C++ strings compare equal',
+    // string equality
+    s.same('two equal C++ strings compare equal',
       cxx('#include <iostream>\n#include <string>\nint main(){ std::string a="Dave", b="Dave";' +
         ' if (a==b) std::cout << "Dave is Dave" << std::endl; }').out, ['Dave is Dave']);
   }
@@ -382,7 +382,7 @@ module.exports = async function run() {
     });
     s.is('every operator case behaves as the engine predicts', obad, 0, ofirst);
 
-    /* Slide 52's claim, which is about C++11 specifically: a member
+    /* A claim specific to C++11: a member
        operator== on the RIGHT-hand type does not resolve a == b. */
     const wrongSide = cxx([
       '#include <iostream>',
@@ -426,11 +426,11 @@ module.exports = async function run() {
 
   /* ---------------- Topic 2 · pointers and ownership ---------------- */
   {
-    /* Slide 10's quiz, decided by star counting and confirmed by g++. */
+    /* The pointer quiz, decided by star counting and confirmed by g++. */
     const want = { i: true, ii: false, iii: false, iv: true, v: true, vi: true };
     w.PT_QUIZ.forEach(q => {
       const r = w.ptCheck(q.decl, q.expr, w.PT_ENV);
-      s.is(`slide 10 ${q.tag}: ${q.src}`, r.legal, want[q.tag], r.why);
+      s.is(`line ${q.tag}: ${q.src}`, r.legal, want[q.tag], r.why);
       if (!HAVE_GPP) return;
       const real = cxx('#include <string>\nusing std::string;\n' +
         'int main(){ string a("Hello"); string * b = new string("Hello");\n  ' +
@@ -527,7 +527,7 @@ module.exports = async function run() {
 
     const selfBug = w.rtSimulate({ copy: 'deep', assign: 'deep-delete', dtor: true,
                                    scenario: 'self' });
-    s.ok('a = a on the slide\'s final operator= reads freed memory',
+    s.ok('a = a on the usual final operator= reads freed memory',
       selfBug.problems.some(p => p.kind === 'use-after-free'));
     const guarded = w.rtSimulate({ copy: 'deep', assign: 'deep-delete-guard', dtor: true,
                                    scenario: 'self' });
@@ -560,7 +560,7 @@ module.exports = async function run() {
     s.is('two parameters deduce independently',
       JSON.stringify(w.tdDeduce(['T', 'U'], ['int', 'double']).deduced), '{"T":"int","U":"double"}');
 
-    /* Range-for element binding — the slide-61 case is the one that matters. */
+    /* Range-for element binding — the map-element case is the one that matters. */
     const cases = [
       ['vector<int>', { kind: 'ref', type: 'int' }, true],
       ['vector<int>', { kind: 'constref', type: 'int' }, true],
@@ -594,7 +594,7 @@ module.exports = async function run() {
     s.is('find returns an iterator to the element it found',
       mf.items[mf.iters.itr], '1194384→"Andrew"');
     s.is('and end() when there is no such key', mf.iters.miss, mf.items.length);
-    s.is('dereferencing that is the error the slide warns about', mf.errors.length, 1);
+    s.is('dereferencing that is the error worth warning about', mf.errors.length, 1);
     s.ok('and a list cannot jump two places',
       w.ctRun('list', w.CT_PRESETS.listJump.ops).errors.length > 0);
     s.is('but a vector can',
@@ -616,8 +616,8 @@ module.exports = async function run() {
                '#include <set>', '#include <map>', '#include <tuple>', '#include <utility>',
                'using namespace std;'].join('\n') + '\n';
 
-    /* The two errors in the deck. */
-    s.is('slide 8: ans.get<0>() does not compile',
+    /* The two errors in the usual write-up. */
+    s.is('ans.get<0>() does not compile',
       cxx(H + 'int main(){ tuple<int,int,bool> a(3,7,true); cout << a.get<0>() << endl; }').compiles,
       false);
     s.same('std::get<0>(ans) is the accessor',
@@ -625,7 +625,7 @@ module.exports = async function run() {
         ' cout << get<0>(a) << "," << get<1>(a) << "," << get<2>(a) << endl; }').out, ['3,7,1']);
 
     const MAP = 'int main(){ map<int,string> m; m[1]="a"; m[2]="b";\n';
-    s.is('slide 61: pair<int,string> & does not bind to a map element',
+    s.is('pair<int,string> & does not bind to a map element',
       cxx(H + MAP + ' for (pair<int,string> & e : m) cout << e.first; }').compiles, false);
     s.same('auto & does', cxx(H + MAP + ' for (auto & e : m) cout << e.first; cout << endl; }').out,
       ['12']);

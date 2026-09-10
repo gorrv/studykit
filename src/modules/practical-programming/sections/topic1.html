@@ -6,7 +6,7 @@
         <div class="topic-subtitle">copies, references, const, and coming to C++ from Java</div>
       </div>
 
-      <p>Most of this week reads like Java with different punctuation, and most of it is. The part
+      <p>Most of this topic reads like Java with different punctuation, and most of it is. The part
       that is not is worth the whole week: in Java a variable is a <em>handle</em> to an object, and
       in C++ a variable can <em>be</em> the object. <code>Coordinate b = a;</code> compiles in both
       languages, means something different in each, and gives you no warning either way.</p>
@@ -181,7 +181,7 @@ Coordinate b;          // looks for Coordinate()</pre>
           <span class="tool-badge">Practice tool</span>
           <h3>List or body — which compiles, and what it costs</h3>
         </div>
-        <div class="tool-desc">The slides show one Journey that compiles and one that does not.
+        <div class="tool-desc">Two versions of the same Journey class: one compiles and one does not.
           Change the member’s properties here and watch which combinations work — the rule underneath
           is not the one the two examples suggest.</div>
         <div class="tool-controls">
@@ -251,7 +251,7 @@ const Coordinate &amp; getStart() { return start; }  // caller can only read</pr
         member from outside the class. That defeats the point of the encapsulation: if Journey also
         cached a <code>distance</code>, it would now be wrong, and Journey would have no way to
         know.<br><br>
-        Given <code>const Coordinate &amp; getStart()</code>, of the four lines on slide 48 the
+        Given <code>const Coordinate &amp; getStart()</code>, of the four lines below the
         second is the one that fails:<br>
         <code>Coordinate a = j.getStart();</code> — fine, it is a copy<br>
         <code>Coordinate &amp; b = j.getStart();</code> — <strong>refused</strong>, that would
@@ -381,7 +381,7 @@ ostream &amp; operator&lt;&lt;(ostream &amp; o, const Coordinate &amp; rhs) {
         <div class="callout-label">The one-sentence version</div>
         In Java a variable names a way to reach an object; in C++ a variable can be the object
         itself, so the language needs separate spellings for &ldquo;another one like it&rdquo; and
-        &ldquo;another name for it&rdquo; — and almost everything else this week follows from
+        &ldquo;another name for it&rdquo; — and almost everything else here follows from
         keeping those two apart.
       </div>
 

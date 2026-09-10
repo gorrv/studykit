@@ -20,12 +20,12 @@
       </div>
       <div class="callout exam">
         <div class="callout-label">Bias, in the context of AI ethics</div>
-        The lecture gives it two senses, and you should be able to say which you mean:
+        It has two senses, and you should be able to say which you mean:
         <ul style="margin:10px 0 0 0;">
           <li><strong>Imbalance or tendency in data</strong> — the <strong>input</strong> sense.</li>
           <li><strong>Direct or indirect discrimination</strong> — the <strong>output</strong> sense.</li>
         </ul>
-        <p style="margin:12px 0 0 0;">These are connected but not the same, and conflating them is a common source of muddle: <strong>imbalanced data does not automatically produce discrimination, and discrimination can arise from perfectly balanced data</strong> (via the label, the objective, or the metric). The five causes on the next slide are precisely the routes from one to the other.</p>
+        <p style="margin:12px 0 0 0;">These are connected but not the same, and conflating them is a common source of muddle: <strong>imbalanced data does not automatically produce discrimination, and discrimination can arise from perfectly balanced data</strong> (via the label, the objective, or the metric). The five causes below are precisely the routes from one to the other.</p>
       </div>
       <!-- ===== EXAMPLES ===== -->
       <h2 id="bi-ex">Four documented examples</h2>
@@ -37,17 +37,17 @@
       </div>
       <div class="callout">
         <div class="callout-label">2 · Generative models — GPT-3 and DALL·E</div>
-        The slide shows outputs from both, with the caption <strong>“All white male.”</strong>
+        Outputs from both carry the caption <strong>“All white male.”</strong>
         <p style="margin:10px 0 0 0;">This is a <strong>representational</strong> harm rather than an allocative one — nobody is denied a resource. <strong>Stereotyping</strong> and <strong>erasing</strong> are the relevant sub-types. It is worth noticing that this failure has no victim who can point to a decision made about them, which is exactly why the reparation list in Part 2 works so poorly for it.</p>
       </div>
       <div class="callout">
         <div class="callout-label">3 · Pedestrian detection — Brandao (2019)</div>
-        <strong>“Age and gender bias in pedestrian detection algorithms.”</strong> The slide shows <strong>miss rates</strong> differing by age and gender group.
+        <strong>“Age and gender bias in pedestrian detection algorithms.”</strong> The data shows <strong>miss rates</strong> differing by age and gender group.
         <p style="margin:10px 0 0 0;">A <strong>quality-of-service</strong> allocative harm with an obvious <strong>physical safety</strong> consequence — a detector that misses children more often is a safety harm, not merely an accuracy footnote. This is the clearest case of one harm category producing another.</p>
       </div>
       <div class="callout exam">
         <div class="callout-label">4 · Gender classification — Buolamwini &amp; Gebru, “Gender Shades” (2018)</div>
-        <p style="margin:0 0 10px 0;">The slide reproduces the error-rate table across <strong>Fitzpatrick skin types I–VI</strong> for three commercial systems:</p>
+        <p style="margin:0 0 10px 0;">The error-rate table runs across <strong>Fitzpatrick skin types I–VI</strong> for three commercial systems:</p>
         <table class="cmp-table">
           <tr><th>system</th><th>Type I</th><th>Type II</th><th>Type III</th><th>Type IV</th><th>Type V</th><th>Type VI</th></tr>
           <tr><td><strong>Microsoft</strong></td><td>1.7%</td><td>1.1%</td><td>3.3%</td><td><strong>0%</strong></td><td>23.2%</td><td>25.0%</td></tr>
@@ -66,7 +66,7 @@
       <div class="callout exam">
         <div class="callout-label">Branch 1 — the risk was not anticipated, tested, or alleviated</div>
         <table class="cmp-table">
-          <tr><th>cause</th><th>the lecture's description</th><th>developer's fault?</th></tr>
+          <tr><th>cause</th><th>description</th><th>developer's fault?</th></tr>
           <tr><td><strong>World bias</strong></td><td>world distribution problem</td><td><span style="color:var(--accent-3);">no</span></td></tr>
           <tr><td><strong>Representation bias</strong></td><td>data collection problem</td><td><strong style="color:var(--accent-2);">★ yes</strong></td></tr>
           <tr><td><strong>Measurement bias</strong></td><td>wrong categorization of people, or wrong measurements</td><td><strong style="color:var(--accent-2);">★ yes</strong></td></tr>
@@ -89,7 +89,7 @@
       <h2 id="bi-tool">Tool · Where bias enters</h2>
       <div class="tool" data-run="runBias">
         <div class="tool-header"><span class="tool-badge">Interactive</span><h3>The pipeline, and a diagnosis drill</h3></div>
-        <p class="tool-desc">The <strong>pipeline</strong> tab lays the five causes out along the stages they arise in — the world, data collection, measurement, the algorithm, evaluation — with each one's fault marker, an example and its usual mitigation. <strong>★ diagnose a case</strong> gives you something that went wrong and asks which cause the lecture would name. The pairs that are easy to confuse — representation vs evaluation, algorithm vs evaluation — are deliberately both in the bank.</p>
+        <p class="tool-desc">The <strong>pipeline</strong> tab lays the five causes out along the stages they arise in — the world, data collection, measurement, the algorithm, evaluation — with each one's fault marker, an example and its usual mitigation. <strong>★ diagnose a case</strong> gives you something that went wrong and asks which cause it is. The pairs that are easy to confuse — representation vs evaluation, algorithm vs evaluation — are deliberately both in the bank.</p>
         <div class="tool-controls" style="margin-top:4px;"></div>
         <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div id="bi-output" class="tool-output"></div>
@@ -97,7 +97,7 @@
       <!-- ===== WHO DISCOVERS ===== -->
       <h2 id="bi-who">Who is discovering these issues</h2>
       <div class="callout exam">
-        <div class="callout-label">The slide, in full</div>
+        <div class="callout-label">The list, in full</div>
         <ul style="margin:6px 0 0 0;">
           <li><strong>Women</strong></li>
           <li><strong>Black scholars</strong></li>
@@ -107,7 +107,7 @@
         <p style="margin:12px 0 0 0;">→ <strong>Importance of lived experience &amp; diversity.</strong></p>
       </div>
       <div class="callout tip">
-        <div class="callout-label">Why this slide sits here rather than in the mitigation section</div>
+        <div class="callout-label">Why this sits here rather than in the mitigation section</div>
         Because it is an <em>empirical claim about how these findings actually got made</em>, not a recommendation. Gender Shades was authored by Buolamwini and Gebru; the disparities had been sitting in deployed commercial products, measurable by anyone, for years before someone thought to break the numbers down that way.
         <p style="margin:10px 0 0 0;">The argument it supports is a practical one: <strong>you cannot test for a harm you have not imagined</strong>, and what you imagine is bounded by who is in the room. That is why <strong>team diversity</strong> and <strong>participatory design</strong> appear as mitigations in Part 4 — they are not gestures at fairness, they are proposed as <em>error-detection mechanisms</em>. Making that argument explicitly is worth more than asserting that diversity is good.</p>
       </div>

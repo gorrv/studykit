@@ -16,7 +16,7 @@
       <div class="callout tip">
         <div class="callout-label">This separation is the entire idea</div>
         Because the language is standard, <strong>your model and their solver are independent</strong>. Improve the model and every planner benefits; improve the planner and every model benefits. It is the same bargain as SQL: describe <em>what</em>, and someone else's engine works out <em>how</em>.
-        <p style="margin:10px 0 0 0;">Hence the long list of planners in the lectures — Zeno, FF, MetricFF, VHPOP, Marvin, Crikey, POPF, MIPS-XXL, LPGP, LPRPG, CoLin, Fast Downward, UPMurphi, Gamer, MBP — all competing in the <strong>International Planning Competition</strong>, all consuming the same input.</p>
+        <p style="margin:10px 0 0 0;">Hence the long list of planners — Zeno, FF, MetricFF, VHPOP, Marvin, Crikey, POPF, MIPS-XXL, LPGP, LPRPG, CoLin, Fast Downward, UPMurphi, Gamer, MBP — all competing in the <strong>International Planning Competition</strong>, all consuming the same input.</p>
       </div>
       <!-- ===== VERSIONS ===== -->
       <h2 id="d-vers">PDDL and its versions</h2>
@@ -53,7 +53,7 @@
       </div>
       <div class="callout tip">
         <div class="callout-label">One domain, many problems</div>
-        The lectures draw one <em>Domain</em> in the middle with eight <em>Problems</em> orbiting it. That's the shape to remember: <strong>the rules of the world are written once</strong>, and each puzzle you want solved is a small file naming the objects, what's true at the start, and what you want true at the end.
+        The usual picture is one <em>Domain</em> in the middle with eight <em>Problems</em> orbiting it. That's the shape to remember: <strong>the rules of the world are written once</strong>, and each puzzle you want solved is a small file naming the objects, what's true at the start, and what you want true at the end.
         <p style="margin:10px 0 0 0;">Quick test of whether something belongs in the domain: <em>would it still be true for a different puzzle in the same world?</em> "A gripper can hold one ball" → domain. "There are four balls and they start in room A" → problem.</p>
       </div>
       <!-- ===== GRIPPER ===== -->
@@ -166,7 +166,7 @@
      <span class="kw">:effect</span> (<span class="kw">and</span> (<span class="ty">at</span> ?ball ?room) (<span class="ty">free</span> ?gripper)
                   (<span class="kw">not</span> (<span class="ty">carry</span> ?ball ?gripper)))))</code></pre>
       <div class="callout">
-        <div class="callout-label">Summary of the deck</div>
+        <div class="callout-label">Summary</div>
         <ul style="margin:6px 0 0 0;">
           <li>PDDL allows us to define problems in a <strong>set-theoretic language</strong>.</li>
           <li><strong>Domain files</strong> store all the predicates and actions we require.</li>
@@ -206,7 +206,7 @@
       <div class="callout tip">
         <div class="callout-label">The four actions come in two mirror pairs</div>
         <strong>pick-up ↔ put-down</strong> (table) and <strong>unstack ↔ stack</strong> (another block). Each pair swaps <code>handempty</code> for <code>holding ?x</code> and back.
-        <p style="margin:10px 0 0 0;">Note that <code>(clear ?x)</code> is deleted when you pick a block up — because while you're holding it, nothing can be placed on it either. And the table is never mentioned as an object: "on the table" is its own predicate, <code>ontable</code>. Part 4's slides simplify all four of these into a <em>single</em> action, <code>Put X on Y from Z</code>, by treating the table as just another destination.</p>
+        <p style="margin:10px 0 0 0;">Note that <code>(clear ?x)</code> is deleted when you pick a block up — because while you're holding it, nothing can be placed on it either. And the table is never mentioned as an object: "on the table" is its own predicate, <code>ontable</code>. Part 4 simplifies all four of these into a <em>single</em> action, <code>Put X on Y from Z</code>, by treating the table as just another destination.</p>
       </div>
       <!-- ===== EXAM ===== -->
       <h2 id="d-exam">Exam-style takeaways</h2>

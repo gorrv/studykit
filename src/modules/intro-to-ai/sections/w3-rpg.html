@@ -63,7 +63,7 @@
       <!-- ===== NEED ===== -->
       <h2 id="r-need">"How do we know this is the best state?"</h2>
       <div class="callout warn">
-        <div class="callout-label">The question the lecture leaves hanging</div>
+        <div class="callout-label">The question left hanging</div>
         Forward chaining generates a tree of states. Fine — but which one should you expand next? Topic 01's answer was <strong>A*</strong>, which needs <code>h(n)</code>. So: <strong>is it possible to define heuristics that work for <em>any</em> PDDL domain?</strong>
         <p style="margin:10px 0 0 0;"><strong>Yes — domain-independent heuristics.</strong> No knowledge about the specific problem is used.</p>
       </div>
@@ -119,7 +119,7 @@
       </div>
       <div class="callout warn">
         <div class="callout-label">a(2) is bigger than it looks — and that's the relaxation showing through</div>
-        The slide lists six actions in a(2); the true count is <strong>nine</strong>. The extra three are <code>B to A from C</code>, <code>C to A from B</code> and <code>C to T from B</code>, and they are applicable for a revealing reason.
+        Six actions are usually listed in a(2); the true count is <strong>nine</strong>. The extra three are <code>B to A from C</code>, <code>C to A from B</code> and <code>C to T from B</code>, and they are applicable for a revealing reason.
         <p style="margin:10px 0 0 0;">f(1) contains <strong>both <code>onBT</code> and <code>onBC</code></strong> — B is on the table <em>and</em> on C at the same time. That is physically impossible, and it happens precisely because we deleted nothing. So the relaxed graph offers moves the real world never would.</p>
         <p style="margin:10px 0 0 0;">This is exactly why the RPG <strong>under</strong>-estimates: the relaxed world is more permissive than the real one. It doesn't affect the answer here — the extraction still picks the same three actions and h = 3 — but if you're listing a(2) by hand, don't stop at six. The <strong>RPG builder tool</strong> below shows all nine.</p>
       </div>

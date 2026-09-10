@@ -124,14 +124,14 @@
 
   function lpPreset(which) {
     var el = document.getElementById('lr-text');
-    if (el) el.value = LP_PRESETS[which] || LP_PRESETS.lecture;
+    if (el) el.value = LP_PRESETS[which] || LP_PRESETS.worked;
     runFeasible();
   }
 
   function runFeasible() {
     var out = document.getElementById('lr-output');
     if (!out) return;
-    var lp = lpRead('lr-text', LP_PRESETS.lecture);
+    var lp = lpRead('lr-text', LP_PRESETS.worked);
     if (!lp.ok) return lpBad('lr-output', lp);
 
     var sol = lpSolveByVertices(lp);
@@ -149,7 +149,7 @@
     if (sol.status === 'infeasible') {
       h += '<div class="verdict bad">The feasible region <strong>R</strong> is empty. No assignment ' +
         'satisfies every constraint at once, so the set of optimal solutions is empty too — one of the ' +
-        'three outcomes the slide lists.</div>';
+        'three outcomes listed above.</div>';
     } else if (sol.status === 'unbounded') {
       h += '<div class="verdict warn">The feasible region is <strong>unbounded in an improving ' +
         'direction</strong>: you can keep moving through it and the objective keeps rising, so there ' +
@@ -195,7 +195,7 @@
 
   function spPreset(which) {
     var el = document.getElementById('sx-text');
-    if (el) el.value = LP_PRESETS[which] || LP_PRESETS.lecture;
+    if (el) el.value = LP_PRESETS[which] || LP_PRESETS.worked;
     runSimplex();
   }
 
@@ -237,7 +237,7 @@
   function runSimplex() {
     var out = document.getElementById('sx-output');
     if (!out) return;
-    var lp = lpRead('sx-text', LP_PRESETS.lecture);
+    var lp = lpRead('sx-text', LP_PRESETS.worked);
     if (!lp.ok) return lpBad('sx-output', lp);
 
     var rule = ((document.getElementById('sx-rule') || {}).value) || 'standard';
@@ -247,7 +247,7 @@
       var h0 = lpProgramHtml(lp) + '<div class="verdict bad">' + run.error + '</div>';
       var tp = spTwoPhase(lp);
       if (tp.ok) {
-        h0 += '<div class="verdict">Solved anyway, by the phase-one method the slides do not give: ' +
+        h0 += '<div class="verdict">Solved anyway, by the phase-one method the usual write-up leaves out: ' +
           '<strong>' + (tp.status === 'optimal'
             ? lp.vars.map(function (v, i) { return v + ' = ' + frShow(tp.x[i]); }).join(', ') +
               '</strong>, objective <strong>' + frShow(tp.obj) + '</strong>' +
@@ -262,7 +262,7 @@
     var h = '<div class="rd-stats">' +
       '<span class="stat-pill a">' + run.pivots + ' pivot' + (run.pivots === 1 ? '' : 's') + '</span>' +
       '<span class="stat-pill a">' + run.m + ' slack variables</span>' +
-      '<span class="stat-pill dark">' + (rule === 'deck' ? 'the slide’s rule' : 'standard rule') + '</span>' +
+      '<span class="stat-pill dark">' + (rule === 'printed' ? 'the usual rule' : 'standard rule') + '</span>' +
       '<span class="stat-pill ' + (run.agrees ? 'b' : 'warn') + '">' +
         (run.agrees ? 'agrees with vertex enumeration' : 'DISAGREES with vertex enumeration') +
       '</span></div>';
@@ -292,11 +292,11 @@
         '</div>';
     }
 
-    if (rule === 'deck' && run.lostFeasibility !== null) {
+    if (rule === 'printed' && run.lostFeasibility !== null) {
       h += '<div class="callout warn" style="margin:14px 0;"><div class="callout-label">' +
         'The tableau stopped being feasible at round ' + run.lostFeasibility + '</div>' +
         'A right-hand side went negative, which means the corner the tableau describes is outside ' +
-        'the feasible region. That happens because the slide requires the row quotient to have a ' +
+        'the feasible region. That happens because the common phrasing requires the row quotient to have a ' +
         '<em>positive</em> numerator, so a row whose right-hand side is exactly zero is skipped — and ' +
         'that is precisely the row that had to be chosen. The standard rule asks for a ' +
         '<em>non-negative</em> numerator and picks it.</div>';
@@ -391,7 +391,7 @@
       var m = ipMatching(IP_MATCHING_PRESET);
       el.value = m.text;
     } else {
-      el.value = LP_PRESETS[which] || LP_PRESETS.lecture;
+      el.value = LP_PRESETS[which] || LP_PRESETS.worked;
     }
     runBranch();
   }
@@ -399,7 +399,7 @@
   function runBranch() {
     var out = document.getElementById('bb-output');
     if (!out) return;
-    var lp = lpRead('bb-text', LP_PRESETS.lecture);
+    var lp = lpRead('bb-text', LP_PRESETS.worked);
     if (!lp.ok) return lpBad('bb-output', lp);
 
     var useBound = ((document.getElementById('bb-bound') || {}).value) === 'on';
@@ -412,7 +412,7 @@
     var h = '<div class="rd-stats">' +
       '<span class="stat-pill a">' + bb.explored + ' nodes</span>' +
       '<span class="stat-pill a">' + bb.pruned + ' pruned</span>' +
-      '<span class="stat-pill dark">' + (useBound ? 'with bounding' : 'the slide’s pseudocode') + '</span>' +
+      '<span class="stat-pill dark">' + (useBound ? 'with bounding' : 'as usually written') + '</span>' +
       (bb.disagreements.length
         ? '<span class="stat-pill warn">engines disagree at ' + bb.disagreements.length + ' node(s)</span>'
         : '<span class="stat-pill b">relaxations cross-checked</span>') +
@@ -446,7 +446,7 @@
     }
 
     if (useBound) {
-      h += '<div class="lp-foot">Without the bounding step — which is how the slide&rsquo;s pseudocode ' +
+      h += '<div class="lp-foot">Without the bounding step — which is how the pseudocode ' +
         'is written, since it explores both children unconditionally — this takes <strong>' +
         plain.explored + '</strong> nodes. With it, <strong>' + bb.explored + '</strong>.' +
         (plain.explored === bb.explored
@@ -492,11 +492,11 @@
   function satIpPreset(which) {
     var el = document.getElementById('si-text');
     var presets = {
-      lecture: '(P | Q | ~R)\n(~P | Q | R)\n(~Q | S)',
+      worked: '(P | Q | ~R)\n(~P | Q | R)\n(~Q | S)',
       unsat: '(P)\n(~P)',
       tight: '(P | Q)\n(~P | Q)\n(P | ~Q)\n(~P | ~Q)'
     };
-    if (el) el.value = presets[which] || presets.lecture;
+    if (el) el.value = presets[which] || presets.worked;
     runSatIp();
   }
 

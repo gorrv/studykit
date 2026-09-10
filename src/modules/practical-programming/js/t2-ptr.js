@@ -6,7 +6,7 @@
      The first is a type checker for the small language of
      pointers: given some names of type T and T*, which of
      `T c = a;`, `T * e = a;`, `T f = *b;` and so on are legal.
-     That is slide 10's quiz, and it is decidable by looking only
+     That is the whole quiz, and it is decidable by looking only
      at how many stars each side has.
 
      The second is the week's real subject. A class holding a
@@ -25,7 +25,7 @@
      can check the verdict with g++ and AddressSanitizer.
      ============================================================ */
 
-  /* ---------- slide 10: is this initialisation legal? ---------- */
+  /* ---------- is this initialisation legal? ---------- */
 
   /**
      Every expression here is a name with some number of stars
@@ -41,7 +41,7 @@
     }
     /* `in`, not a truth test: a plain `string a;` has depth 0, and `!env[e]`
        is true for 0, so testing truthiness rejects every non-pointer name.
-       That made lines i and vi of the slide-10 quiz come out illegal. */
+       That made lines i and vi of the quiz come out illegal. */
     if (!(e in env)) return { ok: false, error: 'No name <code>' + esc(e) + '</code> is declared.' };
     var depth = env[e] + stars;
     if (depth < 0) {
@@ -71,7 +71,7 @@
     };
   }
 
-  /** The slide's own six lines, with the quiz's own numbering. */
+  /** The six lines of the quiz, in their usual numbering. */
   var PT_QUIZ = [
     { tag: 'i',   decl: 0, expr: 'a',  src: 'string c = a;' },
     { tag: 'ii',  decl: 0, expr: 'b',  src: 'string d = b;' },
@@ -122,7 +122,7 @@
         detail: 'appends to block #' + o.ptr });
     }
 
-    /* Slide 52's order matters and is easy to get subtly wrong: BOTH objects
+    /* The order matters and is easy to get subtly wrong: BOTH objects
        exist before either gets a character. Copying first is what makes the
        shallow case print "ab" twice and the deep case print "a" and "b" —
        add the character to a first and the deep case prints "a" and "ab",
@@ -130,7 +130,7 @@
 
        A differential test cannot catch this on its own: the simulation and
        the generated C++ would simply agree on the wrong program. It is the
-       assertion written from the slide that pins it. */
+       assertion written from first principles that pins it. */
     var a = make('a');
 
     if (scenario === 'copy') {

@@ -15,7 +15,7 @@
         </ul>
         <p style="margin:10px 0 0 0; font-size:13px; color:var(--ink-soft);">Practicals use <strong>Haskell</strong> for the functional part and <strong>SWI-Prolog</strong> for the logic part. Part 2 is taught by Dr Odinaldo Rodrigues.</p>
       </div>
-      <p>Topic 01 defined the functional paradigm in one line: <em>based on the mathematical notion of function; the focus is on <strong>what</strong> should be computed, not <strong>how</strong></em>. Everything in this lecture is that sentence unpacked.</p>
+      <p>Topic 01 defined the functional paradigm in one line: <em>based on the mathematical notion of function; the focus is on <strong>what</strong> should be computed, not <strong>how</strong></em>. Everything in this topic is that sentence unpacked.</p>
       <!-- ===== INTRO ===== -->
       <h2 id="t5-intro">What "functional" actually means</h2>
       <div class="callout exam">
@@ -168,13 +168,13 @@
         <p style="margin:0;"><strong>Lazy evaluation defers the evaluation of expressions until their results are needed for other computations.</strong></p>
       </div>
       <div class="callout tip">
-        <div class="callout-label">What "+ sharing" buys you — the bit the lectures state but don't demonstrate</div>
+        <div class="callout-label">What "+ sharing" buys you — the bit usually stated but rarely demonstrated</div>
         Plain call-by-name substitutes an <em>unevaluated</em> argument everywhere the parameter appears. If the parameter occurs twice, the argument gets evaluated <strong>twice</strong> — that's why CBV is "in general more efficient".
         <p style="margin:10px 0 0 0;"><strong>Sharing</strong> fixes this: the copies are the <em>same object</em>, so reducing one reduces all of them. Lazy evaluation therefore gets call-by-name's guarantee <em>and</em> call-by-value's efficiency. You can watch this happen in the tool below with <code>square (3 + 1)</code>.</p>
       </div>
       <!-- ===== REDUCTION TOOL ===== -->
       <h3 id="t5-redtool">🛠️ Interactive: Reduction Strategy Explorer</h3>
-      <p>Run one expression under all three strategies side by side. The highlighted sub-expression is the redex about to be reduced. Use the presets to reproduce the lectures' examples — especially <code>fortytwo infinity</code>, where call-by-value fails and call-by-name succeeds.</p>
+      <p>Run one expression under all three strategies side by side. The highlighted sub-expression is the redex about to be reduced. Use the presets to reproduce the worked examples — especially <code>fortytwo infinity</code>, where call-by-value fails and call-by-name succeeds.</p>
       <div class="tool" data-run="runReduce">
         <div class="tool-header">
           <span class="tool-badge">Practice tool</span>
@@ -292,8 +292,8 @@ fact n = n * fact (n - 1)</textarea>
       <h2 id="t5-fib">Exercise: <code>fib</code>, four ways</h2>
       <p>The exercise: write definitions for <code>fib n</code> giving the n-th value of the Fibonacci sequence <strong>1, 1, 2, 3, 5, 8, 13, 21, …</strong> — one using a <em>conditional</em>, one using <em>guarded equations</em>, one using <em>pattern matching</em>.</p>
       <div class="callout tip">
-        <div class="callout-label">Solutions below are worked out here, not taken from the slide deck</div>
-        The lectures pose this as a pause-and-try exercise and give the sample solution in the video. The three straightforward versions are written out below; <strong>the fourth version is the one the lectures then go on to unravel</strong>, so it is the one to study closely.
+        <div class="callout-label">Solutions below are worked out from scratch</div>
+        This is a pause-and-try exercise. The three straightforward versions are written out below; <strong>the fourth version is the one worth unravelling</strong>, so it is the one to study closely.
       </div>
       <div class="compare-2">
         <div>
@@ -507,8 +507,8 @@ plus 3       :: <span class="ty">Int</span> → <span class="ty">Int</span>
       <!-- ===== EXERCISES ===== -->
       <h2 id="t5-exercises">Exercises 1–5, worked</h2>
       <div class="callout tip">
-        <div class="callout-label">These solutions are worked out here, not copied from the lectures</div>
-        The deck states the five exercises and gives sample solutions in the video. Below is a solution for each, in the style the exercise asks for. Where the exercise names a technique (conditionals, guards), both versions are given.
+        <div class="callout-label">These solutions are worked out from scratch</div>
+        Below is a solution for each, in the style the exercise asks for. Where the exercise names a technique (conditionals, guards), both versions are given.
       </div>
       <div class="exc">
         <div class="exc-n">Exercise 1</div>
@@ -528,7 +528,7 @@ plus 3       :: <span class="ty">Int</span> → <span class="ty">Int</span>
     | n == 0 = 0
     | otherwise = n + sumNat (n - 1)</div>
         </div>
-        <p style="font-size:13px; color:var(--ink-soft);">The guarded version also guards against <code>sumNat (-1)</code>, which would otherwise recurse forever — the same trap the lectures pointed out for <code>fact</code>.</p>
+        <p style="font-size:13px; color:var(--ink-soft);">The guarded version also guards against <code>sumNat (-1)</code>, which would otherwise recurse forever — the same trap as for <code>fact</code>.</p>
       </div>
       <div class="exc">
         <div class="exc-n">Exercise 2</div>

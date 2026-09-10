@@ -261,7 +261,7 @@
       </div>`;
       html += `<p class="ix-hint"><strong>Drag the threshold</strong> and watch the four counts trade against each other — there is no setting that
         makes both precision and recall perfect. <strong>Drag prevalence down to 1%</strong> and push the threshold to the right:
-        accuracy stays near 99% the whole way while recall collapses. That is the lecture's rare-disease example, live.</p>`;
+        accuracy stays near 99% the whole way while recall collapses. That is the rare-disease example, live.</p>`;
     } else if (preset) html += `<div class="verdict warn">${preset.note}</div>`;
     html += `<table class="cmx"><tr><td class="corner"></td><th colspan="2">Actually</th><th>row total</th></tr>
       <tr><td class="corner"></td><th>positive</th><th>negative</th><th></th></tr>
@@ -282,7 +282,7 @@
     if (prec === null) notes.push('<strong>Precision is undefined</strong> — the model never predicted positive, so TP + FP = 0 and the fraction is 0/0. It cannot even be computed, let alone expose the problem.');
     if (rec !== null && rec === 0 && pos > 0) notes.push(`<strong>Recall is 0</strong> — not one of the ${pos} real positive cases was caught. This is the number that exposes the model, whatever accuracy says.`);
     if (acc >= 0.9 && rec !== null && rec < 0.2) notes.push(`<strong>${cmFmt(acc * 100, 1)}% accurate and it catches almost nothing.</strong> Accuracy is high only because ${cmFmt((1 - prev) * 100, 1)}% of the test set is negative and the model gets those for free.`);
-    if (prec !== null && rec !== null && prec >= 0.95 && rec < 0.2) notes.push(`<strong>Precision is ${cmFmt(prec, 2)} — it looks perfect</strong> — while recall is ${cmFmt(rec, 2)}. <em>This is the answer to the slide's question: sensitivity, not precision, reveals the weakness.</em>`);
+    if (prec !== null && rec !== null && prec >= 0.95 && rec < 0.2) notes.push(`<strong>Precision is ${cmFmt(prec, 2)} — it looks perfect</strong> — while recall is ${cmFmt(rec, 2)}. <em>This is the point: sensitivity, not precision, reveals the weakness.</em>`);
     if (prec !== null && rec !== null && rec >= 0.95 && prec < 0.3) notes.push('<strong>Recall is near-perfect and precision is poor</strong> — the mirror failure. The model flags nearly everything, so it misses nothing and is right about almost none of it.');
     if (f1 !== null && prec !== null && rec !== null) {
       const arith = (prec + rec) / 2;

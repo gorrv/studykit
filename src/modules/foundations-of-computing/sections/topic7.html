@@ -58,8 +58,8 @@
       </div>
 
       <div class="callout warn">
-        <div class="callout-label">The loop condition on the slide is inverted</div>
-        The lecture writes <code>While (D⁺ − D⁻) &lt; shortest edge of G</code>. That is the
+        <div class="callout-label">The loop condition is easy to write inverted</div>
+        It is often written <code>While (D⁺ − D⁻) &lt; shortest edge of G</code>. That is the
         <em>stopping</em> condition, not the continuing one. The interval starts at the total edge
         weight, which is far <em>bigger</em> than the shortest edge, so the test is false on the first
         evaluation and the loop body never runs — the algorithm then returns a route of length
@@ -77,7 +77,7 @@
         </div>
         <div class="tool-desc">The decision oracle is answered honestly by brute force, so the search
           really is being driven by yes/no answers alone. Switch the loop condition to the one printed
-          on the slide and watch it do nothing.</div>
+          as printed above and watch it do nothing.</div>
 
         <div class="tool-controls">
           <div class="tool-field" style="flex:1 1 220px;">
@@ -91,7 +91,7 @@ D 4 0</textarea>
             <label for="bi-cond">Loop condition</label>
             <select id="bi-cond">
               <option value="correct">while gap &ge; shortest edge (correct)</option>
-              <option value="deck">while gap &lt; shortest edge (as printed)</option>
+              <option value="printed">while gap &lt; shortest edge (as usually printed)</option>
             </select>
           </div>
         </div>
@@ -149,7 +149,7 @@ D 4 0</textarea>
         <div class="tool-controls">
           <div class="tool-field" style="flex:1 1 260px;">
             <label for="ra-rows">name &nbsp; approximate &nbsp; optimal</label>
-            <textarea id="ra-rows" rows="5" spellcheck="false">lecture-graph 14.71 14.71
+            <textarea id="ra-rows" rows="5" spellcheck="false">example-graph 14.71 14.71
 preorder-only 19.07 14.71
 bad-case 27 14
 tiny 6 5</textarea>
@@ -191,7 +191,7 @@ tiny 6 5</textarea>
         There are two ways to rejoin them and <em>only one is a tour</em>:<br><br>
         <strong>Join each path to the other</strong> — one Hamiltonian cycle ✓<br>
         <strong>Join each path to itself</strong> — two disjoint cycles ✗<br><br>
-        That second case is what Step 4 of the slides — &ldquo;make sure the swap does not disconnect
+        That second case is what Step 4 — &ldquo;make sure the swap does not disconnect
         the graph!&rdquo; — is warning about. In tour terms the valid move is just
         &ldquo;<strong>reverse the segment between the two removed edges</strong>&rdquo;, which is
         why 2-opt is normally stated that way instead.
@@ -269,7 +269,7 @@ H 2 4</textarea>
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn secondary" onclick="twoOptPreset('lecture')">Lecture graph</button>
+          <button class="tool-btn secondary" onclick="twoOptPreset('worked')">Example graph</button>
           <button class="tool-btn secondary" onclick="twoOptPreset('cross')">Five points</button>
           <button class="tool-btn secondary" onclick="twoOptPreset('square')">A square</button>
           <button class="tool-btn secondary" onclick="twoOptPreset('nonmetric')">Non-metric</button>
@@ -280,12 +280,12 @@ H 2 4</textarea>
       </div>
 
       <div class="callout tip">
-        <div class="callout-label">Two things the lecture example quietly shows</div>
+        <div class="callout-label">Two things the worked example quietly shows</div>
         Its final tour, at ≈14.71, is not merely a local optimum — brute force over all 5040 tours
         confirms it is the <strong>global</strong> one. The achieved ratio is 1.00 while the guarantee
         is 2, which is the normal state of affairs: the bound is worst-case and typical inputs are not
         the worst case.<br><br>
-        Also: the slides reach it in two swaps, but SWAP-MOVE as written returns the <em>first</em>
+        Also: it is reachable in two swaps, but SWAP-MOVE as written returns the <em>first</em>
         improving pair, which takes six. The worked example is silently taking the <em>best</em> one
         each round. Both are valid 2-opt — the control above switches between them.
       </div>
@@ -313,13 +313,13 @@ H 2 4</textarea>
       </div>
 
       <div class="callout warn">
-        <div class="callout-label">The hypothesis the proof needs and the slide omits</div>
+        <div class="callout-label">The hypothesis the proof needs, and that is usually omitted</div>
         Step 4 is where the work happens, and it is not free. The preorder traversal of the tree
         revisits vertices; turning it into a Hamiltonian cycle means <strong>shortcutting</strong> past
         the ones already seen. That shortcut is only an improvement if
         d(x,z) ≤ d(x,y) + d(y,z) — the <strong>triangle inequality</strong>.<br><br>
-        The slide states &ldquo;TSP is 2-approximable&rdquo; without qualification, and the very next
-        deck proves TSP is <em>unapproximable</em>. Both are correct. The first is about
+        You will see &ldquo;TSP is 2-approximable&rdquo; stated without qualification, alongside a
+        proof that TSP is <em>unapproximable</em>. Both are correct. The first is about
         <strong>metric</strong> TSP and the second about the general case, and the whole difference
         between them is this one assumption. If an exam asks you to state the 2-approximation result,
         say <em>metric</em> TSP.
@@ -404,7 +404,7 @@ A - C</textarea>
 
       <div class="callout tip">
         <div class="callout-label">What this means outside the exam</div>
-        The slides put it well: routing to minimise <strong>distance</strong> is approximable, because
+        The short version: routing to minimise <strong>distance</strong> is approximable, because
         distances obey the triangle inequality — a detour cannot be shorter than going direct. Routing
         to minimise <strong>duration</strong> is not, because travel times need not: a motorway
         detour really can be quicker than the direct road through town.<br><br>
@@ -435,7 +435,7 @@ A - C</textarea>
         <div class="callout-label">Traps</div>
         <ul style="margin:6px 0 0;">
           <li>Saying &ldquo;TSP is 2-approximable&rdquo; without the word <strong>metric</strong>. The
-            unqualified claim is false, and the next slide proves it false.</li>
+            unqualified claim is false, and the next result proves it false.</li>
           <li>Treating an approximation ratio as typical rather than worst-case.</li>
           <li>Thinking the 2-opt swaps are what earn the factor of 2.</li>
           <li>Reconnecting a 2-opt swap the wrong way and producing two disjoint cycles.</li>

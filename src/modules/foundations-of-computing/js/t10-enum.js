@@ -8,7 +8,7 @@
      because the diagonal argument indexes machines by the same
      numbers it indexes words by.
 
-     One thing the slides gloss. The tuple encoding
+     One thing the usual write-up glosses over. The tuple encoding
 
          <w0, w1, ..., wn>  :=  # w0 # w1 # ... # wn #
 
@@ -17,7 +17,7 @@
      #. It is then ambiguous: #a#b# is both the pair (a, b) and
      the single string "a#b".
 
-     The slide offers a binary code as the alternative -- 0 -> 00,
+     The usual write-up offers a binary code as the alternative -- 0 -> 00,
      1 -> 01, # -> 11 -- and it does NOT fix this, because it gives
      the data character # and the separator the same pattern, so
      the two encodings stay identical bit for bit. What fixes it is
@@ -33,7 +33,7 @@
 
      This is a bijection between the natural numbers and Sigma*,
      which is what lets the diagonal argument say "the i-th word"
-     at all. The slide prints it as
+     at all. The usual write-up prints it as
 
          eps, 1, 0, 00, 01, 10, 11, 000, ...
 
@@ -95,7 +95,7 @@
 
   /* ---------- the tuple encoding, and why it needs the binary code ---------- */
 
-  /** The slide's encoding: #w0#w1#...#wn#. */
+  /** The usual encoding: #w0#w1#...#wn#. */
   function enTuple(parts) {
     return '#' + parts.join('#') + '#';
   }
@@ -109,8 +109,8 @@
     return { ok: true, parts: t.slice(1, -1).split('#') };
   }
 
-  /* The slide's own code table, kept so the collision can be shown. */
-  var EN_SLIDE_BITS = { '0': '00', '1': '01', '#': '11' };
+  /* The usual code table, kept so the collision can be shown. */
+  var EN_BIN_BITS = { '0': '00', '1': '01', '#': '11' };
   /* A table that works: the separator gets a pattern no data symbol has. */
   var EN_BITS = { '0': '00', '1': '01', '#': '10' };
   var EN_SEP = '11';
@@ -172,10 +172,10 @@
      asserted.
 
      First, the plain #-delimited tuple: with components drawn from
-     Sigma union {#}, as the slide says, #a#b# is both the pair
+     Sigma union {#}, as the usual write-up says, #a#b# is both the pair
      (a, b) and the one-element tuple containing "a#b".
 
-     Second -- and this is the part worth knowing -- the slide's
+     Second -- and this is the part worth knowing -- the usual
      suggested repair does not repair it. Coding 0 -> 00, 1 -> 01,
      # -> 11 gives the separator and the data character # the SAME
      pattern, so the collision survives the translation intact.
@@ -187,17 +187,17 @@
   function enAmbiguity() {
     var flatPair = enTuple(['0', '1']);
     var flatSingle = enTuple(['0#1']);
-    var slidePair = enTupleBin(['0', '1'], EN_SLIDE_BITS);
-    var slideSingle = enTupleBin(['0#1'], EN_SLIDE_BITS);
+    var usualPair = enTupleBin(['0', '1'], EN_BIN_BITS);
+    var usualSingle = enTupleBin(['0#1'], EN_BIN_BITS);
     var fixedPair = enTupleBin(['0', '1']);
     var fixedSingle = enTupleBin(['0#1']);
     return {
       ok: true,
       flat: { pair: flatPair, single: flatSingle, collide: flatPair === flatSingle },
-      slide: { pair: slidePair.bits, single: slideSingle.bits, collide: slidePair.bits === slideSingle.bits },
+      usual: { pair: usualPair.bits, single: usualSingle.bits, collide: usualPair.bits === usualSingle.bits },
       fixed: { pair: fixedPair.bits, single: fixedSingle.bits, collide: fixedPair.bits === fixedSingle.bits },
       note: 'The pair (0, 1) and the single string "0#1" have the same plain encoding, and the same ' +
-        'encoding again under the slide’s code table, because # and the separator are both 11. ' +
+        'encoding again under that code table, because # and the separator are both 11. ' +
         'Reserving 11 for the separator alone — and giving the data character # its own 10 — ' +
         'separates them.'
     };
@@ -236,14 +236,14 @@
 
   /**
      code(M) := <q_init, q_accept, q_reject, <delta>>, with delta
-     encoded as a tuple of pairs, exactly as the slide describes
+     encoded as a tuple of pairs, exactly as the usual write-up describes
      a finite function.
 
      Encoded and decoded with the binary form, because the naive
      one cannot survive the nesting.
   */
   function enCodeMachine(m) {
-    /* FLAT, not nested. The slide encodes delta as a tuple of pairs,
+    /* FLAT, not nested. Delta is encoded as a tuple of pairs,
        nesting tuples inside tuples -- and enAmbiguity() above shows
        that the flat #-delimited format cannot be read back once a
        component contains a #, which a nested tuple always does. So
@@ -252,7 +252,7 @@
        is recoverable from the count, and the result really does
        decode, which the nested version does not.
 
-       This is the same information the slide's binary code supplies
+       This is the same information the usual binary code supplies
        by making 11 a separator that cannot occur inside a symbol. */
     var fields = [];
     var rules = 0;

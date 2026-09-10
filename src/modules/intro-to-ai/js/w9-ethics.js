@@ -57,7 +57,7 @@
     { q: 'A hospital consultant stops double-checking a diagnostic model because it is usually right.', a: 'agency',
       e: '<strong>Over-delegation</strong>, and in time <strong>loss of critical thinking</strong> — both human-agency harms. The system may be perfectly accurate and this harm still occurs.' },
     { q: 'Warehouse staff are disciplined for picking errors that were actually caused by the sorting robot.', a: 'account',
-      e: 'The lectures\' own example: <strong>incorrect blaming of humans for AI failures</strong>. An accountability harm — responsibility has been misassigned, not merely lost.' },
+      e: 'A standard example: <strong>incorrect blaming of humans for AI failures</strong>. An accountability harm — responsibility has been misassigned, not merely lost.' },
     { q: 'After an autonomous vehicle collision, no person or organisation can be held answerable for the decision the system made.', a: 'account',
       e: '<strong>Loss of human accountability for harm.</strong> Note the contrast with the previous case: here accountability evaporates, there it lands on the wrong person. Both are accountability harms.' },
     { q: 'A warehouse robot arm injures a worker who stepped into its path.', a: 'safety',
@@ -67,9 +67,9 @@
     { q: 'A recommender keeps serving self-harm content to a teenager because it maximises engagement.', a: 'safety',
       e: '<strong>Health</strong> and <strong>wellbeing</strong> both sit under safety and wellbeing. (The societal category covers effects on <em>information and social relationships at large</em>, not harm to an individual\'s health.)' },
     { q: 'A smart speaker records conversations inside people\'s bedrooms.', a: 'privacy',
-      e: '<strong>Privacy in intimate spaces</strong> — the first of the three privacy settings the lectures name.' },
+      e: '<strong>Privacy in intimate spaces</strong> — the first of the three privacy settings.' },
     { q: 'Software monitors employees\' keystrokes and webcams to score their productivity.', a: 'privacy',
-      e: '<strong>Privacy at work &amp; school.</strong> The lectures split privacy by <em>setting</em> — intimate spaces, work and school, public spaces — so name the setting in an answer.' },
+      e: '<strong>Privacy at work &amp; school.</strong> Privacy splits by <em>setting</em> — intimate spaces, work and school, public spaces — so name the setting in an answer.' },
     { q: 'City-wide camera networks with face recognition track everyone who walks through the centre.', a: 'privacy',
       e: '<strong>Privacy in public spaces.</strong> Note that if the same system misidentifies minorities at a higher rate, you would <em>also</em> have a fairness harm — real cases usually span several categories.' },
     { q: 'A CV-screening model shortlists fewer women for engineering roles.', a: 'fair',
@@ -77,11 +77,11 @@
     { q: 'Speech recognition works noticeably worse for speakers with regional accents.', a: 'fair',
       e: 'Allocative, under <strong>distribution of quality-of-service</strong>. The service is offered to everyone, but not at the same standard — that is the quality-of-service sub-type.' },
     { q: 'An image generator asked for "a nurse" returns only women and asked for "a CEO" returns only men.', a: 'fair',
-      e: '<strong>Representational — stereotyping.</strong> Nobody is denied a resource; the harm is in the depiction. The lectures\' GPT-3 and DALL·E examples are exactly this.' },
+      e: '<strong>Representational — stereotyping.</strong> Nobody is denied a resource; the harm is in the depiction. The GPT-3 and DALL·E examples are exactly this.' },
     { q: 'A translation system has no support at all for a widely spoken minority language.', a: 'fair',
       e: '<strong>Representational — erasing.</strong> Also arguably allocative (quality-of-service), but the primary listed harm for absence-from-the-system is erasure.' },
     { q: 'A form forces users to pick "male" or "female" with no other option.', a: 'fair',
-      e: '<strong>Loss of the opportunity to self-identify</strong>, and <strong>essentialist social categories</strong> — both representational sub-types, and both directly relevant to the phrenology slide.' },
+      e: '<strong>Loss of the opportunity to self-identify</strong>, and <strong>essentialist social categories</strong> — both representational sub-types, and both directly relevant to phrenology.' },
     { q: 'Recommendation feeds push users into increasingly polarised political bubbles.', a: 'social',
       e: '<strong>Civic and political</strong>, and <strong>information</strong> — societal harms. These are harms to the public sphere rather than to one identifiable person.' },
     { q: 'Junior radiologists never develop the skill of reading scans unaided, because the model does it first.', a: 'social',
@@ -93,7 +93,7 @@
     { q: 'Training a large model consumes as much electricity as hundreds of homes use in a year.', a: 'env',
       e: '<strong>Energy consumption and pollution.</strong>' },
     { q: 'Cobalt and lithium extraction expands to supply hardware for new datacentres.', a: 'env',
-      e: '<strong>Mineral mining for datacentres</strong> — the lectures list this separately from energy use, so it is worth naming on its own.' },
+      e: '<strong>Mineral mining for datacentres</strong> — this is listed separately from energy use, so it is worth naming on its own.' },
     { q: 'Machine learning is used to locate new oil reserves more efficiently.', a: 'env',
       e: '<strong>AI and robots for the oil &amp; gas industry</strong> — the third environmental item, and the one people forget. The harm is not the model\'s own footprint but what it is used to accelerate.' }
   ];
@@ -142,11 +142,11 @@
         html += '</div>';
       });
       html += '</div>';
-      html += `<p class="ix-hint">These seven are the list the lecture gives, in the standard order — <strong>“human agency, accountability, safety and wellbeing, privacy, fairness and dignity, societal, environmental”</strong>.
+      html += `<p class="ix-hint">These seven are the standard list, in the standard order — <strong>“human agency, accountability, safety and wellbeing, privacy, fairness and dignity, societal, environmental”</strong>.
         A question asking you to name the harms of a system wants you to work down this list; a question about one harm wants the <em>sub-type</em>, which is where the detail marks are. Click any card to open it.</p>`;
     } else {
       if (HM.cur === null) {
-        html += `<div class="quiz-prompt" style="margin-top:14px;">Press <strong>start</strong> and a short scenario appears. Pick the harm category the lecture would file it under. ${HARM_CASES.length} cases, each with the reasoning spelled out — including the ones that span two categories.</div>`;
+        html += `<div class="quiz-prompt" style="margin-top:14px;">Press <strong>start</strong> and a short scenario appears. Pick the harm category it belongs under. ${HARM_CASES.length} cases, each with the reasoning spelled out — including the ones that span two categories.</div>`;
       } else {
         const c = HARM_CASES[HM.cur];
         html += `<div class="quiz-prompt" style="margin-top:14px;"><div class="qp-topic">classify this harm</div>${c.q}</div>`;
@@ -163,7 +163,7 @@
         if (HM.given) {
           const right = HM.given === c.a;
           const nm = HARMS.filter(h => h.k === c.a)[0].n;
-          html += `<div class="verdict ${right ? 'safe' : 'bad'} quiz-fb">${right ? '✓ <strong>Correct.</strong>' : `✗ The lecture files this under <strong>${nm}</strong>.`} ${c.e}</div>`;
+          html += `<div class="verdict ${right ? 'safe' : 'bad'} quiz-fb">${right ? '✓ <strong>Correct.</strong>' : `✗ This is filed under <strong>${nm}</strong>.`} ${c.e}</div>`;
           html += `<div class="tool-controls" style="margin-top:10px;"><button class="tool-btn green" onclick="hmNew()">Next case ▶</button></div>`;
         }
       }
@@ -187,12 +187,12 @@
       fix: 'Dataset curation, participatory design, resampling, reweighting.' },
     { k: 'meas', n: 'Measurement bias', stage: 'measurement', dev: true,
       d: 'Wrong categorization of people, or wrong measurements.',
-      long: 'The quantity you recorded is not the quantity you care about. Using <em>re-arrest</em> as a stand-in for <em>reoffending</em> imports whatever bias exists in who gets arrested. Forcing people into categories they do not belong to — the phrenology slide — is the other half of this.',
+      long: 'The quantity you recorded is not the quantity you care about. Using <em>re-arrest</em> as a stand-in for <em>reoffending</em> imports whatever bias exists in who gets arrested. Forcing people into categories they do not belong to — phrenology — is the other half of this.',
       fix: 'Interrogate the label. Ask whether the category is even observable, or whether only the subject can say.' },
     { k: 'algo', n: 'Algorithm bias', stage: 'the algorithm', dev: true,
       d: 'Wrong choice of algorithm.',
       long: 'The model or objective itself creates or amplifies the disparity, even on adequate data — for example an objective that maximises average accuracy and is therefore happy to sacrifice a small group.',
-      fix: 'Change the objective — the lecture\'s <em>fairness functions</em> bullet: maximise the minimum accuracy rather than the average.' },
+      fix: 'Change the objective — the <em>fairness functions</em> idea: maximise the minimum accuracy rather than the average.' },
     { k: 'eval', n: 'Evaluation bias', stage: 'evaluation', dev: true,
       d: 'Wrong choice of evaluation metric or test set.',
       long: 'The model is fine but your measurement of it is not. A single overall accuracy number on a test set with the same skew as the training set will report success while the system fails for a minority group — Topic 05\'s accuracy trap, arriving as an ethics problem.',
@@ -205,19 +205,19 @@
   ];
   const BIAS_CASES = [
     { q: 'A face dataset contains 80% lighter-skinned faces because it was scraped from Western news photos.', a: 'repr',
-      e: 'A <strong>data collection</strong> problem — the sample does not match the deployment population. Marked <strong>developer\'s fault</strong> on the lectures.' },
+      e: 'A <strong>data collection</strong> problem — the sample does not match the deployment population. Marked <strong>developer\'s fault</strong>.' },
     { q: 'A recidivism model predicts re-arrest, and uses that as its definition of "reoffending".', a: 'meas',
       e: '<strong>Measurement bias</strong> — wrong measurement. Re-arrest is a measurement of <em>policing</em> as much as of offending, which is precisely how the COMPAS-style disparity arises.' },
     { q: 'A model is tuned to maximise overall accuracy, and reaches it by performing badly on a group that is 3% of the data.', a: 'algo',
-      e: '<strong>Algorithm bias</strong> — the wrong choice of algorithm/objective. The lecture\'s remedy is a <strong>fairness function</strong>: maximise the minimum accuracy instead.' },
+      e: '<strong>Algorithm bias</strong> — the wrong choice of algorithm/objective. The remedy is a <strong>fairness function</strong>: maximise the minimum accuracy instead.' },
     { q: 'A team reports a single accuracy figure on a test set drawn the same way as the training set.', a: 'eval',
       e: '<strong>Evaluation bias</strong> — wrong choice of metric and test set. Note how close this sits to algorithm bias: here the model might be fine and only the <em>measurement of it</em> is broken.' },
     { q: 'Historical promotion records show few women in senior roles, and the model reproduces that pattern.', a: 'world',
-      e: '<strong>World bias</strong> — the world distribution problem. The only cause on the lectures <em>not</em> marked as the developer\'s fault, because the data is an accurate record. That does not make deploying it acceptable.' },
+      e: '<strong>World bias</strong> — the world distribution problem. The only cause <em>not</em> marked as the developer\'s fault, because the data is an accurate record. That does not make deploying it acceptable.' },
     { q: 'A system asks annotators to label people\'s sexuality from photographs.', a: 'meas',
-      e: '<strong>Measurement bias</strong> — wrong categorization of people. The phrenology slide\'s point: these are <strong>social constructs / unobservable</strong>, and <strong>only the subjects can say</strong>. There is no correct measurement to be made.' },
+      e: '<strong>Measurement bias</strong> — wrong categorization of people. The phrenology point: these are <strong>social constructs / unobservable</strong>, and <strong>only the subjects can say</strong>. There is no correct measurement to be made.' },
     { q: 'A pedestrian detector is trained mostly on adult pedestrians and misses children more often.', a: 'repr',
-      e: '<strong>Representation bias.</strong> This is the Brandao (2019) pedestrian-detection result cited on the lectures — age and gender disparities in miss rates.' },
+      e: '<strong>Representation bias.</strong> This is the Brandao (2019) pedestrian-detection result — age and gender disparities in miss rates.' },
     { q: 'A model scores well on the benchmark everyone uses, and the benchmark contains almost no examples from the deployment country.', a: 'eval',
       e: '<strong>Evaluation bias</strong> — the test set is the wrong test set. If the <em>training</em> set had the same skew you would also have representation bias; the two often travel together.' }
   ];
@@ -266,7 +266,7 @@
         g += `<text x="${x + bw / 2}" y="${y + 46}" text-anchor="middle" pointer-events="none" font-family="IBM Plex Mono" font-size="8.5" fill="${b.dev ? 'var(--accent-2)' : 'var(--accent-3)'}">${b.dev ? '★ developer' : 'not developer'}</text>`;
         g += `<text x="${x + bw / 2}" y="${y - 8}" text-anchor="middle" pointer-events="none" font-family="IBM Plex Sans" font-size="9.5" fill="var(--ink-muted)">${b.stage}</text>`;
       });
-      g += `<text x="10" y="${y + 86}" font-family="IBM Plex Sans" font-size="10.5" fill="var(--ink-muted)">bias can enter at any stage — and four of the five are marked ★ the developer's fault on the lectures</text>`;
+      g += `<text x="10" y="${y + 86}" font-family="IBM Plex Sans" font-size="10.5" fill="var(--ink-muted)">bias can enter at any stage — and four of the five are marked ★ the developer's fault</text>`;
       html += `<div class="ix-canvas" style="overflow-x:auto;"><svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" xmlns="http://www.w3.org/2000/svg" style="min-width:100%;">
         <title>Where bias enters</title><desc>Five stages from the world through data collection, measurement, the algorithm and evaluation, each with its named bias.</desc>
         <defs><marker id="biarrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-muted)"/></marker></defs>${g}</svg></div>`;
@@ -274,17 +274,17 @@
       html += `<div class="kmstep"><h5>${b.n} &nbsp;·&nbsp; ${b.d}</h5>
         <p style="margin:0 0 10px 0;">${b.long}</p>
         <div class="verdict ${b.dev ? 'warn' : 'safe'}" style="margin:0 0 10px 0;">${b.dev
-          ? '<strong>★ Marked the developer\'s fault</strong> on the causes slide.'
+          ? '<strong>★ Marked the developer\'s fault</strong> in the causes list.'
           : '<strong>Not marked the developer\'s fault</strong> — the data is an accurate record of an unequal world. It is the only one of the five without the marker, and that is an easy exam question.'}</div>
         <p style="margin:0;"><strong>Typical mitigation:</strong> ${b.fix}</p></div>`;
-      html += '<table style="margin-top:14px;"><tr><th>cause</th><th>the lecture\'s description</th><th>developer\'s fault?</th></tr>'
+      html += '<table style="margin-top:14px;"><tr><th>cause</th><th>description</th><th>developer\'s fault?</th></tr>'
         + BIAS.map(x => `<tr><td><strong>${x.n}</strong></td><td>${x.d}</td><td>${x.dev ? '<strong style="color:var(--accent-2);">★ yes</strong>' : '<span style="color:var(--accent-3);">no</span>'}</td></tr>`).join('')
         + '</table>';
-      html += `<p class="ix-hint">The five above are the branch where <strong>the risk was not anticipated, tested, or alleviated</strong>. The lectures give a second branch — <strong>the risk is obvious and the task itself is problematic</strong> — with three failures, only one of them the developer's:</p>`;
+      html += `<p class="ix-hint">The five above are the branch where <strong>the risk was not anticipated, tested, or alleviated</strong>. There is a second branch — <strong>the risk is obvious and the task itself is problematic</strong> — with three failures, only one of them the developer's:</p>`;
       html += '<table>' + BIAS_OBV.map(x => `<tr><td>${x.n}</td><td>${x.dev ? '<strong style="color:var(--accent-2);">★ developer\'s fault</strong>' : '<span style="color:var(--ink-muted);">—</span>'}</td></tr>`).join('') + '</table>';
     } else {
       if (BI.cur === null) {
-        html += `<div class="quiz-prompt" style="margin-top:14px;">Press <strong>start</strong>. Each case describes something that went wrong; name the cause the lecture would give it. ${BIAS_CASES.length} cases.</div>`;
+        html += `<div class="quiz-prompt" style="margin-top:14px;">Press <strong>start</strong>. Each case describes something that went wrong; name the cause. ${BIAS_CASES.length} cases.</div>`;
       } else {
         const c = BIAS_CASES[BI.cur];
         html += `<div class="quiz-prompt" style="margin-top:14px;"><div class="qp-topic">which cause of discrimination?</div>${c.q}</div>`;
@@ -301,7 +301,7 @@
         if (BI.given) {
           const right = BI.given === c.a;
           const b = BIAS.filter(x => x.k === c.a)[0];
-          html += `<div class="verdict ${right ? 'safe' : 'bad'} quiz-fb">${right ? '✓ <strong>Correct.</strong>' : `✗ The lecture calls this <strong>${b.n}</strong>.`} ${c.e}</div>`;
+          html += `<div class="verdict ${right ? 'safe' : 'bad'} quiz-fb">${right ? '✓ <strong>Correct.</strong>' : `✗ This one is <strong>${b.n}</strong>.`} ${c.e}</div>`;
           html += `<div class="tool-controls" style="margin-top:10px;"><button class="tool-btn green" onclick="biNew()">Next case ▶</button></div>`;
         }
       }
@@ -407,23 +407,23 @@
       <div class="metric dim"><div class="mn">do the objectives agree?</div><div class="mv" style="font-size:15px;">${(bW === bMin && bMin === bGap) ? 'yes' : 'no'}</div><div class="mf">${(bW === bMin && bMin === bGap) ? 'all three pick the same model' : 'different objectives, different winner'}</div></div>
     </div>`;
     const notes = [];
-    if (bW !== bMin) notes.push(`<strong>The objective decides the answer.</strong> Maximising overall accuracy selects <strong>${esc(M[bW].name)}</strong>, whose worst group sits at ${etN(st[bW].min, 1)}%. Maximising the <em>minimum</em> selects <strong>${esc(M[bMin].name)}</strong> instead, at the cost of ${etN(st[bMin].weighted - st[bW].weighted, 2)} points of overall accuracy. That trade is the whole content of the lecture's <em>fairness functions</em> bullet.`);
+    if (bW !== bMin) notes.push(`<strong>The objective decides the answer.</strong> Maximising overall accuracy selects <strong>${esc(M[bW].name)}</strong>, whose worst group sits at ${etN(st[bW].min, 1)}%. Maximising the <em>minimum</em> selects <strong>${esc(M[bMin].name)}</strong> instead, at the cost of ${etN(st[bMin].weighted - st[bW].weighted, 2)} points of overall accuracy. That trade is the whole content of the <em>fairness functions</em> idea.`);
     else notes.push(`Here all objectives happen to prefer <strong>${esc(M[bMin].name)}</strong> — but look at its worst group: <strong>${etN(st[bMin].min, 1)}%</strong> against ${etN(st[bMin].max, 1)}% for its best. <strong>Being the least bad system is not the same as being fair.</strong>`);
     const N = G.reduce((a, x) => a + x.n, 0);
     const small = G.filter(x => x.n / N < 0.1);
     if (bGap !== bMin && st[bGap].min < st[bMin].min - 1e-9) {
-      notes.push(`<strong>And minimising the gap is not the same as helping anyone.</strong> <strong>${esc(M[bGap].name)}</strong> has the smallest gap (${etN(st[bGap].gap, 2)}) but its worst group sits at ${etN(st[bGap].min, 1)}%, <em>below</em> ${esc(M[bMin].name)}'s ${etN(st[bMin].min, 1)}%. A disparity objective can always be satisfied by making the system equally bad for everybody — which is why the lecture's wording is <em>“maximise minimum accuracy”</em>, or <em>“maximise accuracy <strong>and</strong> minimise performance differences”</em>, never disparity alone.`);
+      notes.push(`<strong>And minimising the gap is not the same as helping anyone.</strong> <strong>${esc(M[bGap].name)}</strong> has the smallest gap (${etN(st[bGap].gap, 2)}) but its worst group sits at ${etN(st[bGap].min, 1)}%, <em>below</em> ${esc(M[bMin].name)}'s ${etN(st[bMin].min, 1)}%. A disparity objective can always be satisfied by making the system equally bad for everybody — which is why the wording is <em>“maximise minimum accuracy”</em>, or <em>“maximise accuracy <strong>and</strong> minimise performance differences”</em>, never disparity alone.`);
     }
     if (small.length && G.some(x => x.n !== G[0].n)) {
       notes.push(`<strong>Why the overall figure hides it:</strong> ${small.map(x => esc(x.name)).join(', ')} ${small.length === 1 ? 'is' : 'are'} only ${etN(100 * small.reduce((a, x) => a + x.n, 0) / N, 1)}% of the data, so even a catastrophic accuracy there barely moves the weighted number. <strong>The macro average, which counts every group once, is the column that notices.</strong> This is Topic 05's accuracy trap arriving as an ethics problem — and it is exactly <em>evaluation bias</em>.`);
     }
     html += '<div class="verdict warn" style="margin-top:12px;">' + notes.join('<br><br>') + '</div>';
     html += `<div class="ix-bar"><span class="ix-lab">load</span>
-      <button class="ix-btn" onclick="frLoad('gs')">Gender Shades (slide 27)</button>
+      <button class="ix-btn" onclick="frLoad('gs')">Gender Shades</button>
       <button class="ix-btn" onclick="frLoad('conflict')">objectives disagree</button>
       <button class="ix-btn" onclick="frLoad('trap')">the accuracy trap</button></div>`;
     html += `<p class="ix-hint">Group sizes go in the header as <code>name (n=…)</code>; leave them off and every group counts equally.
-      The <strong>Gender Shades</strong> preset is the table on the lecture's own slide — gender-classification error rates by Fitzpatrick skin type, from Buolamwini &amp; Gebru (2018), converted here to accuracies. Even the best of the three systems drops from <strong>100% on Type IV to 75% on Type VI</strong>.</p>`;
+      The <strong>Gender Shades</strong> preset is the published table — gender-classification error rates by Fitzpatrick skin type, from Buolamwini &amp; Gebru (2018), converted here to accuracies. Even the best of the three systems drops from <strong>100% on Type IV to 75% on Type VI</strong>.</p>`;
     out.innerHTML = html;
   }
   function runFair() {

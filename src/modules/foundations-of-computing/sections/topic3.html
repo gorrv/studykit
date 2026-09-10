@@ -125,7 +125,7 @@
           </div>
         </div>
         <div class="tool-controls">
-          <button class="tool-btn secondary" onclick="mgPreset('7, 10, 4, 6, 1, 5, 9, 3, 8, 2')">The slides’ hand</button>
+          <button class="tool-btn secondary" onclick="mgPreset('7, 10, 4, 6, 1, 5, 9, 3, 8, 2')">The worked hand</button>
           <button class="tool-btn secondary" onclick="mgPreset('1, 2, 3, 4, 5, 6, 7, 8')">Already sorted</button>
           <button class="tool-btn secondary" onclick="mgPreset('8, 7, 6, 5, 4, 3, 2, 1')">Reversed</button>
           <button class="tool-btn secondary" onclick="mgPreset('5, 1, 4')">n = 3, where the two recurrences split</button>
@@ -139,7 +139,7 @@
       <!-- ===== Induction ===== -->
       <h2 id="t3-induction">Solving by induction</h2>
 
-      <p>The lectures call this the <strong>method of substitution</strong>: guess the closed form, then
+      <p>This is the <strong>method of substitution</strong>: guess the closed form, then
       prove it. The proof has two obligations and both must be discharged.</p>
 
       <div class="callout exam">
@@ -296,7 +296,7 @@
         cannot change a growth rate.<br>
         <strong>log₂(5n²) = log₂5 + 2log₂n ∈ Θ(log n)</strong> — the constant and the multiple both
         drop out.<br><br>
-        Both of these are lecture examples, and in both the simplification is most of the work.
+        In both, the simplification is most of the work.
       </div>
 
       <!-- ===== TOOL: master theorem ===== -->
@@ -328,8 +328,8 @@
 
         <div class="tool-controls">
           <button class="tool-btn secondary" onclick="mtPreset(2,2,'n')">Merge sort</button>
-          <button class="tool-btn secondary" onclick="mtPreset(9,3,'sqrt((n+1)^5)')">Lecture example 1</button>
-          <button class="tool-btn secondary" onclick="mtPreset(2,3,'log2(5n^2)')">Lecture example 3</button>
+          <button class="tool-btn secondary" onclick="mtPreset(9,3,'sqrt((n+1)^5)')">Worked example 1</button>
+          <button class="tool-btn secondary" onclick="mtPreset(2,3,'log2(5n^2)')">Worked example 3</button>
           <button class="tool-btn secondary" onclick="mtPreset(8,2,'n^2')">Case 1</button>
           <button class="tool-btn secondary" onclick="mtPreset(7,2,'n^2')">Strassen</button>
           <button class="tool-btn secondary" onclick="mtPreset(1,2,'1')">Binary search</button>
@@ -368,7 +368,7 @@
       </table>
 
       <p>Everything a legal, accepting computation must satisfy can then be written as a constraint on
-      those variables. The lecture gives four representative ones:</p>
+      those variables. Four representative ones:</p>
 
       <div class="proof">
         <div class="pf-lbl">Constraints, in the machine's own vocabulary</div>
