@@ -103,6 +103,26 @@ function asan(source) {
            leaked, aborted };
 }
 
+/* Scala's Int IS the JVM's int, and Scala has no compiler here, so the
+   arithmetic is checked against the next best thing: a real JVM. Java 11
+   runs a single source file directly, no javac needed. Each expression
+   is printed on its own line, and anything that throws prints the
+   exception's name, so both answers are comparable. */
+const HAVE_JAVA = spawnSync('java', ['--version'], { encoding: 'utf8' }).status === 0;
+
+function javaEval(exprs) {
+  const body = exprs.map(e =>
+    '    try { System.out.println(' + e + '); } ' +
+    'catch (Exception ex) { System.out.println("THROWS " + ex.getClass().getSimpleName()); }'
+  ).join('\n');
+  const src = 'public class P {\n  public static void main(String[] a) {\n' + body + '\n  }\n}\n';
+  const f = path.join(TMP, 'P.java');
+  fs.writeFileSync(f, src);
+  const r = runSync('java', [f], 90000);
+  if (r.status !== 0) return { ok: false, error: (r.stderr || '').split('\n')[0] };
+  return { ok: true, out: r.stdout.trim().split('\n') };
+}
+
 function ri(lo, hi) { return lo + Math.floor(Math.random() * (hi - lo + 1)); }
 function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
 
@@ -965,6 +985,149 @@ module.exports = async function run() {
     s.is('dynamic_cast needs a vtable',
       cxx('struct B { int x; };\nstruct D : B { int y; };\n' +
         'int main(){ B b; B * p = &b; D * d = dynamic_cast<D*>(p); (void)d; }').compiles, false);
+  }
+
+  /* ---------------- Scala 1 · values, types, lists ---------------- */
+  {
+    /* The evaluator's own claims. Each of these is a thing the notes
+       state, so a change to either has to be deliberate. */
+    const ev = src => w.scEval(src, {});
+    s.is('Int division truncates', ev('(1 + 2) / 2').show, '1');
+    s.is('and truncates towards zero, not down', ev('-7 / 2').show, '-3');
+    s.is('the remainder takes the left sign', ev('-7 % 2').show, '-1');
+    s.is('Int overflow wraps', ev('2147483647 + 1').show, '-2147483648');
+    s.ok('Int division by zero throws rather than giving Infinity',
+      ev('1 / 0').ok === false && ev('1 / 0').runtime === true);
+    s.is('Double division by zero does not', ev('1.0 / 0').show, 'Infinity');
+    s.is('BigInt does not overflow',
+      ev('BigInt(13) * 12 * 11 * 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2').show, '6227020800');
+    s.is('and the same product in Int does',
+      ev('13 * 12 * 11 * 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2').show, '1932053504');
+    s.is("a Char is a number", ev("'a'.toInt").show, '97');
+    s.is('cons builds on the front', ev('0 :: List(1, 2, 3, 5)').show, 'List(0, 1, 2, 3, 5)');
+    s.is('cons is right-associative', ev('1 :: 2 :: 3 :: Nil').show, 'List(1, 2, 3)');
+    s.is('and types it', ev('1 :: 2 :: 3 :: Nil').type, 'List[Int]');
+    s.is('a tuple keeps both types', ev('(1 + 1, "two")').type, '(Int, String)');
+    s.is('a literal too large for Int is refused outright',
+      ev('2147483648').ok, false, 'Scala rejects the literal; only arithmetic wraps');
+    s.ok('an empty list has no head',
+      ev('Nil.head').ok === false && ev('Nil.head').runtime === true);
+    s.is('the average body on a list that does not divide evenly',
+      ev('List(1, 2).sum / List(1, 2).length').show, '1');
+    s.ok('and on the empty list it divides by zero',
+      ev('Nil.sum / Nil.length').ok === false);
+
+    /* Sharing. The invariant holds for any singly linked list: k conses
+       allocate exactly k cells, and the list you started from is
+       untouched. Checked over every small shape rather than one. */
+    let shareBad = 0, shareFirst = null;
+    for (let n = 0; n <= 6; n++) {
+      for (let k = 1; k <= 4; k++) {
+        const steps = [{ kind: 'literal', name: 'a',
+                         items: Array.from({ length: n }, (_, i) => i + 1) }];
+        let prev = 'a';
+        for (let j = 0; j < k; j++) {
+          steps.push({ kind: 'cons', name: 'b' + j, value: 100 + j, from: prev });
+          prev = 'b' + j;
+        }
+        const r = w.lsRun(steps);
+        const a = r.views.find(v => v.name === 'a');
+        if (r.totalCells !== n + k) {
+          shareBad++;
+          if (!shareFirst) shareFirst = `n=${n} k=${k}: ${r.totalCells} cells, expected ${n + k}`;
+        }
+        if (a.items.length !== n) {
+          shareBad++;
+          if (!shareFirst) shareFirst = `n=${n} k=${k}: the original list changed`;
+        }
+      }
+    }
+    s.is('k conses allocate exactly k cells and leave the original alone', shareBad, 0, shareFirst);
+
+    const two = w.lsRun(w.LS_PRESETS.twoFromOne.steps);
+    s.is('two lists built from one share its cells', two.shared.length, 3);
+    s.is('and only five cells exist in total', two.totalCells, 5);
+    s.same('both see a correct list',
+      two.views.map(v => v.show),
+      ['List(1, 2, 3)', 'List(0, 1, 2, 3)', 'List(9, 1, 2, 3)']);
+    const cat = w.lsRun(w.LS_PRESETS.concat.steps);
+    s.is('::: copies the left list', cat.events[2].allocated, 3);
+    s.is('and shares the right one', cat.events[2].shared, 2);
+    s.is('while .tail allocates nothing',
+      w.lsRun(w.LS_PRESETS.tailIsFree.steps).events[1].allocated, 0);
+
+    /* The refactor, exhaustively over the whole domain. */
+    const same = w.rfCompare('imperative', 'functional', 3);
+    s.ok('the careful loop and the one-liner agree on every input', same.same,
+      same.same ? null : JSON.stringify(same.differences[0]));
+    s.ok('and that is a real domain, not three cases', same.checked > 1000, `${same.checked}`);
+    s.ok('both answers occur, so the test is not vacuous',
+      same.agreeTrue > 50 && same.agreeFalse > 50, `${same.agreeTrue} true, ${same.agreeFalse} false`);
+    const diff = w.rfCompare('buggy', 'functional', 3);
+    s.ok('the clobbered flag is caught', diff.same === false);
+    s.ok('and only ever with a path longer than one',
+      diff.differences.every(d => d.path.length > 1),
+      'a single-element path hides the bug, which is why it survives testing');
+  }
+
+  /* Every numeric claim above, put to a real JVM. */
+  s.ok('a JVM is available for the Scala arithmetic checks', HAVE_JAVA,
+    HAVE_JAVA ? null : 'java not found — the Int semantics below are UNVERIFIED in this run');
+
+  if (HAVE_JAVA) {
+    /* Scala has no compiler here. But Scala's Int is the JVM's int, its
+       / and % are the JVM's, and its overflow is the JVM's — so if the
+       evaluator agrees with Java on arithmetic it agrees with Scala. */
+    const fixed = ['(1 + 2) / 2', '-7 / 2', '-7 % 2', '7 % -2', '2147483647 + 1',
+                   '13 * 12 * 11 * 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2', '1 / 0',
+                   '(int)(1.0 / 0)'];
+    const askJava = fixed.slice(0, 7);
+    const jr = javaEval(askJava);
+    s.ok('the JVM ran', jr.ok, jr.error);
+    if (jr.ok) {
+      let bad = 0, first = null;
+      askJava.forEach((e, i) => {
+        const mine = w.scEval(e, {});
+        const got = mine.ok ? mine.show : (mine.runtime ? 'THROWS ArithmeticException' : 'ERR');
+        if (got !== jr.out[i]) {
+          bad++;
+          if (!first) first = `${e}: engine ${got}, JVM ${jr.out[i]}`;
+        }
+      });
+      s.is('the named cases match the JVM exactly', bad, 0, first);
+    }
+
+    /* And a few hundred random ones, so the agreement is not down to a
+       lucky choice of example. */
+    const gen = depth => {
+      if (depth <= 0 || Math.random() < 0.3) {
+        return String(ri(0, pick([9, 99, 100000, 2147483647])));
+      }
+      return '(' + gen(depth - 1) + ' ' + pick(['+', '-', '*', '/', '%']) + ' ' +
+        gen(depth - 1) + ')';
+    };
+    const cases = [];
+    for (let t = 0; t < 250; t++) cases.push(gen(3));
+    const rr = javaEval(cases);
+    if (!rr.ok) {
+      s.ok('the random arithmetic batch ran', false, rr.error);
+    } else {
+      let bad = 0, first = null, threw = 0, wrapped = 0;
+      cases.forEach((c, i) => {
+        const mine = w.scEval(c, {});
+        const got = mine.ok ? mine.show : (mine.runtime ? 'THROWS ArithmeticException' : 'ERR');
+        if (/THROWS/.test(rr.out[i])) threw++;
+        if (/^-/.test(rr.out[i]) && !/-/.test(c)) wrapped++;
+        if (got !== rr.out[i]) {
+          bad++;
+          if (!first) first = `${c}\n   engine: ${got}\n   JVM   : ${rr.out[i]}`;
+        }
+      });
+      s.is(`all ${cases.length} random Int expressions match the JVM`, bad, 0, first);
+      s.ok('some of them divided by zero', threw > 0, `${threw}`);
+      s.ok('and some overflowed, so wrapping is actually exercised', wrapped > 0,
+        `${wrapped} came out negative from positive inputs`);
+    }
   }
 
   /* ---------------- question bank ---------------- */

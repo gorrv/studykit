@@ -1,0 +1,298 @@
+<section id="scala1" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Scala 01 · Values and Types</div>
+        <h1>Nothing Changes</h1>
+        <div class="topic-subtitle">val and var, the type system, lists, and why immutability is cheap</div>
+      </div>
+
+      <p>Scala runs on the JVM, calls Java libraries, and compiles to the same bytecode — so
+      everything you know about how an <code>Int</code> behaves still applies. What is different is
+      the default: values do not change. That one decision is what the rest of this half is built
+      on, and the first reaction to it is almost always that it cannot possibly be practical.</p>
+
+      <p>It is, and the reason is not discipline. It is that a value nobody can modify is a value
+      everybody can share, so the copying you are imagining does not happen.</p>
+
+      <!-- ===== WHY ===== -->
+      <h2 id="s1-why">The case for it, in one comparison</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">A class, twice</div>
+        <pre class="pp-snippet">// Java
+public class Point {
+  private final int x, y;
+  public Point(int x, int y) { this.x = x; this.y = y; }
+  public int x() { return x; }
+  public int y() { return y; }
+}
+
+// Scala
+case class Point(x: Int, y: Int)</pre>
+        The Scala line gives you the constructor, the accessors, a sensible
+        <code>toString</code>, structural <code>equals</code> and <code>hashCode</code>, a
+        <code>copy</code> method, and the ability to take the thing apart with pattern matching.
+        Twelve lines against one is the usual demonstration; the accessors and the equality are
+        the parts that actually matter later.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Sequential and parallel</div>
+        The practical argument for immutability is what happens when two threads look at the same
+        data. If nothing can be written to, there is nothing to synchronise, no lock to forget, and
+        no interleaving to reason about. A function that only reads its arguments gives the same
+        answer whichever order things run in.<br><br>
+        This is not free — you give up the ability to update in place, and some algorithms are
+        genuinely more awkward — but it buys you the ability to look at a function on its own and
+        know what it does.
+      </div>
+
+      <!-- ===== TYPES ===== -->
+      <h2 id="s1-types">Types</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The ones you will use</div>
+        <table class="pp-table">
+          <thead><tr><th>base</th><th>what it is</th></tr></thead>
+          <tbody>
+            <tr><td><code>Int</code></td><td>32-bit signed, exactly the JVM's <code>int</code></td></tr>
+            <tr><td><code>Long</code></td><td>64-bit signed</td></tr>
+            <tr><td><code>BigInt</code></td><td>arbitrary precision — no overflow, at a cost</td></tr>
+            <tr><td><code>Float</code>, <code>Double</code></td><td>IEEE 754 floating point</td></tr>
+            <tr><td><code>String</code>, <code>Char</code></td><td><code>Char</code> is a 16-bit number</td></tr>
+            <tr><td><code>Boolean</code></td><td><code>true</code> or <code>false</code> — and nothing else</td></tr>
+          </tbody>
+        </table>
+        And the compound ones, which are built from those:
+        <pre class="pp-snippet">List[Int]                lists of Int
+Set[Double]              sets of Double
+(Int, String)            a pair — an Int and a String
+List[(BigInt, String)]   a list of pairs
+List[List[Int]]          a list of lists
+Option[Int]              an Int, or nothing</pre>
+        The square brackets are what other languages write with angle brackets. A type parameter
+        is part of the type: <code>List[Int]</code> and <code>List[String]</code> are unrelated.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Int is the JVM's Int, with everything that implies</div>
+        <pre class="pp-snippet">2147483647 + 1   // -2147483648
+13 * 12 * 11 * 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2   // 1932053504
+(1 + 2) / 2      // 1, not 1.5
+-7 / 2           // -3, not -4
+1 / 0            // throws ArithmeticException
+1.0 / 0          // Infinity</pre>
+        Overflow wraps silently — no exception, no warning, just a wrong answer. 13! is
+        6&nbsp;227&nbsp;020&nbsp;800, and what you get is the bottom 32 bits of it. Division
+        between two Ints throws away the fraction rather than rounding, and truncates
+        <em>towards zero</em>, so <code>-7 / 2</code> is −3.<br><br>
+        <code>BigInt</code> is the escape hatch: put one anywhere in an expression and the whole
+        thing is computed exactly.
+      </div>
+
+      <h3 id="s1-evaltool">&#128736;&#65039; What does this evaluate to?</h3>
+
+      <div class="tool" data-run="runScalaEval">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>A small REPL</h3>
+        </div>
+        <div class="tool-desc">Type an expression, or pick one of the cases below. The type is
+          shown alongside the value, because in Scala the type is what decides what the operators
+          mean.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 340px;">
+            <label for="sc-input">expression</label>
+            <input type="text" id="sc-input" value="(1 + 2) / 2" spellcheck="false"
+                   oninput="runScalaEval()">
+          </div>
+        </div>
+        <div class="tool-output" id="sc-output"></div>
+      </div>
+
+      <!-- ===== DEF ===== -->
+      <h2 id="s1-def">Defining a function</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The shape of it</div>
+        <pre class="pp-snippet">def fname(arg1: ty1, arg2: ty2, ..., argn: tyn): rty = {
+  ...
+}</pre>
+        Every parameter is annotated. The return type after the colon can often be inferred, and
+        is worth writing anyway — it is the one place the compiler will tell you that what you
+        wrote is not what you meant.<br><br>
+        <strong>There is no <code>return</code>.</strong> The value of the body is the value of its
+        last expression. Writing <code>return</code> in Scala works but does something subtly
+        different and is a habit worth not forming.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">A worked example with two traps in it</div>
+        <pre class="pp-snippet">def average(xs: List[Int]): Int = {
+  val s = xs.sum
+  val n = xs.length
+  s / n
+}</pre>
+        <code>s</code> and <code>n</code> are computed, then <code>s / n</code> is the result — no
+        <code>return</code> needed. Both traps are in that last line:<br><br>
+        <strong>It is Int division.</strong> <code>average(List(1, 2))</code> is 1, not 1.5. If
+        you wanted the real average the return type has to be <code>Double</code> and at least one
+        side of the division has to be one: <code>s.toDouble / n</code>.<br><br>
+        <strong>The empty list divides by zero.</strong> <code>average(Nil)</code> throws an
+        <code>ArithmeticException</code>. The signature promises an <code>Int</code> for every
+        <code>List[Int]</code>, and that promise cannot be kept. Either the type should be
+        <code>Option[Int]</code>, or the empty case should be ruled out before you get here.
+      </div>
+
+      <!-- ===== VAL ===== -->
+      <h2 id="s1-val">val and var</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The difference is one keyword and the whole language</div>
+        <pre class="pp-snippet">val x = 42
+x = 43        // does not compile: reassignment to val
+
+var y = 42
+y = 43        // fine</pre>
+        A <code>val</code> is a name for a value, fixed once. A <code>var</code> is a box you can
+        put different values in. Both are typed the same way and inferred the same way; the only
+        difference is whether you may assign again.<br><br>
+        <code>var</code> exists, and using it is not a crime. But nearly every loop that needs one
+        is a loop that did not need to be a loop.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The complaint, and the answer</div>
+        The first serious objection everyone has is that a value you cannot change is useless —
+        how do you accumulate anything, or break out of a search, without a flag?<br><br>
+        The answer is that you were not really accumulating; you were computing a single answer one
+        step at a time and storing the partial results in a box. Say what the answer <em>is</em>
+        instead:
+        <pre class="pp-snippet">// a position is legal when it is on the board
+// and not already in the path
+def is_legal(dim: Int, path: Path)(x: Pos): Boolean =
+  x._1 >= 0 &amp;&amp; x._1 &lt; dim &amp;&amp; x._2 >= 0 &amp;&amp; x._2 &lt; dim &amp;&amp; !path.contains(x)</pre>
+        No <code>var</code>, no flag, no loop, and — the part that matters — no way to get the
+        order of the assignments wrong, because there are none. The tool below runs that version
+        against the loop it replaces, on every input, and shows what the loop made possible.
+      </div>
+
+      <h3 id="s1-rctool">&#128736;&#65039; Is the refactor safe?</h3>
+
+      <div class="tool" data-run="runRefactor">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Two versions, every input</h3>
+        </div>
+        <div class="tool-desc">Pick two implementations and they are both run on every position of
+          a small board, for every path — the whole domain, so a clean result is a proof and not a
+          sample.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="rc-a">this version</label>
+            <select id="rc-a" onchange="runRefactor()">
+              <option value="imperative">the loop, written carefully</option>
+              <option value="buggy">the loop, with the flag clobbered</option>
+              <option value="functional">the one-liner</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="rc-b">against</label>
+            <select id="rc-b" onchange="runRefactor()">
+              <option value="functional">the one-liner</option>
+              <option value="imperative">the loop, written carefully</option>
+              <option value="buggy">the loop, with the flag clobbered</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="rc-dim">board</label>
+            <select id="rc-dim" onchange="runRefactor()">
+              <option value="3">3 &times; 3</option>
+              <option value="2">2 &times; 2</option>
+              <option value="4">4 &times; 4</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-output" id="rc-output"></div>
+      </div>
+
+      <!-- ===== LISTS ===== -->
+      <h2 id="s1-lists">Lists, and why this is cheap</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Making a new one instead of changing the old one</div>
+        <pre class="pp-snippet">val old_list = List(1, 2, 3, 5)
+val new_list = 0 :: old_list      // List(0, 1, 2, 3, 5)</pre>
+        <code>::</code> — pronounced "cons" — makes a list whose head is the left operand and
+        whose tail is the right one. <code>old_list</code> is untouched and still
+        <code>List(1, 2, 3, 5)</code>.<br><br>
+        It is right-associative, which is what makes <code>1 :: 2 :: 3 :: Nil</code> read the way
+        it does: start from the empty list, put 3 on the front, then 2, then 1. Any Scala operator
+        whose name ends in a colon associates to the right.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The objection, answered by counting</div>
+        Making a new list every time sounds ruinous. It is not, because <strong>nothing is
+        copied</strong>. <code>0 :: old_list</code> allocates exactly one cell, whose tail points
+        at the list that already existed. Both names see a correct list, and four of the five
+        cells belong to both of them.<br><br>
+        Sharing like this is safe <em>only</em> because the cells are immutable. If anything could
+        write through one name, the other would see it — which is precisely the bug that makes
+        sharing dangerous in a mutable language, and why defensive copying exists there.
+      </div>
+
+      <h3 id="s1-lstool">&#128736;&#65039; What gets copied</h3>
+
+      <div class="tool" data-run="runCons">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Cons cells</h3>
+        </div>
+        <div class="tool-desc">Cells are numbered. A cell with the same number under two names is
+          the same cell in memory — count how few of them ever get allocated.</div>
+        <div class="tool-output" id="ls-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Where it does cost you</div>
+        <code>::</code> adds to the <strong>front</strong>, in constant time. Adding to the back,
+        or joining two lists with <code>:::</code>, has to copy the left-hand list — its last cell
+        needs a new tail, and that cell may be shared with someone else.<br><br>
+        So <code>xs ::: List(y)</code> inside a loop is quadratic. Build the list backwards with
+        <code>::</code> and <code>reverse</code> it at the end, which is two linear passes.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="s1-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember five things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong><code>val</code> binds a name to a value once</strong>; <code>var</code> is a
+            box. Reach for <code>val</code> and the loops turn into expressions.</li>
+          <li><strong>Int is 32 bits and wraps silently</strong>, and Int division truncates
+            towards zero. <code>BigInt</code> when the numbers are big; <code>.toDouble</code> on
+            one side when you want a fraction.</li>
+          <li><strong>A function body has no <code>return</code></strong> — the last expression is
+            the value.</li>
+          <li><strong><code>::</code> allocates one cell and shares the rest.</strong> Immutability
+            is affordable because sharing is safe.</li>
+          <li><strong>Types are checked before anything runs</strong>, and the type decides what an
+            operator means.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Expecting <code>xs.sum / xs.length</code> to give you a decimal.</li>
+          <li>Calling that on an empty list.</li>
+          <li>Assuming overflow throws. It does not.</li>
+          <li>Writing <code>xs ::: List(x)</code> in a loop and wondering why it crawls.</li>
+          <li>Reaching for a <code>var</code> and a flag before asking what the answer
+            <em>is</em>.</li>
+        </ul>
+      </div>
+
+    </section>

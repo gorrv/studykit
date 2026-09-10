@@ -323,4 +323,54 @@
         <strong>reinterpret_cast</strong> &mdash; no checks of any kind.<br><br>
         Casting <em>up</em>, derived to base, needs no cast at all.
       </div>
+    
+      <h2 id="cr-s1">Scala 01 &middot; values and types</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Types</div>
+        <code>Int</code> (32-bit, the JVM&rsquo;s), <code>Long</code>, <code>BigInt</code> (exact),
+        <code>Float</code>/<code>Double</code>, <code>String</code>, <code>Char</code> (a 16-bit
+        number), <code>Boolean</code>.<br>
+        Compound: <code>List[Int]</code>, <code>Set[Double]</code>, <code>(Int, String)</code>,
+        <code>List[(BigInt, String)]</code>, <code>List[List[Int]]</code>,
+        <code>Option[Int]</code>.<br><br>
+        Square brackets, not angle. <code>List[Int]</code> and <code>List[String]</code> are
+        unrelated types.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Int arithmetic, which is the JVM&rsquo;s</div>
+        <code>(1 + 2) / 2</code> &rarr; <strong>1</strong> &mdash; Int division discards the
+        fraction.<br>
+        <code>-7 / 2</code> &rarr; <strong>&minus;3</strong> &mdash; truncates towards zero, and
+        <code>-7 % 2</code> is &minus;1.<br>
+        <code>2147483647 + 1</code> &rarr; <strong>&minus;2147483648</strong> &mdash; wraps,
+        silently.<br>
+        <code>1 / 0</code> throws <code>ArithmeticException</code>; <code>1.0 / 0</code> is
+        <code>Infinity</code>.<br>
+        A literal too big for an Int is a <em>compile</em> error &mdash; only results wrap.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">def</div>
+        <pre class="pp-snippet">def fname(a1: T1, ..., an: Tn): R = { ... }</pre>
+        No <code>return</code> &mdash; the last expression is the value. Annotate the return type;
+        it is the only place the compiler checks you meant what you wrote.<br><br>
+        <code>def average(xs: List[Int]): Int = xs.sum / xs.length</code> has two bugs in one line:
+        Int division, and division by zero on <code>Nil</code>. The honest type is
+        <code>Option[Int]</code>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">val, var, and lists</div>
+        <code>val</code> binds once &mdash; reassignment does not compile. <code>var</code> is a
+        box.<br><br>
+        <code>x :: xs</code> allocates <strong>one</strong> cell whose tail is <code>xs</code>;
+        <code>xs</code> is unchanged and its cells are shared. Constant time.<br>
+        <code>::</code> is right-associative, so <code>1 :: 2 :: 3 :: Nil</code> reads from the
+        right. Any operator ending in a colon is.<br>
+        <code>:::</code> joins, and <strong>copies its left argument</strong> &mdash; so
+        <code>xs ::: List(y)</code> in a loop is quadratic. Build with <code>::</code> and
+        <code>reverse</code>.
+      </div>
     </section>
