@@ -1,0 +1,170 @@
+<section id="scala4" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Scala 04 · Compiling and Matching</div>
+        <h1>The Order Is the Answer</h1>
+        <div class="topic-subtitle">reverse Polish notation, stack machines, and what backtracking costs</div>
+      </div>
+
+      <p>Two things that look unrelated and are the same idea twice. Turning an expression into
+      reverse Polish notation makes the brackets unnecessary, because the order already says what
+      they said — and once the order says it, the translation to machine instructions is a
+      substitution. Then the same question about regular expressions: if the pattern can be turned
+      into the right shape in advance, matching stops needing to guess.</p>
+
+      <!-- ===== RPN ===== -->
+      <h2 id="s4-rpn">Reverse Polish notation</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The same expression, without brackets</div>
+        <pre class="pp-snippet">(3 + 1) * (2 + 9)
+⇒  3 1 + 2 9 + *</pre>
+        Every operator comes after the two things it operates on. There are no brackets and no
+        precedence rules, and there is nothing to disambiguate: the order is the only information
+        and it is enough.<br><br>
+        <strong>Reading it is a stack.</strong> A number goes on; an operator takes two off and
+        puts one back. When the input runs out there is exactly one value left, and that is the
+        answer — and if there is not exactly one, the expression was malformed.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Getting there: the shunting-yard</div>
+        Read the infix expression left to right. Numbers go straight to the output. An operator
+        waits on a stack until something of at least its own precedence needs to come off, then
+        both go out in the right order. Brackets push and pop.<br><br>
+        That is the whole conversion, and it is where the precedence and the brackets are
+        <em>spent</em>: the output has neither, because the order now carries what they meant.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">And then it is already machine code</div>
+        <pre class="pp-snippet">(3 + 1) * (2 + 9)      ldc 3
+                        ldc 1
+⇒  3 1 + 2 9 + *        iadd
+                        ldc 2
+                        ldc 9
+                        iadd
+                        imul</pre>
+        A number becomes <code>ldc</code> — load constant — and an operator becomes the instruction
+        that pops two and pushes one. That is a one-to-one substitution, which is the point: all
+        the work was done by the conversion.<br><br>
+        The JVM is a stack machine, so this is close to what a real compiler emits for arithmetic.
+        There is no cleverness left in the last step because the notation already removed the need
+        for it.
+      </div>
+
+      <h3 id="s4-rptool">&#128736;&#65039; Infix to RPN to instructions</h3>
+
+      <div class="tool" data-run="runRPN">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>The whole chain</h3>
+        </div>
+        <div class="tool-desc">Type an expression or pick one. It is evaluated three separate
+          ways — directly, on the RPN stack, and by running the compiled instructions — and they
+          have to agree.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 300px;">
+            <label for="rp-input">expression</label>
+            <input type="text" id="rp-input" value="(3 + 1) * (2 + 9)" spellcheck="false"
+                   oninput="runRPN()">
+          </div>
+        </div>
+        <div class="tool-output" id="rp-output"></div>
+      </div>
+
+      <!-- ===== BACKTRACKING ===== -->
+      <h2 id="s4-backtrack">What backtracking costs</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">A pattern, and a string with no b in it</div>
+        <pre class="pp-snippet">(a*)*b        matched against     aaaaaaaaaaaaaaaaaaaa</pre>
+        The answer is no — there is no <code>b</code>, so nothing can match. The question is how
+        long it takes to say so.<br><br>
+        Most regular expression engines work by trying: let the star take some characters, try to
+        match the rest, and if that fails, come back and take a different number. Here the outer
+        star can divide a run of n a's between its repetitions in exponentially many ways, and
+        every one of them has to fail before the engine will admit there is no b.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">This is not a Scala problem, and it is not hypothetical</div>
+        Java, Python, JavaScript, Ruby and most others use backtracking engines and all behave
+        this way on this pattern. The tool below measures your own browser's engine doing it, in
+        this tab, right now.<br><br>
+        A pattern like this reachable from user input is a way to take a server down with a
+        twenty-character string. It has a name — ReDoS — and it is common enough to have a CVE
+        category.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The alternative: rewrite the pattern as you read</div>
+        Instead of trying alternatives, ask a different question at each character: <em>given this
+        pattern, what pattern would be left after consuming an a?</em> That is the
+        <strong>derivative</strong> of the pattern, and it is computed rather than searched.<br><br>
+        Walk the input once, rewriting as you go, and at the end ask whether the pattern that is
+        left can match the empty string. There is no backtracking because nothing was ever
+        guessed — one pass, one step per character, for any pattern.<br><br>
+        The catch is that the rewritten pattern grows unless you simplify it, and the
+        simplification rules are what make this practical: <code>∅r = ∅</code>,
+        <code>εr = r</code>, <code>∅ | r = r</code>, and collapsing two identical alternatives.
+      </div>
+
+      <h3 id="s4-bktool">&#128736;&#65039; The cost, measured</h3>
+
+      <div class="tool" data-run="runBacktrack">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Backtracking against derivatives</h3>
+        </div>
+        <div class="tool-desc">Steps counted, and your browser's own engine timed. Push n up and
+          watch the middle column stay flat while the others do not.</div>
+        <div class="tool-output" id="bk-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why this is the same idea as the RPN half</div>
+        In both cases the fix is to do the thinking in advance. The shunting-yard spends the
+        brackets and precedence once, so the machine that runs the result can be stupid. The
+        derivative spends the pattern's ambiguity once per character, so the matcher never has to
+        guess and come back.<br><br>
+        The next topic is what you get if you push that all the way: work out every state the
+        pattern could be in <em>before</em> seeing any input at all, and matching becomes a table
+        lookup per character.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="s4-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember five things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>RPN needs no brackets</strong> because the order carries the same
+            information. Evaluate it with a stack: numbers push, operators pop two and push
+            one.</li>
+          <li><strong>The shunting-yard converts infix to RPN</strong> — numbers straight out,
+            operators wait on a stack until something at least as tight comes off.</li>
+          <li><strong>RPN to stack-machine code is a substitution</strong>, which is why the
+            conversion was worth doing.</li>
+          <li><strong>A backtracking matcher can take exponential time</strong> on a pattern with
+            nested ambiguity, such as <code>(a*)*b</code>, even to answer <em>no</em>.</li>
+          <li><strong>Derivatives answer the same question in one pass</strong>, at the cost of
+            rewriting and simplifying the pattern as you go.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Writing the RPN operands in the wrong order for <code>-</code> and <code>/</code>,
+            which unlike <code>+</code> and <code>*</code> do not forgive it.</li>
+          <li>Expecting the stack to end with one value when the expression was malformed.</li>
+          <li>Assuming a slow regex means a big input. Twenty characters is enough.</li>
+          <li>Assuming the star is the problem. <code>(a*)b</code> is linear; the
+            <em>nesting</em> is what costs.</li>
+          <li>Forgetting to simplify when computing derivatives, and trading an exponential
+            search for an exponential pattern.</li>
+        </ul>
+      </div>
+
+    </section>

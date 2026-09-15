@@ -1351,6 +1351,317 @@ module.exports = async function run() {
     }
   }
 
+  /* ---------------- Scala 3 · defaults, regexes, crawling ---------------- */
+  {
+    /* Argument binding. The three that must be refused matter more than
+       the five that work. */
+    const bind = k => w.dfBind(w.DF_PARAMS, w.DF_CALLS[k].args);
+    s.same('two positional arguments fill both parameters',
+      bind('both').slots.map(x => x.name + '=' + x.value + '/' + x.from),
+      ['n=7/positional', 'a=3/positional']);
+    s.same('one leaves the second to its default',
+      bind('one').slots.map(x => x.name + '=' + x.value + '/' + x.from),
+      ['n=7/positional', 'a=0/default']);
+    s.ok('named arguments may be reordered', bind('reordered').ok);
+    s.same('and still land in the right places',
+      bind('reordered').slots.map(x => x.name + '=' + x.value), ['n=7', 'a=3']);
+    s.ok('a default does not let you skip an earlier parameter',
+      bind('skipFirst').ok === false);
+    s.ok('a positional argument after a named one is refused',
+      bind('afterNamed').ok === false);
+    s.ok('and a parameter with no default must be supplied', bind('none').ok === false);
+
+    /* The crawl, against a reachability set computed by breadth-first
+       search — different code, same question. */
+    let cbad = 0, cfirst = null;
+    for (let d = 1; d <= 5; d++) {
+      const withMem = w.cwCrawl('a.example', d, { visited: true });
+      const reach = w.cwReachable('a.example', d);
+      const fetched = Object.keys(withMem.counts).sort();
+      if (JSON.stringify(fetched) !== JSON.stringify(reach)) {
+        cbad++;
+        if (!cfirst) cfirst = `depth ${d}: crawled ${fetched}, reachable ${reach}`;
+      }
+      /* With a visited set, nothing is fetched twice. */
+      if (Object.keys(withMem.counts).some(k => withMem.counts[k] > 1)) {
+        cbad++;
+        if (!cfirst) cfirst = `depth ${d}: a visited set did not prevent a repeat`;
+      }
+      const em = w.cwCrawl('a.example', d, { visited: true }).emails;
+      const em2 = w.cwReachableEmails('a.example', d);
+      if (JSON.stringify(em) !== JSON.stringify(em2)) {
+        cbad++;
+        if (!cfirst) cfirst = `depth ${d}: emails ${em} vs ${em2}`;
+      }
+    }
+    s.is('the crawl reaches exactly the pages breadth-first search says it should', cbad, 0, cfirst);
+
+    /* And without a visited set it really does repeat itself — the
+       whole point of that half of the tool. */
+    const noMem3 = w.cwCrawl('a.example', 3, {});
+    const withMem3 = w.cwCrawl('a.example', 3, { visited: true });
+    s.ok('without one, some page is fetched more than once',
+      noMem3.repeats.length > 0, `${noMem3.total} fetches, ${noMem3.distinct} pages`);
+    s.ok('and the fetch count is higher than the page count',
+      noMem3.total > noMem3.distinct, `${noMem3.total} vs ${noMem3.distinct}`);
+    s.is('while with one they are equal', withMem3.total, withMem3.distinct);
+    s.ok('the gap widens with depth',
+      w.cwCrawl('a.example', 4, {}).total > noMem3.total);
+
+    /* The regexes find what they should. These live outside the JVM
+       block deliberately: with them inside, a change that made every
+       pattern match nothing passed cleanly on a machine without java. */
+    const email = t2 => {
+      const m3 = w.rxFind(w.RX_PATTERNS.email.source, t2).matches;
+      return m3.length ? m3[0].text : null;
+    };
+    s.is('an ordinary address matches whole', email('ada@example.com'), 'ada@example.com');
+    s.is('a capital in the local part gives a wrong address, not no address',
+      email('Ada@example.com'), 'da@example.com');
+    s.is('and a long suffix gives a truncated one',
+      email('ada@example.technology'), 'ada@example.techno');
+    s.is('a six-character suffix is fine', email('ada@example.museum'), 'ada@example.museum');
+    s.is('all upper case does fail outright', email('ADA@EXAMPLE.COM'), null);
+
+    s.is('the URL pattern finds both links on the sample page',
+      w.rxFind(w.RX_PATTERNS.http.source, w.RX_PAGES.simple.text).count, 2);
+    /* Indexing into the matches is what turns a wrong answer into a
+       crash, and a crash stops every assertion after it. Read the
+       first match defensively so a regression is reported rather than
+       thrown. */
+    const firstMatch = (pat, text) => {
+      const m4 = w.rxFind(pat, text).matches;
+      return m4.length ? m4[0] : { text: '(no match)', groups: [] };
+    };
+    s.is('and keeps the quotes, which is what unquote is for',
+      firstMatch(w.RX_PATTERNS.http.source, w.RX_PAGES.simple.text).text,
+      '"https://example.com/a"');
+    s.is('unquote removes them', w.rxUnquote('"https://example.com/a"'), 'https://example.com/a');
+    s.is('the email pattern finds both addresses too',
+      w.rxFind(w.RX_PATTERNS.email.source, w.RX_PAGES.simple.text).count, 2);
+    s.is('href captures just the target',
+      firstMatch(w.RX_PATTERNS.href.source, w.RX_PAGES.simple.text).groups[0],
+      'https://example.com/a');
+    s.is('and a page with nothing in it finds nothing',
+      w.rxFind(w.RX_PATTERNS.http.source, w.RX_PAGES.none.text).count, 0);
+  }
+
+  if (HAVE_JAVA) {
+    /* Scala's regexes are java.util.regex. Every pattern and page in the
+       tool goes to a real JVM, and the matches, their positions and
+       their groups are compared one by one. */
+    let rbad = 0, rn = 0, rfirst = null, totalMatches = 0;
+    Object.keys(w.RX_PATTERNS).forEach(pk => {
+      Object.keys(w.RX_PAGES).forEach(gk => {
+        const pattern = w.RX_PATTERNS[pk].source;
+        const text = w.RX_PAGES[gk].text;
+        const b64 = x => Buffer.from(x, 'utf8').toString('base64');
+        const prog = 'import java.util.regex.*;\npublic class P {\n' +
+          '  public static void main(String[] a) throws Exception {\n' +
+          '    String p = new String(java.util.Base64.getDecoder().decode("' + b64(pattern) + '"), "UTF-8");\n' +
+          '    String t = new String(java.util.Base64.getDecoder().decode("' + b64(text) + '"), "UTF-8");\n' +
+          '    Matcher m = Pattern.compile(p).matcher(t);\n' +
+          '    while (m.find()) {\n' +
+          '      StringBuilder sb = new StringBuilder();\n' +
+          '      sb.append(m.start()).append("|").append(m.group());\n' +
+          '      for (int g = 1; g <= m.groupCount(); g++) sb.append("|").append(m.group(g));\n' +
+          '      System.out.println(sb.toString());\n' +
+          '    }\n    System.out.println("--END--");\n  }\n}\n';
+        const f = path.join(TMP, 'P.java');
+        fs.writeFileSync(f, prog);
+        const jr = runSync('java', [f], 90000);
+        rn++;
+        if (jr.status !== 0) {
+          rbad++;
+          if (!rfirst) rfirst = `${pk}/${gk}: the JVM would not run it — ` +
+            (jr.stderr || '').split('\n')[0];
+          return;
+        }
+        const real = [];
+        for (const line of jr.stdout.split('\n')) {
+          if (line === '--END--') break;
+          if (line.trim()) real.push(line);
+        }
+        const mine = w.rxFind(pattern, text).matches.map(m2 =>
+          [m2.index, m2.text].concat(m2.groups.map(g => g === null ? '' : g)).join('|'));
+        totalMatches += mine.length;
+        if (JSON.stringify(mine) !== JSON.stringify(real)) {
+          rbad++;
+          if (!rfirst) {
+            rfirst = `${pk} on ${gk}:\n   here: ${JSON.stringify(mine)}\n   JVM : ${JSON.stringify(real)}`;
+          }
+        }
+      });
+    });
+    s.is(`all ${rn} pattern/page pairs match java.util.regex exactly`, rbad, 0, rfirst);
+    s.ok('and there were matches to compare', totalMatches > 8, `${totalMatches}`);
+
+  }
+
+  /* ---------------- Scala 4 · RPN, bytecode, backtracking ---------------- */
+  {
+    /* The conversion is checked by evaluating the result three ways that
+       share no code: on an RPN stack, by running the compiled
+       instructions, and by the Scala evaluator on the original infix. */
+    s.same('the worked example converts as expected',
+      w.rpConvert('(3 + 1) * (2 + 9)').rpn, ['3', '1', '+', '2', '9', '+', '*']);
+    s.same('precedence is spent by the conversion',
+      w.rpConvert('3 + 1 * 2').rpn, ['3', '1', '2', '*', '+']);
+    s.same('and left associativity is kept',
+      w.rpConvert('10 - 4 - 3').rpn, ['10', '4', '-', '3', '-']);
+    s.same('the instructions are a substitution',
+      w.rpCompile(w.rpConvert('(3 + 1) * (2 + 9)').tokens),
+      ['ldc 3', 'ldc 1', 'iadd', 'ldc 2', 'ldc 9', 'iadd', 'imul']);
+
+    let rbad = 0, rn = 0, rfirst = null;
+    const gen = d => {
+      if (d <= 0 || Math.random() < 0.35) return String(ri(1, 20));
+      return '(' + gen(d - 1) + ' ' + pick(['+', '-', '*']) + ' ' + gen(d - 1) + ')';
+    };
+    for (let t = 0; t < 150; t++) {
+      const src = gen(3);
+      const conv = w.rpConvert(src);
+      const viaStack = w.rpEval(conv.tokens);
+      const viaCode = w.rpRunCode(w.rpCompile(conv.tokens));
+      const viaEval = w.scEval(src, {});
+      rn++;
+      const ok = conv.ok && viaStack.ok && viaCode.ok && viaEval.ok &&
+        viaStack.value === viaCode.value && String(viaStack.value) === viaEval.show;
+      if (!ok) {
+        rbad++;
+        if (!rfirst) {
+          rfirst = `${src}: stack ${viaStack.value}, code ${viaCode.value}, ` +
+            `evaluator ${viaEval.ok ? viaEval.show : viaEval.error}`;
+        }
+      }
+    }
+    s.is(`all ${rn} expressions agree across the stack, the compiled code and the evaluator`,
+      rbad, 0, rfirst);
+    s.ok('an unbalanced bracket is refused', w.rpConvert('(1 + 2').ok === false);
+    s.ok('and so is a stray closing one', w.rpConvert('1 + 2)').ok === false);
+
+    /* Backtracking. The claim is about growth, so it is measured. */
+    const nested = w.bkParse('(a*)*b');
+    const simple = w.bkParse('(a*)b');
+    s.ok('both patterns parse', nested.ok && simple.ok);
+    const n8 = w.bkMatch(nested.ast, 'aaaaaaaa', 5000000);
+    const n12 = w.bkMatch(nested.ast, 'aaaaaaaaaaaa', 5000000);
+    const n16 = w.bkMatch(nested.ast, 'a'.repeat(16), 5000000);
+    s.ok('the nested pattern never matches a string of only a\'s', !n8.matched && !n12.matched);
+    s.ok('and the work grows faster than the input',
+      n12.steps > n8.steps * 4 && n16.steps > n12.steps * 4,
+      `${n8.steps}, ${n12.steps}, ${n16.steps}`);
+    const s8 = w.bkMatch(simple.ast, 'aaaaaaaa', 5000000);
+    const s16 = w.bkMatch(simple.ast, 'a'.repeat(16), 5000000);
+    s.ok('while one star costs the same per character',
+      s16.steps < s8.steps * 3, `${s8.steps} then ${s16.steps}`);
+
+    /* The derivative matcher: one step per character, always. */
+    [4, 8, 16, 64, 256].forEach(n => {
+      const r = w.bkDerivMatch(nested.ast, 'a'.repeat(n));
+      s.is('derivatives take one step per character at n = ' + n, r.steps, n);
+    });
+
+    /* And the two matchers must agree on every short string, or the fast
+       one is fast because it is wrong. */
+    let dbad = 0, dn = 0, dfirst = null, accepted = 0;
+    Object.keys(w.BK_PATTERNS).forEach(pk => {
+      const p = w.bkParse(w.BK_PATTERNS[pk].src);
+      for (let len = 0; len <= 8; len++) {
+        for (let mask = 0; mask < Math.pow(2, len); mask++) {
+          let str = '';
+          for (let i = 0; i < len; i++) str += 'ab'[(mask >> i) & 1];
+          const a = w.bkMatch(p.ast, str, 3000000);
+          const b = w.bkDerivMatch(p.ast, str);
+          dn++;
+          if (b.matched) accepted++;
+          if (!a.overflowed && a.matched !== b.matched) {
+            dbad++;
+            if (!dfirst) dfirst = `${w.BK_PATTERNS[pk].src} on "${str}": ${a.matched} vs ${b.matched}`;
+          }
+        }
+      }
+    });
+    s.is(`the two matchers agree on all ${dn} strings`, dbad, 0, dfirst);
+    s.ok('and some of them matched, so this is not vacuous', accepted > 20, `${accepted}`);
+  }
+
+  /* ---------------- Scala 5 · DFAs and NFAs ---------------- */
+  {
+    const worked = w.DA_MACHINES.worked;
+    const r = w.daRun(worked, 'abaaa');
+    s.ok('the worked string is accepted', r.accepted);
+    s.same('and it takes the expected route',
+      r.steps.filter(x => x.read !== null).map(x => x.state + x.read + x.to),
+      ['Q0aQ1', 'Q1bQ2', 'Q2aQ3', 'Q3aQ4', 'Q4aQ4']);
+
+    /* A partial delta means getting stuck, and stuck means rejected. */
+    const partial = w.DA_MACHINES.partial;
+    s.ok('a machine with a gap in delta accepts what it can', w.daRun(partial, 'ab').accepted);
+    s.ok('and gets stuck otherwise', w.daRun(partial, 'b').stuck);
+    s.ok('which is a rejection, not an error', w.daRun(partial, 'b').accepted === false);
+    s.ok('and it stops reading at that point',
+      w.daRun(partial, 'baaaa').steps.length === 2);
+
+    /* Each machine against an independent description of its language. */
+    const strings = w.daStrings(['a', 'b'], 10);
+    s.is('that is every string up to length 10', strings.length, 2047);
+    const checks = [
+      ['evenA', s2 => (s2.match(/a/g) || []).length % 2 === 0, 'an even number of a\'s'],
+      ['endsAB', s2 => /ab$/.test(s2), 'ends in ab']
+    ];
+    checks.forEach(([key, oracle, what]) => {
+      let bad = 0, first = null, yes = 0;
+      strings.forEach(s2 => {
+        const got = w.daRun(w.DA_MACHINES[key], s2).accepted;
+        const want = oracle(s2);
+        if (want) yes++;
+        if (got !== want) {
+          bad++;
+          if (!first) first = `"${s2}": machine ${got}, ${what} ${want}`;
+        }
+      });
+      s.is(`the ${key} machine accepts exactly the strings that are ${what}`, bad, 0, first);
+      s.ok('and that is a real split', yes > 100 && yes < strings.length - 100, `${yes}`);
+    });
+
+    /* The NFA and the DFA built from it must accept the same strings.
+       Two implementations, one question, every string up to length 10. */
+    Object.keys(w.NA_MACHINES).forEach(key => {
+      const nfa = w.NA_MACHINES[key];
+      const dfa = w.naSubset(nfa);
+      let bad = 0, first = null, yes = 0;
+      strings.forEach(s2 => {
+        const a = w.naRun(nfa, s2).accepted;
+        const b = w.daRun(dfa, s2).accepted;
+        if (a) yes++;
+        if (a !== b) {
+          bad++;
+          if (!first) first = `"${s2}": NFA ${a}, subset DFA ${b}`;
+        }
+      });
+      s.is(`"${key}": the NFA and its subset construction agree on all 2047 strings`, bad, 0, first);
+      s.ok('and it accepts something', yes > 0, `${yes}`);
+      s.ok('the DFA has no more states than the bound allows',
+        dfa.states.length <= Math.pow(2, nfa.states.length),
+        `${dfa.states.length} from ${nfa.states.length}`);
+    });
+
+    /* The NFA for "ends in ab" against a regex — a third opinion. */
+    let nbad = 0;
+    strings.forEach(s2 => {
+      if (w.naRun(w.NA_MACHINES.endsAB, s2).accepted !== /ab$/.test(s2)) nbad++;
+    });
+    s.is('the guessing NFA agrees with a regular expression too', nbad, 0);
+
+    /* Acceptance is "some path", not "all paths". */
+    const two = w.NA_MACHINES.twoWays;
+    s.ok('two routes to the same accepting state still accept once',
+      w.naRun(two, 'ab').accepted);
+    s.same('and the set carries both', w.naRun(two, 'a').end, ['X', 'Y']);
+    s.ok('a string with no path at all is rejected', w.naRun(two, 'ba').accepted === false);
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 1200);

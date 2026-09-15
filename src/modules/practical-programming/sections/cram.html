@@ -447,4 +447,91 @@ xs.filter(n =&gt; p(n)).map(n =&gt; f(n))</pre>
         the same values are recomputed. It also returns 1 for both 0 and 1, so it is shifted by one
         from 0, 1, 1, 2, 3.
       </div>
+    
+      <h2 id="cr-s3">Scala 03 &middot; text and the web</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Defaults and named arguments</div>
+        <code>def f(n: Int, a: Int = 0)</code> &mdash; a default lets you omit <strong>the end</strong>
+        of the argument list.<br>
+        To skip an earlier one, name the later ones: <code>f(a = 3)</code> fails only because
+        <code>n</code> has no default.<br>
+        <strong>After the first named argument, everything must be named.</strong> Named arguments
+        may be reordered freely.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Try, raw strings, regexes</div>
+        <code>Try(expr).getOrElse(d)</code> &mdash; catches whatever <code>expr</code> throws and
+        supplies <code>d</code>. <code>Success</code>/<code>Failure</code>, and unlike Option it
+        keeps the exception.<br><br>
+        <code>s"…$name…"</code> interpolates; without the <code>s</code> it does not.<br><br>
+        <code>"""…"""</code> is raw &mdash; no escape processing. <code>.r</code> makes it a
+        <code>Regex</code>. <code>findAllIn(page)</code> gives every match.<br><br>
+        <strong>An unanchored pattern does not fail on input it cannot handle &mdash; it matches
+        part of it.</strong> <code>Ada@example.com</code> comes back as
+        <code>da@example.com</code>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Set and the crawler</div>
+        <code>Set</code>: no order, no duplicates. <code>.toSet</code> after
+        <code>findAllIn</code> is what stops one page being crawled twice.<br><br>
+        <pre class="pp-snippet">def crawl(url: String, n: Int): Unit =
+  if (n == 0) () else { …; for (u &lt;- get_all_URLs(page)) crawl(u, n - 1) }</pre>
+        The countdown is the base case. <strong>No visited set means pages are fetched more than
+        once</strong> &mdash; the depth limit bounds the damage, it does not prevent it.<br><br>
+        The harvester is the same shape returning <code>Set[String]</code>: base case
+        <code>Set()</code>, combine with <code>++</code>, and <code>flatten</code> because the
+        for-comprehension yields a set of sets.
+      </div>
+
+      <h2 id="cr-s4">Scala 04 &middot; compiling and matching</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Reverse Polish</div>
+        <code>(3 + 1) * (2 + 9)</code> &rarr; <code>3 1 + 2 9 + *</code><br><br>
+        No brackets, no precedence &mdash; the order carries both. Evaluate with a stack: a number
+        pushes, an operator pops two and pushes one, and exactly one value should be left.<br><br>
+        <strong>Shunting-yard:</strong> numbers straight to the output; an operator waits on a
+        stack until something of at least its precedence comes off; brackets push and pop.<br><br>
+        Then the compiler is a substitution: <code>ldc n</code> for a number,
+        <code>iadd</code>/<code>isub</code>/<code>imul</code> for an operator. The JVM is a stack
+        machine, which is why this is close to what is really emitted.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Catastrophic backtracking</div>
+        <code>(a*)*b</code> against n a&rsquo;s with no b: <strong>exponential</strong>. The outer
+        star can split the a&rsquo;s exponentially many ways and every one must fail.<br><br>
+        <code>(a*)b</code> is linear. <strong>The nesting is what costs, not the star.</strong><br><br>
+        Java, Python, JavaScript and Ruby all behave this way &mdash; it is the engine design, not
+        the language. Reachable from user input it is a denial of service, called ReDoS.<br><br>
+        <strong>Derivatives</strong> answer the same question in one pass: at each character,
+        rewrite the pattern into what would be left. Simplify as you go &mdash; <code>∅r = ∅</code>,
+        <code>εr = r</code>, <code>∅ | r = r</code> &mdash; or the pattern blows up instead.
+      </div>
+
+      <h2 id="cr-s5">Scala 05 &middot; finite automata</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">A(Σ, Qs, Q₀, F, δ)</div>
+        An alphabet, a set of states, a start state, a set of accepting states, and a transition
+        function.<br><br>
+        <strong>δ may be partial.</strong> No transition means stuck, and stuck means rejected.
+        The same machine can be written with a total δ by adding a dead state.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Nondeterminism</div>
+        An NFA&rsquo;s δ gives a <strong>set</strong> of next states, possibly empty. It accepts
+        when <strong>some</strong> path ends accepting &mdash; not all.<br><br>
+        Run it by carrying the set of states you could be in: one pass, no backtracking, and the
+        set can never be bigger than the number of states.<br><br>
+        <strong>Subset construction:</strong> one DFA state per reachable set of NFA states. Up to
+        2<sup>n</sup> in theory, a handful in practice. An NFA recognises exactly what a DFA does
+        &mdash; it is more convenient, not more powerful.<br><br>
+        Regex &rarr; NFA &rarr; DFA is the chain that makes matching one table lookup per
+        character, with no pattern able to make it exponential.
+      </div>
     </section>

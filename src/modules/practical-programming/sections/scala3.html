@@ -1,0 +1,225 @@
+<section id="scala3" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Scala 03 · Text and the Web</div>
+        <h1>Programs That Meet Reality</h1>
+        <div class="topic-subtitle">default arguments, Try, regular expressions, Sets, and a crawler</div>
+      </div>
+
+      <p>Everything so far has been a function on values you supplied. This topic is the first one
+      where the program talks to something outside itself — a page that might not load, text that
+      might not be the shape you expected — and the tools are the ones that make failure a value
+      rather than a crash.</p>
+
+      <!-- ===== DEFAULTS ===== -->
+      <h2 id="s3-defaults">Default arguments</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">A parameter that fills itself in</div>
+        <pre class="pp-snippet">def collatzHelper(n: Int, a: Int = 0): Int = ...
+
+collatzHelper(7, 3)   // n = 7, a = 3
+collatzHelper(7)      // n = 7, a = 0</pre>
+        Useful for the accumulator a recursive function needs but a caller should not have to think
+        about: the helper takes it, the first call does not have to pass it.<br><br>
+        A default lets you leave off <strong>the end</strong> of the argument list. To skip
+        something in the middle you have to give the later ones by name —
+        <code>collatzHelper(a = 3)</code> — and once a name is used, everything after it must be
+        named too, because position no longer means anything. Named arguments can also be
+        reordered freely.
+      </div>
+
+      <h3 id="s3-dftool">&#128736;&#65039; Which argument goes where</h3>
+
+      <div class="tool" data-run="runDefaults">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Argument binding</h3>
+        </div>
+        <div class="tool-desc">Eight calls, three of which do not compile.</div>
+        <div class="tool-output" id="df-output"></div>
+      </div>
+
+      <!-- ===== TRY ===== -->
+      <h2 id="s3-try">When it might fail</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Try, and a value to fall back on</div>
+        <pre class="pp-snippet">def get_page(url: String): String = {
+  Try(fromURL(url)("ISO-8859-1").take(10000).mkString)
+    .getOrElse { println(s"Problem with: $url"); "" }
+}</pre>
+        <code>Try(...)</code> runs the expression and catches whatever it throws, giving back
+        <code>Success(value)</code> or <code>Failure(exception)</code>. Like
+        <code>Option</code>, it turns a crash into a value — and keeps the exception, which
+        <code>Option</code> would have thrown away.<br><br>
+        <code>getOrElse</code> then supplies a default. The signature says
+        <code>String</code>, and it means it: a page that will not load comes back as the empty
+        string and the crawl carries on.<br><br>
+        <code>take(10000)</code> is not politeness. Without it, one enormous page stops the whole
+        program.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">s"..." — string interpolation</div>
+        The <code>s</code> before the quotes lets <code>$name</code> and <code>${expr}</code> stand
+        for values inside a string: <code>s"Visiting: $n $url"</code>. Without the <code>s</code>
+        it is just those characters.
+      </div>
+
+      <!-- ===== REGEX ===== -->
+      <h2 id="s3-regex">Regular expressions</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Writing one</div>
+        <pre class="pp-snippet">val http_pattern = """"https?://[^"]*"""".r
+
+val email_pattern =
+  """([a-z\d\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})""".r</pre>
+        <code>"""…"""</code> is a raw string: no escape processing, so a backslash is a backslash
+        and you write the pattern as the regex engine wants to see it. <code>.r</code> turns the
+        string into a <code>Regex</code>.<br><br>
+        The four brackets at each end of the first one are not a typo — three open the raw string
+        and the fourth is a quote character that is part of the pattern. It matches the quotes
+        around a URL in the HTML, which is why the matches include them.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Using one</div>
+        <pre class="pp-snippet">def unquote(s: String) = s.drop(1).dropRight(1)
+
+def get_all_URLs(page: String): Set[String] =
+  http_pattern.findAllIn(page).map(unquote).toSet</pre>
+        <code>findAllIn</code> gives every match, <code>map(unquote)</code> strips the quotes the
+        pattern deliberately included, and <code>toSet</code> throws away the duplicates — a page
+        that links to the same place twice should not be crawled twice.<br><br>
+        A <code>Set</code> has no order and no repeats. That is the right shape here and worth
+        choosing deliberately: the alternative is remembering to de-duplicate later, which is the
+        kind of thing nobody remembers.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">What this pattern does when it cannot cope</div>
+        It does not fail. Nothing anchors either end of it, so when the address is not the shape it
+        expects, it matches <em>part</em> of one instead:
+        <pre class="pp-snippet">Ada@example.com          →  da@example.com
+ada@example.technology   →  ada@example.techno
+ada@example.museum       →  ada@example.museum
+ADA@EXAMPLE.COM          →  no match at all</pre>
+        The first two are worse than a miss. A harvester using this pattern collects addresses that
+        look plausible and do not exist, and nothing anywhere reports a problem.<br><br>
+        A regex is a cheap approximation of a shape. The useful question is never "is it correct"
+        but "what does it do to the cases it was not written for" — and unanchored patterns
+        answer that with a confident wrong answer. Try the awkward page in the tool.
+      </div>
+
+      <h3 id="s3-rxtool">&#128736;&#65039; What the pattern matches</h3>
+
+      <div class="tool" data-run="runRegex">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>findAllIn</h3>
+        </div>
+        <div class="tool-desc">Every match highlighted in the page, with its position and groups.
+          Scala's regexes are Java's, and the test suite compares these against a real JVM.</div>
+        <div class="tool-output" id="rx-output"></div>
+      </div>
+
+      <!-- ===== CRAWLER ===== -->
+      <h2 id="s3-crawl">The crawler</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Twelve lines, and it works</div>
+        <pre class="pp-snippet">def crawl(url: String, n: Int): Unit = {
+  if (n == 0) ()
+  else {
+    println(s"Visiting: $n $url")
+    val page = get_page(url)
+    for (u &lt;- get_all_URLs(page))
+      crawl(u, n - 1)
+  }
+}</pre>
+        The recursion is the whole design. <code>n</code> counts down to zero, which is the base
+        case; each page's links are crawled one level shallower. There is no queue, no loop and no
+        visited set — the call stack is doing the bookkeeping.<br><br>
+        <code>()</code> is the value of type <code>Unit</code>, and the return type says this
+        function is run for its effect rather than its answer.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">What it does not do</div>
+        It does not remember where it has been. A page reachable by two routes is fetched twice; a
+        pair of pages that link to each other is fetched over and over until the counter runs out.
+        Only the depth limit stops it, and it stops it by giving up rather than by being finished.
+        <br><br>
+        On a real site that is somebody else's bandwidth, and it is the difference between a
+        crawler and a nuisance. The fix is a set of visited URLs — which is the same
+        <code>Set</code> that was already being used for the links.
+      </div>
+
+      <h3 id="s3-cwtool">&#128736;&#65039; Crawling, with and without memory</h3>
+
+      <div class="tool" data-run="runCrawl">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Depth, repeats and cycles</h3>
+        </div>
+        <div class="tool-desc">A small web of six pages, one of which links back. Turn the visited
+          set on and watch the fetch count stop growing.</div>
+        <div class="tool-output" id="cr-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The harvester is the same shape, with an answer</div>
+        <pre class="pp-snippet">def emails(url: String, n: Int): Set[String] = {
+  if (n == 0) Set()
+  else {
+    val page = get_page(url)
+    val new_emails = email_pattern.findAllIn(page).toSet
+    new_emails ++ (for (u &lt;- get_all_URLs(page))
+                     yield emails(u, n - 1)).flatten
+  }
+}</pre>
+        Same recursion, but returning <code>Set[String]</code> instead of <code>Unit</code>. The
+        base case is the empty set rather than <code>()</code>, and the results are combined with
+        <code>++</code> on the way back out.<br><br>
+        The <code>flatten</code> is doing real work: the for-comprehension yields one
+        <code>Set[String]</code> per link, so the whole thing is a
+        <code>Set[Set[String]]</code> until it is flattened. Forgetting it is a type error, which
+        is the good kind of mistake.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="s3-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember five things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>A default fills in the end of an argument list.</strong> To skip earlier
+            ones, use names — and after the first name, everything must be named.</li>
+          <li><strong><code>Try(...).getOrElse(d)</code></strong> turns a thrown exception into a
+            value, so one unreachable page does not stop the program.</li>
+          <li><strong><code>"""…"""</code> is a raw string</strong>, and <code>.r</code> makes it a
+            regex. <code>findAllIn</code> gives every match.</li>
+          <li><strong><code>Set</code> has no order and no duplicates</strong> — the right shape
+            for "the links on this page".</li>
+          <li><strong>Recursion with a countdown is the crawl.</strong> The depth limit bounds it;
+            only a visited set stops it repeating itself.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Expecting a default to let you skip an argument in the middle.</li>
+          <li>Forgetting the <code>s</code> on an interpolated string, and printing
+            <code>$url</code>.</li>
+          <li>Writing a regex in an ordinary string, where <code>\d</code> needs escaping
+            twice.</li>
+          <li>Trusting a regex to be a correct definition of an email address.</li>
+          <li>Crawling without a visited set, and hammering one server.</li>
+          <li>Forgetting <code>flatten</code>, and ending up with a set of sets.</li>
+        </ul>
+      </div>
+
+    </section>

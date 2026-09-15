@@ -1,0 +1,153 @@
+<section id="scala5" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Scala 05 · Finite Automata</div>
+        <h1>Machines With No Memory</h1>
+        <div class="topic-subtitle">DFAs, NFAs, and how a set of states replaces guessing</div>
+      </div>
+
+      <p>The previous topic ended with a matcher that has to guess and come back. This one is what
+      you build so that it never has to. A finite automaton has no memory beyond which state it is
+      in — that is the whole restriction — and it turns out to be exactly enough for regular
+      expressions, with the useful side effect that matching costs one step per character no matter
+      what the pattern is.</p>
+
+      <!-- ===== DFA ===== -->
+      <h2 id="s5-dfa">A deterministic finite automaton</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Five things</div>
+        <pre class="pp-snippet">A(Σ, Qs, Q₀, F, δ)</pre>
+        <table class="pp-table">
+          <tbody>
+            <tr><td><strong>Σ</strong></td><td>an alphabet — the characters it can read</td></tr>
+            <tr><td><strong>Qs</strong></td><td>a set of states</td></tr>
+            <tr><td><strong>Q₀</strong></td><td>one of them is where it starts</td></tr>
+            <tr><td><strong>F</strong></td><td>some of them accept</td></tr>
+            <tr><td><strong>δ</strong></td><td>a transition function: a state and a character give
+              a state</td></tr>
+          </tbody>
+        </table>
+        Running it is as simple as it sounds: start at Q₀, read the characters one at a time,
+        follow δ. When the input runs out, accept if you are standing on a state in F.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">δ might not be defined everywhere</div>
+        There need not be an entry for every state and character. If the machine reads something it
+        has no move for, it is <strong>stuck</strong> — and a stuck machine rejects.<br><br>
+        This is worth being comfortable with rather than avoiding. A partial δ is often the
+        clearest way to write a machine down, and "no transition" and "a transition to a state
+        that can never accept" say the same thing. Some definitions insist on a total δ and add a
+        dead state to absorb everything; that is the same machine with more boxes drawn.
+      </div>
+
+      <h3 id="s5-datool">&#128736;&#65039; Running one</h3>
+
+      <div class="tool" data-run="runDFA">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>DFA, step by step</h3>
+        </div>
+        <div class="tool-desc">Four machines, including one with gaps in δ. The list of accepted
+          strings at the bottom is computed by running the machine on each, not written down.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 220px;">
+            <label for="da-input">input string</label>
+            <input type="text" id="da-input" value="abaaa" spellcheck="false" oninput="runDFA()">
+          </div>
+        </div>
+        <div class="tool-output" id="da-output"></div>
+      </div>
+
+      <!-- ===== NFA ===== -->
+      <h2 id="s5-nfa">Nondeterminism</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">One change, and it is a different kind of machine</div>
+        δ now gives a <strong>set</strong> of next states rather than one — possibly empty,
+        possibly several. The machine is allowed to be in more than one place.<br><br>
+        Acceptance means: <em>some</em> path through the machine ends on an accepting state. Not
+        all of them, and you do not have to say which.<br><br>
+        That sounds like it needs a search, and it is why an NFA is so much easier to write: you
+        can guess where the interesting part of the string starts instead of remembering how you
+        got here.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Running one without searching</div>
+        Do not try one path and come back. Carry the <strong>set of states you could be in</strong>
+        and take them all forward together: for each state in the set, follow the transitions for
+        the character just read, and union the results.<br><br>
+        One pass, one set per character, no backtracking. This is exactly the thing the exponential
+        matcher in the previous topic was not doing — and the reason it is possible here is that a
+        finite automaton has nowhere to store anything except which state it is in, so the set of
+        possibilities can never be larger than the number of states.
+      </div>
+
+      <h3 id="s5-natool">&#128736;&#65039; The set of possible states</h3>
+
+      <div class="tool" data-run="runNFA">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>NFA, and the DFA it becomes</h3>
+        </div>
+        <div class="tool-desc">The run keeps a set. Underneath, the same machine with one state per
+          set — worked out in advance instead of during the match.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 220px;">
+            <label for="na-input">input string</label>
+            <input type="text" id="na-input" value="aab" spellcheck="false" oninput="runNFA()">
+          </div>
+        </div>
+        <div class="tool-output" id="na-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The subset construction, and why it closes the loop</div>
+        If running an NFA means tracking a set of states, then a DFA whose states <em>are</em> those
+        sets does the same job with no set arithmetic left at run time. Build it once: start from
+        the set containing Q₀, and for each set and character work out the set you land in, adding
+        any set you have not seen before.<br><br>
+        The result is an ordinary deterministic machine. It can have up to 2<sup>n</sup> states for
+        an n-state NFA, and in practice almost never does, because only the reachable sets get
+        built.<br><br>
+        <strong>That is the whole chain.</strong> A regular expression becomes an NFA, the NFA
+        becomes a DFA, and the DFA matches in one table lookup per character — no guessing, no
+        backtracking, and no pattern that can make it take exponential time.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="s5-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember five things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>A DFA is five things</strong>: alphabet, states, a start state, accepting
+            states, and a transition function.</li>
+          <li><strong>δ may be partial.</strong> No transition means stuck, and stuck means
+            rejected.</li>
+          <li><strong>An NFA's δ gives a set</strong>, and it accepts when <em>some</em> path
+            accepts.</li>
+          <li><strong>Run an NFA by carrying the set of possible states</strong> — one pass, no
+            backtracking.</li>
+          <li><strong>The subset construction makes that a DFA</strong>, doing the work once
+            instead of per match. Up to 2<sup>n</sup> states in theory, far fewer in practice.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Thinking an NFA is more powerful than a DFA. It is not — it recognises exactly the
+            same languages, just more conveniently.</li>
+          <li>Reading "accepts if some path accepts" as "accepts if all paths accept".</li>
+          <li>Forgetting that a stuck DFA rejects rather than erroring.</li>
+          <li>Expecting the subset construction to blow up. The bound is 2<sup>n</sup>; the
+            reachable sets are usually a handful.</li>
+          <li>Building a DFA by hand and forgetting a character in some state, which quietly makes
+            it partial.</li>
+        </ul>
+      </div>
+
+    </section>
