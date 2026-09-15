@@ -1,0 +1,288 @@
+<section id="scala2" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Scala 02 · Functions and Matching</div>
+        <h1>Say What, Not How</h1>
+        <div class="topic-subtitle">higher-order functions, Option, for-comprehensions, pattern matching</div>
+      </div>
+
+      <p>Scala 01 took the loops away. This topic is what you use instead. Every loop you were
+      going to write is one of about six shapes — transform each element, keep some of them, find
+      the first one, count them, check them all, combine them — and each shape has a name and
+      takes a function.</p>
+
+      <p>Two things fall out of that. Functions become values you can pass around, and the answer
+      "there wasn't one" becomes a value too, with a type that says so.</p>
+
+      <!-- ===== HOF ===== -->
+      <h2 id="s2-hof">Functions that take functions</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The shapes</div>
+        <pre class="pp-snippet">def even(x: Int): Boolean = x % 2 == 0
+
+List(1, 2, 3, 4, 5).filter(even)   // List(2, 4)
+List(1, 2, 3, 4, 5).count(even)    // 2
+List(1, 2, 3, 4, 5).find(even)     // Some(2)
+List(1, 2, 3, 4, 5).exists(even)   // true
+List(1, 2, 3, 4, 5).forall(even)   // false
+List(1, 2, 3, 4, 5).map(n =&gt; n * n)  // List(1, 4, 9, 16, 25)</pre>
+        <code>even</code> is passed as an argument, without being called. A function is a value
+        like any other: it has a type — here <code>Int =&gt; Boolean</code> — and can be stored,
+        passed and returned.<br><br>
+        <strong>Note what <code>find</code> gives back.</strong> Not the element, and not −1 or
+        null when there isn't one: an <code>Option[Int]</code>, which is either
+        <code>Some(2)</code> or <code>None</code>. The type tells you the search might fail before
+        you have written a line.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Writing the function inline</div>
+        <pre class="pp-snippet">def less4(x: Int) = x &lt; 4    // named
+(x: Int) =&gt; x &lt; 4             // the same function, anonymous
+x =&gt; x &lt; 4                    // the type is inferred from the context
+_ &lt; 4                         // and the name is not needed either</pre>
+        The underscore stands for the argument, in order. One <code>_</code> means one parameter;
+        <strong>two <code>_</code>s mean two parameters</strong>, so <code>_ * _</code> is
+        <code>(a, b) =&gt; a * b</code> and not <code>x =&gt; x * x</code>. When you want the same
+        argument twice, write the lambda out.
+      </div>
+
+      <!-- ===== FOR ===== -->
+      <h2 id="s2-for">For-comprehensions</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Not a loop</div>
+        <pre class="pp-snippet">for (n &lt;- List(1, 2, 3, 4, 5)) yield n * n
+// List(1, 4, 9, 16, 25)</pre>
+        This looks like a <code>for</code> loop and is not one. It is <strong>syntax</strong> for
+        <code>map</code>, rewritten by the compiler before anything runs:
+        <pre class="pp-snippet">List(1, 2, 3, 4, 5).map(n =&gt; n * n)</pre>
+        With a condition, the <code>if</code> becomes a <code>filter</code>. With two generators,
+        the outer one becomes a <code>flatMap</code>. The <code>yield</code> is what makes it
+        produce a result — without it you get <code>Unit</code> and whatever the body did to the
+        outside world.
+      </div>
+
+      <h3 id="s2-fctool">&#128736;&#65039; The same thing, two ways</h3>
+
+      <div class="tool" data-run="runForComp">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Desugaring</h3>
+        </div>
+        <div class="tool-desc">Both sides are evaluated, every time. They are the same expression
+          written twice.</div>
+        <div class="tool-output" id="fc-output"></div>
+      </div>
+
+      <!-- ===== OPTION ===== -->
+      <h2 id="s2-option">Option</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">A value that might not be there, in the type</div>
+        <pre class="pp-snippet">List(7, 2, 3, 4, 5, 6).find(_ &lt; 4)   // Some(2)
+List(5, 6, 7, 8, 9).find(_ &lt; 4)      // None</pre>
+        An <code>Option[Int]</code> is either <code>Some(n)</code> or <code>None</code>. That is
+        the whole type — two cases, and the compiler knows about both.<br><br>
+        Compare the alternatives. A sentinel like −1 is a real Int, so nothing stops you adding it
+        to something. A <code>null</code> has the same type as a real value, so the compiler cannot
+        see the difference and the mistake arrives later, somewhere else, as a
+        <code>NullPointerException</code>. An <code>Option[Int]</code> is a <em>different type</em>
+        from <code>Int</code>, so the one place you must think about emptiness is the place that
+        knows what to do about it.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Where this bites first: parsing</div>
+        <pre class="pp-snippet">"1234".toInt          // 1234
+"12x".toInt           // throws NumberFormatException
+"  12".toInt          // throws — no trimming
+"2147483648".toInt    // throws — does not fit in an Int
+
+"12x".toIntOption     // None
+"1234".toIntOption    // Some(1234)</pre>
+        <code>toInt</code> is <code>Integer.parseInt</code>, and its failure is an exception that
+        the signature does not mention. <code>toIntOption</code> puts the failure in the type
+        instead, so it cannot be forgotten.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Four ways to get at what is inside</div>
+        <table class="pp-table">
+          <thead><tr><th>call</th><th>what it does</th></tr></thead>
+          <tbody>
+            <tr><td><code>o.getOrElse(d)</code></td><td>the value, or <code>d</code> when empty</td></tr>
+            <tr><td><code>o.map(f)</code></td><td>applies <code>f</code> only when there is something; still an Option</td></tr>
+            <tr><td><code>o match { … }</code></td><td>handles both cases, visibly</td></tr>
+            <tr><td><code>o.get</code></td><td>the value, or a <code>NoSuchElementException</code></td></tr>
+          </tbody>
+        </table>
+        The last one throws away everything the type bought you. It exists, and reaching for it is
+        almost always a sign that the wrong one of the other three was skipped.
+      </div>
+
+      <h3 id="s2-optool">&#128736;&#65039; When there might be nothing</h3>
+
+      <div class="tool" data-run="runOption">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Option against exceptions</h3>
+        </div>
+        <div class="tool-desc">Type anything. Which strings parse and which throw is
+          <code>Integer.parseInt</code> — the test suite checks these answers against a real
+          JVM.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 300px;">
+            <label for="so-input">the string</label>
+            <input type="text" id="so-input" value="1234" spellcheck="false" oninput="runOption()">
+          </div>
+        </div>
+        <div class="tool-output" id="so-output"></div>
+      </div>
+
+      <!-- ===== MAP ===== -->
+      <h2 id="s2-map">Map, the data structure</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Not the method</div>
+        <pre class="pp-snippet">val ascii = ('a' to 'z').map(c =&gt; (c, c.toInt))
+val ascii_map = ascii.toMap
+
+ascii_map.get('a')        // Some(97)
+ascii_map('a')            // 97
+ascii_map.get('A')        // None
+ascii_map('A')            // throws NoSuchElementException</pre>
+        <code>map</code> the method transforms every element; <code>Map</code> the type is a
+        key-value store. The example above uses both in two lines, which is unfortunate and worth
+        being clear about.<br><br>
+        <strong><code>get</code> returns an <code>Option</code></strong>, not the value — a
+        missing key is exactly the case Option is for. Applying the map directly,
+        <code>ascii_map('a')</code>, gives the value and throws when the key is absent. Two
+        different calls for two different situations: use <code>get</code> when the key might not
+        be there, and say what to do about it.
+      </div>
+
+      <!-- ===== MATCHING ===== -->
+      <h2 id="s2-match">Pattern matching</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">More than a switch</div>
+        <pre class="pp-snippet">def fizz_buzz(n: Int): String =
+  (n % 3, n % 5) match {
+    case (0, 0) =&gt; "fizz buzz"
+    case (0, _) =&gt; "fizz"
+    case (_, 0) =&gt; "buzz"
+    case _      =&gt; n.toString
+  }</pre>
+        The thing being matched is a <em>pair</em>, and the patterns take it apart. A
+        <code>switch</code> compares one value against constants; this matches the shape of a
+        structure and binds the pieces at the same time.<br><br>
+        <strong>Cases are tried in order and the first match wins.</strong> For n = 15 all four
+        patterns above would match, and only the first gets to. That is why the specific cases go
+        first, and why <code>case _</code> at the top makes everything below it dead code.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">What you can match on</div>
+        <pre class="pp-snippet">case 3                 // a literal
+case (a, b)            // a tuple, binding both halves
+case Nil               // the empty list
+case h :: t            // a non-empty list, binding head and tail
+case List(a, b)        // a list of exactly two
+case Some(v)           // an Option that has something, binding it
+case None              // one that does not
+case x if x &gt; 10       // a guard
+case _                 // anything</pre>
+        A lowercase name in a pattern <strong>binds</strong> — it does not compare against a
+        variable of that name. This catches everyone once: <code>case n =&gt; …</code> matches
+        anything and shadows the <code>n</code> you meant to compare with.
+      </div>
+
+      <h3 id="s2-mttool">&#128736;&#65039; Which case wins</h3>
+
+      <div class="tool" data-run="runMatch">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Match tracer</h3>
+        </div>
+        <div class="tool-desc">Every case, whether it was reached, whether it matched, and what it
+          bound. Watch what happens when <code>case _</code> moves to the top.</div>
+        <div class="tool-output" id="mt-output"></div>
+      </div>
+
+      <!-- ===== RECURSION ===== -->
+      <h2 id="s2-recursion">Recursion</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Matching and recursion fit together</div>
+        <pre class="pp-snippet">def my_flatten(xs: List[Option[Int]]): List[Int] =
+  xs match {
+    case Nil             =&gt; Nil
+    case None :: rest    =&gt; my_flatten(rest)
+    case Some(v) :: rest =&gt; v :: my_flatten(rest)
+  }</pre>
+        Three cases, three lines, no index and no accumulator. The list is either empty — and then
+        the answer is obvious — or it has a head and a tail, and the head is either something or
+        nothing. Every case of the input has a case in the code, which is what makes it hard to
+        get wrong.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Right, and still the wrong shape</div>
+        <pre class="pp-snippet">def fib(n: Int): Int = {
+  if (n == 0 || n == 1) 1
+  else fib(n - 1) + fib(n - 2)
+}</pre>
+        A direct transcription of the definition, and correct. It is also exponential — the two
+        calls recompute the same values over and over. The tool below counts the calls rather than
+        estimating them.<br><br>
+        Note the indexing too: this gives 1 for both 0 and 1, so it is shifted by one from the
+        sequence that starts 0, 1, 1, 2, 3.
+      </div>
+
+      <h3 id="s2-rctool">&#128736;&#65039; Recursion, traced and counted</h3>
+
+      <div class="tool" data-run="runRecursion">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Call by call</h3>
+        </div>
+        <div class="tool-desc">The flatten trace is every call and which case it took. The fib
+          counts are measured by running it.</div>
+        <div class="tool-output" id="rc2-output"></div>
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="s2-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember five things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>Functions are values.</strong> <code>filter</code>, <code>map</code>,
+            <code>find</code>, <code>count</code>, <code>exists</code>, <code>forall</code> take
+            one, and between them replace nearly every loop.</li>
+          <li><strong>A for-comprehension is syntax for map</strong> — with <code>if</code>
+            becoming <code>filter</code> and a second generator becoming <code>flatMap</code>.
+            Without <code>yield</code> it produces nothing.</li>
+          <li><strong><code>Option</code> puts "there might be nothing" in the type</strong>, where
+            the compiler can see it. <code>find</code> and <code>Map.get</code> both return one.</li>
+          <li><strong>Cases are tried in order; the first match wins.</strong> Specific first,
+            <code>case _</code> last.</li>
+          <li><strong>A lowercase name in a pattern binds</strong> rather than compares.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Expecting <code>find</code> to return the element. It returns an Option.</li>
+          <li>Expecting <code>Map.get</code> to return the value. Same.</li>
+          <li><code>_ * _</code> when you meant <code>x =&gt; x * x</code>.</li>
+          <li>Forgetting <code>yield</code>, and getting <code>Unit</code>.</li>
+          <li>Putting <code>case _</code> before the cases that do the work.</li>
+          <li>Reaching for <code>.get</code> on an Option to make the types line up.</li>
+        </ul>
+      </div>
+
+    </section>

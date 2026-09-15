@@ -587,3 +587,46 @@
   .rc-side pre { font-size: 11px; }
   table.pp-table td.yes { color: var(--accent-3); font-weight: 600; }
   table.pp-table td.no { color: var(--accent-2); font-weight: 600; }
+
+  /* ============================================================
+     SCALA 02 · desugaring, Option, match tracer, recursion
+     ============================================================ */
+
+  .fc-choices, .mt-choices, .mt-values { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px;
+    align-items: center; }
+  .fc-pair, .so-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
+  .fc-side, .so-side { flex: 1 1 300px; min-width: 0; }
+  .fc-side pre, .so-side pre { font-size: 11.5px; }
+  .so-ways { margin: 14px 0; }
+
+  table.mt-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 12px 0; }
+  table.mt-table th, table.mt-table td {
+    border: 1px solid var(--rule);
+    padding: 6px 9px;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.mt-table th { background: var(--surface-3); font-size: 11px; }
+  tr.mt-win { background: var(--pp-shared); }
+  tr.mt-dead { opacity: .55; }
+  tr.mt-miss td { color: var(--ink-soft); }
+  .mt-guard { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--accent-2); }
+  .mt-no { color: var(--accent-2); font-size: 11px; }
+
+  .rc-bars { margin: 12px 0; }
+  .rc-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .rc-bar-n {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    width: 22px;
+    text-align: right;
+    color: var(--ink-soft);
+  }
+  .rc-bar {
+    display: inline-block;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 3px;
+    min-width: 2px;
+  }
+  .rc-bar-c { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-soft); }

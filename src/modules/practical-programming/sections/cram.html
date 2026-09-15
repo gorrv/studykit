@@ -373,4 +373,78 @@
         <code>xs ::: List(y)</code> in a loop is quadratic. Build with <code>::</code> and
         <code>reverse</code>.
       </div>
+    
+      <h2 id="cr-s2">Scala 02 &middot; functions and matching</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The six shapes</div>
+        <table class="pp-table">
+          <thead><tr><th>call</th><th>gives</th></tr></thead>
+          <tbody>
+            <tr><td><code>xs.map(f)</code></td><td>a list of the same length, each element transformed</td></tr>
+            <tr><td><code>xs.filter(p)</code></td><td>the elements p accepts</td></tr>
+            <tr><td><code>xs.find(p)</code></td><td><strong>Option</strong> &mdash; the first one, or None</td></tr>
+            <tr><td><code>xs.count(p)</code></td><td>Int</td></tr>
+            <tr><td><code>xs.exists(p)</code> / <code>forall(p)</code></td><td>Boolean</td></tr>
+            <tr><td><code>xs.flatMap(f)</code></td><td>the lists f returns, joined</td></tr>
+          </tbody>
+        </table>
+        A function is a value: <code>(x: Int) =&gt; x &lt; 4</code>, or <code>x =&gt; x &lt; 4</code>,
+        or <code>_ &lt; 4</code>. Each <code>_</code> is a <strong>separate</strong> parameter, so
+        <code>_ * _</code> is <code>(a, b) =&gt; a * b</code>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">For-comprehensions are syntax for map</div>
+        <pre class="pp-snippet">for (n &lt;- xs if p(n)) yield f(n)
+// is exactly
+xs.filter(n =&gt; p(n)).map(n =&gt; f(n))</pre>
+        <code>if</code> &rarr; <code>filter</code>, <code>yield</code> &rarr; <code>map</code>, a
+        second generator &rarr; <code>flatMap</code>. <strong>No <code>yield</code> means
+        <code>Unit</code></strong> &mdash; it becomes a <code>foreach</code>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Option</div>
+        <code>Some(v)</code> or <code>None</code>. Returned by <code>find</code>,
+        <code>headOption</code>, <code>Map.get</code>, <code>toIntOption</code>.<br><br>
+        <code>o.getOrElse(d)</code> &middot; <code>o.map(f)</code> &middot;
+        <code>o match { case Some(v) =&gt; … case None =&gt; … }</code> &middot;
+        <code>o.get</code> (throws).<br><br>
+        Why not null: a null has the <em>same type</em> as a value, so the compiler cannot see it.
+        <code>Option[Int]</code> is a different type from <code>Int</code>.<br><br>
+        <code>"12x".toInt</code> throws; <code>"12x".toIntOption</code> is <code>None</code>. No
+        trimming, and out-of-range throws too.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Pattern matching</div>
+        <pre class="pp-snippet">(n % 3, n % 5) match {
+  case (0, 0) =&gt; "fizz buzz"
+  case (0, _) =&gt; "fizz"
+  case (_, 0) =&gt; "buzz"
+  case _      =&gt; n.toString
+}</pre>
+        <strong>Tried in order; first match wins.</strong> For n = 15 all four match and only the
+        first runs. <code>case _</code> first makes everything below it dead.<br><br>
+        Patterns: <code>3</code> &middot; <code>(a, b)</code> &middot; <code>Nil</code> &middot;
+        <code>h :: t</code> &middot; <code>List(a, b)</code> &middot; <code>Some(v)</code> &middot;
+        <code>None</code> &middot; <code>x if x &gt; 10</code> &middot; <code>_</code>.<br><br>
+        <strong>A lowercase name binds, it does not compare.</strong> <code>case n =&gt;</code>
+        matches anything and shadows the outer <code>n</code>.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Recursion</div>
+        <pre class="pp-snippet">def my_flatten(xs: List[Option[Int]]): List[Int] =
+  xs match {
+    case Nil             =&gt; Nil
+    case None :: rest    =&gt; my_flatten(rest)
+    case Some(v) :: rest =&gt; v :: my_flatten(rest)
+  }</pre>
+        One case per shape of the input, no index, no accumulator.<br><br>
+        <code>fib(n) = fib(n-1) + fib(n-2)</code> is correct and <strong>exponential</strong> &mdash;
+        the same values are recomputed. It also returns 1 for both 0 and 1, so it is shifted by one
+        from 0, 1, 1, 2, 3.
+      </div>
     </section>

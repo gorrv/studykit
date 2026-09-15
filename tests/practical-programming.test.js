@@ -1130,6 +1130,227 @@ module.exports = async function run() {
     }
   }
 
+  /* ---------------- Scala 2 · functions, Option, matching ---------------- */
+  {
+    const ev = src => w.scEval(src, {});
+
+    /* Higher-order functions. */
+    s.is('filter keeps what the function accepts',
+      ev('List(1, 2, 3, 4, 5).filter(x => x % 2 == 0)').show, 'List(2, 4)');
+    s.is('and the underscore means the same thing',
+      ev('List(1, 2, 3, 4, 5).filter(_ % 2 == 0)').show, 'List(2, 4)');
+    s.is('count counts them', ev('List(1, 2, 3, 4, 5).count(_ % 2 == 0)').show, '2');
+    s.is('map transforms each', ev('List(1,2,3,4,5,6,7,8).map(n => n * n)').show,
+      'List(1, 4, 9, 16, 25, 36, 49, 64)');
+    s.is('find gives the first, wrapped', ev('List(7,2,3,4,5,6).find(_ < 4)').show, 'Some(2)');
+    s.is('and None when there is none', ev('List(5,6,7,8,9).find(_ < 4)').show, 'None');
+    s.is('find is typed as an Option', ev('List(7,2,3).find(_ < 4)').type, 'Option[Int]');
+    s.ok('two underscores mean two parameters, so this is refused',
+      ev('List(1,2,3).map(_ * _)').ok === false,
+      'in Scala `_ * _` is (a, b) => a * b, which map cannot use');
+
+    /* for-comprehensions. */
+    s.is('a for-comprehension yields a list',
+      ev('for (n <- List(1, 2, 3, 4, 5)) yield n * n').show, 'List(1, 4, 9, 16, 25)');
+    s.is('a guard filters', ev('for (n <- List(1,2,3,4,5,6) if n % 2 == 0) yield n').show,
+      'List(2, 4, 6)');
+    s.is('two generators nest, outer first',
+      ev('for (x <- List(1,2); y <- List(10,20)) yield x * y').show, 'List(10, 20, 20, 40)');
+
+    /* Option. */
+    s.is('getOrElse on Some', ev('Some(42).getOrElse(0)').show, '42');
+    s.is('getOrElse on None', ev('None.getOrElse(0)').show, '0');
+    s.is('map on Some applies', ev('Some(3).map(_ * 2)').show, 'Some(6)');
+    s.is('map on None does not', ev('None.map(_ * 2)').show, 'None');
+    s.ok('get on None throws', ev('None.get').ok === false && ev('None.get').runtime === true);
+    s.is('toIntOption on rubbish', ev('"12x".toIntOption').show, 'None');
+    s.is('and on a number', ev('"1234".toIntOption').show, 'Some(1234)');
+    s.ok('toInt on rubbish throws instead', ev('"12x".toInt').ok === false);
+
+    /* Map. */
+    s.is('Map.get returns an Option', ev("Map('a' -> 97).get('a')").show, 'Some(97)');
+    s.is('and None for a missing key', ev("Map('a' -> 97).get('z')").show, 'None');
+    s.ok('applying the map directly throws on a missing key',
+      ev("Map('a' -> 97)('z')").ok === false);
+    s.is('a to z is 26 characters', ev("('a' to 'z').length").show, '26');
+    s.is('and the codes come out right',
+      ev("('a' to 'e').map(c => (c, c.toInt)).toMap.get('c')").show, 'Some(99)');
+
+    /* Pattern matching: order decides. */
+    const fizz = n => '(' + n + ' % 3, ' + n + ' % 5) match { case (0, 0) => "fizz buzz" ' +
+      'case (0, _) => "fizz" case (_, 0) => "buzz" case _ => "' + n + '" }';
+    s.is('15 is fizz buzz', ev(fizz(15)).show, '"fizz buzz"');
+    s.is('3 is fizz', ev(fizz(3)).show, '"fizz"');
+    s.is('5 is buzz', ev(fizz(5)).show, '"buzz"');
+    s.is('7 is itself', ev(fizz(7)).show, '"7"');
+    s.is('a list pattern binds head and tail',
+      ev('List(1,2,3) match { case Nil => 0 case h :: t => h + t.length }').show, '3');
+    s.is('Some binds what is inside',
+      ev('Some(5) match { case None => 0 case Some(v) => v * 2 }').show, '10');
+    s.ok('and a match with a gap throws at run time',
+      ev('3 match { case 1 => "one" case 2 => "two" }').ok === false);
+
+    /* A guard can reject a pattern that matched, and then the next case
+       gets its turn. Without this the guard could be ignored entirely
+       and every other assertion here would still pass. */
+    const guarded = n =>
+      'Some(' + n + ') match { case Some(v) if v > 10 => "big" case Some(v) => "small" ' +
+      'case None => "nothing" }';
+    s.is('a guard that holds keeps the case', ev(guarded(42)).show, '"big"');
+    s.is('a guard that fails passes it on', ev(guarded(3)).show, '"small"');
+    const gt = w.scMatchTrace(guarded(3), {});
+    s.is('the tracer says which guard failed', gt.rows[0].guardResult, false);
+    s.is('and the case is reported as not matching', gt.rows[0].matched, false);
+    s.is('so the second case is the winner', gt.winner, 1);
+    s.ok('a for-comprehension guard actually filters',
+      ev('for (n <- List(1,2,3,4,5,6) if n % 2 == 0) yield n').show === 'List(2, 4, 6)' &&
+      ev('for (n <- List(1,2,3,4,5,6)) yield n').show === 'List(1, 2, 3, 4, 5, 6)');
+
+    /* The tracer: which cases were reached, which matched. */
+    const tr = w.scMatchTrace(fizz(15), {});
+    s.is('all four fizz-buzz patterns match 15', tr.rows.filter(r => r.matched).length, 4);
+    s.is('and only the first is reached', tr.rows.filter(r => r.reached).length, 1);
+    s.is('so the answer is the first one', tr.result, '"fizz buzz"');
+    const dead = w.scMatchTrace(
+      '(15 % 3, 15 % 5) match { case _ => "other" case (0, 0) => "fizz buzz" }', {});
+    s.is('putting case _ first makes the rest unreachable',
+      dead.rows.filter(r => !r.reached).length, 1);
+    s.is('and changes the answer', dead.result, '"other"');
+    const bindTr = w.scMatchTrace('List(1,2,3) match { case Nil => 0 case h :: t => h }', {});
+    s.same('the tracer reports what a pattern bound',
+      bindTr.rows[1].binds.map(b => b.name + '=' + b.value), ['h=1', 't=List(2, 3)']);
+
+    /* The collection methods, against JavaScript's own — a separate
+       implementation of the same operations, which is the nearest thing
+       to a second opinion available without a Scala compiler. */
+    const PREDS = [['_ % 2 == 0', x => x % 2 === 0], ['_ > 3', x => x > 3],
+                   ['_ < 4', x => x < 4], ['x => x * x > 9', x => x * x > 9]];
+    const MAPS = [['_ * 2', x => x * 2], ['n => n * n', x => x * x], ['_ + 1', x => x + 1]];
+    const showList = a => 'List(' + a.join(', ') + ')';
+    let cbad = 0, cn = 0, cfirst = null;
+    for (let t = 0; t < 120; t++) {
+      const xs = Array.from({ length: ri(0, 7) }, () => ri(-5, 9));
+      const lit = 'List(' + xs.join(', ') + ')';
+      const [ps, pf] = pick(PREDS), [ms, mf] = pick(MAPS);
+      [[`${lit}.filter(${ps})`, showList(xs.filter(pf))],
+       [`${lit}.map(${ms})`, showList(xs.map(mf))],
+       [`${lit}.count(${ps})`, String(xs.filter(pf).length)],
+       [`${lit}.exists(${ps})`, String(xs.some(pf))],
+       [`${lit}.forall(${ps})`, String(xs.every(pf))],
+       [`${lit}.find(${ps})`, xs.some(pf) ? 'Some(' + xs.find(pf) + ')' : 'None'],
+       [`${lit}.reverse`, showList(xs.slice().reverse())],
+       [`${lit}.sorted`, showList(xs.slice().sort((a, b) => a - b))],
+       [`${lit}.distinct`, showList([...new Set(xs)])],
+       [`${lit}.sum`, String(xs.reduce((a, b) => a + b, 0) | 0)]
+      ].forEach(([src, want]) => {
+        const r = ev(src);
+        const got = r.ok ? r.show : 'ERR';
+        cn++;
+        if (got !== want) {
+          cbad++;
+          if (!cfirst) cfirst = `${src}: engine ${got}, JavaScript ${want}`;
+        }
+      });
+    }
+    s.is(`all ${cn} collection results match JavaScript's own array methods`, cbad, 0, cfirst);
+
+    /* And the law this topic is about: a for-comprehension is the map it
+       desugars to. Generated both ways and compared. */
+    let fbad = 0, fn = 0, ffirst = null;
+    for (let t = 0; t < 120; t++) {
+      const xs = Array.from({ length: ri(0, 6) }, () => ri(-4, 9));
+      const lit = 'List(' + xs.join(', ') + ')';
+      const body = pick(['q * q', 'q + 1', 'q * 2 - 1']);
+      const guard = pick([null, 'q % 2 == 0', 'q > 0']);
+      const forSrc = guard ? `for (q <- ${lit} if ${guard}) yield ${body}`
+                           : `for (q <- ${lit}) yield ${body}`;
+      const mapSrc = guard ? `${lit}.filter(q => ${guard}).map(q => ${body})`
+                           : `${lit}.map(q => ${body})`;
+      const a = ev(forSrc), b = ev(mapSrc);
+      fn++;
+      const ga = a.ok ? a.show : 'ERR', gb = b.ok ? b.show : 'ERR';
+      if (ga !== gb) {
+        fbad++;
+        if (!ffirst) ffirst = `${forSrc} gave ${ga}, ${mapSrc} gave ${gb}`;
+      }
+    }
+    s.is(`all ${fn} for-comprehensions equal the map they desugar to`, fbad, 0, ffirst);
+
+    /* find is the first thing filter keeps — a law relating two of them. */
+    let lbad = 0;
+    for (let t = 0; t < 60; t++) {
+      const xs = Array.from({ length: ri(0, 6) }, () => ri(-4, 9));
+      const lit = 'List(' + xs.join(', ') + ')';
+      const p = pick(PREDS)[0];
+      const found = ev(`${lit}.find(${p})`).show;
+      const kept = ev(`${lit}.filter(${p})`);
+      const firstKept = kept.value.v.length ? 'Some(' + w.scShow(kept.value.v[0]) + ')' : 'None';
+      if (found !== firstKept) lbad++;
+    }
+    s.is('find always agrees with the first element filter keeps', lbad, 0);
+
+    /* The recursion trace and the call count are measured, not asserted. */
+    const fl = w.scFlattenTrace([null, 3, null, 7, 1]);
+    s.same('my_flatten drops the Nones', fl.result, [3, 7, 1]);
+    s.is('and takes one call per element plus one', fl.steps.length, 6);
+    const f10 = w.scFibCount(10), f12 = w.scFibCount(12);
+    s.is('fib(10) is 89 with this indexing', f10.value, 89);
+    s.ok('and the call count grows exponentially', f12.calls > 2 * f10.calls,
+      `${f10.calls} then ${f12.calls}`);
+  }
+
+  if (HAVE_JAVA) {
+    /* Which strings parse is Integer.parseInt, so ask a real JVM. */
+    const inputs = ['1234', '0', '-7', '12x', '', '  12', '2147483648', '3.0', '007'];
+    const jr = javaEval(inputs.map(s2 => 'Integer.parseInt("' + s2 + '")'));
+    s.ok('the JVM ran the parse cases', jr.ok, jr.error);
+    if (jr.ok) {
+      let bad = 0, first = null, threw = 0;
+      inputs.forEach((s2, i) => {
+        const mine = w.scEval('"' + s2 + '".toInt', {});
+        const got = mine.ok ? mine.show : 'THROWS NumberFormatException';
+        if (/THROWS/.test(jr.out[i])) threw++;
+        if (got !== jr.out[i]) {
+          bad++;
+          if (!first) first = `"${s2}".toInt: engine ${got}, JVM ${jr.out[i]}`;
+        }
+      });
+      s.is('toInt agrees with Integer.parseInt on every case', bad, 0, first);
+      s.ok('and several of them throw, so the check is not vacuous', threw >= 4, `${threw}`);
+
+      /* toIntOption is the same question with the failure in the type. */
+      let obad = 0;
+      inputs.forEach((s2, i) => {
+        const opt = w.scEval('"' + s2 + '".toIntOption', {});
+        const threwInJava = /THROWS/.test(jr.out[i]);
+        const isNone = opt.ok && opt.show === 'None';
+        if (threwInJava !== isNone) obad++;
+      });
+      s.is('toIntOption is None exactly where parseInt throws', obad, 0);
+    }
+
+    /* The pair-match fizz buzz, against the nested-if version written in
+       Java — a different shape of code for the same function. */
+    const cases = [];
+    for (let n = 1; n <= 40; n++) cases.push(n);
+    const jl = javaEval(cases.map(n =>
+      '((' + n + ' % 3 == 0 && ' + n + ' % 5 == 0) ? "fizz buzz" : ' +
+      '(' + n + ' % 3 == 0) ? "fizz" : (' + n + ' % 5 == 0) ? "buzz" : "' + n + '")'));
+    if (jl.ok) {
+      let bad = 0, first = null;
+      cases.forEach((n, i) => {
+        const src = '(' + n + ' % 3, ' + n + ' % 5) match { case (0, 0) => "fizz buzz" ' +
+          'case (0, _) => "fizz" case (_, 0) => "buzz" case _ => "' + n + '" }';
+        const got = w.scEval(src, {}).show.replace(/"/g, '');
+        if (got !== jl.out[i]) {
+          bad++;
+          if (!first) first = `n=${n}: match gave ${got}, Java gave ${jl.out[i]}`;
+        }
+      });
+      s.is('the pair-match fizz buzz agrees with the nested-if version on 1..40', bad, 0, first);
+    }
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 1200);
