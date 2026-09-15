@@ -398,8 +398,7 @@
   .ov-tag { font-size: 11px; color: var(--ink-soft); text-align: right; }
   .ov-row.chosen .ov-tag { color: var(--accent-3); font-weight: 600; }
 
-  .up-choices, .ly-choices { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 14px; }
-  table.up-trace { width: 100%; border-collapse: collapse; font-size: 12px; }
+    table.up-trace { width: 100%; border-collapse: collapse; font-size: 12px; }
   table.up-trace th, table.up-trace td {
     border: 1px solid var(--rule);
     padding: 7px 9px;
@@ -509,8 +508,9 @@
     margin-bottom: 12px;
   }
   .cw-picks { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .cw-picks .chip.right { border-color: var(--accent-3); background: var(--pp-shared); color: var(--accent-3); }
-  .cw-picks .chip.wrong { border-color: var(--accent-2); color: var(--accent-2); }
+  .cw-picks .tool-btn.right { border-color: var(--accent-3); background: var(--pp-shared);
+    color: var(--accent-3); }
+  .cw-picks .tool-btn.wrong { border-color: var(--accent-2); color: var(--accent-2); }
   .cw-detail { margin: 12px 0; }
 
   table.pp-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 8px 0 2px; }
@@ -527,8 +527,7 @@
      SCALA 01 · the REPL, cons cells, the refactor check
      ============================================================ */
 
-  .sc-choices, .ls-choices { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
-  .sc-repl {
+    .sc-repl {
     border: 1px solid var(--rule);
     border-left: 4px solid var(--accent);
     border-radius: 8px;
@@ -592,9 +591,7 @@
      SCALA 02 · desugaring, Option, match tracer, recursion
      ============================================================ */
 
-  .fc-choices, .mt-choices, .mt-values { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px;
-    align-items: center; }
-  .fc-pair, .so-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
+    .fc-pair, .so-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
   .fc-side, .so-side { flex: 1 1 300px; min-width: 0; }
   .fc-side pre, .so-side pre { font-size: 11.5px; }
   .so-ways { margin: 14px 0; }
@@ -635,10 +632,7 @@
      SCALA 03–05 · defaults, regexes, crawling, RPN, automata
      ============================================================ */
 
-  .df-choices, .rx-choices, .cr-controls, .rp-choices, .bk-choices, .da-choices {
-    display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; align-items: center;
-  }
-  .rx-page { margin: 12px 0; }
+    .rx-page { margin: 12px 0; }
   .rx-page pre {
     background: var(--surface-2);
     border: 1px solid var(--rule);

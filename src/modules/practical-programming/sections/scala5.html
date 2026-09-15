@@ -54,9 +54,19 @@
         <div class="tool-controls">
           <div class="tool-field" style="flex:1 1 220px;">
             <label for="da-input">input string</label>
-            <input type="text" id="da-input" value="abaaa" spellcheck="false" oninput="runDFA()">
+            <input type="text" id="da-input" value="abaaa" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="da-machine">machine</label>
+            <select id="da-machine">
+              <option value="worked">the worked example</option>
+              <option value="evenA">an even number of a's</option>
+              <option value="endsAB">ends in ab</option>
+              <option value="partial">a partial machine</option>
+            </select>
           </div>
         </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="da-output"></div>
       </div>
 
@@ -97,9 +107,18 @@
         <div class="tool-controls">
           <div class="tool-field" style="flex:1 1 220px;">
             <label for="na-input">input string</label>
-            <input type="text" id="na-input" value="aab" spellcheck="false" oninput="runNFA()">
+            <input type="text" id="na-input" value="aab" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="na-machine">machine</label>
+            <select id="na-machine">
+              <option value="worked">the worked example</option>
+              <option value="endsAB">ends in ab, guessed</option>
+              <option value="twoWays">two routes to one place</option>
+            </select>
           </div>
         </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="na-output"></div>
       </div>
 

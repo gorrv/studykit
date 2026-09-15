@@ -36,13 +36,6 @@
       '<span class="stat-pill ' + (same ? 'b' : 'c') + '">' +
         (same ? 'the same answer' : 'different!') + '</span></div>';
 
-    h += '<div class="fc-choices">';
-    Object.keys(FC_PRESETS).forEach(function (k) {
-      h += '<button class="chip' + (k === fcCurrent ? ' on' : '') +
-        '" onclick="runForComp(\'' + k + '\')">' + esc(FC_PRESETS[k].label) + '</button>';
-    });
-    h += '</div>';
-
     h += '<div class="fc-pair">';
     [['for-comprehension', forSrc, a], ['what it desugars to', mapSrc, b]].forEach(function (col) {
       h += '<div class="fc-side"><div class="pp-cap">' + col[0] + '</div>' +
@@ -169,9 +162,23 @@
     var out = document.getElementById('mt-output');
     if (!out) return;
     if (which) { mtCurrent = which; mtValue = 0; }
-    if (valueIndex !== undefined && valueIndex !== null) mtValue = valueIndex;
     var p = MT_PRESETS[mtCurrent] || MT_PRESETS.fizz;
     var v = p.vars[0];
+    /* The value comes from the select in the tool's controls. Its options are
+       rewritten to match whichever preset is showing, since each one has its
+       own interesting values. */
+    var sel = document.getElementById('mt-value');
+    if (sel) {
+      var wanted = which ? 0 : Math.min(Number(sel.value) || 0, v.values.length - 1);
+      if (which || sel.options.length !== v.values.length) {
+        sel.innerHTML = v.values.map(function (val, i) {
+          return '<option value="' + i + '">' + esc(v.name) + ' = ' + esc(String(val)) +
+            '</option>';
+        }).join('');
+        sel.value = String(wanted);
+      }
+      mtValue = Number(sel.value) || 0;
+    }
     var chosen = v.values[Math.min(mtValue, v.values.length - 1)];
 
     var env = {};
@@ -181,20 +188,8 @@
     var oneLine = p.src.replace(/\n\s*/g, ' ');
     var r = scMatchTrace(oneLine, env);
 
-    var h = '<div class="mt-choices">';
-    Object.keys(MT_PRESETS).forEach(function (k) {
-      h += '<button class="chip' + (k === mtCurrent ? ' on' : '') +
-        '" onclick="runMatch(\'' + k + '\')">' + esc(MT_PRESETS[k].label) + '</button>';
-    });
-    h += '</div>';
-
-    h += '<div class="mt-values"><span class="pp-cap" style="margin:0 6px 0 0;">' +
-      esc(v.name) + ' =</span>';
-    v.values.forEach(function (val, i) {
-      h += '<button class="chip' + (i === Math.min(mtValue, v.values.length - 1) ? ' on' : '') +
-        '" onclick="runMatch(null, ' + i + ')">' + esc(String(val)) + '</button>';
-    });
-    h += '</div>';
+    var h = '<div class="pp-note" style="margin:0 0 10px;">' + esc(v.name) + ' = <code>' +
+      esc(String(chosen)) + '</code></div>';
 
     h += '<pre class="pp-snippet">' + esc(p.src) + '</pre>';
 
@@ -266,14 +261,10 @@
     var out = document.getElementById('rc2-output');
     if (!out) return;
     if (which) rcCurrent = which;
-    if (n !== undefined && n !== null) rcN = n;
+    var nSel = document.getElementById('rc-n');
+    if (nSel) rcN = Number(nSel.value) || 6;
 
-    var h = '<div class="mt-choices">';
-    Object.keys(RC_PRESETS).forEach(function (k) {
-      h += '<button class="chip' + (k === rcCurrent ? ' on' : '') +
-        '" onclick="runRecursion(\'' + k + '\')">' + esc(RC_PRESETS[k].label) + '</button>';
-    });
-    h += '</div>';
+    var h = '';
 
     if (rcCurrent === 'flatten') {
       var p = RC_PRESETS.flatten;
@@ -295,12 +286,6 @@
     } else {
       h += '<pre class="pp-snippet">def fib(n: Int): Int = {\n' +
         '  if (n == 0 || n == 1) 1\n  else fib(n - 1) + fib(n - 2)\n}</pre>';
-      h += '<div class="mt-values"><span class="pp-cap" style="margin:0 6px 0 0;">n =</span>';
-      [4, 6, 8, 10, 12, 14, 16, 18, 20].forEach(function (k) {
-        h += '<button class="chip' + (k === rcN ? ' on' : '') +
-          '" onclick="runRecursion(null, ' + k + ')">' + k + '</button>';
-      });
-      h += '</div>';
       var f = scFibCount(rcN);
       h += '<div class="rd-stats">' +
         '<span class="stat-pill a">fib(' + rcN + ') = ' + f.value + '</span>' +

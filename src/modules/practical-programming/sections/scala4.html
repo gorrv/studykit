@@ -66,10 +66,15 @@
         <div class="tool-controls">
           <div class="tool-field" style="flex:1 1 300px;">
             <label for="rp-input">expression</label>
-            <input type="text" id="rp-input" value="(3 + 1) * (2 + 9)" spellcheck="false"
-                   oninput="runRPN()">
+            <input type="text" id="rp-input" value="(3 + 1) * (2 + 9)" spellcheck="false">
           </div>
+          <button class="tool-btn secondary" onclick="runRPN('brackets')">(3 + 1) * (2 + 9)</button>
+          <button class="tool-btn secondary" onclick="runRPN('precedence')">3 + 1 * 2</button>
+          <button class="tool-btn secondary" onclick="runRPN('left')">10 - 4 - 3</button>
+          <button class="tool-btn secondary" onclick="runRPN('nested')">2 * (3 + 4 * (5 - 1))</button>
+          <button class="tool-btn secondary" onclick="runRPN('div')">7 / 2 * 2</button>
         </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="rp-output"></div>
       </div>
 
@@ -119,6 +124,28 @@
         </div>
         <div class="tool-desc">Steps counted, and your browser's own engine timed. Push n up and
           watch the middle column stay flat while the others do not.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="bk-pattern">pattern</label>
+            <select id="bk-pattern">
+              <option value="nested">(a*)*b</option>
+              <option value="simple">(a*)b</option>
+              <option value="alt">(a|a)*b</option>
+              <option value="plain">aaa*b</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="bk-max">up to n =</label>
+            <select id="bk-max">
+              <option value="10">10</option>
+              <option value="14">14</option>
+              <option value="18">18</option>
+              <option value="22">22</option>
+              <option value="26">26</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="bk-output"></div>
       </div>
 

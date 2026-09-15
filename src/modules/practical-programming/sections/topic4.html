@@ -187,6 +187,7 @@ foo.insert(foo.begin(), 42);   // error</pre>
             </select>
           </div>
         </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="vc-output"></div>
       </div>
 
@@ -284,6 +285,7 @@ cout &lt;&lt; a.size() &lt;&lt; endl;         // 1000000</pre>
             </select>
           </div>
         </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="ov-output"></div>
       </div>
 
@@ -334,6 +336,16 @@ else     { cout &lt;&lt; "foo is null\n"; }</pre>
         </div>
         <div class="tool-desc">Short programs, line by line: who holds what, when the delete
           happens, and what the program prints.</div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="runOwnership('scope')">Owning and releasing</button>
+          <button class="tool-btn secondary" onclick="runOwnership('copy')">Copying (refused)</button>
+          <button class="tool-btn secondary" onclick="runOwnership('move')">Moving</button>
+          <button class="tool-btn secondary" onclick="runOwnership('fromFunction')">From a function</button>
+          <button class="tool-btn secondary" onclick="runOwnership('release')">release, and its leak</button>
+          <button class="tool-btn secondary" onclick="runOwnership('reset')">reset</button>
+          <button class="tool-btn secondary" onclick="runOwnership('useAfterMove')">Reading after a move</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="up-output"></div>
       </div>
 

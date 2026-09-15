@@ -9,22 +9,20 @@
   function runDFA(which, input) {
     var out = document.getElementById('da-output');
     if (!out) return;
-    if (which) {
-      daCurrent = which;
-      daInput = which === 'worked' ? 'abaaa' : (which === 'partial' ? 'ab' : 'abba');
+    var picked = ((document.getElementById('da-machine') || {}).value) || 'worked';
+    if (picked !== daCurrent) {
+      /* A different machine wants a string it can actually read. */
+      daCurrent = picked;
+      daInput = picked === 'worked' ? 'abaaa' : (picked === 'partial' ? 'ab' : 'abba');
       var box0 = document.getElementById('da-input');
       if (box0) box0.value = daInput;
+    } else {
+      var box = document.getElementById('da-input');
+      if (box) daInput = box.value;
     }
-    var box = document.getElementById('da-input');
-    if (box && input !== false) daInput = box.value;
     var m = DA_MACHINES[daCurrent] || DA_MACHINES.worked;
 
-    var h = '<div class="da-choices">';
-    Object.keys(DA_MACHINES).forEach(function (k) {
-      h += '<button class="chip' + (k === daCurrent ? ' on' : '') +
-        '" onclick="runDFA(\'' + k + '\')">' + DA_MACHINES[k].label + '</button>';
-    });
-    h += '</div>';
+    var h = '';
 
     /* The five things it is. */
     h += '<div class="da-tuple"><div class="pp-cap">A(Σ, Qs, Q₀, F, δ)</div>' +
@@ -121,22 +119,19 @@
   function runNFA(which) {
     var out = document.getElementById('na-output');
     if (!out) return;
-    if (which) {
-      naCurrent = which;
+    var picked = ((document.getElementById('na-machine') || {}).value) || 'worked';
+    if (picked !== naCurrent) {
+      naCurrent = picked;
       naInput = 'aab';
       var box0 = document.getElementById('na-input');
       if (box0) box0.value = naInput;
+    } else {
+      var box = document.getElementById('na-input');
+      if (box) naInput = box.value;
     }
-    var box = document.getElementById('na-input');
-    if (box) naInput = box.value;
     var m = NA_MACHINES[naCurrent] || NA_MACHINES.worked;
 
-    var h = '<div class="da-choices">';
-    Object.keys(NA_MACHINES).forEach(function (k) {
-      h += '<button class="chip' + (k === naCurrent ? ' on' : '') +
-        '" onclick="runNFA(\'' + k + '\')">' + NA_MACHINES[k].label + '</button>';
-    });
-    h += '</div>';
+    var h = '';
 
     h += '<table class="da-delta"><thead><tr><th>δ</th>';
     m.alphabet.forEach(function (c) { h += '<th>' + esc(c) + '</th>'; });

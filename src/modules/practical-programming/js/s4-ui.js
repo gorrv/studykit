@@ -16,12 +16,7 @@
 
     var conv = rpConvert(src);
 
-    var h = '<div class="rp-choices">';
-    Object.keys(RP_PRESETS).forEach(function (k) {
-      h += '<button class="chip' + (k === rpCurrent ? ' on' : '') +
-        '" onclick="runRPN(\'' + k + '\')">' + esc(RP_PRESETS[k].label) + '</button>';
-    });
-    h += '</div>';
+    var h = '';
 
     if (!conv.ok) {
       out.innerHTML = h + '<div class="verdict bad">' + conv.error + '</div>';
@@ -98,8 +93,8 @@
   function runBacktrack(which, max) {
     var out = document.getElementById('bk-output');
     if (!out) return;
-    if (which) bkPattern = which;
-    if (max) bkMax = max;
+    bkPattern = ((document.getElementById('bk-pattern') || {}).value) || 'nested';
+    bkMax = Number(((document.getElementById('bk-max') || {}).value) || '18');
     var p = BK_PATTERNS[bkPattern] || BK_PATTERNS.nested;
 
     var parsed = bkParse(p.src);
@@ -108,20 +103,7 @@
       return;
     }
 
-    var h = '<div class="bk-choices">';
-    Object.keys(BK_PATTERNS).forEach(function (k) {
-      h += '<button class="chip' + (k === bkPattern ? ' on' : '') +
-        '" onclick="runBacktrack(\'' + k + '\')"><code>' + esc(BK_PATTERNS[k].src) +
-        '</code></button>';
-    });
-    h += '</div>';
-
-    h += '<div class="bk-choices"><span class="pp-cap" style="margin:0 6px 0 0;">up to n =</span>';
-    [10, 14, 18, 22, 26].forEach(function (m) {
-      h += '<button class="chip' + (m === bkMax ? ' on' : '') +
-        '" onclick="runBacktrack(null, ' + m + ')">' + m + '</button>';
-    });
-    h += '</div>';
+    var h = '';
 
     h += '<div class="pp-note">Matching <code>' + esc(p.src) + '</code> against a string of ' +
       'n a&rsquo;s — which has no <code>b</code>, so the answer is always <em>no</em>. The ' +

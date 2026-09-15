@@ -37,6 +37,22 @@ collatzHelper(7)      // n = 7, a = 0</pre>
           <h3>Argument binding</h3>
         </div>
         <div class="tool-desc">Eight calls, three of which do not compile.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 280px;">
+            <label for="df-call">the call</label>
+            <select id="df-call">
+              <option value="both">collatzHelper(7, 3)</option>
+              <option value="one">collatzHelper(7)</option>
+              <option value="explicit">collatzHelper(7, 0)</option>
+              <option value="named">collatzHelper(n = 7, a = 3)</option>
+              <option value="reordered">collatzHelper(a = 3, n = 7)</option>
+              <option value="skipFirst">collatzHelper(a = 3)</option>
+              <option value="afterNamed">collatzHelper(n = 7, 3)</option>
+              <option value="none">collatzHelper()</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="df-output"></div>
       </div>
 
@@ -122,6 +138,25 @@ ADA@EXAMPLE.COM          →  no match at all</pre>
         </div>
         <div class="tool-desc">Every match highlighted in the page, with its position and groups.
           Scala's regexes are Java's, and the test suite compares these against a real JVM.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="rx-pattern">pattern</label>
+            <select id="rx-pattern">
+              <option value="http">URLs in quotes</option>
+              <option value="email">email addresses</option>
+              <option value="href">href attributes</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="rx-page">page</label>
+            <select id="rx-page">
+              <option value="simple">a small page</option>
+              <option value="tricky">awkward cases</option>
+              <option value="none">nothing to find</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="rx-output"></div>
       </div>
 
@@ -166,6 +201,26 @@ ADA@EXAMPLE.COM          →  no match at all</pre>
         </div>
         <div class="tool-desc">A small web of six pages, one of which links back. Turn the visited
           set on and watch the fetch count stop growing.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="cr-depth">depth</label>
+            <select id="cr-depth">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="cr-visited">visited set</label>
+            <select id="cr-visited">
+              <option value="no">no — as written</option>
+              <option value="yes">yes</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="cr-output"></div>
       </div>
 

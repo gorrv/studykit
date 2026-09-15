@@ -4,23 +4,28 @@
 
   /* ---------- Tool 1 · the REPL ---------- */
 
+  var scLastExample = '';
+
   function runScalaEval(preset) {
     var out = document.getElementById('sc-output');
     if (!out) return;
     var box = document.getElementById('sc-input');
-    if (preset && SC_EXPRS[preset] && box) box.value = SC_EXPRS[preset].src;
+
+    /* The example chooser fills the box — but only when the choice has
+       actually changed, or every live re-run would overwrite what is
+       being typed. */
+    var sel = document.getElementById('sc-example');
+    if (!preset && sel && sel.value && sel.value !== scLastExample) preset = sel.value;
+    if (sel) scLastExample = sel.value;
+    if (preset && SC_EXPRS[preset] && box) {
+      box.value = SC_EXPRS[preset].src;
+      if (sel && sel.value !== preset) { sel.value = preset; scLastExample = preset; }
+    }
     var src = box ? box.value : '1 + 1';
 
     var r = scEval(src, {});
 
-    var h = '<div class="sc-choices">';
-    Object.keys(SC_EXPRS).forEach(function (k) {
-      h += '<button class="chip" onclick="runScalaEval(\'' + k + '\')">' +
-        esc(SC_EXPRS[k].label) + '</button>';
-    });
-    h += '</div>';
-
-    h += '<div class="sc-repl"><span class="sc-prompt">scala&gt;</span> <code>' +
+    var h = '<div class="sc-repl"><span class="sc-prompt">scala&gt;</span> <code>' +
       esc(src.trim()) + '</code></div>';
 
     if (!r.ok) {
@@ -68,13 +73,6 @@
       '<span class="stat-pill b">' + alloc + ' cells allocated</span>' +
       '<span class="stat-pill ' + (r.shared.length ? 'a' : 'dark') + '">' +
         r.shared.length + ' shared</span></div>';
-
-    h += '<div class="ls-choices">';
-    Object.keys(LS_PRESETS).forEach(function (k) {
-      h += '<button class="chip' + (k === lsCurrent ? ' on' : '') +
-        '" onclick="runCons(\'' + k + '\')">' + esc(LS_PRESETS[k].label) + '</button>';
-    });
-    h += '</div>';
 
     h += '<table class="up-trace"><thead><tr><th>line</th><th>new cells</th><th>shared</th>' +
       '<th>what happens</th></tr></thead><tbody>';

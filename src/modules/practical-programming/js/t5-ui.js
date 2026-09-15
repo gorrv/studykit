@@ -108,13 +108,6 @@
       '<span class="stat-pill b">sizeof = ' + r.size + '</span>' +
       (r.hasVptr ? '<span class="stat-pill dark">has a vtable pointer</span>' : '') + '</div>';
 
-    h += '<div class="ly-choices">';
-    Object.keys(LY_PRESETS).forEach(function (k) {
-      h += '<button class="chip' + (k === lyCurrent ? ' on' : '') +
-        '" onclick="runLayout(\'' + k + '\')">' + esc(LY_PRESETS[k].label) + '</button>';
-    });
-    h += '</div>';
-
     /* The bar. Each byte is one unit wide. */
     h += '<div class="ly-bar">';
     var used = 0;
@@ -201,8 +194,8 @@
           if (k === c.right) state = ' right';
           else if (k === picked) state = ' wrong';
         }
-        h += '<button class="chip' + state + '" onclick="runCast(\'' + k + '\')">' +
-          '<code>' + esc(k) + '</code></button>';
+        h += '<button class="tool-btn secondary' + state + '" onclick="runCast(\'' + k +
+          '\')">' + esc(k) + '</button>';
       });
     h += '</div>';
 

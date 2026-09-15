@@ -101,12 +101,30 @@ Option[Int]              an Int, or nothing</pre>
           shown alongside the value, because in Scala the type is what decides what the operators
           mean.</div>
         <div class="tool-controls">
-          <div class="tool-field" style="flex:1 1 340px;">
+          <div class="tool-field" style="flex:1 1 300px;">
             <label for="sc-input">expression</label>
-            <input type="text" id="sc-input" value="(1 + 2) / 2" spellcheck="false"
-                   oninput="runScalaEval()">
+            <input type="text" id="sc-input" value="(1 + 2) / 2" spellcheck="false">
+          </div>
+          <div class="tool-field" style="flex:0 1 240px;">
+            <label for="sc-example">or pick an example</label>
+            <select id="sc-example">
+              <option value="">— your own —</option>
+              <option value="intDiv">integer division</option>
+              <option value="intDivNeg">truncating towards zero</option>
+              <option value="overflow">Int overflow</option>
+              <option value="factorial">why BigInt exists</option>
+              <option value="bigint">the same in BigInt</option>
+              <option value="doubleDiv">Double division</option>
+              <option value="cons">building a list</option>
+              <option value="consChain">cons is right-associative</option>
+              <option value="average">the average function</option>
+              <option value="charInt">a Char is a number</option>
+              <option value="strings">strings and +</option>
+              <option value="tuple">a pair</option>
+            </select>
           </div>
         </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="sc-output"></div>
       </div>
 
@@ -190,7 +208,7 @@ def is_legal(dim: Int, path: Path)(x: Pos): Boolean =
         <div class="tool-controls">
           <div class="tool-field">
             <label for="rc-a">this version</label>
-            <select id="rc-a" onchange="runRefactor()">
+            <select id="rc-a">
               <option value="imperative">the loop, written carefully</option>
               <option value="buggy">the loop, with the flag clobbered</option>
               <option value="functional">the one-liner</option>
@@ -198,7 +216,7 @@ def is_legal(dim: Int, path: Path)(x: Pos): Boolean =
           </div>
           <div class="tool-field">
             <label for="rc-b">against</label>
-            <select id="rc-b" onchange="runRefactor()">
+            <select id="rc-b">
               <option value="functional">the one-liner</option>
               <option value="imperative">the loop, written carefully</option>
               <option value="buggy">the loop, with the flag clobbered</option>
@@ -206,13 +224,14 @@ def is_legal(dim: Int, path: Path)(x: Pos): Boolean =
           </div>
           <div class="tool-field">
             <label for="rc-dim">board</label>
-            <select id="rc-dim" onchange="runRefactor()">
+            <select id="rc-dim">
               <option value="3">3 &times; 3</option>
               <option value="2">2 &times; 2</option>
               <option value="4">4 &times; 4</option>
             </select>
           </div>
         </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="rc-output"></div>
       </div>
 
@@ -251,6 +270,14 @@ val new_list = 0 :: old_list      // List(0, 1, 2, 3, 5)</pre>
         </div>
         <div class="tool-desc">Cells are numbered. A cell with the same number under two names is
           the same cell in memory — count how few of them ever get allocated.</div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="runCons('cons')">One on the front</button>
+          <button class="tool-btn secondary" onclick="runCons('twoFromOne')">Two lists, one tail</button>
+          <button class="tool-btn secondary" onclick="runCons('tailIsFree')">tail costs nothing</button>
+          <button class="tool-btn secondary" onclick="runCons('chain')">Building one up</button>
+          <button class="tool-btn secondary" onclick="runCons('concat')">::: copies</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="ls-output"></div>
       </div>
 

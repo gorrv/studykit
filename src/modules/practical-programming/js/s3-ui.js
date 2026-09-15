@@ -9,7 +9,7 @@
   function runDefaults(which) {
     var out = document.getElementById('df-output');
     if (!out) return;
-    if (which) dfCurrent = which;
+    dfCurrent = ((document.getElementById('df-call') || {}).value) || 'one';
     var c = DF_CALLS[dfCurrent] || DF_CALLS.one;
     var r = dfBind(DF_PARAMS, c.args);
 
@@ -17,13 +17,6 @@
       '<span class="stat-pill a"><code>' + esc(c.label) + '</code></span>' +
       '<span class="stat-pill ' + (r.ok ? 'b' : 'c') + '">' +
         (r.ok ? 'compiles' : 'does not compile') + '</span></div>';
-
-    h += '<div class="df-choices">';
-    Object.keys(DF_CALLS).forEach(function (k) {
-      h += '<button class="chip' + (k === dfCurrent ? ' on' : '') +
-        '" onclick="runDefaults(\'' + k + '\')">' + esc(DF_CALLS[k].label) + '</button>';
-    });
-    h += '</div>';
 
     h += '<pre class="pp-snippet">def collatzHelper(n: Int, a: Int = 0): Int = ...\n\n' +
       esc(c.label) + '</pre>';
@@ -65,26 +58,14 @@
   function runRegex(which, page) {
     var out = document.getElementById('rx-output');
     if (!out) return;
-    if (which) rxPattern = which;
-    if (page) rxPage = page;
+    rxPattern = ((document.getElementById('rx-pattern') || {}).value) || 'http';
+    rxPage = ((document.getElementById('rx-page') || {}).value) || 'simple';
     var p = RX_PATTERNS[rxPattern] || RX_PATTERNS.http;
     var g = RX_PAGES[rxPage] || RX_PAGES.simple;
 
     var r = rxFind(p.source, g.text);
 
-    var h = '<div class="rx-choices">';
-    Object.keys(RX_PATTERNS).forEach(function (k) {
-      h += '<button class="chip' + (k === rxPattern ? ' on' : '') +
-        '" onclick="runRegex(\'' + k + '\')">' + esc(RX_PATTERNS[k].label) + '</button>';
-    });
-    h += '</div><div class="rx-choices">';
-    Object.keys(RX_PAGES).forEach(function (k) {
-      h += '<button class="chip' + (k === rxPage ? ' on' : '') +
-        '" onclick="runRegex(null, \'' + k + '\')">' + esc(RX_PAGES[k].label) + '</button>';
-    });
-    h += '</div>';
-
-    h += '<pre class="pp-snippet">' + esc(p.scala) + '</pre>';
+    var h = '<pre class="pp-snippet">' + esc(p.scala) + '</pre>';
 
     if (!r.ok) {
       out.innerHTML = h + '<div class="verdict bad">' + r.error + '</div>';
@@ -142,21 +123,13 @@
   function runCrawl(depth, visited) {
     var out = document.getElementById('cr-output');
     if (!out) return;
-    if (depth !== undefined && depth !== null) cwDepth = depth;
-    if (visited !== undefined && visited !== null) cwVisited = visited;
+    cwDepth = Number(((document.getElementById('cr-depth') || {}).value) || '3');
+    cwVisited = (((document.getElementById('cr-visited') || {}).value) || 'no') === 'yes';
 
     var r = cwCrawl('a.example', cwDepth, { visited: cwVisited });
     var reach = cwReachable('a.example', cwDepth);
 
-    var h = '<div class="cr-controls"><span class="pp-cap" style="margin:0 6px 0 0;">depth</span>';
-    [1, 2, 3, 4, 5].forEach(function (d) {
-      h += '<button class="chip' + (d === cwDepth ? ' on' : '') +
-        '" onclick="runCrawl(' + d + ')">' + d + '</button>';
-    });
-    h += '<span class="pp-cap" style="margin:0 6px 0 14px;">visited set</span>' +
-      '<button class="chip' + (!cwVisited ? ' on' : '') + '" onclick="runCrawl(null, false)">no</button>' +
-      '<button class="chip' + (cwVisited ? ' on' : '') + '" onclick="runCrawl(null, true)">yes</button>' +
-      '</div>';
+    var h = '';
 
     h += '<div class="rd-stats">' +
       '<span class="stat-pill a">' + r.total + ' visits</span>' +

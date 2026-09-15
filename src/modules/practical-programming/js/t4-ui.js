@@ -144,6 +144,7 @@
   function runOwnership(which) {
     var out = document.getElementById('up-output');
     if (!out) return;
+    /* The chooser lives in the tool's controls, like every other tool. */
     if (which) upCurrent = which;
     var preset = UP_PRESETS[upCurrent] || UP_PRESETS.scope;
     var r = upRun(preset.ops);
@@ -156,13 +157,6 @@
         ? '<span class="stat-pill c">' + r.leaked.length + ' never deleted</span>'
         : '<span class="stat-pill b">nothing leaks</span>') +
       '</div>';
-
-    h += '<div class="up-choices">';
-    Object.keys(UP_PRESETS).forEach(function (k) {
-      h += '<button class="chip' + (k === upCurrent ? ' on' : '') +
-        '" onclick="runOwnership(\'' + k + '\')">' + esc(UP_PRESETS[k].label) + '</button>';
-    });
-    h += '</div>';
 
     h += '<table class="up-trace"><thead><tr><th>line</th><th>owners</th><th>what happens</th>' +
       '</tr></thead><tbody>';

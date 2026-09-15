@@ -67,6 +67,15 @@ public:
         </div>
         <div class="tool-desc">Every offset here is what the compiler actually produces —
           the test suite compares each one against g++.</div>
+        <div class="tool-controls">
+          <button class="tool-btn secondary" onclick="runLayout('plain')">Two ints</button>
+          <button class="tool-btn secondary" onclick="runLayout('derived')">A derived class</button>
+          <button class="tool-btn secondary" onclick="runLayout('virtualBase')">With a virtual function</button>
+          <button class="tool-btn secondary" onclick="runLayout('multiple')">Two base classes</button>
+          <button class="tool-btn secondary" onclick="runLayout('multipleVirtual')">Two bases, first virtual</button>
+          <button class="tool-btn secondary" onclick="runLayout('padding')">A double after an int</button>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="ly-output"></div>
       </div>
 
@@ -148,7 +157,7 @@ delete c;   // which destructor?</pre>
         <div class="tool-controls">
           <div class="tool-field">
             <label for="dp-real">the object really is</label>
-            <select id="dp-real" onchange="runDispatch()">
+            <select id="dp-real">
               <option value="Bikes">a Bikes</option>
               <option value="Coordinate">a Coordinate</option>
             </select>
@@ -164,17 +173,18 @@ delete c;   // which destructor?</pre>
           </div>
           <div class="tool-field" id="dp-static-field">
             <label for="dp-static">declared as</label>
-            <select id="dp-static" onchange="runDispatch()">
+            <select id="dp-static">
               <option value="Coordinate">Coordinate</option>
               <option value="Bikes">Bikes</option>
             </select>
           </div>
           <div class="tool-field">
             <label>&nbsp;</label>
-            <label class="ck"><input type="checkbox" id="dp-virtual" onchange="runDispatch()">
+            <label class="ck"><input type="checkbox" id="dp-virtual">
               printDetails is <code>virtual</code></label>
           </div>
         </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="dp-output"></div>
       </div>
 
@@ -301,7 +311,7 @@ c.emplace_back(new Bikes(3,4,100));</pre>
         <div class="tool-controls">
           <div class="tool-field">
             <label for="cw-case">the situation</label>
-            <select id="cw-case" onchange="runCast()">
+            <select id="cw-case">
               <option value="numeric">int to double</option>
               <option value="downKnown">base pointer, known to be derived</option>
               <option value="downUnknown">base pointer, might be derived</option>
@@ -313,6 +323,7 @@ c.emplace_back(new Bikes(3,4,100));</pre>
             </select>
           </div>
         </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
         <div class="tool-output" id="cw-output"></div>
       </div>
 

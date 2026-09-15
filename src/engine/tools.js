@@ -81,11 +81,20 @@
           });
         }
 
-        var sels = tool.querySelectorAll('select');
-        for (var q = 0; q < sels.length; q++) {
-          if (sels[q].getAttribute('onchange')) continue;
-          if (sels[q].getAttribute('data-nolive') !== null) continue;
-          sels[q].addEventListener('change', rerun);
+        /* Selects, checkboxes and radios all re-run on change. Anything
+           carrying its own onchange is left alone: that handler is there
+           because it does something first, such as loading a preset into
+           the other fields.
+
+           Checkboxes were missing from this list for a long time, which
+           is not visible in a screenshot — the tick appears, and nothing
+           happens. Four of them across two modules were dead. */
+        var changers = tool.querySelectorAll(
+          'select, input[type="checkbox"], input[type="radio"]');
+        for (var q = 0; q < changers.length; q++) {
+          if (changers[q].getAttribute('onchange')) continue;
+          if (changers[q].getAttribute('data-nolive') !== null) continue;
+          changers[q].addEventListener('change', rerun);
         }
 
         // Say that the tool is live.

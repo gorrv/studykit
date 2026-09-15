@@ -191,6 +191,53 @@ async function checkStructure(s, m) {
     }
   }
 
+  /* Every tool looks like every other tool.
+   *
+   * A module's tools are its most visible surface, and they drifted: the
+   * ones written later put their preset chooser inside the output as a row
+   * of bespoke buttons, dropped the reset row, and wired their own input
+   * handlers — which also bypassed the engine's live-update setting. None
+   * of that is a bug in any single tool, and all of it is obvious side by
+   * side. So the shape is checked rather than remembered.
+   */
+  {
+    const tools = m.$$('.tool[data-run]');
+    s.ok('the module has tools', tools.length > 0);
+
+    const noReset = tools.filter(t => !t.querySelector('.tool-reset'))
+      .map(t => t.getAttribute('data-run'));
+    s.is('every tool offers a reset', noReset.length, 0, noReset.join(', '));
+
+    /* Controls belong in .tool-controls, where the engine can find them,
+       the reader can find them, and they stay put when the output
+       re-renders. */
+    const chipsInOutput = tools.filter(t => {
+      const out = t.querySelector('.tool-output');
+      return out && out.querySelector('.chip');
+    }).map(t => t.getAttribute('data-run'));
+    s.is('no tool hides its controls in its own output', chipsInOutput.length, 0,
+      chipsInOutput.join(', '));
+
+    /* The engine wires live re-runs itself, honouring the reader's live
+       toggle and a debounce. A hand-written handler that only calls the
+       tool's own run function does neither, and is redundant.
+
+       A handler that does something else first — load a preset into the
+       other fields, hide a control that has stopped being relevant — is
+       not redundant, and is left alone. */
+    const redundant = [];
+    tools.forEach(t => {
+      const run = t.getAttribute('data-run');
+      t.querySelectorAll('.tool-controls [oninput], .tool-controls [onchange]').forEach(el => {
+        const code = (el.getAttribute('oninput') || el.getAttribute('onchange') || '')
+          .replace(/\s/g, '');
+        if (code === run + '()') redundant.push(run + ' (' + code + ')');
+      });
+    });
+    s.is('no tool re-wires what the engine already does', redundant.length, 0,
+      redundant.join(', '));
+  }
+
   s.ok('no NUL bytes in source', m.raw.indexOf('\u0000') < 0);
   s.ok('has a title', !!m.doc.title, m.doc.title);
 
