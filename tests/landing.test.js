@@ -31,6 +31,7 @@ module.exports = async function run() {
   // The card stats are hand-written and were wrong within a day of the module
   // changing. Check them against the module they describe.
   const { loadModule } = require('./lib/harness');
+  const byTitle = {};
   for (const a of cards) {
     const file = path.basename(a.getAttribute('href'));
     const stats = {};
@@ -48,6 +49,8 @@ module.exports = async function run() {
       figures: (mod.raw.match(/<svg/g) || []).length,
       'exam questions': (mod.window.mockQuestionBank || []).length,
     };
+    const h3 = a.querySelector('h3');
+    if (h3) byTitle[h3.textContent.trim()] = actual;
 
     Object.keys(stats).forEach(k => {
       if (actual[k] === undefined) return;
@@ -55,6 +58,29 @@ module.exports = async function run() {
         `card says ${stats[k]}, module has ${actual[k]}`);
     });
   }
+
+  // The README repeats the same figures in a table. It went stale twice before
+  // anyone noticed, so check it against the modules too — same numbers, one
+  // source of truth, no hand-updating.
+  const readme = fs.readFileSync(path.join(DIST, '..', 'README.md'), 'utf8');
+  const cols = ['sections', 'tools', 'question generators', 'figures'];
+  const rows = readme.split('\n')
+    .map(l => l.trim())
+    .filter(l => l.startsWith('|') && !/^\|[\s|:-]+\|$/.test(l))
+    .map(l => l.slice(1, -1).split('|').map(c => c.trim()))
+    .filter(r => r.length === 5 && byTitle[r[0]]);
+
+  s.ok('the README table lists every module', rows.length === Object.keys(byTitle).length,
+    `README has ${rows.length} recognised rows, the landing page has ${Object.keys(byTitle).length} cards`);
+
+  rows.forEach(r => {
+    cols.forEach((col, i) => {
+      const claimed = Number(r[i + 1]);
+      if (!Number.isFinite(claimed)) return;
+      s.ok(`README: ${r[0]} — ${claimed} ${col}`, byTitle[r[0]][col] === claimed,
+        `README says ${claimed}, module has ${byTitle[r[0]][col]}`);
+    });
+  });
 
   s.ok('theme toggle flips the attribute', (() => {
     const before = doc.documentElement.getAttribute('data-theme');

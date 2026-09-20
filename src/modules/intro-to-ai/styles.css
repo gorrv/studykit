@@ -1,10 +1,6 @@
 
   /* Callouts */
   /* Code, pseudocode, diagrams */
-  .code-block, .pseudo { background: var(--code-bg); color: var(--code-fg); padding: 20px 24px; border-radius: 8px;
-    font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.6; overflow-x: auto;
-    margin: 20px 0; box-shadow: var(--shadow); }
-  .pseudo { white-space: pre; }
   main pre { background: var(--code-bg); color: var(--code-fg); padding: 18px 22px; border-radius: 8px;
     font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; line-height: 1.62; overflow-x: auto;
     margin: 20px 0; box-shadow: var(--shadow); white-space: pre; }
@@ -14,60 +10,21 @@
   main pre .ty { color: var(--code-ty); }
   main pre .st { color: var(--code-st); }
   main pre .dim { color: var(--code-dim); }
-  .pseudo .kw, .code-block .kw { color: var(--code-kw); }
-  .pseudo .cm, .code-block .cm { color: var(--code-cm); }
-  .pseudo .ty, .code-block .ty { color: var(--code-ty); }
-  .pseudo .st, .code-block .st { color: var(--code-st); }
-  .pseudo .dim, .code-block .dim { color: var(--code-dim); }
   .diagram { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 24px;
     margin: 24px 0; box-shadow: var(--shadow); font-family: 'IBM Plex Mono', monospace; font-size: 13px;
     line-height: 1.6; overflow-x: auto; }
-  /* Matrix / grid table for utilities, transitions, confusion matrices */
-  .mat { width: auto; border-collapse: collapse; margin: 20px 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
-  .mat th, .mat td { border: 1px solid var(--rule); padding: 8px 14px; text-align: center; }
-  .mat th { background: var(--tint-n); color: var(--ink-soft); font-size: 11px; }
-  .mat td { background: var(--surface-2); }
-  .mat td.hl { background: var(--tint-hl); font-weight: 600; }
-  .mat .rowhead { background: var(--tint-n); color: var(--ink-soft); font-size: 11px; text-align: right; }
   /* Comparison boxes */
-  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
-  @media (max-width: 760px) { .compare-2, .compare-3, .mode-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .compare-2, .compare-3 { grid-template-columns: 1fr; } }
   /* Numbered concept cards */
   .concept-grid { display: grid; gap: 18px; margin: 24px 0; }
-  /* Topic cards */
-  .tcards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
-  @media (max-width: 760px) { .tcards { grid-template-columns: 1fr; } }
-  .tcard { border: 1px solid var(--rule); border-top: 4px solid var(--accent); border-radius: 8px;
-    padding: 18px; background: var(--surface); box-shadow: var(--shadow); }
-  .tcard h4 { margin: 0 0 4px 0; font-size: 18px; color: var(--accent); }
-  .tcard .t-tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase;
-    letter-spacing: 0.1em; color: var(--ink-muted); display: block; margin-bottom: 8px; }
-  .tcard p { font-size: 13px; margin: 0 0 8px 0; }
-  .tcard.b { border-top-color: var(--accent-3); } .tcard.b h4 { color: var(--accent-3); }
-  .tcard.c { border-top-color: var(--accent-2); } .tcard.c h4 { color: var(--accent-2); }
-  .tcard.d { border-top-color: var(--accent-4); } .tcard.d h4 { color: var(--accent-4); }
   /* Proofs and derivations */
   .proof { background: var(--surface); border: 1px solid var(--rule); border-left: 4px solid var(--accent-4);
     border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 18px 0; box-shadow: var(--shadow); }
   .inf { display: inline-block; text-align: center; vertical-align: bottom;
     font-family: 'IBM Plex Mono', monospace; font-size: 12px; margin: 0 7px; }
-  .sos { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 18px 20px;
-    margin: 20px 0; box-shadow: var(--shadow); overflow-x: auto; }
   /* Step traces */
   .steps { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; background: var(--surface);
     border: 1px solid var(--rule); border-radius: 8px; margin: 14px 0; box-shadow: var(--shadow); overflow-x: auto; }
-  .step-row { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 7px 14px;
-    border-bottom: 1px dashed var(--rule); align-items: baseline; }
-  .step-row:last-child { border-bottom: none; }
-  .step-row:hover { background: rgba(var(--highlight-rgb), 0.14); }
-  .step-row .s-n { color: var(--ink-muted); font-size: 10px; }
-  .step-row .s-note { display: block; font-size: 10px; color: var(--accent-4); font-style: italic; margin-top: 2px; }
-  .step-row.ok .s-body { color: var(--accent-3); font-weight: 600; }
-  .step-row.fail .s-body { color: var(--accent-2); }
-  .trace-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
-  .trace-table td.on { background: var(--tint-c); color: var(--accent-3); font-weight: 600; }
-  .trace-table td.off { background: var(--tint-b2); color: var(--accent-2); font-weight: 600; }
-  .trace-table td.mark { background: var(--tint-a); }
   /* Badges and verdicts */
   .tag { display: inline-block; background: var(--accent); color: var(--surface-2); padding: 2px 10px;
     border-radius: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase;
@@ -76,10 +33,6 @@
   .tool { background: var(--surface-3); border: 2px solid var(--ink); border-radius: 12px; padding: 24px;
     margin: 28px 0; box-shadow: 0 4px 20px rgba(var(--shadow-rgb), 0.1); }
   /* Practice */
-  .qcard { border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 0 10px 10px 0;
-    padding: 18px 22px; margin: 20px 0; background: var(--surface); box-shadow: var(--shadow); }
-  .exc { border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0;
-    padding: 16px 20px; margin: 18px 0; background: var(--surface); box-shadow: var(--shadow); }
   .quiz-choice { text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 13.5px; padding: 9px 13px;
     border: 1px solid var(--rule); border-radius: 6px; background: var(--surface-2); color: var(--ink);
     cursor: pointer; transition: all 0.12s; }
@@ -112,7 +65,7 @@
   .fnode .nm { font-weight: 600; color: var(--accent); }
   .fnode .calc { color: var(--ink-muted); font-size: 11px; }
   /* Cram sheet */
-  /* ---- W2: CSP domains ---- */
+  /* ---- Topic 2: CSP domains ---- */
   .dom-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-family: 'IBM Plex Mono', monospace; }
   .dom-table th { background: var(--chip-bg); color: var(--chip-fg); font-size: 10px; text-transform: uppercase;
                   letter-spacing: 0.08em; padding: 6px 8px; text-align: center; border: 1px solid var(--rule); }
@@ -128,7 +81,6 @@
   .v.gone::after { content: ''; position: absolute; left: -1px; right: -1px; top: 6px; height: 1px; background: var(--ink); }
   .v-red { background: var(--val-r); } .v-green { background: var(--val-g); } .v-blue { background: var(--val-b); }
   .v-other { background: var(--ink-muted); }
-  .v-empty { background: transparent; border-style: dashed; }
   .vlabel { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-muted); margin-left: 5px; }
   .csp-sol { font-family: 'IBM Plex Mono', monospace; font-size: 13.5px; background: var(--tint-c);
              border: 1px solid var(--accent-3); border-radius: 8px; padding: 12px 16px; margin: 12px 0; line-height: 1.9; }
@@ -138,7 +90,7 @@
   .arcstep .arc { color: var(--accent); font-weight: 600; }
   .arcstep .rm { color: var(--accent-2); }
   .arcstep .okk { color: var(--ink-muted); }
-  /* ---- W3: RPG layers ---- */
+  /* ---- Topic 3: RPG layers ---- */
   .rpg-wrap { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0 14px 0; align-items: flex-start; }
   .rpg-col { min-width: 118px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface-2);
              padding: 8px 6px; flex-shrink: 0; }
@@ -164,7 +116,7 @@
          color: var(--accent-2); font-weight: 600; }
   .tbl { width: 84px; height: 4px; background: var(--ink-muted); border-radius: 2px; margin-top: 1px; }
   .stack-row { display: flex; align-items: flex-end; gap: 4px; }
-  /* ---- W4: grid worlds ---- */
+  /* ---- Topic 4: grid worlds ---- */
   .gw { display: inline-block; border-collapse: collapse; margin: 6px 10px 6px 0; vertical-align: top; }
   .gw td { border: 1px solid var(--rule); width: 62px; height: 46px; text-align: center; vertical-align: middle;
            font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; background: var(--surface-2); color: var(--ink); }
@@ -188,7 +140,7 @@
   .eu-row .act { font-weight: 600; color: var(--accent); }
   .eu-row.best .act { color: var(--accent-3); }
   .eu-row .tot { text-align: right; font-weight: 600; }
-  /* ---- W5: ML metrics ---- */
+  /* ---- Topic 5: ML metrics ---- */
   .cmx { border-collapse: collapse; margin: 14px 0; font-family: 'IBM Plex Mono', monospace; }
   .cmx td, .cmx th { border: 1px solid var(--rule); padding: 9px 14px; text-align: center; font-size: 13px; }
   .cmx th { background: var(--chip-bg); color: var(--chip-fg); font-size: 10px; text-transform: uppercase;
@@ -217,7 +169,7 @@
   .fitrow.best { background: rgba(var(--accent3-rgb), 0.12); border-radius: 4px; padding-left: 6px; font-weight: 600; }
   .fitrow .bar { height: 9px; border-radius: 3px; background: var(--accent); display: inline-block; vertical-align: middle; }
   .fitrow .bar.val { background: var(--accent-2); }
-  /* ---- W6: clustering ---- */
+  /* ---- Topic 6: clustering ---- */
   .dmx { border-collapse: collapse; margin: 10px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
   .dmx td, .dmx th { border: 1px solid var(--rule); padding: 5px 9px; text-align: center; min-width: 44px; }
   .dmx th { background: var(--surface-3); color: var(--ink-muted); font-size: 10.5px; font-weight: 600; }

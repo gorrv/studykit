@@ -136,6 +136,30 @@ async function checkStructure(s, m) {
     .filter(h => h && !m.doc.getElementById(h));
   s.ok('no dead internal links', dead.length === 0, [...new Set(dead)].join(', '));
 
+  /* These notes are meant to stand on their own, so nothing may refer to the
+     teaching they were written alongside: no "slide 10", no "this week", no
+     institution. It is easy to reintroduce one sentence at a time, and only a
+     reader who was never in the room would notice, so check it every run.
+     The verb is fine — "slide the threshold" is not a reference to a slide. */
+  {
+     const banned = [
+       [/\bslides?\s+\d+/i, 'a numbered slide'],
+       [/\bslide\s+deck|\bdecks?\b(?!\s*of\s+cards)/i, 'a deck'],
+       [/\blecturers?\b|\blectures?\b/i, 'a lecture'],
+       [/\bweeks?\b/i, 'a week'],
+       [/\(W\d+(\s*[–-]\s*\d+)?\)/, 'a week by its abbreviation'],
+       [/\btutorials?\s+\d+/i, 'a numbered tutorial'],
+       [/\bKCL\b|King'?s College/i, 'an institution'],
+     ];
+     const text = m.doc.body ? m.doc.body.textContent : m.raw;
+     banned.forEach(([re, what]) => {
+       const hit = text.match(re);
+       s.ok(`nothing on the page refers to ${what}`, !hit,
+         hit ? `found "${text.slice(Math.max(0, hit.index - 40), hit.index + 40)
+           .replace(/\s+/g, ' ').trim()}"` : null);
+     });
+  }
+
   /* Exactly one section is showing, and the nav can change which.
    *
    * The rule that hides the others lived in each module's own stylesheet,

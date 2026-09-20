@@ -1,4 +1,4 @@
-  /* ---------- W2 · CPU scheduling ---------- */
+  /* ---------- Topic 2 · CPU scheduling ---------- */
 
   /** A small random workload. Bursts stay short so the sums are doable by hand. */
   function qsWorkload(n) {

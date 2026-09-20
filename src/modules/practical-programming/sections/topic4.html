@@ -1,12 +1,12 @@
 <section id="topic4" class="topic-section">
 
       <div class="topic-header">
-        <div class="topic-eyebrow">Topic 04 · Ownership and Moving</div>
+        <div class="topic-eyebrow">C++ 04 · Ownership and Moving</div>
         <h1>Who Deletes It?</h1>
         <div class="topic-subtitle">unique_ptr, lvalues and rvalues, move semantics</div>
       </div>
 
-      <p>Topic 2 left you with a rule: every <code>new</code> needs a <code>delete</code>, and
+      <p>The pointers topic left you with a rule: every <code>new</code> needs a <code>delete</code>, and
       getting that right by hand across every early return, exception and branch is a job nobody
       does perfectly. This topic is the way out. One class holds the pointer and deletes it when it
       goes out of scope, and the type system is used to guarantee that exactly one thing owns it at

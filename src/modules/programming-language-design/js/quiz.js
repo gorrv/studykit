@@ -1,5 +1,5 @@
   /* ============================================================
-     TOOL 22: SELF-TEST GENERATOR
+     SELF-TEST GENERATOR
      Questions are generated, and marked by the same engines the
      topic-by-topic tools use.
      ============================================================ */
@@ -44,7 +44,7 @@
       ? '{' + res.mgu.map(e => plShow(e.l, 0) + '->' + plShow(e.r, 0)).sort().join(',') + '}'
       : 'failure';
     return {
-      topic: 'Unification (W10)',
+      topic: 'Unification (Topic 8)',
       prompt: `Solve the unification problem — give the <strong>mgu</strong>, or write <code>failure</code> if the terms are not unifiable.<pre>{ ${esc(prob)} }</pre>`,
       placeholder: 'X -> a, Y -> b   (or: failure)',
       answer: ans === 'failure' ? 'failure' : ans.replace(/->/g, ' ↦ '),
@@ -67,7 +67,7 @@
     const sigma = sbParseSigma(sg);
     const res = plShow(sbApplySim(plParse(t), sigma), 0);
     return {
-      topic: 'Substitutions (W9)',
+      topic: 'Substitutions (Topic 7)',
       prompt: `Apply the substitution to the term. Remember the replacements happen <strong>simultaneously</strong>.<pre>t = ${esc(t)}\nσ = {${esc(sg.replace(/->/g, ' ↦ '))}}</pre>What is <code>tσ</code>?`,
       placeholder: 'f(...)',
       answer: res,
@@ -96,7 +96,7 @@
     try { prSolve(goals, prog, {}, 0, ctx); } catch (e) { }
     const ans = ctx.solutions.length ? ctx.solutions[0] : 'false';
     return {
-      topic: 'Prolog (W9–10)',
+      topic: 'Prolog (Topics 7–8)',
       prompt: `What is Prolog's <strong>first</strong> answer to this query?<pre>${esc(b.p)}\n\n?- ${esc(q)}.</pre>`,
       placeholder: 'X = ...   or   true   or   false',
       answer: ans,
@@ -122,7 +122,7 @@
     ];
     const o = qzPick(opts);
     return {
-      topic: 'Horn clauses (W9)',
+      topic: 'Horn clauses (Topic 7)',
       prompt: `Is this a fact, a rule, a goal — or not a Horn clause at all?<pre>${esc(o.e.replace(/\\\//g, ' ∨ ').replace(/~/g, '¬'))}</pre>`,
       kind: 'choice',
       choices: ['fact', 'rule', 'goal', 'not a Horn clause'],
@@ -143,7 +143,7 @@
     while (g++ < 4000) { const nx = smStepCfg(cfg); if (nx === null || nx.stuck) break; cfg = { c: nx.c, r: nx.r, m: nx.m }; if (!cfg.c.length) break; }
     const val = cfg.m[ask];
     return {
-      topic: 'SIMP semantics (W3–4)',
+      topic: 'SIMP semantics (Topics 3–4)',
       prompt: `Run this SIMP program in the given store. What is the final value of <code>${ask}</code>?<pre>${esc(prog)}\n\ninitial store: {${esc(mem.replace(/=/g, ' ↦ '))}}</pre>`,
       placeholder: 'a number',
       answer: String(val),
@@ -162,7 +162,7 @@
       const r = fpReduce(expr, defs, strat, 60);
       const ok = r.done && r.nf;
       return {
-        topic: 'Evaluation strategies (W6)',
+        topic: 'Evaluation strategies (Topic 5)',
         prompt: `With the definitions<pre>${esc(defs)}</pre>does <code>${esc(expr)}</code> reach a value under <strong>${strat === 'cbv' ? 'call-by-value' : 'call-by-name'}</strong>?`,
         kind: 'choice', choices: ['yes', 'no'],
         answer: ok ? 'yes' : 'no',
@@ -173,7 +173,7 @@
     const expr = `square (${n} + ${m})`;
     const rc = fpReduce(expr, defs, 'cbn', 60), rl = fpReduce(expr, defs, 'lazy', 60);
     return {
-      topic: 'Evaluation strategies (W6)',
+      topic: 'Evaluation strategies (Topic 5)',
       prompt: `With <code>square x = x * x</code>, how many reduction steps does <strong>call-by-name</strong> take to evaluate <code>${esc(expr)}</code>?`,
       placeholder: 'a number',
       answer: String(rc.steps),
@@ -191,7 +191,7 @@
     let ans;
     try { ans = tyCheck(sfParseTerm(sfLex(t), 0).e, G, E).ty; } catch (e) { ans = 'untypeable'; }
     return {
-      topic: 'SFUN typing (W8)',
+      topic: 'SFUN typing (Topic 6)',
       prompt: `With Γ(x) = int and ε(max) = (int,int)→int, ε(square) = ε(fact) = (int)→int, what is the type of<pre>${esc(t)}</pre>`,
       kind: 'choice', choices: ['int', 'bool', 'untypeable'],
       answer: ans,
@@ -212,7 +212,7 @@
     while (g++ < 200) { const r = pmStep(cur, D); if (!r) break; cur = r.e; }
     const ans = pmShow(cur, 0);
     return {
-      topic: 'Lists &amp; data types (W8)',
+      topic: 'Lists &amp; data types (Topic 6)',
       prompt: `Reduce to normal form:<pre>${esc(defs)}\n\n${esc(e)}</pre>`,
       placeholder: 'the value',
       answer: ans,
@@ -229,7 +229,7 @@
     const L = ptEval(ptBuild(toks, 'left')), R = ptEval(ptBuild(toks, 'right'));
     const askLeft = Math.random() < 0.5;
     return {
-      topic: 'Ambiguity (W1)',
+      topic: 'Ambiguity (Topic 1)',
       prompt: `Under the ambiguous grammar <code>Exp ::= Num | Exp Op Exp</code>, the string <code>${esc(expr)}</code> has two parse trees. What value does the <strong>${askLeft ? 'left' : 'right'}-associative</strong> reading give?`,
       placeholder: 'a number',
       answer: String(askLeft ? L : R),

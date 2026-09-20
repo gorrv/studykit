@@ -1,5 +1,5 @@
   /* ============================================================
-     TOPIC 06 · revision week
+     TOPIC 06 · consolidation
      ------------------------------------------------------------
      Topic 6 introduces nothing new — it is a consolidation topic — so
      this section has no new material in it and does not pretend
@@ -299,7 +299,7 @@
     h += '</div>';
 
     h += '<div class="lp-foot">Press it again and every instance is different. The point of a ' +
-      'revision week is to find the thing you have quietly stopped believing; this is the same ' +
+      'revision pass is to find the thing you have quietly stopped believing; this is the same ' +
       'question asked of the notes.</div>';
 
     out.innerHTML = h;
@@ -468,7 +468,7 @@
     if (!q) {
       h += '<div class="quiz-prompt"><div class="qp-topic">ready</div>' +
         'Press <strong>New question</strong>. Questions come from Topics 1 to 5 only — the ' +
-        'material this revision week covers.</div>';
+        'material this consolidation topic covers.</div>';
       out.innerHTML = h;
       return;
     }

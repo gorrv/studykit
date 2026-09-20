@@ -15,12 +15,14 @@ No runtime dependencies. No server. It works offline.
 
 | Module | Sections | Tools | Question generators | Figures |
 |---|---|---|---|---|
+| Foundations of Computing | 12 | 46 | 91 | 5 |
 | Introduction to AI | 40 | 33 | 230 | 44 |
+| Practical Experiences of Programming | 12 | 30 | 74 | 0 |
 | Programming Language Design | 11 | 24 | 10 | 4 |
 | Operating Systems | 13 | 12 | 10 | 1 |
-| Foundations of Computing | 3 | 6 | 11 | — |
 
 Operating Systems also carries a hand-written bank of 123 exam questions behind its mock paper.
+The table is checked against the built modules by `tests/landing.test.js`, so it cannot drift.
 
 ---
 
@@ -59,7 +61,7 @@ own directory:
 
 ```html
 <!--@include @/engine/quiz.js-->     shared by every module
-<!--@include js/w4-mdp.js-->         this module's own
+<!--@include js/t4-mdp.js-->         this module's own
 ```
 
 The build inlines everything, so a built module still opens from a USB stick on a machine with no
@@ -89,14 +91,15 @@ any code moved. See [`docs/AUTHORING.md`](docs/AUTHORING.md) to add a module.
 ## Running the tests
 
 ```
-  running build.test.js …                             32 passed (80ms)
-  running foundations-of-computing.test.js …          99 passed (4136ms)
-  running intro-to-ai.test.js …                      230 passed (3790ms)
-  running landing.test.js …                           20 passed (7676ms)
-  running operating-systems.test.js …                110 passed (1829ms)
-  running programming-language-design.test.js …      130 passed (3132ms)
+  running build.test.js …                             39 passed (119ms)
+  running foundations-of-computing.test.js …         875 passed (9241ms)
+  running intro-to-ai.test.js …                      274 passed (10704ms)
+  running landing.test.js …                           47 passed (9454ms)
+  running operating-systems.test.js …                141 passed (2662ms)
+  running practical-programming.test.js …            544 passed (58942ms)
+  running programming-language-design.test.js …      169 passed (5240ms)
 
-621 / 621 assertions passed across 6 suites in 21.7s
+2089 / 2089 assertions passed across 7 suites in 97.6s
 ```
 
 Run one suite with `node tests/run.js intro` (after a build).
@@ -105,9 +108,15 @@ The suites come in three layers.
 
 **Structural invariants**, in `tests/lib/harness.js`, applied to every module: no duplicate element
 ids, no dead internal links, every tool registered and rendering without errors, no unresolved
-template literals or leaked `undefined`/`NaN`, every section reachable through the nav, no runtime
-warnings, and every CSS token defined in both palettes — a token with no dark value is invisible in
-dark mode, which is the one class of bug the DOM tests can never see.
+template literals or leaked `undefined`/`NaN`, exactly one section visible with the nav able to
+change which, every class used on the page backed by a rule, no runtime warnings, and every CSS
+token defined in both palettes — a token with no dark value is invisible in dark mode, which is the
+one class of bug the DOM tests can never see. Also that nothing refers to the teaching the notes
+were written alongside: no numbered slide, no lecture, no week, no institution. These pages are
+meant to stand on their own, and one sentence at a time is how that quietly stops being true.
+
+The counts in this file and on the landing page are checked against the built modules too, so the
+documentation cannot drift from what it describes.
 
 **Generated-question fuzzing**: thousands of draws per run, each checked to be self-consistent —
 the stated answer is accepted by its own marker, no wrong choice is, and nonsense is rejected.
@@ -142,7 +151,7 @@ s.ok('FIFO is not — which is why it can show the anomaly', viol.fifo > 0);
 
 ## Errors this caught
 
-In the source lecture material:
+In the source material:
 
 - A decision tree figure whose printed class labels contradicted its own class-count vectors in
   three nodes.

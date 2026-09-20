@@ -7,7 +7,7 @@
       <p class="no-print">A distilled summary of the module so far. Use <strong>Ctrl/Cmd+P</strong> to print it (the sidebar and tools are hidden in print). Each card maps to a topic.</p>
       <div class="cram-grid">
         <div class="cram-card">
-          <h3>W1 · The three components</h3>
+          <h3>Topic 1 · The three components</h3>
           <ul>
             <li><span class="term">Syntax</span> = form of programs (how expressions/commands/declarations are built).</li>
             <li><span class="term">Semantics</span> = meaning of programs (how they behave when executed).</li>
@@ -16,7 +16,7 @@
           </ul>
         </div>
         <div class="cram-card">
-          <h3>W1 · Paradigms</h3>
+          <h3>Topic 1 · Paradigms</h3>
           <ul>
             <li><span class="term">Imperative</span> — computation steps, mirrors the architecture. <em>Fortran, C, Python, Java.</em></li>
             <li><span class="term">Functional</span> — mathematical functions; <em>what</em>, not <em>how</em>. <em>Lisp, Haskell, CaML, Scheme.</em></li>
@@ -26,7 +26,7 @@
           </ul>
         </div>
         <div class="cram-card">
-          <h3>W1 · Implementation techniques</h3>
+          <h3>Topic 1 · Implementation techniques</h3>
           <ul>
             <li><span class="term">Compilation</span> → machine language. Fast execution.</li>
             <li><span class="term">Phases:</span> lexical analysis → syntax analysis (parsing) → type &amp; semantics analysis → machine code generation.</li>
@@ -36,7 +36,7 @@
           </ul>
         </div>
         <div class="cram-card">
-          <h3>W1 · Syntax</h3>
+          <h3>Topic 1 · Syntax</h3>
           <ul>
             <li><span class="term">Given by:</span> an alphabet + a set of rules.</li>
             <li><span class="term">Grammar</span> = alphabet V = V<sub>T</sub> ∪ V<sub>NT</sub> + rules + initial symbol. Written in <strong>BNF</strong>.</li>
@@ -47,7 +47,7 @@
           </ul>
         </div>
         <div class="cram-card">
-          <h3>W1 · Semantics</h3>
+          <h3>Topic 1 · Semantics</h3>
           <ul>
             <li><span class="term">Static (typing)</span> — catch syntactically-correct-but-broken programs <em>before</em> execution, e.g. <code>1 + 'a'</code>.</li>
             <li><span class="term">Dynamic</span> — the meaning of programs.</li>
@@ -59,7 +59,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-3);">
-          <h3 style="color:var(--accent-3);">W1 · Transition systems</h3>
+          <h3 style="color:var(--accent-3);">Topic 1 · Transition systems</h3>
           <ul>
             <li><span class="term">Specified by:</span> a set <strong>Config</strong> of configurations + a relation <strong>→ ⊆ Config × Config</strong>.</li>
             <li><span class="term">c →* c′</span> = reflexive transitive closure: a chain <code>c → c₁ → … → cₙ = c′</code> with <strong>n ≥ 0</strong>.</li>
@@ -71,7 +71,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-4);">
-          <h3 style="color:var(--accent-4);">W2 · Variables</h3>
+          <h3 style="color:var(--accent-4);">Topic 2 · Variables</h3>
           <ul>
             <li>Imperative languages = abstractions of the <span class="term">Von Neumann</span> architecture; <span class="term">variables represent memory cells</span>.</li>
             <li><span class="term">4 properties:</span> name · type (<em>values allowed <strong>and</strong> operations available</em>) · address = <span class="term">l-value</span> · value = <span class="term">r-value</span>.</li>
@@ -80,7 +80,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-4);">
-          <h3 style="color:var(--accent-4);">W2 · Lifetime &amp; scope</h3>
+          <h3 style="color:var(--accent-4);">Topic 2 · Lifetime &amp; scope</h3>
           <ul>
             <li><span class="term">Lifetime</span> = time between allocation and deallocation. <strong>4 classes:</strong></li>
             <li><span class="term">Static</span> — bound before execution until end. ✓ efficiency (compile-time addressing) ✗ no reuse, no recursion.</li>
@@ -93,7 +93,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-2);">
-          <h3 style="color:var(--accent-2);">W2 · Flow of control</h3>
+          <h3 style="color:var(--accent-2);">Topic 2 · Flow of control</h3>
           <ul>
             <li><span class="term">3 kinds:</span> selection · looping · branching. <strong>if-then-else + while suffice for any sequential algorithm; go-to is superfluous.</strong></li>
             <li><span class="term">Dangling else</span> — Java matches <code>else</code> with the <em>most recent unpaired then</em>. Algol 60 disambiguates with <code>begin</code>/<code>end</code>; Java needs braces for the outer reading.</li>
@@ -107,7 +107,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-3);">
-          <h3 style="color:var(--accent-3);">W3 · SIMP syntax</h3>
+          <h3 style="color:var(--accent-3);">Topic 3 · SIMP syntax</h3>
           <ul>
             <li><span class="term">Why formal:</span> <code>f(i++,--i)</code> — both operators precise, but C never specified the <em>order of evaluation of parameters</em> → different compilers, different code.</li>
             <li><span class="term">Abstract machine</span> = transition system specifying an <em>interpreter</em>. The <em>first</em> approach to formal description.</li>
@@ -120,7 +120,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-3);">
-          <h3 style="color:var(--accent-3);">W3 · The machine</h3>
+          <h3 style="color:var(--accent-3);">Topic 3 · The machine</h3>
           <ul>
             <li><span class="term">3 parts:</span> control stack <em>c</em> · results (auxiliary) stack <em>r</em> · memory/store <em>m</em>, a <strong>partial</strong> function address → integer; dom(m) = where defined.</li>
             <li><span class="term">m[l ↦ n](l) = n</span> and <span class="term">m[l ↦ n](l′) = m(l′)</span> if l ≠ l′.</li>
@@ -137,7 +137,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-4);">
-          <h3 style="color:var(--accent-4);">W4 · Induction</h3>
+          <h3 style="color:var(--accent-4);">Topic 4 · Induction</h3>
           <ul>
             <li><span class="term">Mathematical:</span> base P(0); step ∀n. P(n) ⇒ P(n+1).</li>
             <li><span class="term">Structural (lists):</span> P(nil); P(l) ⇒ P(cons(h,l)).</li>
@@ -150,7 +150,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent);">
-          <h3 style="color:var(--accent);">W4 · Small-step</h3>
+          <h3 style="color:var(--accent);">Topic 4 · Small-step</h3>
           <ul>
             <li><span class="term">Configuration</span> = ⟨P, s⟩ — a <em>pair</em>, no stacks. Remaining work = the leftover program text.</li>
             <li>E has value n if ⟨E,s⟩ →* ⟨n,s′⟩ · C succeeds if ⟨C,s⟩ →* ⟨skip,s′⟩.</li>
@@ -165,7 +165,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-3);">
-          <h3 style="color:var(--accent-3);">W4 · Big-step</h3>
+          <h3 style="color:var(--accent-3);">Topic 4 · Big-step</h3>
           <ul>
             <li><span class="term">⟨P,s⟩ ⇓ ⟨P′,s′⟩</span> if ⟨P,s⟩ →* ⟨P′,s′⟩ and ⟨P′,s′⟩ is <em>terminal</em>.</li>
             <li><span class="term">Expressions:</span> const, var, and, not, op, bop. Stores thread <strong>s → s′ → s″</strong>.</li>
@@ -177,7 +177,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-3);">
-          <h3 style="color:var(--accent-3);">W6 · Functional basics</h3>
+          <h3 style="color:var(--accent-3);">Topic 5 · Functional basics</h3>
           <ul>
             <li>Programs consist <span class="term">entirely of functions</span>; functions defined in terms of other functions; focus on <em>what</em>, not <em>how</em>.</li>
             <li>Strongly typed (no core dumps) + built-in memory management. <span class="term">✓</span> shorter, easier to understand/design/verify/maintain. <span class="term">✗</span> usually slower, arguably less flexible.</li>
@@ -191,7 +191,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-3);">
-          <h3 style="color:var(--accent-3);">W6 · Definitions &amp; currying</h3>
+          <h3 style="color:var(--accent-3);">Topic 5 · Definitions &amp; currying</h3>
           <ul>
             <li><span class="term">3 styles:</span> plain equation · guarded (conditional) equations · pattern matching.</li>
             <li><span class="term">Pattern order matters</span> — arguments compared against definitions <em>in the order provided</em>, until a match or the patterns are exhausted.</li>
@@ -207,7 +207,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-4);">
-          <h3 style="color:var(--accent-4);">W8 · Types &amp; polymorphism</h3>
+          <h3 style="color:var(--accent-4);">Topic 6 · Types &amp; polymorphism</h3>
           <ul>
             <li>Values divided into <span class="term">types</span>, each associated with <em>a set of operations</em>; given explicitly or inferred.</li>
             <li><span class="term">Static</span> (C, C++, Java, Haskell) vs <span class="term">dynamic</span> (Python, JavaScript, PHP).</li>
@@ -221,7 +221,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-4);">
-          <h3 style="color:var(--accent-4);">W8 · Lists &amp; user-defined types</h3>
+          <h3 style="color:var(--accent-4);">Topic 6 · Lists &amp; user-defined types</h3>
           <ul>
             <li><code>[] :: [a]</code> · <code>(:) :: a→[a]→[a]</code> · <code>head :: [a]→a</code> · <code>tail :: [a]→[a]</code>. Strings <em>are</em> lists of characters.</li>
             <li><code>data Nat = Zero | Succ Nat</code> · <code>data Seq a = Empty | Cons a (Seq a)</code>.</li>
@@ -232,7 +232,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-3);">
-          <h3 style="color:var(--accent-3);">W8 · SFUN semantics &amp; typing</h3>
+          <h3 style="color:var(--accent-3);">Topic 6 · SFUN semantics &amp; typing</h3>
           <ul>
             <li>SFUN = small, <span class="term">first-order</span> functional language over ints and Booleans. <strong>Configurations are just terms</strong> — no store.</li>
             <li>Program = set of recursive equations; vars(dᵢ) ⊆ parameters; <span class="term">one equation per function name</span>. <em>Closed</em> term = no variables.</li>
@@ -247,7 +247,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent);">
-          <h3 style="color:var(--accent);">W9 · Logic programming basics</h3>
+          <h3 style="color:var(--accent);">Topic 7 · Logic programming basics</h3>
           <ul>
             <li><span class="term">Logic</span> expresses knowledge / describes the problem; <span class="term">inference</span> computes the solution.</li>
             <li>✓ knowledge-based · declarative · precise simple semantics · one formalism for spec/program/proof · <strong>the same program used many ways</strong> ← <em>only this last one is specific to LP</em>.</li>
@@ -259,7 +259,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent);">
-          <h3 style="color:var(--accent);">W9 · Clauses &amp; substitutions</h3>
+          <h3 style="color:var(--accent);">Topic 7 · Clauses &amp; substitutions</h3>
           <ul>
             <li><span class="term">Horn clause</span> = disjunction of literals, <em>at most one positive</em>. <span class="term">Definite clause</span> = exactly one positive.</li>
             <li><span class="term">Fact</span> single positive · <span class="term">Rule</span> positive + negatives · <span class="term">Goal</span> only negatives, <code>:- B₁,…,Bₙ.</code></li>
@@ -272,7 +272,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-2);">
-          <h3 style="color:var(--accent-2);">W9 · Built-ins, lists, limitations</h3>
+          <h3 style="color:var(--accent-2);">Topic 7 · Built-ins, lists, limitations</h3>
           <ul>
             <li>Built-ins: operators · <code>is</code> · <code>call/1 fail/0 !/0</code> · <code>','</code> · <code>=..</code> · <code>write, nl</code>. Notation <span class="term">p/n</span>.</li>
             <li>Lists: <code>[]</code> · <code>[X|L]</code> cons · <code>[X,Y,Z]</code>. <code>[]</code> matches only the empty list, <code>[H|T]</code> only non-empty. <code>member/2 length/2 sort/2</code>.</li>
@@ -285,7 +285,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-4);">
-          <h3 style="color:var(--accent-4);">W10 · Unification</h3>
+          <h3 style="color:var(--accent-4);">Topic 8 · Unification</h3>
           <ul>
             <li><span class="term">Problem U</span> = set of equations between terms. <span class="term">Unifier</span> σ makes sᵢσ and tᵢσ <em>syntactically identical</em>. <span class="term">mgu</span> = a unifier of which every other unifier is an instance.</li>
             <li>{X↦Y} is more general than {X↦a, Y↦a}: compose with {Y↦a} to get ρ, but not conversely.</li>
@@ -297,7 +297,7 @@
           </ul>
         </div>
         <div class="cram-card" style="border-top-color: var(--accent-4);">
-          <h3 style="color:var(--accent-4);">W10 · SLD-resolution</h3>
+          <h3 style="color:var(--accent-4);">Topic 8 · SLD-resolution</h3>
           <ul>
             <li><span class="term">Principle:</span> prove <code>:- G₁,…,Gₙ</code> by showing P ∪ {¬G₁∨…∨¬Gₙ} leads to a <em>contradiction</em>. Derived goals = <span class="term">resolvents</span>.</li>
             <li><span class="term">S</span>elective (a fixed computation rule picks the atom) · <span class="term">L</span>inear (the most recent resolvent is the next goal) · <span class="term">D</span>efinite (all program clauses definite).</li>
@@ -317,30 +317,30 @@
             <li><span class="term">Trees, not strings</span> — abstract syntax exists so that SOS rules can be defined "in terms of its components".</li>
             <li>An <span class="term">interpreter is a machine in software</span> — the same idea returns as the abstract machine.</li>
             <li><span class="term">Non-determinism</span> is a bug for imperative execution but a feature for logic programming search (Prolog, later).</li>
-            <li>The <span class="term">dangling else</span> is W1's ambiguity problem inside a real language — same string, two parse trees. Abstract syntax dissolves it.</li>
+            <li>The <span class="term">dangling else</span> is Topic 1's ambiguity problem inside a real language — same string, two parse trees. Abstract syntax dissolves it.</li>
             <li><span class="term">Blocks</span> do double duty: they scope declarations <em>and</em> disambiguate nested selectors.</li>
-            <li>W2 describes constructs <em>informally</em>; <span class="term">SIMP</span> gives them a formal operational semantics using W1's transition systems.</li>
-            <li><span class="term">l-value / r-value</span> (W2) becomes <em>syntax</em> in W3: <code>l := !l − 1</code>. The assignment rule is the distinction made mechanical.</li>
-            <li>W1's <span class="term">terminal configuration</span> (no outgoing →) is W3's ⟨nil, nil, m⟩; a <em>stuck</em> configuration (undefined location, division by zero) is non-final with no successor.</li>
-            <li><span class="term">Determinism</span> (W1) is what makes the machine an interpreter: exactly one rule matches each configuration.</li>
-            <li><span class="term">Abstract syntax = the induction principle.</span> W1 made programs trees; W4 uses exactly those leaves and constructors as the base cases and induction steps.</li>
-            <li><span class="term">Three semantics for one language:</span> abstract machine (W3) · small-step · big-step (W4). All agree on the final store; they differ in granularity and in what they can express about failure.</li>
-            <li>W2's <span class="term">static scope</span> becomes W4's block rule: a fresh location, a renaming, and a discard on exit.</li>
-            <li><span class="term">Evaluation order</span>, unspecified in C, is pinned down three times over: op-decomp order (W3), the <em>n₁</em> in the R rules (W4 small-step), and store threading s→s′→s″ (W4 big-step).</li>
-            <li><span class="term">e → e′ is the same arrow throughout.</span> Functional evaluation (W6) is a small-step semantics with <em>no store</em> — a configuration is just an expression, because nothing can be assigned to.</li>
-            <li><span class="term">Evaluation order, one more time:</span> C left it open (W3), SIMP's rules pinned it down (W3–W4), and W6 makes it a <em>choice</em> — the strategy — with real consequences for termination.</li>
-            <li><span class="term">Scope recurs:</span> Pascal blocks (W2) → SIMP's <code>begin loc</code> rule (W4) → <code>where</code> / <code>let … in</code> (W6). Always: a local name, a delimited region, gone afterwards.</li>
+            <li>Topic 2 describes constructs <em>informally</em>; <span class="term">SIMP</span> gives them a formal operational semantics using Topic 1's transition systems.</li>
+            <li><span class="term">l-value / r-value</span> (Topic 2) becomes <em>syntax</em> in Topic 3: <code>l := !l − 1</code>. The assignment rule is the distinction made mechanical.</li>
+            <li>Topic 1's <span class="term">terminal configuration</span> (no outgoing →) is Topic 3's ⟨nil, nil, m⟩; a <em>stuck</em> configuration (undefined location, division by zero) is non-final with no successor.</li>
+            <li><span class="term">Determinism</span> (Topic 1) is what makes the machine an interpreter: exactly one rule matches each configuration.</li>
+            <li><span class="term">Abstract syntax = the induction principle.</span> Topic 1 made programs trees; Topic 4 uses exactly those leaves and constructors as the base cases and induction steps.</li>
+            <li><span class="term">Three semantics for one language:</span> abstract machine (Topic 3) · small-step · big-step (Topic 4). All agree on the final store; they differ in granularity and in what they can express about failure.</li>
+            <li>Topic 2's <span class="term">static scope</span> becomes Topic 4's block rule: a fresh location, a renaming, and a discard on exit.</li>
+            <li><span class="term">Evaluation order</span>, unspecified in C, is pinned down three times over: op-decomp order (Topic 3), the <em>n₁</em> in the R rules (Topic 4 small-step), and store threading s→s′→s″ (Topic 4 big-step).</li>
+            <li><span class="term">e → e′ is the same arrow throughout.</span> Functional evaluation (Topic 5) is a small-step semantics with <em>no store</em> — a configuration is just an expression, because nothing can be assigned to.</li>
+            <li><span class="term">Evaluation order, one more time:</span> C left it open (Topic 3), SIMP's rules pinned it down (Topics 3–4), and Topic 5 makes it a <em>choice</em> — the strategy — with real consequences for termination.</li>
+            <li><span class="term">Scope recurs:</span> Pascal blocks (Topic 2) → SIMP's <code>begin loc</code> rule (Topic 4) → <code>where</code> / <code>let … in</code> (Topic 5). Always: a local name, a delimited region, gone afterwards.</li>
             <li><span class="term">SIMP vs SFUN</span> — both get a big-step semantics in the same style, but SIMP's configurations are ⟨P, s⟩ and SFUN's are <em>just terms</em>. Removing the store is exactly what "no side effects" means formally.</li>
-            <li><span class="term">"No derivation exists"</span> means the same thing in W4 and W8: divergence and stuckness are both just the absence of a finite proof tree.</li>
-            <li><span class="term">Induction, three times:</span> mathematical (W4) → structural over abstract syntax (W4) → structural over a <code>data</code> declaration (W8). Always one case per constructor.</li>
-            <li><span class="term">Goals are configurations.</span> Prolog's "informal procedural mechanism" is a transition system in W1's sense — one step replaces the selected literal by a clause body under a substitution.</li>
-            <li><span class="term">Substitution</span> runs through the whole course: SIMP's <code>m[l ↦ n]</code>, SFUN's <code>dᵢ{x ↦ v}</code>, SOS's <code>C{x ↦ l}</code>, and Prolog's σ. Always variables replaced by terms, always simultaneous.</li>
+            <li><span class="term">"No derivation exists"</span> means the same thing in Topic 4 and Topic 6: divergence and stuckness are both just the absence of a finite proof tree.</li>
+            <li><span class="term">Induction, three times:</span> mathematical (Topic 4) → structural over abstract syntax (Topic 4) → structural over a <code>data</code> declaration (Topic 6). Always one case per constructor.</li>
+            <li><span class="term">Goals are configurations.</span> Prolog's "informal procedural mechanism" is a transition system in Topic 1's sense — one step replaces the selected literal by a clause body under a substitution.</li>
+            <li><span class="term">Substitution</span> runs through the whole module: SIMP's <code>m[l ↦ n]</code>, SFUN's <code>dᵢ{x ↦ v}</code>, SOS's <code>C{x ↦ l}</code>, and Prolog's σ. Always variables replaced by terms, always simultaneous.</li>
             <li><span class="term">Three paradigms, three notions of "answer":</span> imperative = the final store · functional = the normal form · logic = the <em>bindings</em> that made the proof work.</li>
-            <li><span class="term">Complete ≠ complete implementation.</span> SLD-resolution finds every solution; Prolog's depth-first search need not. Compare W6: call-by-name always finds the value, call-by-value need not. <em>Same shape of result, twice.</em></li>
-            <li><span class="term">Order sensitivity</span> is the recurring practical trap: pattern order in Haskell (W6), equation order in SFUN, clause order in Prolog (W10). In each case the <em>declarative</em> reading is order-free and the <em>implementation</em> is not.</li>
-            <li><span class="term">Renaming apart</span> — SIMP's fresh <code>l</code> in the block rule (W4) and Prolog's clause renaming (W10) solve the same problem: accidental capture of names.</li>
-            <li><span class="term">Trees everywhere:</span> parse trees (W1) · derivation trees for ⇓ (W4, W8) · SLD-resolution trees (W10). All are proofs; a missing tree always means "no derivation exists".</li>
-            <li><span class="term">Course order:</span> imperative (SIMP + transition systems) → functional + type systems → logic (Prolog).</li>
+            <li><span class="term">Complete ≠ complete implementation.</span> SLD-resolution finds every solution; Prolog's depth-first search need not. Compare Topic 5: call-by-name always finds the value, call-by-value need not. <em>Same shape of result, twice.</em></li>
+            <li><span class="term">Order sensitivity</span> is the recurring practical trap: pattern order in Haskell (Topic 5), equation order in SFUN, clause order in Prolog (Topic 8). In each case the <em>declarative</em> reading is order-free and the <em>implementation</em> is not.</li>
+            <li><span class="term">Renaming apart</span> — SIMP's fresh <code>l</code> in the block rule (Topic 4) and Prolog's clause renaming (Topic 8) solve the same problem: accidental capture of names.</li>
+            <li><span class="term">Trees everywhere:</span> parse trees (Topic 1) · derivation trees for ⇓ (Topics 4 and 6) · SLD-resolution trees (Topic 8). All are proofs; a missing tree always means "no derivation exists".</li>
+            <li><span class="term">The order here:</span> imperative (SIMP + transition systems) → functional + type systems → logic (Prolog).</li>
           </ul>
         </div>
       </div>

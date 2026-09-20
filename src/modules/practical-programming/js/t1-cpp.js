@@ -5,7 +5,7 @@
      make a NEW object, and when does it just give an existing one
      another name? Java answers that uniformly (everything is a
      reference); C++ does not, and the difference is where the
-     week's bugs live.
+     topic's bugs live.
 
      So this is not a syntax highlighter. It keeps a heap of
      objects with identities, an environment of names bound to

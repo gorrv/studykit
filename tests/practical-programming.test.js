@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Practical Experiences of Programming — Topic 1, C++.
+ * Practical Experiences of Programming — the C++ and Scala halves.
  *
  * This module is checked differently from the others, because for once the
  * reference implementation is available: g++ is a real C++ compiler, and the

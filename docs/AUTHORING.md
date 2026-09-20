@@ -38,7 +38,7 @@ tools, then your question generators, then `boot.js` last.
   <!--@include @/engine/tools.js-->
   <!--@include @/engine/quiz.js-->
   <!--@include @/engine/search.js-->
-  <!--@include js/w2-scheduling.js-->
+  <!--@include js/t2-scheduling.js-->
   <!--@include js/questions/scheduling.js-->
   <!--@include @/engine/boot.js-->
 </script>

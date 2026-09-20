@@ -1,4 +1,4 @@
-  /* ---------- W3 · address translation, W4 · page replacement ---------- */
+  /* ---------- Topic 3 · address translation, Topic 4 · page replacement ---------- */
 
   /**
    * Mark a hex answer.

@@ -241,7 +241,7 @@
   }
   function runExam() { exRender(); }
   TOOL_RUNNERS.runExam = runExam;
-  /* ---------- W1: quiz generators ---------- */
+  /* ---------- Topic 1: quiz generators ---------- */
   (function () {
     const ROMANIA = `ARAD - A : 118\nARAD - B : 75\nARAD - D : 140\nB - C : 71\nD - C : 151\nD - E : 80\nD - F : 99\nA - I : 111\nI - L : 70\nL - M : 75\nM - H : 120\nH - E : 146\nH - G : 138\nE - G : 97\nG - BUCHAREST : 101\nF - BUCHAREST : 211`;
     const RH = { ARAD: 366, A: 329, B: 374, C: 380, D: 253, E: 193, F: 176, G: 100, H: 160, I: 244, L: 241, M: 242, BUCHAREST: 0 };

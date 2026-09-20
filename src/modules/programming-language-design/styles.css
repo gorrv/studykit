@@ -226,7 +226,7 @@
   .cat.term { border-top-color: var(--accent-3); } .cat.term h4 { color: var(--accent-3); }
   .cat.stuck { border-top-color: var(--accent-2); } .cat.stuck h4 { color: var(--accent-2); }
   .cat.div { border-top-color: var(--accent-4); } .cat.div h4 { color: var(--accent-4); }
-  /* ===== Topic 6 components ===== */
+  /* ===== Topic 5 components ===== */
   .hs { background: var(--code-bg); color: var(--code-fg); padding: 16px 20px; border-radius: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.65; overflow-x: auto; margin: 16px 0; box-shadow: var(--shadow); white-space: pre; }
   .hs .kw { color: var(--code-kw); } .hs .cm { color: var(--code-cm); } .hs .ty { color: var(--code-ty); } .hs .fn { color: var(--highlight); } .hs .st { color: var(--code-st); }
   /* Reduction sequence display */
@@ -260,7 +260,7 @@
   /* Exercise cards */
   .exc { border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 18px 0; background: var(--surface); box-shadow: var(--shadow); }
   .exc .exc-sig { font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: rgba(var(--accent-rgb), 0.08); padding: 4px 9px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
-  /* ===== Topic 9 components ===== */
+  /* ===== Topic 7 components ===== */
   .pl { background: var(--code-bg); color: var(--code-fg); padding: 16px 20px; border-radius: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.65; overflow-x: auto; margin: 16px 0; box-shadow: var(--shadow); white-space: pre; }
   .pl .v { color: var(--code-ty); } .pl .at { color: var(--code-cm); } .pl .op { color: var(--code-kw); } .pl .cm { color: var(--code-dim2); font-style: italic; } .pl .st { color: var(--code-st); }
   /* Goal-sequence trace */
@@ -273,8 +273,6 @@
   .gt-row .gt-note { display: block; font-size: 10px; color: var(--accent-4); font-style: italic; margin-top: 2px; }
   .gt-row.ok .gt-goal { color: var(--accent-3); font-weight: 600; }
   .gt-row.fail .gt-goal { color: var(--accent-2); }
-  .gt-row.bt { background: rgba(var(--accent2-rgb), 0.05); }
-  .gt-row.bt .gt-goal { color: var(--accent-2); font-style: italic; }
   /* Solutions */
   .sols { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; }
   .sol { background: var(--tint-c); border: 1px solid var(--accent-3); border-radius: 6px; padding: 8px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--accent-3); }
@@ -283,14 +281,13 @@
   .chk { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 13.5px; margin: 12px 0; align-items: baseline; }
   .chk .mark { font-family: 'IBM Plex Mono', monospace; font-weight: 700; }
   .chk .mark.y { color: var(--accent-3); } .chk .mark.n { color: var(--accent-2); }
-  .chk .lbl { font-family: 'IBM Plex Mono', monospace; }
   /* Substitution display */
   .subst-grid { display: grid; grid-template-columns: 90px 1fr; gap: 6px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13.5px; margin: 12px 0; align-items: baseline; }
   .subst-grid .sg-lbl { color: var(--ink-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }
   .subst-grid .sg-val { color: var(--ink); }
   .subst-grid .sg-val.res { color: var(--accent-3); font-weight: 600; }
   .subst-grid .sg-val.bad { color: var(--accent-2); }
-  /* ===== Topic 10 components ===== */
+  /* ===== Topic 8 components ===== */
   /* Unification step table */
   .unif { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; margin: 14px 0; box-shadow: var(--shadow); overflow-x: auto; }
   .unif-row { display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding: 7px 14px; border-bottom: 1px dashed var(--rule); align-items: baseline; }
@@ -328,7 +325,6 @@
   .qcard { border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 0 10px 10px 0; padding: 18px 22px; margin: 20px 0; background: var(--surface); box-shadow: var(--shadow); }
   .quiz-prompt code { font-size: 0.9em; }
   .quiz-choice { text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 13.5px; padding: 9px 13px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface-2); cursor: pointer; transition: all 0.12s; }
-  .quiz-choice.picked { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.1); }
   /* Cram sheet */
   .cram-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
   @media (max-width: 800px) { .cram-grid { grid-template-columns: 1fr; } }

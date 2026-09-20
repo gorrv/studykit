@@ -9,7 +9,7 @@
      That is the whole quiz, and it is decidable by looking only
      at how many stars each side has.
 
-     The second is the week's real subject. A class holding a
+     The second is the topic's real subject. A class holding a
      `string *` has three special members the compiler will write
      for you -- copy constructor, assignment operator, destructor
      -- and the versions it writes copy the POINTER. Two objects

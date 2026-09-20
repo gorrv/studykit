@@ -213,7 +213,7 @@
     return { ok: false, error: 'Unknown case.' };
   }
 
-  /* ---------- Java against C++, on the points the week raises ---------- */
+  /* ---------- Java against C++, on the points this topic raises ---------- */
 
   var PP_CONTRASTS = [
     { id: 'new', topic: 'Making an object',

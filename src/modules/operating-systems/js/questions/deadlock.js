@@ -1,4 +1,4 @@
-  /* ---------- W11 · deadlock and the Banker's algorithm ---------- */
+  /* ---------- Topic 10 · deadlock and the Banker's algorithm ---------- */
 
   /** A random allocation state, small enough to check by hand. */
   function qdState() {

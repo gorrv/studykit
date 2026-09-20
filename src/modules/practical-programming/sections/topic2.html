@@ -1,12 +1,12 @@
 <section id="topic2" class="topic-section">
 
       <div class="topic-header">
-        <div class="topic-eyebrow">Topic 02 · Pointers and Ownership</div>
+        <div class="topic-eyebrow">C++ 02 · Pointers and Ownership</div>
         <h1>But I Miss Typing <code>new</code></h1>
         <div class="topic-subtitle">pointers, delete, and the three functions you get for free</div>
       </div>
 
-      <p>Topic 1 said C++ objects can be values. This topic puts <code>new</code> back, and with it the
+      <p>The previous topic said C++ objects can be values. This topic puts <code>new</code> back, and with it the
       question Java never asks: <strong>who frees this?</strong> Nothing collects your garbage, so
       ownership stops being an implementation detail and becomes part of what a class means.</p>
 
@@ -41,13 +41,13 @@ cout &lt;&lt; a-&gt;getX() &lt;&lt; endl;</pre>
       </div>
 
       <div class="callout warn">
-        <div class="callout-label">Pointers bring back the two things Topic 1 removed</div>
+        <div class="callout-label">Pointers bring back the two things references removed</div>
         <strong>They can be null.</strong> <code>string * s = nullptr; s-&gt;size();</code> compiles
         and then crashes — the C++ equivalent of a NullPointerException, without the exception. A
         reference could not have done this.<br><br>
         <strong>Comparing them compares addresses.</strong>
         <code>new string("Dave") == new string("Dave")</code> is <strong>false</strong>, exactly as in
-        Java, because there are two objects at two addresses. Topic 1 said C++ fixes Java’s
+        Java, because there are two objects at two addresses. The previous topic said C++ fixes Java’s
         <code>==</code> trap; this is the case where it does not, because now you are back to
         comparing handles. <code>*a == *b</code> compares the strings.
       </div>
@@ -180,7 +180,7 @@ const int &amp; operator[](int idx) const;       // on a const one</pre>
       one string that each of them believes it owns.</p>
 
       <div class="callout exam">
-        <div class="callout-label">The class the week is built around</div>
+        <div class="callout-label">The class this topic is built around</div>
         <pre class="pp-snippet">class IHazStringPtr {
 private:
   string * str;
@@ -261,7 +261,7 @@ IHazStringPtr(const IHazStringPtr &amp; other)
                              : new string(*(other.str))) { }</pre>
         <code>new string(*(other.str))</code> is the whole idea: dereference their pointer to get
         their string, and construct a new string from it. The third version does it in the
-        initialiser list for the reason Topic 1 gave — the member is built once rather than built
+        initialiser list for the reason given earlier — the member is built once rather than built
         and then overwritten.
       </div>
 

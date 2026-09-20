@@ -452,23 +452,6 @@
     margin-right: 6px;
   }
 
-  /* Coming soon */
-  .coming-soon {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--ink-muted);
-    font-family: 'Fraunces', serif;
-    font-style: italic;
-    font-size: 18px;
-  }
-  .coming-soon::before {
-    content: "—";
-    display: block;
-    font-size: 32px;
-    margin-bottom: 12px;
-    color: var(--rule);
-  }
-
   /* ===== Topic 2 components ===== */
 
   /* Gantt chart for scheduling */
@@ -510,7 +493,6 @@
     color: var(--ink-muted);
     margin-top: 2px;
   }
-  .gantt-tick { text-align: left; transform: translateX(-50%); }
 
   /* Process state diagram */
   .state-diagram {
@@ -647,7 +629,6 @@
   .mem-text { background: var(--rule); }
   .mem-data { background: var(--paper-2); }
   .mem-stack { background: var(--tint-a); }
-  .mem-heap { background: var(--tint-b); }
   .mem-procA { background: var(--tint-a2); }
   .mem-procB { background: var(--os-gantt-3); }
 
@@ -1204,8 +1185,6 @@
     padding: 10px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-align: center;
   }
   .fl-node .sz { font-weight: 700; color: var(--accent-3); }
-  .fl-used { border-color: var(--accent-2); background: var(--tint-b2); }
-  .fl-used .sz { color: var(--accent-2); }
   .fl-arrow { font-family: 'IBM Plex Mono', monospace; color: var(--ink-muted); padding: 0 8px; font-size: 14px; }
 
   /* File descriptor table */
@@ -1242,7 +1221,7 @@
   .io-stage h4 { margin: 0 0 6px 0; font-family: 'Fraunces', serif; font-size: 16px; }
   .io-stage p { margin: 0; font-size: 13px; }
 
-  /* ===== Topic 7 components ===== */
+  /* ===== Topic 6 components ===== */
   /* Access control matrix */
   .acm { border-collapse: collapse; margin: 20px 0; font-size: 13px; }
   .acm th, .acm td { border: 1px solid var(--rule); padding: 8px 12px; text-align: center; }
@@ -1250,8 +1229,6 @@
   .acm .subj { background: var(--tint-a); font-weight: 600; text-align: left; font-family: 'IBM Plex Mono', monospace; }
   .acm td.perm { font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
   .acm td.none { color: var(--ink-muted); }
-  .acm-row-hl td { background: var(--tint-hl); }
-  .acm-col-hl { background: var(--tint-hl) !important; }
 
   /* ACL vs capability split diagram */
   .ac-split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 24px 0; }
@@ -1294,7 +1271,7 @@
   .factor p { margin: 0; font-size: 12px; color: var(--ink-soft); }
   @media (max-width: 700px) { .factors { grid-template-columns: 1fr; } }
 
-  /* ===== Topic 8 components ===== */
+  /* ===== Topic 7 components ===== */
   /* fork process tree */
   .fork-tree { display: flex; flex-direction: column; align-items: center; margin: 20px 0; font-family: 'IBM Plex Mono', monospace; }
   .fork-proc { border: 2px solid var(--accent); background: var(--tint-a); border-radius: 8px; padding: 10px 16px; font-size: 13px; text-align: center; }
@@ -1332,7 +1309,7 @@
   .cram-card .term { font-weight: 600; color: var(--ink); }
   @media print { .cram-grid { grid-template-columns: 1fr 1fr; } }
 
-  /* ===== Topic 9 components ===== */
+  /* ===== Topic 8 components ===== */
   /* JVM thread state machine */
   .jvm-states { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 20px 0; align-items: center; }
   .jvm-state { padding: 10px 16px; border-radius: 22px; font-family: 'Fraunces', serif; font-weight: 600; font-size: 13px; border: 2px solid; background: var(--surface-2); }
@@ -1365,7 +1342,7 @@
   /* code annotation tags */
   .way-tag { display: inline-block; background: var(--accent); color: #fff; font-size: 10px; font-family: 'IBM Plex Mono', monospace; padding: 2px 8px; border-radius: 10px; margin-right: 6px; }
 
-  /* ===== Topic 10 components ===== */
+  /* ===== Topic 9 components ===== */
   /* lock acquisition flow */
   .lock-flow { display: flex; flex-direction: column; gap: 8px; margin: 20px 0; max-width: 520px; }
   .lock-step { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--rule); background: var(--surface); font-size: 13px; }
@@ -1389,7 +1366,6 @@
   .vis-core { border: 2px solid var(--accent); border-radius: 8px; padding: 12px; background: var(--tint-a); text-align: center; font-size: 12px; }
   .vis-core.stale { border-color: var(--accent-2); background: var(--tint-b2); }
   .vis-val { font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 16px; margin: 6px 0; }
-  .vis-ram { border: 2px dashed var(--ink-muted); border-radius: 8px; padding: 10px; text-align: center; font-size: 11px; font-family: 'IBM Plex Mono', monospace; }
 
   /* two-problems split */
   .twoprob { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
@@ -1399,7 +1375,7 @@
   .prob-vis { border-color: var(--accent-2); background: var(--tint-b2); }
   .prob-card h4 { margin: 0 0 6px 0; font-family: 'Fraunces', serif; font-size: 16px; }
 
-  /* ===== Topic 11 components ===== */
+  /* ===== Topic 10 components ===== */
   /* deadlock 4 conditions */
   .dl-conditions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
   @media (max-width: 700px) { .dl-conditions { grid-template-columns: 1fr; } }

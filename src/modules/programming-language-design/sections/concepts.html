@@ -107,7 +107,7 @@
       <!-- ===================== OPERATIONAL FLAVOURS ===================== -->
       <h2 id="cx-opsem">Abstract machine vs small-step vs big-step</h2>
       <table>
-        <tr><th></th><th>Abstract machine (W3)</th><th>Small-step / SOS (W4)</th><th>Big-step ⇓ (W4)</th></tr>
+        <tr><th></th><th>Abstract machine (Topic 3)</th><th>Small-step / SOS (Topic 4)</th><th>Big-step ⇓ (Topic 4)</th></tr>
         <tr><td><strong>Shape</strong></td><td>⟨control, results, memory⟩ triple, rewritten by transitions</td><td>⟨P, s⟩ → ⟨P′, s′⟩ — one step of computation</td><td>a single judgement, proved by a derivation tree</td></tr>
         <tr><td><strong>Granularity</strong></td><td>finest — many steps</td><td>medium</td><td>coarsest — one relation, all at once</td></tr>
         <tr><td><strong>Disadvantage</strong></td><td><strong>Not very intuitive</strong>: many transitions do only <em>phrase analysis</em>; only a few really compute.</td><td>To show a sequence of reductions is valid you need a <strong>proof</strong> — each arrow may need a whole derivation tree.</td><td>Cannot distinguish <strong>blocked</strong> from <strong>divergent</strong> — both are just "no derivation".</td></tr>

@@ -68,5 +68,30 @@ const DIM = s => `\x1b[2m${s}\x1b[0m`;
   console.log('\n' + BOLD(`${passed} / ${total} assertions passed`) +
     DIM(` across ${suites.length} suites in ${secs}s`));
 
-  process.exit(failed.length ? 1 : 0);
+  // The README and the landing page both quote this total in prose. Prose does
+  // not get updated when a suite grows, so both went stale — check them here,
+  // where the real number is known. Only on a full run: a filtered run has a
+  // smaller total and would flag a drift that is not one.
+  let drifted = false;
+  if (!filter) {
+    const claims = [
+      ['README.md', /(\d[\d,]*) \/ \1 assertions passed/],
+      [path.join('src', 'site', 'index.html'), /([\d,]+) assertions that drive/],
+    ];
+    for (const [rel, re] of claims) {
+      const file = path.join(DIR, '..', rel);
+      let text;
+      try { text = fs.readFileSync(file, 'utf8'); } catch { continue; }
+      const m = text.match(re);
+      if (!m) {
+        console.log(RED(`\n  ✗ ${rel} no longer states an assertion total — the check below is blind`));
+        drifted = true;
+      } else if (Number(m[1].replace(/,/g, '')) !== total) {
+        console.log(RED(`\n  ✗ ${rel} claims ${m[1]} assertions; there are ${total}`));
+        drifted = true;
+      }
+    }
+  }
+
+  process.exit(failed.length || drifted ? 1 : 0);
 })();

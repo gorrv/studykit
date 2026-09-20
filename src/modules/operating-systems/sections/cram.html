@@ -11,7 +11,7 @@
       <div class="cram-grid">
 
         <div class="cram-card">
-          <h3>W1 · Core Concepts</h3>
+          <h3>Topic 1 · Core Concepts</h3>
           <ul>
             <li><span class="term">OS</span> = securely multiplexes (shares) hardware among programs/users.</li>
             <li><span class="term">Concurrency</span> (interleaved, uncontrolled order) ≠ <span class="term">parallelism</span> (truly simultaneous).</li>
@@ -23,7 +23,7 @@
         </div>
 
         <div class="cram-card">
-          <h3>W2 · Processes &amp; Scheduling</h3>
+          <h3>Topic 2 · Processes &amp; Scheduling</h3>
           <ul>
             <li><span class="term">Program</span> (file) vs <span class="term">process</span> (running instance). Chrome ×2 = 1 program, 2 processes.</li>
             <li><span class="term">Memory:</span> text+data from file; stack+heap created by OS (grow toward each other).</li>
@@ -36,7 +36,7 @@
         </div>
 
         <div class="cram-card">
-          <h3>W3 · Virtual Memory &amp; Translation</h3>
+          <h3>Topic 3 · Virtual Memory &amp; Translation</h3>
           <ul>
             <li><span class="term">Address-binding problem:</span> programs embed fixed addresses but share physical RAM safely.</li>
             <li><span class="term">Evolution:</span> relocation → base/limit → segmentation → paging → multi-level tables.</li>
@@ -49,7 +49,7 @@
         </div>
 
         <div class="cram-card">
-          <h3>W4 · Demand Paging</h3>
+          <h3>Topic 4 · Demand Paging</h3>
           <ul>
             <li><span class="term">Page fault</span> = a hook, not just an error → OS can act &amp; resume.</li>
             <li><span class="term">Lazy allocation</span> · <span class="term">lazy zeroing</span> (1 shared zero frame) · <span class="term">copy-on-write</span>.</li>
@@ -61,7 +61,7 @@
         </div>
 
         <div class="cram-card">
-          <h3>W5 · User-Space (malloc, stack, I/O)</h3>
+          <h3>Topic 5 · User-Space (malloc, stack, I/O)</h3>
           <ul>
             <li><span class="term">malloc</span> = library code in the process; parcels small pieces from OS pages. 2 layers of frag.</li>
             <li><span class="term">Free list</span> threaded through free space; <span class="term">first-fit</span> (fast) vs <span class="term">best-fit</span> (less waste).</li>
@@ -74,7 +74,7 @@
         </div>
 
         <div class="cram-card">
-          <h3>W7 · Security</h3>
+          <h3>Topic 6 · Security</h3>
           <ul>
             <li><span class="term">Security</span> (adversarial) ≠ <span class="term">fault-tolerance</span> (accidental).</li>
             <li><span class="term">Mechanism</span> (OS) vs <span class="term">policy</span> (users). Unix checks at open() only.</li>
@@ -87,7 +87,7 @@
         </div>
 
         <div class="cram-card" style="border-top-color: var(--accent-2);">
-          <h3 style="color:var(--accent-2);">W8 · History &amp; Microkernels ★</h3>
+          <h3 style="color:var(--accent-2);">Topic 7 · History &amp; Microkernels ★</h3>
           <ul>
             <li><span class="term">fork()</span> — once called, twice returned: child PID in parent, 0 in child, &lt;0 on fail. CoW memory.</li>
             <li><span class="term">exec()</span> — replaces process with new program. fork-then-exec lets child set up fds/pipes/env.</li>
@@ -98,7 +98,7 @@
         </div>
 
         <div class="cram-card" style="border-top-color: var(--accent-3);">
-          <h3 style="color:var(--accent-3);">W9 · Java Concurrency</h3>
+          <h3 style="color:var(--accent-3);">Topic 8 · Java Concurrency</h3>
           <ul>
             <li><span class="term">3 ways to thread:</span> extend Thread, implement Runnable, lambda. Call <span class="term">start()</span> not run().</li>
             <li><span class="term">Prefer Runnable</span> — frees inheritance + lets threads share one behaviour object.</li>
@@ -111,7 +111,7 @@
         </div>
 
         <div class="cram-card" style="border-top-color: var(--accent-3);">
-          <h3 style="color:var(--accent-3);">W10 · Java Synchronization</h3>
+          <h3 style="color:var(--accent-3);">Topic 9 · Java Synchronization</h3>
           <ul>
             <li><span class="term">Two problems:</span> mutual exclusion (atomicity) + visibility.</li>
             <li><span class="term">Critical section</span> = one-thread-at-a-time code; protect with <span class="term">mutual exclusion</span> via locks.</li>
@@ -125,7 +125,7 @@
         </div>
 
         <div class="cram-card" style="border-top-color: var(--accent-3);">
-          <h3 style="color:var(--accent-3);">W11 · Deadlock &amp; Semaphores</h3>
+          <h3 style="color:var(--accent-3);">Topic 10 · Deadlock &amp; Semaphores</h3>
           <ul>
             <li><span class="term">ReentrantLock</span> — explicit lock/unlock (in finally!); cross-method, fairness, tryLock, timed/interruptible.</li>
             <li><span class="term">Reentrant</span> = holder can re-acquire; needed for nested synchronized calls.</li>
@@ -143,9 +143,9 @@
             <li><span class="term">Interrupts</span> tie everything: I/O completion, timer→preemption, page faults, syscalls.</li>
             <li><span class="term">Fragmentation</span> recurs: segmentation, paging, malloc heap.</li>
             <li><span class="term">The stack</span> recurs: procedure calls, syscalls, buffer overflows, fork frames.</li>
-            <li><span class="term">Copy-on-write</span> links W4 (lazy) and W8 (fork).</li>
-            <li><span class="term">Capabilities = file descriptors</span> links W5, W7, W8.</li>
-            <li><span class="term">Limited direct execution</span> (W1) underpins scheduling, memory protection, and security.</li>
+            <li><span class="term">Copy-on-write</span> links Topic 4 (lazy) and Topic 7 (fork).</li>
+            <li><span class="term">Capabilities = file descriptors</span> links Topic 5, Topic 6, Topic 7.</li>
+            <li><span class="term">Limited direct execution</span> (Topic 1) underpins scheduling, memory protection, and security.</li>
           </ul>
         </div>
 
