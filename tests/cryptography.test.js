@@ -345,6 +345,178 @@ module.exports = async function run() {
       rnd.rate, 0.8, 0.03);
   }
 
+  /* ================ Topic 3 ================ */
+
+  /* ---------------- the worked examples printed in the notes ---------------- */
+
+  {
+    /* The strongest kind of assertion available here: someone else wrote the
+       answer down, and the engine has to produce it. */
+    s.is('hello − abcde = hdjik', w.hiAddMod('hello', 'abcde', -1), 'hdjik');
+    s.is('01000101 ⊕ 01110110 = 00110011',
+      w.hiXor('01000101', '01110110'), '00110011');
+    s.is('Enc(yajayap, caracal) = aaaaaaa',
+      w.hiText(w.hiVigEnc(w.hiNums('yajayap'), w.hiNums('caracal'))), 'aaaaaaa');
+    s.same('trace(hello) = (23, 7, 0, 3)', w.hiTrace(w.hiNums('hello')), [23, 7, 0, 3]);
+    s.is('Enc(1, hello) = ifmmp', w.hiText(w.hiCaesarEnc(1, w.hiNums('hello'))), 'ifmmp');
+    s.ok('and ifmmp has the same trace as hello',
+      w.hiSameTrace(w.hiNums('hello'), w.hiNums('ifmmp')));
+
+    /* 26! — the notes say ≈ 2^88.4, which is worth being able to check. */
+    const ks = w.hiKeySpaces(5);
+    s.is('26! exactly', ks.subst.size, '403291461126605635584000000');
+    s.near('  ...which is about 2^88.4 as the notes say', ks.subst.bits, 88.4, 0.05);
+    s.is('the Caesar key space is 26', ks.caesar.size, '26');
+    s.ok('and the Vigenère key space is at least 26ⁿ',
+      BigInt(ks.vigenere.size) >= BigInt(ks.vigenere.atLeast));
+  }
+
+  /* ---------------- correctness of all three ciphers ---------------- */
+
+  {
+    const msg = w.hiNums('attackatdawn');
+    let bad = 0;
+    for (let k = 0; k < 26; k++) {
+      if (w.hiText(w.hiCaesarDec(k, w.hiCaesarEnc(k, msg))) !== w.hiText(msg)) bad++;
+    }
+    s.is('Caesar round-trips under every key', bad, 0);
+
+    let badP = 0;
+    for (let seed = 1; seed <= 50; seed++) {
+      const perm = w.hiPerm(seed);
+      const sorted = perm.slice().sort((a, b) => a - b).join(',');
+      if (sorted !== Array.from({ length: 26 }, (_, i) => i).join(',')) badP++;
+      if (w.hiText(w.hiSubstDec(perm, w.hiSubstEnc(perm, msg))) !== w.hiText(msg)) badP++;
+    }
+    s.is('every generated substitution key really is a permutation, and round-trips',
+      badP, 0);
+
+    let badV = 0;
+    for (const key of ['a', 'key', 'crypto', 'zzzz']) {
+      const kk = w.hiNums(key);
+      if (w.hiText(w.hiVigDec(kk, w.hiVigEnc(kk, msg))) !== w.hiText(msg)) badV++;
+    }
+    s.is('Vigenère round-trips', badV, 0);
+
+    /* A one-letter Vigenère key is a Caesar cipher — same cipher, two names. */
+    let same = 0;
+    for (let k = 0; k < 26; k++) {
+      if (w.hiText(w.hiVigEnc([k], msg)) === w.hiText(w.hiCaesarEnc(k, msg))) same++;
+    }
+    s.is('a one-letter Vigenère key is exactly Caesar', same, 26);
+  }
+
+  /* ---------------- the trace claim, by exhaustion ---------------- */
+
+  {
+    [2, 3].forEach(len => {
+      const r = w.hiTraceClaim(len);
+      s.is(`${len}-letter words: reachable by some key = shares a trace, no exceptions`,
+        r.mismatch, 0, `${r.messages} messages checked`);
+      s.is(`  ...and each has exactly 26 of each`, r.pairs, r.messages * 26);
+    });
+
+    /* Said another way, derived here: a shift leaves every gap alone. */
+    let moved = 0;
+    for (let a = 0; a < 26; a++) {
+      for (let b = 0; b < 26; b++) {
+        for (let k = 0; k < 26; k++) {
+          const before = (b - a + 26) % 26;
+          const after = (((b + k) % 26) - ((a + k) % 26) + 26) % 26;
+          if (before !== after) moved++;
+        }
+      }
+    }
+    s.is('a shift changes no gap, over all 17,576 letter-pair-and-key cases', moved, 0);
+
+    /* The crib scan finds the right key when it finds anything at all. */
+    const ct = w.hiText(w.hiCaesarEnc(5, w.hiNums('the secret message')));
+    const scan = w.hiCribScan(ct);
+    s.ok('a crib scan finds common words by their gaps alone', scan.hits.length > 0);
+    s.ok('and every hit names the real key',
+      scan.hits.every(h => h.key === 5),
+      scan.hits.map(h => `${h.word}:${h.key}`).join(' '));
+  }
+
+  /* ---------------- brute force ---------------- */
+
+  {
+    const ct = w.hiText(w.hiCaesarEnc(5, w.hiNums('thesecretmessage')));
+    const r = w.hiBruteCaesar([{ m: 'thesecretmessage', c: ct }]);
+    s.is('brute force tries the whole key space', r.tried, 26);
+    s.same('and one known pair leaves exactly the right key', r.survivors, [5]);
+
+    /* A single short pair need not pin it down — worth knowing rather than
+       assuming the attack always succeeds outright. */
+    const short = w.hiText(w.hiCaesarEnc(5, w.hiNums('a')));
+    const rs = w.hiBruteCaesar([{ m: 'a', c: short }]);
+    s.is('one letter is still enough for Caesar, since the key is one letter',
+      rs.survivors.length, 1);
+  }
+
+  /* ---------------- breaking Vigenère ---------------- */
+
+  {
+    /* Enough ciphertext and the key falls out; too little and it does not.
+       Both directions are asserted, because a tool that always succeeded
+       would be teaching that the attack is free. */
+    const easy = w.hiVigSuccess('key', 120);
+    s.ok('a 3-letter key is recovered from 120 letters', easy.correct,
+      `got ${easy.found}`);
+
+    const long = w.hiVigSuccess('crypto', 200);
+    s.ok('a 6-letter key is recovered from 200 letters', long.correct,
+      `got ${long.found}`);
+
+    const thin = w.hiVigSuccess('crypto', 40);
+    s.ok('but not from 40 — about six letters a column is not enough', !thin.correct,
+      `got ${thin.found}, which would mean the attack is free`);
+
+    /* The key length is found before the key, from the ciphertext alone. */
+    const ct = w.hiText(w.hiVigEnc(w.hiNums('crypto'), w.hiNums(w.HI_SAMPLE)));
+    s.is('the key length is recovered from the ciphertext alone',
+      w.hiGuessKeyLength(ct, 10).best, 6);
+
+    /* And each column really is a Caesar cipher: attacking one directly
+       agrees with what the full break says about it. */
+    const full = w.hiBreakVigenere(ct, 6);
+    const c = w.hiNums(ct);
+    let disagree = 0;
+    for (let i = 0; i < 6; i++) {
+      const col = [];
+      for (let j = i; j < c.length; j += 6) col.push(c[j]);
+      if (w.hiBestShift(col).key !== full.key[i]) disagree++;
+    }
+    s.is('each column attacked on its own agrees with the full break', disagree, 0);
+  }
+
+  /* ---------------- perfect secrecy and its price ---------------- */
+
+  {
+    /* The notes' own list of candidate messages for aaaaaaa. */
+    const words = ['leopard', 'caracal', 'lioness', 'cheetah', 'panther'];
+    const cands = w.hiCandidates('aaaaaaa', words);
+    s.is('every seven-letter candidate has a key reaching aaaaaaa',
+      cands.length, words.length);
+    s.ok('and each of those keys really produces it', cands.every(c => c.checks),
+      cands.filter(c => !c.checks).map(c => c.message).join(', '));
+
+    /* The keys are all different — which is the uniqueness that forces
+       |K| ≥ |M|, derived here rather than quoted. */
+    const keys = new Set(cands.map(c => c.key));
+    s.is('and they are all different keys', keys.size, words.length);
+
+    const ex = w.hiTwoTimeAlways(1);
+    s.is('reuse leaks the difference, over every message pair and key', ex.bad, 0);
+    s.is('  ...all 17,576 of them', ex.total, Math.pow(26, 3));
+
+    const tt = w.hiTwoTime('attackatdawn', 'retreatatten', 'qwertyuiopas');
+    s.ok('the worked example leaks m₂ − m₁', tt.ok && tt.leaks);
+    s.is('and guessing m₁ recovers m₂ exactly', tt.recovered, 'retreatatten');
+    s.ok('a key shorter than the messages is refused rather than silently repeated',
+      !w.hiTwoTime('attackatdawn', 'retreatatten', 'abc').ok);
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 1500);

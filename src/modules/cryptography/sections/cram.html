@@ -256,4 +256,112 @@
 
       </div>
 
+      <h2 id="cr-t3">Topic 03 &middot; historical ciphers</h2>
+
+      <div class="cram-grid">
+
+        <div class="cram-card">
+          <h3>Modular arithmetic</h3>
+          <ul>
+            <li><code>&Zopf;/n&Zopf; = {0, &hellip;, n&minus;1}</code>. <strong>n = 26</strong>
+              historical, <strong>n = 2</strong> modern.</li>
+            <li>Identity, inverses, commutative, associative.</li>
+            <li><code>&oplus;</code> is addition mod 2, and
+              <code>a &oplus; a = 0</code>.</li>
+            <li>Elementwise = schoolbook addition with <strong>no carries</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The three ciphers</h3>
+          <ul>
+            <li><span class="term">Caesar</span> one shift. <code>|K| = 26</code>.
+              <code>c<sub>i</sub> = m<sub>i</sub> + sk</code>.</li>
+            <li><span class="term">Substitution</span> any permutation.
+              <code>|K| = 26! &asymp; 2<sup>88.4</sup></code>. Caesar's keys are a subset.</li>
+            <li><span class="term">Vigen&egrave;re</span> repeating key of length j.
+              <code>|K| = 26 + &hellip; + 26<sup>n</sup> &ge; 26<sup>n</sup></code>. It is
+              <strong>j Caesar ciphers interleaved</strong>.</li>
+            <li><span class="term">Transposition</span> rearranges rather than substitutes, so
+              the letter frequencies are exactly the message's.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Why they all fail</h3>
+          <ul>
+            <li>Message-ciphertext pairs give the key.</li>
+            <li>Frequency analysis, directly or per column.</li>
+            <li><span class="term">Enc is deterministic</span> &mdash; the fundamental one,
+              and the one a bigger key space does nothing about.</li>
+            <li>None of this is needed: pick <code>m<sub>0</sub>, m<sub>1</sub></code> of equal
+              length and win IND-EAV. These attacks are the <em>minimum</em> any scheme must
+              resist.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Brute force</h3>
+          <ul>
+            <li>Search <code>K</code>, keeping <code>k</code> with
+              <code>Dec(k, c<sub>i</sub>) = m<sub>i</sub></code> for all pairs.</li>
+            <li><span class="term">Uses Dec, not Enc</span>, because <code>Enc</code> may be
+              randomised and re-encrypting need not reproduce <code>c</code>.</li>
+            <li>Needs known pairs, or enough context to recognise a plausible message.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Frequency analysis</h3>
+          <ul>
+            <li><code>e</code> 12.7%, <code>t</code> 9.1%, <code>a</code> 8.2%,
+              <code>o</code> 7.5%, <code>i</code> 7%.</li>
+            <li>Also first letters of words, and letter pairs.</li>
+            <li><span class="term">Vigen&egrave;re:</span> find the key length first, split into
+              <code>c<sub>1</sub>c<sub>1+j</sub>&hellip;</code>, attack each column as a
+              Caesar cipher.</li>
+            <li>A longer key is not stronger &mdash; it just thins each column, so you need
+              more ciphertext.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The trace</h3>
+          <ul>
+            <li>The gaps between consecutive letters:
+              <code>trace(hello) = (23, 7, 0, 3)</code>.</li>
+            <li>A shift moves both letters equally, so <strong>the trace is
+              unchanged</strong>.</li>
+            <li><span class="term">c decrypts to m iff trace(c) = trace(m).</span> So hunt for
+              the traces of likely words &mdash; no keys tried.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Perfect secrecy</h3>
+          <ul>
+            <li>The ciphertext carries <strong>no information except length</strong>. Every
+              message of that length is equally likely.</li>
+            <li>For each message there is a <strong>unique</strong> key reaching a given
+              ciphertext &mdash; and keys are uniform.</li>
+            <li>Binary version = the <span class="term">one-time pad</span>
+              (Miller&ndash;Vernam&ndash;Mauborgne), <code>c = m &oplus; sk</code>.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>And what it costs</h3>
+          <ul>
+            <li><code>|K| &ge; |M|</code>: key at least as long as the message.</li>
+            <li><span class="term">Single use.</span> Reuse gives
+              <code>c<sub>2</sub> &minus; c<sub>1</sub> = m<sub>2</sub> &minus;
+              m<sub>1</sub></code> &mdash; the key cancels.</li>
+            <li>Key distribution is the hard problem, so you want <em>small</em> keys and
+              <em>large</em> messages. This gives the opposite.</li>
+            <li>Real uses exist where a key can be hand-delivered and used once.</li>
+          </ul>
+        </div>
+
+      </div>
+
     </section>

@@ -1,0 +1,404 @@
+<section id="topic3" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 03 &middot; Historical Ciphers</div>
+        <h1>Three Fixes, None of Them a Definition</h1>
+        <div class="topic-subtitle">modular arithmetic, Caesar to Vigenère, the attacks that caught them, and what perfect secrecy costs</div>
+      </div>
+
+      <p>Three ciphers, each invented to patch the flaw in the one before. All three fall, and
+      the interesting part is <em>how</em> they were approached: find a weakness, add
+      complexity, hope. No definition was ever targeted, so there was never a moment at which
+      any of them could be said to have failed. The last section of the topic is the opposite
+      of that &mdash; a scheme with a proof, and a bill to go with it.</p>
+
+      <!-- ===== MODULAR ARITHMETIC ===== -->
+      <h2 id="t3-mod">Arithmetic that wraps around</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Z/nZ</div>
+        If <code>&Zopf; = {&hellip;, &minus;2, &minus;1, 0, 1, 2, &hellip;}</code> are the
+        integers, then the integers modulo a positive <code>n</code> are
+        <pre class="cr-snippet">&Zopf;/n&Zopf; = {0, 1, &hellip;, n &minus; 1}</pre>
+        Adding and subtracting work as they do in <code>&Zopf;</code>, except that they wrap.
+        With <code>n = 5</code>: <code>1 &minus; 4 = 2</code>, <code>2 + 2 = 4</code>,
+        <code>3 + 4 = 2</code>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The four properties, and the two values of n that matter</div>
+        <table class="cr-defs" style="margin-top:4px;">
+          <tr><th>identity</th><td><code>x + 0 = 0 + x = x</code> &mdash; a zero that does
+            nothing</td></tr>
+          <tr><th>inverses</th><td><code>x &minus; x = 0</code> &mdash; adding and subtracting
+            the same value cancel</td></tr>
+          <tr><th>commutative</th><td><code>x + y = y + x</code> &mdash; order does not
+            matter</td></tr>
+          <tr><th>associative</th><td><code>(x + y) + z = x + (y + z)</code> &mdash;
+            bracketing does not matter</td></tr>
+        </table>
+        <br><strong>n = 26</strong> for historical ciphers, with
+        <code>a &harr; 0, b &harr; 1, &hellip;, z &harr; 25</code>.
+        <strong>n = 2</strong> for contemporary ones, where addition has its own symbol:
+        <code>&oplus;</code>, with <code>0&oplus;0 = 1&oplus;1 = 0</code> and
+        <code>1&oplus;0 = 0&oplus;1 = 1</code>. The same four properties hold, and
+        <code>a &oplus; a = 0</code> is the one worth remembering.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Elementwise: schoolbook addition with no carries</div>
+        <pre class="cr-snippet">  01000101          hello
+&oplus; 01110110        &minus; abcde
+  00110011          hdjik</pre>
+        Every position is its own little sum, and nothing moves between columns. That
+        independence is why these ciphers are easy to describe &mdash; and, as the attacks
+        below show, why they are easy to take apart one column at a time.
+      </div>
+
+      <!-- ===== THE THREE CIPHERS ===== -->
+      <h2 id="t3-caesar">Caesar</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The whole scheme</div>
+        <code>K = {0, 1, &hellip;, 25}</code>, <code>M = C = {a, &hellip;, z}<sup>*</sup></code>.
+        <table class="cr-defs" style="margin-top:6px;">
+          <tr><th><code>KGen</code></th><td>sample a uniform <code>sk</code> from
+            <code>K</code></td></tr>
+          <tr><th><code>Enc(sk, m)</code></th><td>for each <code>i</code>,
+            <code>c<sub>i</sub> = m<sub>i</sub> + sk mod 26</code></td></tr>
+          <tr><th><code>Dec(sk, c)</code></th><td>for each <code>i</code>,
+            <code>m<sub>i</sub> = c<sub>i</sub> &minus; sk mod 26</code></td></tr>
+        </table>
+        <br>Caesar's own favourite key is said to have been <code>d &harr; 3</code>. Sampling a
+        uniform key from 26 possibilities is five coin flips &mdash; with a retry, since 32
+        does not divide evenly by 26.
+      </div>
+
+      <h2 id="t3-subst">Monoalphabetic substitution</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">An arbitrary permutation instead of a shift</div>
+        <code>K = Perm(&alpha;)</code>, <code>M = C = &alpha;<sup>*</sup></code>. A permutation
+        is a bijection from a set to itself; <code>Enc</code> applies it letter by letter and
+        <code>Dec</code> applies its inverse &mdash; the same table read bottom to top.
+        <pre class="cr-snippet">a  b  c  &hellip;  y  z
+f  b  z  &hellip;  a  v</pre>
+        <strong><code>|K| = |&alpha;|! = 26! &asymp; 2<sup>88.4</sup></code></strong>, against
+        Caesar's 26. The keys of the Caesar cipher are themselves permutations, so Caesar's
+        key space is a <em>subset</em> of this one.
+      </div>
+
+      <h2 id="t3-vigenere">Vigenère</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">A different shift per position, from a repeating key</div>
+        <code>K = &alpha; &cup; &alpha;<sup>2</sup> &cup; &hellip; &cup; &alpha;<sup>n</sup></code>,
+        <code>M = C = &alpha;<sup>*</sup></code>. With a key of length <code>j</code>:
+        <code>c<sub>i</sub> = m<sub>i</sub> + sk<sub>i mod j</sub></code>.
+        <pre class="cr-snippet">   m₁   m₂   m₃   m₄   m₅   m₆   m₇
++  sk₁  sk₂  sk₃  sk₄  sk₁  sk₂  sk₃
+   c₁   c₂   c₃   c₄   c₅   c₆   c₇</pre>
+        That is <strong>four distinct Caesar ciphers interleaved</strong>, and
+        <code>|K| = 26 + 26<sup>2</sup> + &hellip; + 26<sup>n</sup> &ge; 26<sup>n</sup></code>.
+      </div>
+
+      <h3 id="t3-hctool">&#128736;&#65039; The three of them, and their key spaces</h3>
+
+      <div class="tool" data-run="runCiphers">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Encrypt, decrypt, and count the keys</h3>
+        </div>
+        <div class="tool-desc">Each cipher with its real key space &mdash; 26! computed
+          exactly, not quoted &mdash; and the list of what is wrong with it.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="hc-which">cipher</label>
+            <select id="hc-which">
+              <option value="caesar">Caesar</option>
+              <option value="subst">Monoalphabetic substitution</option>
+              <option value="vigenere">Vigenère</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="hc-key">key</label>
+            <input type="text" id="hc-key" value="key" spellcheck="false">
+          </div>
+          <div class="tool-field" style="flex:1 1 220px;">
+            <label for="hc-msg">message</label>
+            <input type="text" id="hc-msg" value="attack at dawn" spellcheck="false">
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="hc-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The pattern, and why it is the wrong pattern</div>
+        Caesar's key space is tiny, so substitution makes it enormous. Substitution still
+        leaks frequencies, so Vigenère spreads them over several alphabets. Each step fixes
+        the flaw that was noticed and leaves the rest.
+        <br><br>This is <strong>unprincipled</strong>: it finds a flaw, adds complexity, and
+        relies on being cleverer than whoever is attacking. No security definition is targeted,
+        so nothing is ever achieved &mdash; and nothing can be declared broken either, because
+        there was no claim to break. What is wanted instead: <em>if</em> a well-defined problem
+        is hard, <em>then</em> this object satisfies this definition of security. Then spend
+        the effort on checking the proof and on measuring how hard the problem really is.
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">A different family: transposition</div>
+        Instead of changing the letters, rearrange them &mdash; the key says how. The rail
+        fence cipher writes the message in a zigzag across several lines and reads it off row
+        by row. The letters are all still there, which is its own kind of weakness: the letter
+        frequencies of the ciphertext are exactly those of the message.
+      </div>
+
+      <!-- ===== CRYPTANALYSIS ===== -->
+      <h2 id="t3-attacks">Taking them apart</h2>
+
+      <div class="callout warn">
+        <div class="callout-label">None of this is needed to call them insecure</div>
+        Every cipher above falls immediately to the definitions of the previous topic: pick
+        <code>m<sub>0</sub></code> and <code>m<sub>1</sub></code> of the same length that are
+        distinguishable from <code>c<sub>b</sub></code>; or note that a message-ciphertext
+        pair reveals the key; or that access to <code>Enc(sk, &middot;)</code> recovers it
+        outright; or simply that <code>Enc</code> is deterministic.
+        <br><br>The attacks below matter for a different reason: <strong>any scheme must
+        resist them as a bare minimum</strong> before IND-EAV, IND-CPA or IND-CCA is even
+        worth discussing.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Brute force</div>
+        <pre class="cr-snippet">input: message-ciphertext pairs {(mᵢ, cᵢ)}
+for k in K:
+    for i in 1..N:
+        if Dec(k, cᵢ) ≠ mᵢ: try the next k
+    return k</pre>
+        Two things to notice. It needs a way to recognise a wrong guess &mdash; either known
+        pairs, or enough context to say that a candidate message is not plausible English.
+        And it runs <strong><code>Dec</code> on the ciphertexts, not <code>Enc</code> on the
+        messages</strong>: <code>Enc</code> may be randomised, in which case re-encrypting a
+        known message need not reproduce the ciphertext, and the right key would be thrown
+        away.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Frequency analysis</div>
+        Assume the messages are English and the cipher does not remove that structure from the
+        ciphertext. Then <code>e, t, a, o, i</code> at roughly
+        <strong>12.7%, 9.1%, 8.2%, 7.5%, 7%</strong> give you a handle; so do first letters of
+        words, and pairs of letters. It needs enough ciphertext &mdash; and surprisingly
+        little.
+        <br><br>Direct against Caesar and against substitution. Against Vigenère you must
+        first find the key length <code>j</code>, split the ciphertext into
+        <code>c<sub>1</sub>c<sub>1+j</sub>c<sub>1+2j</sub>&hellip;</code> and so on, and attack
+        each of those as its own Caesar cipher.
+      </div>
+
+      <h3 id="t3-vbtool">&#128736;&#65039; Breaking Vigenère, column by column</h3>
+
+      <div class="tool" data-run="runVigBreak">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Find the key length, then 26 guesses per column</h3>
+        </div>
+        <div class="tool-desc">The key length is found first, from the ciphertext alone, by
+          trying each and seeing which one makes the columns look like English. Then each
+          column is a Caesar cipher.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="vb-key">key to encrypt with</label>
+            <input type="text" id="vb-key" value="crypto" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="vb-len">ciphertext length</label>
+            <select id="vb-len">
+              <option value="40">40 letters</option>
+              <option value="80">80 letters</option>
+              <option value="120" selected>120 letters</option>
+              <option value="200">200 letters</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="vb-output"></div>
+      </div>
+
+      <h2 id="t3-trace">The trace: Caesar's extra weakness</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The gaps survive</div>
+        Take the differences between consecutive letters of a word.
+        <pre class="cr-snippet">hello:  h→e = −3 = 23,  e→l = 7,  l→l = 0,  l→o = 3
+trace(hello) = (23, 7, 0, 3)</pre>
+        A shift moves every letter by the same amount, so every difference is unchanged.
+        <code>Enc(1, hello) = ifmmp</code>, and <code>trace(ifmmp) = (23, 7, 0, 3)</code> too.
+        <br><br><strong>A ciphertext can decrypt to a message exactly when the two share a
+        trace.</strong> So you can hunt for the trace of a likely word &mdash;
+        <code>the</code>, <code>hello</code>, <code>attack</code> &mdash; without trying a
+        single key.
+      </div>
+
+      <h3 id="t3-trtool">&#128736;&#65039; Traces, and cribs found with them</h3>
+
+      <div class="tool" data-run="runTrace">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>What a shift cannot hide</h3>
+        </div>
+        <div class="tool-desc">A word's trace, the same trace under all 26 keys, and a
+          ciphertext scanned for the traces of common words &mdash; no keys tried.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="tr-word">word</label>
+            <input type="text" id="tr-word" value="hello" spellcheck="false">
+          </div>
+          <div class="tool-field" style="flex:1 1 240px;">
+            <label for="tr-ct">ciphertext to scan</label>
+            <input type="text" id="tr-ct" value="ymjxjhwjyrjxxflj" spellcheck="false">
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="tr-output"></div>
+      </div>
+
+      <!-- ===== PERFECT SECRECY ===== -->
+      <h2 id="t3-perfect">Perfect secrecy, and the bill</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The scheme</div>
+        <code>K = {0, &hellip;, 25}<sup>n</sup></code> and
+        <code>M = C = {a, &hellip;, z}<sup>&le;n</sup></code>. Sample a uniform
+        <code>sk</code>; add it letter by letter; subtract it to decrypt.
+        <strong>No element of <code>sk</code> may ever be used twice</strong>, so the key is at
+        least as long as the message.
+        <br><br>The binary version, modulo 2, is the <strong>one-time pad</strong>
+        (Miller&ndash;Vernam&ndash;Mauborgne): <code>K = {0,1}<sup>n</sup></code>,
+        <code>c = m &oplus; sk</code>.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">What the claim actually says</div>
+        The ciphertext carries <strong>no information about the message except its
+        length</strong>. Any message of that length could have produced it, and each is
+        equally likely. Take <code>c = aaaaaaa</code>: <code>leopard</code> could have produced
+        it, and so could <code>caracal</code>, <code>lioness</code>, <code>cheetah</code> and
+        <code>panther</code> &mdash; each under exactly one key, each sampled with the same
+        probability.
+      </div>
+
+      <h3 id="t3-cdtool">&#128736;&#65039; Every message, and the key it would have needed</h3>
+
+      <div class="tool" data-run="runCandidates">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>One ciphertext, five equally good explanations</h3>
+        </div>
+        <div class="tool-desc">For each candidate message, the key that would have produced
+          this exact ciphertext &mdash; and a check that it does.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="cd-ct">ciphertext</label>
+            <input type="text" id="cd-ct" value="aaaaaaa" spellcheck="false">
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="cd-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Two messages, one key</div>
+        <pre class="cr-snippet">c₂ − c₁ = (m₂ + sk) − (m₁ + sk) = m₂ − m₁</pre>
+        The key cancels. Anyone watching now has the difference of two secret messages without
+        having either, and guessing one gives the other outright. This is not a weakening of
+        the one-time pad; it is a different scheme, and that one has no argument behind it at
+        all.
+      </div>
+
+      <h3 id="t3-tttool">&#128736;&#65039; Reusing the key</h3>
+
+      <div class="tool" data-run="runTwoTime">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>What "one time" is doing in the name</h3>
+        </div>
+        <div class="tool-desc">Two messages under one key. Watch the key cancel.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 180px;">
+            <label for="tt-m1">first message</label>
+            <input type="text" id="tt-m1" value="attackatdawn" spellcheck="false">
+          </div>
+          <div class="tool-field" style="flex:1 1 180px;">
+            <label for="tt-m2">second message</label>
+            <input type="text" id="tt-m2" value="retreatatten" spellcheck="false">
+          </div>
+          <div class="tool-field" style="flex:1 1 180px;">
+            <label for="tt-key">the key, used for both</label>
+            <input type="text" id="tt-key" value="qwertyuiopas" spellcheck="false">
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="tt-output"></div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Where this leaves us</div>
+        Perfect secrecy is achievable and brittle. It has real uses where the key can be
+        delivered by hand and used once &mdash; the Washington&ndash;Moscow hotline being the
+        standard example &mdash; and a long history of catastrophic failure wherever the
+        single-use rule was bent.
+        <br><br>The deeper problem is the shape of the bill. Key distribution is hard, so what
+        is wanted is a <strong>small key and large messages</strong>. Perfect secrecy requires
+        the exact opposite, and no cleverness will change that: it follows from
+        <code>|K| &ge; |M|</code>, which follows from the uniqueness that made it perfect.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="t3-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember seven things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>Z/nZ with n = 26 for historical, n = 2 for modern.</strong> Identity,
+            inverses, commutative, associative. <code>a &oplus; a = 0</code>.</li>
+          <li><strong>Caesar:</strong> one shift. <code>|K| = 26</code>.
+            <strong>Substitution:</strong> any permutation,
+            <code>|K| = 26! &asymp; 2<sup>88.4</sup></code>.
+            <strong>Vigenère:</strong> a repeating key,
+            <code>|K| &ge; 26<sup>n</sup></code>.</li>
+          <li><strong>Every one of them is deterministic</strong>, which is the fundamental
+            failure &mdash; and the one a bigger key space does not touch.</li>
+          <li><strong>Brute force uses <code>Dec</code>, not <code>Enc</code></strong>, because
+            <code>Enc</code> may be randomised.</li>
+          <li><strong>Vigenère is broken per column:</strong> find the key length, split the
+            ciphertext, attack each part as a Caesar cipher.</li>
+          <li><strong>The trace is the gaps between letters</strong>, and a shift leaves it
+            alone. <code>c</code> decrypts to <code>m</code> iff they share a trace.</li>
+          <li><strong>Perfect secrecy forces <code>|K| &ge; |M|</code></strong>, a single-use
+            key, and a key at least as long as the message. Reuse leaks
+            <code>m<sub>2</sub> &minus; m<sub>1</sub></code>.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Thinking 26! is a large enough key space to matter. It is, against brute force
+            alone &mdash; and the cipher still falls to frequency counting, which never
+            touches the key space.</li>
+          <li>Calling Vigenère "polyalphabetic and therefore strong". It is <em>j</em> Caesar
+            ciphers, and finding <em>j</em> is the only extra work.</li>
+          <li>Believing a longer Vigenère key is fundamentally stronger. It only thins out each
+            column, so you need proportionally more ciphertext.</li>
+          <li>Writing brute force with <code>Enc</code>. Fine for these ciphers, wrong in
+            general.</li>
+          <li>Thinking the one-time pad's problem is that it is slow. It is perfectly secret
+            and provably so; the problems are key length, single use, and no integrity.</li>
+          <li>Treating key reuse as "a bit less secure". It leaks the difference of the
+            messages exactly, to anyone watching.</li>
+        </ul>
+      </div>
+
+    </section>
