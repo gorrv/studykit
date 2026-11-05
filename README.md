@@ -100,21 +100,42 @@ any code moved. See [`docs/AUTHORING.md`](docs/AUTHORING.md) to add a module.
 ## Running the tests
 
 ```
-  running build.test.js …                             60 passed (148ms)
-  running compilers-and-formal-languages.test.js …    29 passed (2660ms)
-  running cryptography.test.js …                      29 passed (2593ms)
-  running foundations-of-computing.test.js …         875 passed (10053ms)
-  running intro-to-ai.test.js …                      274 passed (13531ms)
-  running landing.test.js …                           74 passed (25733ms)
-  running operating-systems.test.js …                141 passed (3080ms)
-  running practical-programming.test.js …            544 passed (61388ms)
-  running programming-language-design.test.js …      169 passed (6160ms)
-  running software-measurement-and-testing.test.js …  29 passed (2555ms)
+  running build.test.js …                             60 passed (146ms)
+  running compilers-and-formal-languages.test.js …    29 passed (2648ms)
+  running cryptography.test.js …                      29 passed (2579ms)
+  running foundations-of-computing.test.js …         875 passed (9515ms)
+  running intro-to-ai.test.js …                      274 passed (11104ms)
+  running landing.test.js …                           74 passed (25409ms)
+  running operating-systems.test.js …                141 passed (2653ms)
+  running practical-programming.test.js …
+    compiler differentials: 89 compiled, 247 from cache (8 recompiled and confirmed)
+                                                     545 passed (17267ms)
+  running programming-language-design.test.js …      169 passed (5399ms)
+  running software-measurement-and-testing.test.js …  29 passed (2556ms)
 
-2224 / 2224 assertions passed across 10 suites in 127.0s
+2225 / 2225 assertions passed across 10 suites in 80.5s
 ```
 
 Run one suite with `node tests/run.js intro` (after a build).
+
+### Why the second run is faster
+
+Practical Programming compiles about 330 small C++ programs with g++ and runs them, which was most
+of the suite's wall clock. The programs do not change between runs — only the engine being compared
+against them does — so the compiler's answers are cached on disk under `tests/.cache`, keyed by the
+exact source, the exact argv, and g++'s own version and target. A changed program is a different
+key, so there is no such thing as a stale hit. A cold run takes about a minute; a warm one about
+eighteen seconds.
+
+That rests on the programs being deterministic, which they have to be or the suite would already be
+flaky. An unchecked assumption is a hope, so 2% of hits are recompiled and compared against what was
+stored, and a disagreement fails the run. It earned this immediately: the first version of the cache
+stored g++'s error text including the temp directory, which is new every run, and the spot-check
+caught it before the cache was ever committed.
+
+`STUDYKIT_CACHE=0` disables it, `STUDYKIT_CACHE_VERIFY=1` recompiles and checks *every* hit — which
+is the honest way to confirm a warm green run means what a cold one does. The cache is outside git
+and CI never has one, so CI always does the full work.
 
 The suites come in three layers.
 
