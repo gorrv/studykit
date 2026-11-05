@@ -1,0 +1,484 @@
+<section id="topic1" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 01 &middot; What Security Means</div>
+        <h1>Nothing Here Is Secret Yet</h1>
+        <div class="topic-subtitle">syntax, correctness, and five attempts at saying what a cipher should do</div>
+      </div>
+
+      <p>This topic contains no clever cipher and almost no arithmetic. It is about the
+      sentence that has to come before either: <strong>what are we claiming, exactly, when we
+      say a scheme is secure?</strong> Most of the work in the subject turns out to be in
+      pinning that down, and the ciphers follow from it. Below, four attempts at the sentence
+      get written and knocked down in turn, each by a scheme that satisfies the previous
+      attempt and is still obviously useless &mdash; and each attack is run on the page rather
+      than described.</p>
+
+      <!-- ===== WHAT THE SUBJECT IS ===== -->
+      <h2 id="t1-what">What the subject is about</h2>
+
+      <div class="callout">
+        <div class="callout-label">Several definitions, none of them agreeing</div>
+        <table class="cr-defs">
+          <tr><th>A dictionary</th><td>the art or practice of writing in code or cipher; the
+            science of encryption.</td></tr>
+          <tr><th>Katz&ndash;Lindell</th><td>the study of mathematical techniques for securing
+            digital information, systems and distributed computations against adversarial
+            attacks.</td></tr>
+          <tr><th>Rosulek</th><td>the study of controlling access to information.</td></tr>
+          <tr><th>Martin</th><td>to study the limits of computing.</td></tr>
+          <tr><th>Blanchette</th><td>code created with the sole purpose of regulating
+            behaviour.</td></tr>
+        </table>
+        The dictionary one is the weakest, and it is the one most people start with. Encryption
+        is a part of cryptography roughly as sorting is a part of computer science.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The disagreement is the point</div>
+        These are not competing attempts at one fact. They are five different views of what the
+        subject is <em>for</em>: a technique, a science of limits, a way of controlling access,
+        a means of regulating what people can do. Which definition you reach for changes which
+        questions look important &mdash; and the last one, in particular, is a reminder that a
+        cryptographic design is a decision about who gets to do what.
+      </div>
+
+      <!-- ===== THE THOUGHT EXPERIMENT ===== -->
+      <h2 id="t1-lords">Two lords and a rider</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The setting everything else is built on</div>
+        Two lords, Francis and Henry, want to communicate securely between their pavilions.
+        Meeting in person, they agree on three things: a method of <strong>encryption</strong>
+        that turns a message into a ciphertext using a secret key, a method of
+        <strong>decryption</strong> that reverses it using the same key, and
+        <strong>the key itself</strong>, whispered so that nobody overhears.<br><br>
+        To send a message, Francis encrypts it, writes the ciphertext on parchment, and hands
+        it to his most trusted rider. Henry decrypts it and reads it.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Now ask what can go wrong</div>
+        <ul style="margin:6px 0 0;">
+          <li><strong>The scheme.</strong> What if the lords are not very clever and the cipher
+            is bad? What would "bad" even mean?</li>
+          <li><strong>The parchment.</strong> Can it be altered, added to, shortened, or its
+            parts reordered &mdash; and still decrypt to something that reads
+            plausibly?</li>
+          <li><strong>The rider.</strong> Can they be captured, bribed, threatened, or simply
+            made to arrive late?</li>
+        </ul>
+        Three questions, and they turn out to need three different kinds of answer. The first
+        is secrecy, the second is integrity, and the third is largely not cryptography at all.
+      </div>
+
+      <!-- ===== SYNTAX ===== -->
+      <h2 id="t1-ske">Secret key encryption, as syntax only</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">SKE = (KGen, Enc, Dec)</div>
+        A <strong>secret key encryption scheme</strong> is a triple of algorithms, over a key
+        space <code>K</code>, a message space <code>M</code> and a ciphertext space
+        <code>C</code>:
+        <table class="cr-defs" style="margin-top:8px;">
+          <tr><th><code>KGen</code></th><td>outputs a secret key <code>sk</code> from
+            <code>K</code> &nbsp;&nbsp;<code class="cr-dim">sk &larr; KGen</code></td></tr>
+          <tr><th><code>Enc</code></th><td>takes <code>sk</code> and a message <code>m</code>
+            from <code>M</code>, outputs a ciphertext <code>c</code> from <code>C</code>
+            &nbsp;&nbsp;<code class="cr-dim">c = Enc(sk, m)</code></td></tr>
+          <tr><th><code>Dec</code></th><td>takes <code>sk</code> and a ciphertext
+            <code>c</code>, outputs a message
+            &nbsp;&nbsp;<code class="cr-dim">m = Dec(sk, c)</code></td></tr>
+        </table>
+        <br><strong>This says nothing whatever about correctness or security.</strong> It is
+        the shape of the thing: what goes in, what comes out. The arrow in
+        <code>sk &larr; KGen</code> rather than <code>=</code> is doing a job &mdash; key
+        generation is allowed to be random, and had better be.
+      </div>
+
+      <h3 id="t1-correct">Correctness, which is also not security</h3>
+
+      <div class="callout exam">
+        <div class="callout-label">The one obligation that is not about adversaries</div>
+        If a secret key is used to encrypt a message into a ciphertext, then decrypting that
+        ciphertext with the same key returns the same message.
+        <pre class="cr-snippet">c = Enc(sk, m)   &rArr;   m = Dec(sk, c)</pre>
+        That is all correctness asks, and a scheme can satisfy it perfectly while being
+        completely useless. The tool below checks correctness by running it over an entire
+        domain &mdash; and then breaks the scheme anyway.
+      </div>
+
+      <h3 id="t1-satool">&#128736;&#65039; Correct, and still broken</h3>
+
+      <div class="tool" data-run="runSchemeAudit">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Correctness and security, measured separately</h3>
+        </div>
+        <div class="tool-desc">Pick a scheme. Correctness is checked over every key against
+          every three-letter message &mdash; the whole domain, not a sample &mdash; and then
+          the attack that defeats the scheme is run on your own message.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="sa-scheme">scheme</label>
+            <select id="sa-scheme">
+              <option value="identity">Do nothing</option>
+              <option value="keepfirst">Shift, first letter left alone</option>
+              <option value="shift">Shift (Caesar)</option>
+              <option value="otp">One-time pad</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="sa-key">key (where it has one)</label>
+            <select id="sa-key">
+              <option value="3">3</option>
+              <option value="7" selected>7</option>
+              <option value="11">11</option>
+              <option value="19">19</option>
+            </select>
+          </div>
+          <div class="tool-field" style="flex:1 1 240px;">
+            <label for="sa-msg">message</label>
+            <input type="text" id="sa-msg" value="attack at dawn" spellcheck="false">
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="sa-output"></div>
+      </div>
+
+      <!-- ===== THE LADDER ===== -->
+      <h2 id="t1-ladder">Five attempts at "a good encryption scheme"</h2>
+
+      <p>Each attempt below is a reasonable-sounding sentence. Each is then killed by a scheme
+      that satisfies it and is plainly no good &mdash; which is how you can tell the sentence
+      was not yet saying what you meant.</p>
+
+      <div class="cr-ladder">
+        <div class="cr-rung bad">
+          <div class="cr-rung-n">i</div>
+          <div class="cr-rung-b">
+            <p><strong>You cannot recover the secret key by observing ciphertexts.</strong></p>
+            <p class="cr-kill">Killed by: the scheme that ignores the key and writes the
+            message out as the ciphertext. The key is beyond recovery because nothing ever
+            touches it.</p>
+          </div>
+        </div>
+        <div class="cr-rung bad">
+          <div class="cr-rung-n">ii</div>
+          <div class="cr-rung-b">
+            <p><strong>You cannot recover messages by observing ciphertexts.</strong></p>
+            <p class="cr-kill">Killed by: a scheme that leaks the first letter, or the first
+            word. "The message" was not recovered, and the damage is done anyway.</p>
+          </div>
+        </div>
+        <div class="cr-rung bad">
+          <div class="cr-rung-n">iii</div>
+          <div class="cr-rung-b">
+            <p><strong>You cannot recover even partial messages by observing
+            ciphertexts.</strong></p>
+            <p class="cr-kill">Killed by: anything that leaks statistics. Knowing how often
+            each letter occurs is not a part of the message, and it is enough to break a shift
+            cipher outright.</p>
+          </div>
+        </div>
+        <div class="cr-rung warm">
+          <div class="cr-rung-n">iv</div>
+          <div class="cr-rung-b">
+            <p><strong>You cannot infer any further meaningful or new information about
+            messages by observing ciphertexts.</strong></p>
+            <p class="cr-kill">Getting warmer. Not yet a formal statement &mdash; "meaningful"
+            and "infer" are carrying a great deal &mdash; but the intent is now right. What if
+            the adversary can do more than observe?</p>
+          </div>
+        </div>
+        <div class="cr-rung good">
+          <div class="cr-rung-n">v</div>
+          <div class="cr-rung-b">
+            <p><strong>You cannot infer any further meaningful or new information about
+            messages by observing ciphertexts, even given the ability to encrypt and decrypt
+            messages and ciphertexts of your choice.</strong></p>
+            <p class="cr-kill">This captures the adversaries we expect to meet. Whether it is
+            <em>realistic</em> to hand an attacker a decryption box is a fair question &mdash;
+            and the answer is that assuming too much of an adversary costs you very little,
+            while assuming too little costs you everything.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">What that exercise was really teaching</div>
+        Every one of those sentences has two halves, and a definition is only as good as both:
+        <table class="cr-defs" style="margin-top:8px;">
+          <tr><th>What must not be possible</th><td>inferring further meaningful information
+            about the messages.</td></tr>
+          <tr><th>Given what capabilities</th><td>observing ciphertexts &mdash; or, in addition,
+            encrypting and decrypting chosen inputs.</td></tr>
+        </table>
+        <br>Change either half and you have a different definition. A scheme is never "secure"
+        on its own; it is secure <em>against</em> something, <em>for</em> something. This family
+        of properties usually travels under the name <strong>confidentiality</strong>, or
+        sometimes <strong>secrecy</strong>.
+      </div>
+
+      <h3 id="t1-fqtool">&#128736;&#65039; What the letters give away</h3>
+
+      <div class="tool" data-run="runFreq">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Rung iii, broken by counting</h3>
+        </div>
+        <div class="tool-desc">Shift your own text and watch the letter counts move without
+          changing. Then watch the key fall out of them &mdash; no key, no guessing, just a
+          table of English frequencies.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 320px;">
+            <label for="fq-msg">message</label>
+            <input type="text" id="fq-msg"
+                   value="the point of a definition is that it says what an adversary may do"
+                   spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="fq-key">shift</label>
+            <select id="fq-key">
+              <option value="1">1</option>
+              <option value="7" selected>7</option>
+              <option value="13">13</option>
+              <option value="22">22</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="fq-output"></div>
+      </div>
+
+      <!-- ===== PERFECT SECRECY ===== -->
+      <h2 id="t1-pad">The one scheme that survives rung iv completely</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The one-time pad</div>
+        Take one letter of key per letter of message, each chosen uniformly at random, and add
+        them letter by letter. Decryption subtracts the same pad.<br><br>
+        An eavesdropper who sees the ciphertext learns <em>nothing</em> &mdash; not "nothing
+        practical", not "nothing without enormous computation", but nothing at all. The tool
+        below counts out why, over every message and every ciphertext of a given length.
+      </div>
+
+      <h3 id="t1-pftool">&#128736;&#65039; Counting out perfect secrecy</h3>
+
+      <div class="tool" data-run="runPerfect">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Every message explains every ciphertext</h3>
+        </div>
+        <div class="tool-desc">For messages of one or two letters, count the keys joining each
+          message to each ciphertext. The claim is that the count never varies &mdash; so here
+          it is, over every pair.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="pf-n">message length</label>
+            <select id="pf-n">
+              <option value="1" selected>1 letter</option>
+              <option value="2">2 letters</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="pf-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">And yet it is not the end of the story</div>
+        Perfect secrecy is the strongest possible answer to rung iv, and the pad is still not a
+        scheme you would deploy. The key is as long as the message and may never be reused, so
+        the problem of sending a secret message has been swapped for the problem of sending an
+        equally long secret key. Worse &mdash; and this is the subject of the rest of this
+        topic &mdash; secrecy was never the only thing being asked for.
+      </div>
+
+      <!-- ===== INTEGRITY ===== -->
+      <h2 id="t1-integrity">Security that is not secrecy</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The rider is bribed</div>
+        Suppose the rider is paid to alter the parchment. They do not know the key and cannot
+        read the message. They can still reorder characters, add some, or remove some.<br><br>
+        Henry decrypts and gets &mdash; what? If he is lucky, gibberish, and he notices. If he
+        is not, something that reads perfectly well and is not what Francis wrote. The
+        assurance that what arrived is what was sent is a <strong>separate security
+        property</strong>, and it has its own name: <strong>integrity</strong>.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Secrecy does not imply integrity, and the pad proves it</div>
+        It is tempting to assume that a message nobody can read is a message nobody can
+        meddle with. The one-time pad &mdash; the most secret scheme there is &mdash; is the
+        cleanest counterexample. Add a letter to the ciphertext and the same letter is added to
+        what Henry reads. The attacker never learns the message and never touches the key, and
+        still decides what the message becomes.
+      </div>
+
+      <h3 id="t1-mltool">&#128736;&#65039; Rewriting a message you cannot read</h3>
+
+      <div class="tool" data-run="runMalleate">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Perfect secrecy, zero integrity</h3>
+        </div>
+        <div class="tool-desc">Francis writes one message; the rider wants it to say another.
+          The rider never sees the key. Tick the box to have Henry check a tag before
+          decrypting.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 220px;">
+            <label for="ml-msg">what Francis wrote</label>
+            <input type="text" id="ml-msg" value="pay alice ten" spellcheck="false">
+          </div>
+          <div class="tool-field" style="flex:1 1 220px;">
+            <label for="ml-target">what the rider wants it to say</label>
+            <input type="text" id="ml-target" value="pay carol ten" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="ml-tag">integrity</label>
+            <label class="cr-check"><input type="checkbox" id="ml-tag"> check a tag first</label>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="ml-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">How Francis could fix it</div>
+        Two quite different kinds of answer, and it is worth seeing that they are different:
+        <ul style="margin:6px 0 0;">
+          <li><strong>Engineering.</strong> Indelible ink, fill every empty space on the
+            parchment so nothing can be inserted, tamper-evident seals.</li>
+          <li><strong>Cryptography.</strong> Compute a <em>tag</em> from the ciphertext and a
+            second shared key, write it beside the ciphertext, and have Henry check the tag
+            before he decrypts anything.</li>
+        </ul>
+      </div>
+
+      <h3 id="t1-mac">Message authentication codes, as syntax only</h3>
+
+      <div class="callout exam">
+        <div class="callout-label">MAC = (KGen, Tag, Vf)</div>
+        <table class="cr-defs" style="margin-top:4px;">
+          <tr><th><code>KGen</code></th><td>outputs an integrity key <code>ik</code> from a key
+            space <code>K</code> &nbsp;&nbsp;<code class="cr-dim">ik &larr; KGen</code></td></tr>
+          <tr><th><code>Tag</code></th><td>takes <code>ik</code> and a message <code>m</code>,
+            outputs a tag <code>&tau;</code> from a tag space <code>T</code>
+            &nbsp;&nbsp;<code class="cr-dim">&tau; = Tag(ik, m)</code></td></tr>
+          <tr><th><code>Vf</code></th><td>takes <code>ik</code>, a message and a tag, and
+            outputs 0 or 1 &nbsp;&nbsp;<code class="cr-dim">1 = Vf(ik, m, &tau;)</code></td></tr>
+        </table>
+        <br>Once again: syntax only. Nothing here says what makes a MAC a <em>good</em> MAC,
+        and the same ladder of attempts would have to be climbed again to say it. Note also
+        that this is a second key &mdash; secrecy and integrity are achieved by different
+        means, and generally with different keys.
+      </div>
+
+      <!-- ===== AND BEYOND ===== -->
+      <h2 id="t1-beyond">Still more properties</h2>
+
+      <div class="callout">
+        <div class="callout-label">Things a rider can do that neither property covers</div>
+        <div class="cr-two">
+          <div>
+            <div class="cr-cap">usually counted as cryptography</div>
+            <ul style="margin:4px 0 0;">
+              <li>reordering ciphertexts and tags</li>
+              <li>repeating them</li>
+              <li>reflecting them &mdash; sending them back the way they came</li>
+            </ul>
+          </div>
+          <div>
+            <div class="cr-cap">usually counted as network engineering</div>
+            <ul style="margin:4px 0 0;">
+              <li>delaying delivery</li>
+              <li>denying delivery altogether</li>
+            </ul>
+          </div>
+        </div>
+        A valid, correctly tagged ciphertext, delivered twice, is a problem that neither
+        secrecy nor integrity as stated above says anything about. Each of these needs its own
+        sentence, with its own two halves.
+      </div>
+
+      <h3 id="t1-cast">Alice, Bob, and the people trying to read their post</h3>
+
+      <div class="callout">
+        <div class="callout-label">The usual names</div>
+        The two machines holding the keys are conventionally <strong>Alice</strong> and
+        <strong>Bob</strong> rather than two lords. The adversary gets a name according to what
+        they are allowed to do: <strong>Eve</strong> eavesdrops and nothing more;
+        <strong>Charlie</strong> is active &mdash; he can have messages of his choice encrypted
+        and ciphertexts of his choice decrypted.<br><br>
+        Those two names are rungs iv and v wearing a disguise. Eve is rarely a strong enough
+        adversary to design against.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why bother with all this formality</div>
+        <ul style="margin:6px 0 0;">
+          <li>It <strong>states the adversary's capabilities explicitly</strong>, instead of
+            leaving them to be assumed differently by everyone reading.</li>
+          <li>It gives a <strong>shared meaning</strong>, rather than relying on how two people
+            each happen to read an English sentence.</li>
+          <li>It lets us be <strong>pessimistic on purpose</strong>. Assume the adversary is
+            stronger than they are likely to be, and the result applies in more situations than
+            the one you had in mind.</li>
+        </ul>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">An aside: cryptography as a munition</div>
+        Until the late 1990s, the United States classed cryptography as a munition, which made
+        exporting its source code illegal. Early versions of the Netscape browser therefore
+        shipped in two flavours: a domestic one with full-length keys, and an international one
+        with deliberately weakened ones. The author of PGP was investigated after its source
+        code left the country; the legal argument that followed turned on whether source code
+        is speech. The courts eventually decided that it is.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="t1-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember six things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>SKE is a triple</strong> <code>(KGen, Enc, Dec)</code> over spaces
+            <code>K</code>, <code>M</code>, <code>C</code> &mdash; and stating it says nothing
+            about correctness or security.</li>
+          <li><strong>Correctness is <code>Dec(sk, Enc(sk, m)) = m</code></strong>, and the
+            "do nothing" cipher satisfies it perfectly.</li>
+          <li><strong>A security definition has two halves:</strong> what must not be possible,
+            and what the adversary is allowed to do. Only stating both says anything.</li>
+          <li><strong>Each rung of the ladder is killed by a scheme that satisfies the previous
+            one</strong> &mdash; the key is safe because it is unused; the message is not
+            recovered but its first letter is; no letter is recovered but all the statistics
+            are.</li>
+          <li><strong>Secrecy and integrity are different properties achieved by different
+            means</strong>, and the one-time pad proves the first does not imply the second.</li>
+          <li><strong>MAC is a triple</strong> <code>(KGen, Tag, Vf)</code> with a
+            <em>separate</em> key, and tags are checked before decrypting.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Treating "the key cannot be recovered" as a security property. It is satisfied by
+            schemes that never use the key.</li>
+          <li>Reading correctness as a weak form of security. It is not a form of security at
+            all.</li>
+          <li>Assuming an unreadable message is an unmodifiable one. The most secret scheme
+            there is offers no protection at all against modification.</li>
+          <li>Saying a scheme "is secure" with no adversary attached. Secure against whom, able
+            to do what?</li>
+          <li>Thinking the pad's weakness is that it is slow or old-fashioned. Its secrecy is
+            perfect and provably so; its problems are key length, key reuse, and having no
+            integrity whatsoever.</li>
+          <li>Forgetting that <code>Tag</code> and <code>Enc</code> take different keys.</li>
+        </ul>
+      </div>
+
+    </section>

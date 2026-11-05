@@ -5,20 +5,80 @@
  *
  *   node tests/run.js              run everything
  *   node tests/run.js intro        run only suites whose name matches
+ *   node tests/run.js --resume     reuse results for suites already run
+ *                                  against this exact tree
  *
  * Exits non-zero if anything fails, so CI can gate on it.
+ *
+ * About --resume. The total assertion count is only meaningful from a run of
+ * everything, and on a slow machine a run of everything can take longer than
+ * the operator is able to give one command — at which point the choice is
+ * between reporting a number nobody checked and not reporting one. Neither is
+ * much good, so instead each suite's result is written out with a hash of the
+ * whole tree it was produced from (every built module, every test file, the
+ * harness). On a resumed run, a suite whose hash still matches is reported
+ * from that record and the rest are run for real; change anything at all and
+ * every hash changes, so there is no way for a stale result to be counted.
+ * It is off unless asked for, so CI always does the full work.
  */
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const DIR = __dirname;
-const filter = process.argv[2];
+const args = process.argv.slice(2);
+const resume = args.includes('--resume');
+const filter = args.find(a => !a.startsWith('-'));
 
 const files = fs.readdirSync(DIR)
   .filter(f => f.endsWith('.test.js'))
   .filter(f => !filter || f.includes(filter))
   .sort();
+
+/* Everything a suite's result could possibly depend on. Deliberately coarse:
+   a per-suite dependency list would resume more often and would be one
+   oversight away from counting a result that no longer holds. */
+function treeHash() {
+  const h = crypto.createHash('sha256');
+  const add = dir => {
+    let entries;
+    try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (e) { return; }
+    for (const e of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+      if (e.name === '.cache' || e.name === 'node_modules') continue;
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) add(full);
+      else { h.update(full); h.update(fs.readFileSync(full)); }
+    }
+  };
+  add(path.join(DIR, '..', 'dist'));
+  add(DIR);
+  try { h.update(fs.readFileSync(path.join(DIR, '..', 'README.md'))); } catch (e) {}
+  return h.digest('hex');
+}
+
+const TREE = resume ? treeHash() : null;
+const RESUME_DIR = path.join(DIR, '.cache', 'suites');
+
+function recall(file) {
+  if (!resume) return null;
+  try {
+    const r = JSON.parse(fs.readFileSync(path.join(RESUME_DIR, file + '.json'), 'utf8'));
+    return r.tree === TREE ? r.suite : null;
+  } catch (e) { return null; }
+}
+
+function remember(file, suite) {
+  if (!resume) return;
+  try {
+    fs.mkdirSync(RESUME_DIR, { recursive: true });
+    fs.writeFileSync(path.join(RESUME_DIR, file + '.json'),
+      JSON.stringify({ tree: TREE, suite: {
+        name: suite.name, passed: suite.passed, failed: suite.failed,
+        total: suite.total, ms: suite.ms, failures: suite.failures
+      } }));
+  } catch (e) { /* a cache that cannot be written is not a failed run */ }
+}
 
 if (!files.length) {
   console.error(filter ? `no suites match "${filter}"` : 'no test files found');
@@ -34,7 +94,18 @@ const DIM = s => `\x1b[2m${s}\x1b[0m`;
   const started = Date.now();
   const suites = [];
 
+  let reused = 0;
   for (const file of files) {
+    const known = recall(file);
+    if (known) {
+      reused++;
+      console.log(DIM(`  ${file} … `) +
+        (known.failed ? RED(`${known.failed} failed`) : GREEN(`${known.passed} passed`)) +
+        DIM(' (from the last run against this tree)'));
+      suites.push(known);
+      continue;
+    }
+
     process.stdout.write(DIM(`  running ${file} … `));
     let suite;
     try {
@@ -47,6 +118,7 @@ const DIM = s => `\x1b[2m${s}\x1b[0m`;
     }
     console.log(suite.failed ? RED(`${suite.failed} failed`) : GREEN(`${suite.passed} passed`) + DIM(` (${suite.ms}ms)`));
     suites.push(suite);
+    remember(file, suite);
   }
 
   const failed = suites.filter(s => s.failed);
@@ -66,7 +138,8 @@ const DIM = s => `\x1b[2m${s}\x1b[0m`;
   const secs = ((Date.now() - started) / 1000).toFixed(1);
 
   console.log('\n' + BOLD(`${passed} / ${total} assertions passed`) +
-    DIM(` across ${suites.length} suites in ${secs}s`));
+    DIM(` across ${suites.length} suites in ${secs}s`) +
+    (reused ? DIM(` (${reused} recalled, ${suites.length - reused} run here)`) : ''));
 
   // The README and the landing page both quote this total in prose. Prose does
   // not get updated when a suite grows, so both went stale — check them here,

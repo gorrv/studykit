@@ -20,18 +20,18 @@ No runtime dependencies. No server. It works offline.
 | Practical Experiences of Programming | 2 | 12 | 30 | 74 | 0 |
 | Programming Language Design | 2 | 11 | 24 | 10 | 4 |
 | Operating Systems | 2 | 13 | 12 | 10 | 1 |
-| Cryptography | 3 | 1 | 0 | 0 | 0 |
+| Cryptography | 3 | 4 | 5 | 9 | 0 |
 | Software Measurement and Testing | 3 | 1 | 0 | 0 | 0 |
 | Compilers and Formal Languages | 3 | 1 | 0 | 0 | 0 |
 
 Operating Systems also carries a hand-written bank of 123 exam questions behind its mock paper.
 The table is checked against the built modules by `tests/landing.test.js`, so it cannot drift.
 
-The year-3 modules are in progress: each is a working shell — it opens, searches, prints and is
-under test — with its orientation page and no topics yet, which is why the counts are what they
-are. The landing page marks them as such, and the tests check that label against the file behind
-it in both directions, so a module cannot gain topics and go on looking unfinished, nor be
-presented as ready while still empty.
+The year-3 modules are being written as the material is covered, so their counts are small and
+will grow. Two of them are still shells — they open, search, print and are under test, but have
+only an orientation page. The landing page marks those as in progress, and the tests check that
+label against the file behind it in both directions, so a module cannot gain topics and go on
+looking unfinished, nor be presented as ready while still empty.
 
 ---
 
@@ -102,10 +102,10 @@ any code moved. See [`docs/AUTHORING.md`](docs/AUTHORING.md) to add a module.
 ```
   running build.test.js …                             60 passed (146ms)
   running compilers-and-formal-languages.test.js …    29 passed (2648ms)
-  running cryptography.test.js …                      29 passed (2579ms)
+  running cryptography.test.js …                      81 passed (7515ms)
   running foundations-of-computing.test.js …         875 passed (9515ms)
   running intro-to-ai.test.js …                      274 passed (11104ms)
-  running landing.test.js …                           74 passed (25409ms)
+  running landing.test.js …                           77 passed (25409ms)
   running operating-systems.test.js …                141 passed (2653ms)
   running practical-programming.test.js …
     compiler differentials: 89 compiled, 247 from cache (8 recompiled and confirmed)
@@ -113,7 +113,7 @@ any code moved. See [`docs/AUTHORING.md`](docs/AUTHORING.md) to add a module.
   running programming-language-design.test.js …      169 passed (5399ms)
   running software-measurement-and-testing.test.js …  29 passed (2556ms)
 
-2225 / 2225 assertions passed across 10 suites in 80.5s
+2280 / 2280 assertions passed across 10 suites in 86.1s
 ```
 
 Run one suite with `node tests/run.js intro` (after a build).
@@ -136,6 +136,14 @@ caught it before the cache was ever committed.
 `STUDYKIT_CACHE=0` disables it, `STUDYKIT_CACHE_VERIFY=1` recompiles and checks *every* hit — which
 is the honest way to confirm a warm green run means what a cold one does. The cache is outside git
 and CI never has one, so CI always does the full work.
+
+`node tests/run.js --resume` is for the other half of the same problem. The total above only means
+something if it comes from running everything, and on a slow machine that can take longer than
+whoever is waiting is able to give it — at which point the temptation is to quote a number nobody
+checked. Instead each suite's result is stored with a hash of the whole tree it came from, and a
+resumed run reports the stored result for any suite whose hash still matches. Change one byte
+anywhere and every hash changes, so a stale result cannot be counted: a single added newline took
+the number of recalled suites from ten to zero. Also off by default.
 
 The suites come in three layers.
 

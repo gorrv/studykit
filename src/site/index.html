@@ -210,13 +210,20 @@ footer a{color:var(--accent)}
     written down until it has been checked, which is why they fill up slowly.</p>
   <div class="cards">
 
-    <a class="card soon" href="modules/cryptography.html">
-      <div class="code">Starting out</div>
+    <a class="card" href="modules/cryptography.html">
+      <div class="code">Topic 1</div>
       <h3>Cryptography</h3>
-      <p>Ciphers and keys, and what it takes to argue that a scheme is hard to break rather than
-        merely unfamiliar.</p>
+      <p>What it means for a scheme to be secure, before any scheme is built. The syntax of
+        secret key encryption and of message authentication; why correctness is not security;
+        and five attempts at defining a good cipher, each killed by a scheme that satisfies
+        the previous attempt &mdash; with the attack that kills it run on the page. Then
+        perfect secrecy, counted out over every message and ciphertext, and the one-time pad
+        rewriting a message its attacker cannot read.</p>
       <div class="stats">
-        <span class="stat">no topics yet</span>
+        <span class="stat"><b>4</b> sections</span>
+        <span class="stat"><b>5</b> tools</span>
+        <span class="stat"><b>9</b> question generators</span>
+        <span class="stat">attacks run, not described</span>
       </div>
     </a>
 
@@ -292,7 +299,7 @@ That's the whole install. It works with no network connection.
       simulates the clock, a value-iteration grid that actually sweeps, a page-replacement tracer that
       shows you Belady's anomaly rather than asserting it.</p>
 
-    <p>The notes grew around the tools, and the test suite grew around both — 2225 assertions that drive
+    <p>The notes grew around the tools, and the test suite grew around both — 2280 assertions that drive
       the real pages and check the results against published worked examples and, where none exists,
       against exhaustive search. That turned out to be the most useful part: it caught several genuine
       errors in the material I was revising from, and a few of my own.</p>

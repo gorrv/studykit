@@ -1,0 +1,136 @@
+<section id="cram" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">&#9733; Revision</div>
+        <h1>Cram Sheet</h1>
+        <div class="topic-subtitle">every rule so far, one page &mdash; Ctrl/Cmd+P prints it</div>
+      </div>
+
+      <h2 id="cr-t1">Topic 01 &middot; what security means</h2>
+
+      <div class="cram-grid">
+
+        <div class="cram-card">
+          <h3>The two objects, as syntax</h3>
+          <ul>
+            <li><span class="term">SKE = (KGen, Enc, Dec)</span> over key space <code>K</code>,
+              message space <code>M</code>, ciphertext space <code>C</code>.</li>
+            <li><code>sk &larr; KGen</code> &middot; <code>c = Enc(sk, m)</code> &middot;
+              <code>m = Dec(sk, c)</code>. The arrow is there because key generation is
+              random.</li>
+            <li><span class="term">MAC = (KGen, Tag, Vf)</span> with its own integrity key
+              <code>ik</code>. <code>&tau; = Tag(ik, m)</code>, and <code>Vf</code> returns
+              <strong>0 or 1</strong>.</li>
+            <li>Stating either triple says <strong>nothing</strong> about correctness or
+              security. It is the shape, not the guarantee.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Correctness</h3>
+          <ul>
+            <li><code>c = Enc(sk, m) &rArr; m = Dec(sk, c)</code>. That is the whole
+              obligation.</li>
+            <li>It is a statement about the scheme <strong>agreeing with itself</strong>, and
+              is not a weak form of security.</li>
+            <li>The "do nothing" cipher is perfectly correct and perfectly useless.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The ladder, and what kills each rung</h3>
+          <ul>
+            <li><span class="term">i</span> key not recoverable &rarr; killed by the scheme
+              that never uses the key.</li>
+            <li><span class="term">ii</span> messages not recoverable &rarr; killed by leaking
+              the first letter.</li>
+            <li><span class="term">iii</span> partial messages not recoverable &rarr; killed
+              by leaking statistics.</li>
+            <li><span class="term">iv</span> no further information inferable &rarr; the right
+              intent, not yet formal.</li>
+            <li><span class="term">v</span> iv, <em>even with</em> chosen encryptions and
+              decryptions &rarr; the one to aim at.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>What a definition must say</h3>
+          <ul>
+            <li><span class="term">What must not be possible</span> — inferring further
+              meaningful information about the messages.</li>
+            <li><span class="term">Given what capabilities</span> — observing only, or also
+              encrypting and decrypting chosen inputs.</li>
+            <li>Change either half and it is a different claim. Nothing is "secure" without
+              saying against whom.</li>
+            <li>This family of properties is <span class="term">confidentiality</span>, or
+              secrecy.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Breaking a shift cipher</h3>
+          <ul>
+            <li>A shift moves the letter counts along without changing them, so the counts
+              identify the key.</li>
+            <li>Score each of the 26 shifts by <span class="term">&chi;&sup2;</span> against
+              English frequencies; the smallest wins.</li>
+            <li>Measured on a fixed passage: <strong>10 letters &rarr; 83.7%</strong>,
+              <strong>20 &rarr; 98.6%</strong>, <strong>30 &rarr; 100%</strong>.</li>
+            <li>Short messages are the only protection, and it runs out quickly.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The one-time pad</h3>
+          <ul>
+            <li>One uniform key letter per message letter, added letter by letter.</li>
+            <li><span class="term">Perfect secrecy:</span> for any message and any ciphertext
+              there is <strong>exactly one</strong> key joining them, so every message stays
+              exactly as likely as it was.</li>
+            <li>Not a computational claim — the information is absent, so no amount of work
+              recovers it.</li>
+            <li>Costs: key as long as the message, never reusable, and
+              <strong>no integrity at all</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Integrity</h3>
+          <ul>
+            <li>The assurance that what arrived is what was sent. A <strong>separate</strong>
+              property from secrecy, achieved by separate means and a separate key.</li>
+            <li><span class="term">The pad is the proof they are separate:</span>
+              <code>Dec(k, c + d) = m + d</code>. The attacker learns nothing and still
+              chooses the message.</li>
+            <li>Engineering answers: indelible ink, no blank space, tamper-evident seals.</li>
+            <li>Cryptographic answer: a tag over the ciphertext under a second key, checked
+              <em>before</em> decrypting.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Neither property covers these</h3>
+          <ul>
+            <li>Reordering, repeating, or reflecting valid ciphertexts and tags — each is
+              genuine, so integrity is satisfied.</li>
+            <li>Delaying or denying delivery — generally network engineering rather than
+              cryptography.</li>
+            <li>Every one of these needs its own sentence, with its own two halves.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The cast</h3>
+          <ul>
+            <li><span class="term">Alice</span> and <span class="term">Bob</span> hold the
+              keys.</li>
+            <li><span class="term">Eve</span> eavesdrops and nothing more — rung iv.</li>
+            <li><span class="term">Charlie</span> is active: chosen messages encrypted, chosen
+              ciphertexts decrypted — rung v.</li>
+            <li>Eve is rarely a strong enough adversary to design against.</li>
+          </ul>
+        </div>
+
+      </div>
+
+    </section>

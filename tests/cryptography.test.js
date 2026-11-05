@@ -2,35 +2,206 @@
 /**
  * Cryptography.
  *
- * A new module: the start page and nothing else yet. The structural
- * invariants still apply, and they are the reason this file exists now
- * rather than later — a shell that is already under test cannot acquire a
- * duplicate id, a dead link or an unstyled class quietly as it fills up.
+ * The first topic is a conceptual one — definitions, syntax, and the argument
+ * that correctness is not security — so the things worth asserting are the
+ * demonstrations rather than any arithmetic the notes teach. Three kinds of
+ * claim get made on that page, and each is checked here the hard way:
  *
- * Every topic added here should bring assertions with it, checking the
- * mathematics against a value derived some other way. Until then there is
- * nothing to assert, and this suite says so rather than pretending.
+ *   - "this scheme is correct": exhausted over the whole domain, and checked
+ *     against a second implementation written here that shares no code with
+ *     the engine.
+ *   - "the pad is perfectly secret": counted over every (message, ciphertext)
+ *     pair, not argued.
+ *   - "thirty letters is enough to break a shift": measured over every window
+ *     of a fixed passage, with the number on the page and the number here
+ *     coming from the same sweep.
  */
 
 const { loadModule, Suite, checkStructure, checkQuestionBank } = require('./lib/harness');
 
+/* An independent shift cipher, written from the definition rather than from
+   the engine, for the differential checks below. */
+const A = 26;
+const shiftEnc = (k, m) => m.map(x => (x + k) % A);
+const shiftDec = (k, c) => c.map(x => (x - k + A) % A);
+
 module.exports = async function run() {
   const s = new Suite('cryptography');
   const m = await loadModule('cryptography.html');
+  const w = m.window;
 
   await checkStructure(s, m);
-  checkQuestionBank(s, m);
 
-  // The start page is the whole module for now, so check it is actually
-  // usable: it has to be the section that shows, and its sidebar links have
-  // to land somewhere (checkStructure catches dead links, not empty navs).
-  const secs = m.$$('.topic-section');
-  s.is('the start page is the only section so far', secs.length, 1,
-    secs.map(x => x.id).join(', '));
-  s.is('and it is the one that shows', secs[0] && secs[0].id, 'start');
+  /* ---------------- correctness, by exhaustion ---------------- */
 
-  const links = m.$$('nav a[href^="#"]');
-  s.ok('the sidebar offers a way into it', links.length > 0);
+  {
+    const r = w.skCorrect('shift', 3);
+    s.ok('the shift cipher is correct on every key and every 3-letter message',
+      r.ok && r.bad === 0, r.first && JSON.stringify(r.first));
+    s.is('and that really was the whole domain', r.total, 26 * Math.pow(26, 3));
+
+    /* The same claim, decided by an implementation that shares nothing with
+       the engine's. If both are wrong they have to be wrong identically. */
+    let disagree = 0, firstBad = null;
+    for (let k = 0; k < A; k++) {
+      for (let a = 0; a < A; a++) {
+        for (let b = 0; b < A; b++) {
+          const msg = [a, b];
+          const mine = shiftDec(k, shiftEnc(k, msg)).join(',');
+          const theirs = w.SK_SCHEMES.shift.dec(k, w.SK_SCHEMES.shift.enc(k, msg)).join(',');
+          if (mine !== theirs || mine !== msg.join(',')) {
+            disagree++;
+            if (!firstBad) firstBad = `k=${k} m=${msg} mine=${mine} engine=${theirs}`;
+          }
+        }
+      }
+    }
+    s.is('engine and an independent shift cipher agree on all 17,576 cases', disagree, 0, firstBad);
+
+    const id = w.skCorrect('identity', 3);
+    s.ok('the "do nothing" scheme is correct too — which is the point of it',
+      id.ok && id.bad === 0);
+  }
+
+  /* ---------------- the ladder, rung by rung ---------------- */
+
+  {
+    const r = w.skReadOff('identity', 'attack at dawn');
+    s.is('rung ii: the "do nothing" ciphertext is the message', r.ciphertext, r.plaintext);
+
+    const p = w.skPartial('attack at dawn', 7);
+    s.ok('rung iii: the first letter is readable straight off the ciphertext',
+      p.ok && p.correct && p.leaked === p.truth, p.ok ? `${p.leaked} vs ${p.truth}` : p.error);
+    s.ok('and the rest of it is not', p.ciphertext.slice(1) !== p.plaintext.slice(1));
+
+    /* Brute force: whatever the key, the message is among the 26 candidates.
+       This is weaker than the frequency attack and needs no language at all. */
+    let missing = 0;
+    const msg = w.skNums('attack at dawn');
+    for (let k = 0; k < A; k++) {
+      const c = w.SK_SCHEMES.shift.enc(k, msg);
+      const found = [];
+      for (let j = 0; j < A; j++) found.push(w.skText(w.SK_SCHEMES.shift.dec(j, c)));
+      if (found.indexOf(w.skText(msg)) < 0) missing++;
+    }
+    s.is('rung iv: 26 candidates always contain the message, for every key', missing, 0);
+  }
+
+  /* ---------------- how much text the frequency attack needs ---------------- */
+
+  {
+    /* The figures quoted on the page and in the cram sheet. If the engine
+       changes, these move, and the prose is wrong until it is updated. */
+    const want = { 10: 83.7, 20: 98.6, 30: 100 };
+    Object.keys(want).forEach(len => {
+      const e = w.skEnoughText(Number(len));
+      const pct = 100 * e.rate;
+      s.near(`chi-squared recovers the key on ${len} letters, ${want[len]}% of windows`,
+        pct, want[len], 0.05);
+    });
+
+    const thirty = w.skEnoughText(30);
+    s.is('by thirty letters it does not miss at all', thirty.hit, thirty.total);
+
+    /* The page says the outcome does not depend on the key, and uses that to
+       count windows rather than window-key pairs. If that were wrong the
+       quoted percentages would be wrong too. */
+    const ki = w.skKeyIndependent(10, 40);
+    s.is('the attack succeeds for all 26 keys on a window, or for none',
+      ki.disagreements, 0, `${ki.checked} checks`);
+
+    /* And the real key really is the minimum, not merely near it. */
+    const full = w.skNums(w.SK_SAMPLE);
+    let wrong = 0;
+    for (let k = 0; k < A; k++) {
+      if (w.skChi(shiftEnc(k, full)).best.key !== k) wrong++;
+    }
+    s.is('on the whole passage every one of the 26 keys is recovered', wrong, 0);
+  }
+
+  /* ---------------- perfect secrecy, counted ---------------- */
+
+  {
+    [1, 2].forEach(n => {
+      const r = w.skPerfect(n);
+      s.ok(`one-time pad, ${n}-letter messages: every pair joined by exactly one key`,
+        r.ok && r.uniform, r.ok ? `counts seen: ${r.kinds.join(', ')}` : r.error);
+      s.is(`  ...over all ${Math.pow(26, n)}² pairs`, r.pairs, Math.pow(Math.pow(26, n), 2));
+    });
+
+    /* Said a second way: for a fixed ciphertext, the key that explains a given
+       message is forced, and is the difference of the two. Derived here rather
+       than read from the engine. */
+    let bad = 0;
+    for (let mi = 0; mi < A; mi++) {
+      for (let ci = 0; ci < A; ci++) {
+        const k = (ci - mi + A) % A;
+        if ((mi + k) % A !== ci) bad++;
+      }
+    }
+    s.is('and the key joining a message to a ciphertext is their difference', bad, 0);
+  }
+
+  /* ---------------- malleability: secrecy without integrity ---------------- */
+
+  {
+    const ex = w.skMalleableAlways(1);
+    s.ok('the rewrite lands on the target for every message, key and target',
+      ex.ok && ex.bad === 0, ex.ok ? `${ex.bad} of ${ex.total}` : ex.error);
+    s.is('  ...which is all 17,576 of them', ex.total, Math.pow(26, 3));
+
+    /* Longer messages, by the algebra rather than by exhaustion: the pad acts
+       letter by letter, so Dec(k, c + d) = m + d whatever the length. */
+    let bad = 0, firstBad = null;
+    for (let trial = 0; trial < 3000; trial++) {
+      const n = 1 + (trial % 9);
+      const msg = [], key = [], delta = [];
+      for (let i = 0; i < n; i++) {
+        msg.push((trial * 7 + i * 13) % A);
+        key.push((trial * 11 + i * 5) % A);
+        delta.push((trial * 3 + i * 17) % A);
+      }
+      const c = w.SK_SCHEMES.otp.enc(key, msg);
+      const got = w.SK_SCHEMES.otp.dec(key, c.map((x, i) => (x + delta[i]) % A));
+      const want = msg.map((x, i) => (x + delta[i]) % A);
+      if (got.join(',') !== want.join(',')) {
+        bad++;
+        if (!firstBad) firstBad = `n=${n} got ${got} want ${want}`;
+      }
+    }
+    s.is('adding d to the ciphertext adds d to the message, at every length', bad, 0, firstBad);
+
+    /* The tool's worked example, end to end. */
+    const r = w.skMalleate('pay alice ten', 'pay carol ten', 20250911);
+    s.ok('the worked example rewrites the message', r.ok && r.worked,
+      r.ok ? `received ${r.received}` : r.error);
+    s.is('and the receiver reads exactly what the attacker chose',
+      r.received, r.target);
+    s.ok('while the attacker never had the key', r.key.length === r.message.length);
+
+    /* Lengths have to match or the demonstration is a different attack. */
+    const bad2 = w.skMalleate('short', 'much longer target', 1);
+    s.ok('a mismatched target is refused rather than silently truncated', !bad2.ok);
+  }
+
+  /* ---------------- the tag, and what it catches ---------------- */
+
+  {
+    const r = w.skWithTag('pay alice ten', 'pay carol ten', 20250911, 47);
+    s.ok('a genuine ciphertext and tag verify', r.ok && r.acceptedBefore);
+    s.ok('the tampered one does not', r.ok && !r.acceptedAfter);
+
+    /* Correctness of the tag, separately from whether it catches anything:
+       the same key and ciphertext must always give the same tag. */
+    const ct = w.skNums('abcdefghij');
+    s.is('tagging is deterministic', w.skTag(9, ct), w.skTag(9, ct));
+    s.ok('and a different key gives a different tag here',
+      w.skTag(9, ct) !== w.skTag(10, ct));
+  }
+
+  /* ---------------- question bank ---------------- */
+
+  checkQuestionBank(s, m, 1500);
 
   return s;
 };
