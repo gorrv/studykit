@@ -211,18 +211,19 @@ footer a{color:var(--accent)}
   <div class="cards">
 
     <a class="card" href="modules/cryptography.html">
-      <div class="code">Topic 1</div>
+      <div class="code">Topics 1&ndash;2</div>
       <h3>Cryptography</h3>
-      <p>What it means for a scheme to be secure, before any scheme is built. The syntax of
-        secret key encryption and of message authentication; why correctness is not security;
-        and five attempts at defining a good cipher, each killed by a scheme that satisfies
-        the previous attempt &mdash; with the attack that kills it run on the page. Then
-        perfect secrecy, counted out over every message and ciphertext, and the one-time pad
-        rewriting a message its attacker cannot read.</p>
+      <p>What it means for a scheme to be secure, before any scheme is built. Five attempts at
+        defining a good cipher, each killed by a scheme that satisfies the previous attempt,
+        with the attack that kills it run on the page; perfect secrecy counted out over every
+        message and ciphertext; and the one-time pad rewriting a message its attacker cannot
+        read. Then the formal version: Kerckhoffs, how many functions could be an
+        <code>Enc</code> at all, and IND-EAV, IND-CPA, IND-CCA and EUF-CMA played out for
+        thousands of rounds against named strategies, with the win rate counted.</p>
       <div class="stats">
-        <span class="stat"><b>4</b> sections</span>
-        <span class="stat"><b>5</b> tools</span>
-        <span class="stat"><b>9</b> question generators</span>
+        <span class="stat"><b>5</b> sections</span>
+        <span class="stat"><b>9</b> tools</span>
+        <span class="stat"><b>18</b> question generators</span>
         <span class="stat">attacks run, not described</span>
       </div>
     </a>
@@ -299,7 +300,7 @@ That's the whole install. It works with no network connection.
       simulates the clock, a value-iteration grid that actually sweeps, a page-replacement tracer that
       shows you Belady's anomaly rather than asserting it.</p>
 
-    <p>The notes grew around the tools, and the test suite grew around both — 2280 assertions that drive
+    <p>The notes grew around the tools, and the test suite grew around both — 2324 assertions that drive
       the real pages and check the results against published worked examples and, where none exists,
       against exhaustive search. That turned out to be the most useful part: it caught several genuine
       errors in the material I was revising from, and a few of my own.</p>

@@ -199,6 +199,152 @@ module.exports = async function run() {
       w.skTag(9, ct) !== w.skTag(10, ct));
   }
 
+  /* ================ Topic 2 ================ */
+
+  /* ---------------- counting, against enumeration ---------------- */
+
+  {
+    /* The closed forms in the notes are checked against a count of the
+       objects they claim to count — built one at a time. A formula and an
+       enumeration are about as independent as two derivations get. */
+    let bad = 0, first = null;
+    for (let sz = 1; sz <= 4; sz++) {
+      for (let t = 1; t <= 5; t++) {
+        const f = w.gmCount(sz, t), e = w.gmEnumerate(sz, t);
+        if (!e.ok) continue;
+        if (f.functions !== e.functions || f.injective !== e.injective) {
+          bad++;
+          if (!first) first = `s=${sz} t=${t}: formula ${f.functions}/${f.injective}, ` +
+            `counted ${e.functions}/${e.injective}`;
+        }
+      }
+    }
+    s.is('the counting formulas agree with an enumeration, for every s and t', bad, 0, first);
+
+    /* The worked example in the notes. */
+    const deck = w.gmCount(3, 4);
+    s.is('|M|=3, |C|=4: 4³ functions', deck.functions, 64);
+    s.is('  ...and C(4,3)·3! = 24 injective ones', deck.injective, 24);
+    s.is('when t = s the injective ones are the s! bijections', w.gmCount(4, 4).injective, 24);
+
+    /* And the claim that forces injectivity, settled over every function. */
+    let mism = 0, firstM = null;
+    for (const [sz, t] of [[2, 2], [2, 3], [3, 3], [3, 4], [2, 4]]) {
+      const r = w.gmInjectiveNeeded(sz, t);
+      if (!r.ok) continue;
+      if (r.mismatch !== 0) { mism += r.mismatch; if (!firstM) firstM = `s=${sz} t=${t}`; }
+      if (r.invertible !== r.injective) {
+        mism++;
+        if (!firstM) firstM = `s=${sz} t=${t}: ${r.invertible} invertible vs ${r.injective} injective`;
+      }
+    }
+    s.is('a scheme can be made correct exactly when Enc is injective', mism, 0, firstM);
+    s.ok('and so |C| < |M| admits no correct scheme at all',
+      w.gmCount(4, 3).injective === 0 && !w.gmCount(4, 3).possible);
+  }
+
+  /* ---------------- the games, played ---------------- */
+
+  {
+    /* Where the right answer is known exactly, the measurement has something
+       to be checked against rather than merely reported. */
+
+    const otp = w.gmPlay('otpFresh', 'coin', 'eav', 4000, 20251009);
+    s.near('a one-time pad under IND-EAV: the adversary is reduced to guessing',
+      otp.rate, 0.5, 0.03);
+
+    const otpPattern = w.gmPlay('otpFresh', 'pattern', 'eav', 4000, 20251009);
+    s.near('  ...and a cleverer strategy does no better', otpPattern.rate, 0.5, 0.03);
+
+    /* Deterministic Enc cannot survive a chosen-plaintext attack. Not
+       "usually loses" — loses every round, by construction. */
+    ['shiftFixed', 'otpReused'].forEach(id => {
+      const r = w.gmPlay(id, 'replay', 'cpa', 2000, 7);
+      s.is(`${id} loses every round of IND-CPA to encrypt-and-compare`, r.wins, r.rounds);
+    });
+
+    /* A fresh key per message is not the same as a randomised Enc. */
+    const fresh = w.gmPlay('shiftFresh', 'pattern', 'eav', 2000, 7);
+    s.is('a shift with a fresh key still loses IND-EAV on the letter pattern',
+      fresh.wins, fresh.rounds);
+
+    /* Malleability, cashed in as an IND-CCA distinguisher. */
+    const cca = w.gmPlay('shiftFixed', 'maul', 'cca', 2000, 7);
+    s.is('altering the challenge ciphertext wins IND-CCA every round', cca.wins, cca.rounds);
+
+    /* The one exception in IND-CCA, tested rather than assumed. An adversary
+       that hands the challenge straight back learns nothing and is pushed
+       back to guessing — which is exactly what stops the game being vacuous.
+       The mauling adversary above never triggers it, so without this the
+       rule would be unexercised code. */
+    const back = w.gmPlay('shiftFixed', 'askback', 'cca', 2000, 7);
+    s.ok('the decryption oracle refuses the challenge ciphertext', back.refusals > 0,
+      `${back.refusals} refusals in ${back.rounds} rounds`);
+    s.is('  ...every single round', back.refusals, back.rounds);
+    s.near('  ...leaving that adversary guessing', back.rate, 0.5, 0.04);
+
+    /* Taking an oracle away is supposed to matter, and the runner should say
+       so rather than quietly scoring a strategy it cannot play. */
+    const noOracle = w.gmPlay('shiftFixed', 'replay', 'eav', 100, 1);
+    s.ok('a CPA strategy is refused in EAV rather than silently scored',
+      !noOracle.ok && noOracle.unavailable);
+    const noDec = w.gmPlay('shiftFixed', 'maul', 'cpa', 100, 1);
+    s.ok('and a CCA strategy is refused in CPA', !noDec.ok && noDec.unavailable);
+
+    /* Same seed, same answer — the figures on the page are reproducible. */
+    const again = w.gmPlay('otpFresh', 'coin', 'eav', 4000, 20251009);
+    s.is('a game replayed with the same seed gives the same count', again.wins, otp.wins);
+  }
+
+  /* ---------------- EUF-CMA ---------------- */
+
+  {
+    const f = w.gmForge('crypto');
+    s.ok('the forgery is a message the oracle was never asked about', f.ok && f.isNew);
+    s.ok('and its tag is valid under every key', f.ok && f.worksForEveryKey,
+      f.ok ? `${f.keysFailed} of ${f.keysChecked} keys` : f.error);
+
+    /* Derived here rather than read off the engine: the tag is a sum, so any
+       permutation of a message shares it. */
+    let bad = 0;
+    for (let ik = 0; ik < 26; ik++) {
+      for (let trial = 0; trial < 200; trial++) {
+        const msg = [trial % 26, (trial * 7) % 26, (trial * 13) % 26];
+        const perm = [msg[2], msg[0], msg[1]];
+        if (w.gmSumTag(ik, msg) !== w.gmSumTag(ik, perm)) bad++;
+      }
+    }
+    s.is('every rearrangement of a message carries its tag, for every key', bad, 0);
+
+    [2, 3].forEach(n => {
+      const r = w.gmForgeRate(n);
+      s.is(`the forgery wins every one of the ${r.total.toLocaleString()} ` +
+        `${n}-letter games`, r.wins, r.total);
+    });
+
+    /* Correctness of the MAC, which is separate from it being forgeable. */
+    let wrong = 0;
+    for (let ik = 0; ik < 26; ik++) {
+      for (let a = 0; a < 26; a++) {
+        if (!w.gmSumVerify(ik, [a], w.gmSumTag(ik, [a]))) wrong++;
+      }
+    }
+    s.is('the MAC is correct — an honest tag always verifies', wrong, 0);
+  }
+
+  /* ---------------- canonical verification ---------------- */
+
+  {
+    const det = w.gmCanonical(false, 3000, 7);
+    s.is('with a deterministic Tag, canonical Vf rejects nothing honest', det.rejected, 0);
+
+    const rnd = w.gmCanonical(true, 3000, 7);
+    s.ok('with a randomised Tag it throws out most honest tags', rnd.rejected > 0,
+      `${rnd.rejected} of ${rnd.trials}`);
+    s.near('  ...four salts in five being non-zero, so about four fifths',
+      rnd.rate, 0.8, 0.03);
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 1500);

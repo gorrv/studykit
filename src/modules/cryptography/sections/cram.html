@@ -133,4 +133,127 @@
 
       </div>
 
+      <h2 id="cr-t2">Topic 02 &middot; games</h2>
+
+      <div class="cram-grid">
+
+        <div class="cram-card">
+          <h3>Who may toss a coin</h3>
+          <ul>
+            <li><span class="term">KGen</span> randomised. <span class="term">Dec</span> and
+              <span class="term">Vf</span> deterministic.</li>
+            <li><span class="term">Enc</span> and <span class="term">Tag</span> potentially
+              randomised &mdash; <code>c &larr; Enc</code> when they are,
+              <code>c = Enc</code> when not.</li>
+            <li><code>Dec</code> may output <strong>&perp;</strong>.</li>
+            <li>Randomness is just an extra input:
+              <code>c = Enc(sk, m; &rho;)</code>, <code>&rho; &larr; R = {0,1}<sup>r</sup></code>.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Correctness, both objects</h3>
+          <ul>
+            <li><code>&forall; sk &isin; K, m &isin; M: Dec(sk, Enc(sk, m)) = m</code></li>
+            <li><code>&forall; ik &isin; K, m &isin; M: Vf(ik, m, Tag(ik, m)) = 1</code></li>
+            <li>Both satisfied by silly schemes &mdash; <code>Enc(sk,m)=m</code>, and a
+              <code>Vf</code> that always says 1.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Canonical verification</h3>
+          <ul>
+            <li>Recompute <code>&tau;&prime; = Tag(ik, m)</code>, output 1 iff
+              <code>&tau; = &tau;&prime;</code>.</li>
+            <li><span class="term">Requires a deterministic Tag.</span> With a randomised one
+              a message has many valid tags, the verifier produces one, and rejects the
+              rest &mdash; <strong>correctness fails</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Counting Enc</h3>
+          <ul>
+            <li><code>|M| = s</code>, <code>|C| = t</code>, <code>Enc<sub>sk</sub>: M &rarr; C</code>,
+              <code>Dec<sub>sk</sub>: C &rarr; M &cup; {&perp;}</code>.</li>
+            <li>Functions: <code>t<sup>s</sup></code>. Injective:
+              <code>C(t,s) &middot; s!</code>. If <code>t = s</code>: <code>s!</code>
+              bijections.</li>
+            <li><span class="term">Enc must be injective</span>, so <code>t &ge; s</code>.
+              Two messages sharing a ciphertext leave <code>Dec</code> one answer for two
+              questions.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Kerckhoffs</h3>
+          <ul>
+            <li>Six requirements; the one that is quoted:
+              <span class="term">the system must not require secrecy</span> and may be stolen
+              without causing trouble.</li>
+            <li>The key is the secret, not the design. Keys can be changed; designs
+              cannot.</li>
+            <li>The forgotten four are about key handling, telegraphs, portability and ease
+              of use.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The three IND games</h3>
+          <ul>
+            <li>All: C samples <code>sk</code> and a uniform <code>b</code>; A sends
+              <code>m<sub>0</sub>, m<sub>1</sub></code> of <strong>equal length</strong>;
+              A sees <code>c<sub>b</sub></code> and names <code>b&prime;</code>.</li>
+            <li><span class="term">EAV</span> no oracles &middot;
+              <span class="term">CPA</span> adds <code>O<sub>Enc</sub></code> &middot;
+              <span class="term">CCA</span> adds <code>O<sub>Dec</sub></code>.</li>
+            <li><code>O<sub>Dec</sub></code> returns <strong>&perp;</strong> on
+              <code>c<sub>b</sub></code> only &mdash; otherwise the game is vacuous.</li>
+            <li>Equal lengths required because ciphertext length leaks message length.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>EUF-CMA</h3>
+          <ul>
+            <li><code>O<sub>Tag</sub></code> hands out tags and collects queries in
+              <code>Q</code>.</li>
+            <li>A outputs <code>(m&prime;, &tau;&prime;)</code> and wins when
+              <code>Vf = 1</code> <strong>and</strong> <code>m&prime; &notin; Q</code>.</li>
+            <li><span class="term">Existential:</span> any new message counts. Ruling out the
+              easiest forgery rules out the rest.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>What secure means</h3>
+          <ul>
+            <li>IND-&#123;EAV, CPA, CCA&#125;: no efficient A wins noticeably more than
+              <strong>one half</strong>. Half because you can always guess.</li>
+            <li>EUF-CMA: noticeably more than <strong>zero</strong>. Forging is creation, not
+              a choice.</li>
+            <li><span class="term">Efficient</span> = PPT, probabilistic polynomial time.
+              <span class="term">Noticeable</span> = non-negligible, where negligible is
+              eventually below every inverse polynomial.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>What the games show</h3>
+          <ul>
+            <li><span class="term">Deterministic Enc loses IND-CPA always:</span> encrypt
+              <code>m<sub>0</sub></code> at the oracle and compare.</li>
+            <li><span class="term">A fresh key is not randomised Enc:</span> a shift still
+              sends <code>aa</code> to two equal letters.</li>
+            <li><span class="term">Malleability loses IND-CCA:</span> alter
+              <code>c<sub>b</sub></code> by one letter, have <em>that</em> decrypted, undo
+              the change.</li>
+            <li>Why IND captures everything: any leak you can name distinguishes
+              <em>some</em> pair, so no distinguishable pair means no leak.</li>
+          </ul>
+        </div>
+
+      </div>
+
     </section>

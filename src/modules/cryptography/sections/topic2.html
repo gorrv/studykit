@@ -1,0 +1,459 @@
+<section id="topic2" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 02 &middot; Games</div>
+        <h1>Saying It Precisely Enough to Lose</h1>
+        <div class="topic-subtitle">the formal definitions, Kerckhoffs, and security as a game an adversary can win</div>
+      </div>
+
+      <p>The previous topic ended with a sentence that was nearly a definition: no further
+      meaningful information, even given chosen encryptions and decryptions. Nearly, because
+      "meaningful" and "information" were still carrying the weight. This topic replaces them
+      with something that cannot be argued about &mdash; <strong>a game, an adversary, and a
+      win condition</strong> &mdash; and the four tools below play those games and count who
+      wins.</p>
+
+      <!-- ===== FORMAL SYNTAX ===== -->
+      <h2 id="t2-ske">SKE, formally this time</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Which algorithms may use randomness, and which may not</div>
+        <table class="cr-defs" style="margin-top:4px;">
+          <tr><th><code>KGen</code></th><td><strong>Randomised.</strong> Samples and outputs
+            <code>sk &isin; K</code>. &nbsp;<code class="cr-dim">sk &larr; KGen</code></td></tr>
+          <tr><th><code>Enc</code></th><td><strong>Potentially randomised.</strong> Takes
+            <code>sk &isin; K</code> and <code>m &isin; M</code>, outputs <code>c &isin; C</code>.
+            &nbsp;<code class="cr-dim">c &larr; Enc(sk, m)</code> if randomised, else
+            <code class="cr-dim">c = Enc(sk, m)</code></td></tr>
+          <tr><th><code>Dec</code></th><td><strong>Deterministic.</strong> Takes
+            <code>sk</code> and <code>c</code>, outputs <code>m &isin; M</code> <em>or the
+            failure symbol</em> <code>&perp;</code>.</td></tr>
+        </table>
+        <br>Two things are new since the informal version. <code>Dec</code> may now
+        <strong>fail</strong> rather than return nonsense &mdash; which is what makes it
+        possible for a scheme to reject a ciphertext. And the arrow <code>&larr;</code> is
+        load-bearing: it marks exactly those algorithms that may consume randomness.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Randomness as an extra input</div>
+        A randomised algorithm is a deterministic one that has been handed some random bits.
+        Writing those bits down turns one into the other:
+        <pre class="cr-snippet">&rho; &larr; R = {0,1}<sup>r</sup>      c = Enc(sk, m; &rho;)</pre>
+        That is worth holding on to, because it is how randomised encryption gets analysed at
+        all &mdash; and because a scheme whose <code>Enc</code> is deterministic has no
+        <code>&rho;</code> to hide behind. Every historical cipher is in that position, and
+        the second tool below shows exactly what it costs them.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Correctness, stated over the whole space</div>
+        <pre class="cr-snippet">for all sk &isin; K and m &isin; M:   Dec(sk, Enc(sk, m)) = m</pre>
+        And still no security: <code>Enc(sk, m) = m</code> with <code>Dec(sk, c) = c</code>
+        satisfies it exactly.
+      </div>
+
+      <h2 id="t2-mac">MAC, formally</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">MAC = (KGen, Tag, Vf)</div>
+        <table class="cr-defs" style="margin-top:4px;">
+          <tr><th><code>KGen</code></th><td><strong>Randomised.</strong> Outputs
+            <code>ik &isin; K</code>.</td></tr>
+          <tr><th><code>Tag</code></th><td><strong>Potentially randomised.</strong> Takes
+            <code>ik</code> and <code>m</code>, outputs <code>&tau; &isin; T</code>.</td></tr>
+          <tr><th><code>Vf</code></th><td><strong>Deterministic.</strong> Takes
+            <code>ik</code>, <code>m</code>, <code>&tau;</code>, outputs 0 or 1.</td></tr>
+        </table>
+        <br><strong>Correctness:</strong>
+        <code>for all ik &isin; K and m &isin; M, Vf(ik, m, Tag(ik, m)) = 1</code>. And a
+        <code>Vf</code> that always says 1 satisfies it, so once again correctness is not
+        security.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Canonical verification, and the condition on it</div>
+        When <code>Tag</code> is deterministic &mdash; which is the case throughout here
+        &mdash; verification can always be done the obvious way, and nothing is lost by
+        assuming it is:
+        <pre class="cr-snippet">Vf(ik, m, &tau;):  compute &tau;&prime; = Tag(ik, m)
+             output 1 if &tau; = &tau;&prime;, else 0</pre>
+        The condition matters. Ask why it needs <code>Tag</code> to be deterministic before
+        reading on &mdash; and then let the fourth tool answer it by running the thing.
+      </div>
+
+      <!-- ===== SPACES ===== -->
+      <h2 id="t2-spaces">What the spaces actually are</h2>
+
+      <div class="callout">
+        <div class="callout-label">Sets, and then something more useful</div>
+        Formally <code>K</code>, <code>M</code>, <code>C</code> and <code>T</code> are just
+        <strong>sets</strong> &mdash; collections without repeats, of anything at all. That is
+        so general as to be unhelpful, and in practice they are strings over an alphabet.
+        Writing <code>&alpha;</code> for the alphabet:
+        <table class="cr-defs" style="margin-top:8px;">
+          <tr><th><code>&alpha;<sup>0</sup> = {&epsilon;}</code></th><td>the empty
+            string</td></tr>
+          <tr><th><code>&alpha;<sup>1</sup> = {0, 1}</code></th><td>single bits, for the binary
+            alphabet</td></tr>
+          <tr><th><code>&alpha;<sup>2</sup> = {00, 01, 10, 11}</code></th><td>pairs</td></tr>
+          <tr><th><code>&alpha;<sup>*</sup> = &bigcup;<sub>i&isin;&naturals;</sub>
+            &alpha;<sup>i</sup></code></th><td>the Kleene star: strings of any
+            length</td></tr>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Two shapes worth recognising</div>
+        <ul style="margin:6px 0 0;">
+          <li><strong>Historical.</strong> <code>&alpha;<sub>K</sub> = &alpha;<sub>M</sub> =
+            &alpha;<sub>C</sub> = {a..z}</code>, with <code>K = &alpha;<sub>K</sub><sup>n</sup></code>,
+            <code>M = &alpha;<sub>M</sub><sup>*</sup></code> and
+            <code>C = &alpha;<sub>C</sub><sup>*</sup></code>.</li>
+          <li><strong>Contemporary.</strong> <code>&alpha;<sub>K</sub> = &alpha;<sub>M</sub> =
+            {0,1}</code> with <code>&alpha;<sub>C</sub> = {0,1}<sup>&ell;</sup></code>.</li>
+        </ul>
+        Historical ciphers work over alphabets in the ordinary sense of the word; modern ones
+        work over bits. Spotting which is in play tells you what a "length" means in the game
+        rules below.
+      </div>
+
+      <!-- ===== ENC AS A FUNCTION ===== -->
+      <h2 id="t2-functions">Enc as a function, and how many there are</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Fix the key and you have an ordinary function</div>
+        Fix <code>sk</code> and write <code>Enc<sub>sk</sub>(&middot;)</code>. Then with
+        <code>|M| = s</code> and <code>|C| = t</code>:
+        <pre class="cr-snippet">Enc<sub>sk</sub>: M &rarr; C        Dec<sub>sk</sub>: C &rarr; M &cup; {&perp;}</pre>
+        <table class="cr-defs" style="margin-top:8px;">
+          <tr><th>functions M &rarr; C</th><td><code>t<sup>s</sup></code></td></tr>
+          <tr><th>injective ones</th><td><code>C(t, s) &middot; s!</code></td></tr>
+          <tr><th>when <code>t = s</code></th><td>injective means bijective, and there are
+            <code>s!</code></td></tr>
+        </table>
+        <br><strong><code>Enc<sub>sk</sub></code> must be injective</strong>, and therefore
+        <code>t &ge; s</code>: you cannot encrypt into a space smaller than the one you
+        started in.
+      </div>
+
+      <h3 id="t2-cttool">&#128736;&#65039; Counting them, and checking the formula</h3>
+
+      <div class="tool" data-run="runCount">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Every function from M to C, built and sorted</h3>
+        </div>
+        <div class="tool-desc">The closed forms beside a count of the actual objects. Then the
+          injectivity claim, settled by asking of every single function whether any
+          <code>Dec</code> could make it correct.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="ct-s">|M| = s</label>
+            <select id="ct-s">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="ct-t">|C| = t</label>
+            <select id="ct-t">
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4" selected>4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="ct-output"></div>
+      </div>
+
+      <!-- ===== KERCKHOFFS ===== -->
+      <h2 id="t2-kerckhoffs">Kerckhoffs' principles</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Six requirements, from an 1883 military manual</div>
+        <ol style="margin:6px 0 0;">
+          <li>The system must be substantially, if not mathematically,
+            <strong>indecipherable</strong>.</li>
+          <li>The system <strong>must not require secrecy</strong>, and can be stolen by the
+            enemy without causing trouble.</li>
+          <li>It must be easy to <strong>communicate and retain the key</strong> without
+            written notes, and easy to change it at will.</li>
+          <li>It must be compatible with <strong>telegraph communication</strong>.</li>
+          <li>It must be <strong>portable</strong>, and usable by one person alone.</li>
+          <li>It must be <strong>easy to use</strong> &mdash; no mental strain and no long
+            list of rules.</li>
+        </ol>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The second one is the one people mean</div>
+        "The system must not require secrecy" is why every game below hands the adversary the
+        algorithms and keeps back only the key. It is a statement about what is realistic:
+        algorithms get published, reverse-engineered, leaked or simply guessed, and a key can
+        be changed afterwards while a design cannot. A scheme whose security rests on nobody
+        knowing how it works has not been shown to be secure &mdash; it has only been left
+        untested.
+        <br><br>The rest of the list has aged in an interesting way. Four, five and six are
+        plainly about equipment and people, and they are the ones that get dropped when the
+        list is quoted &mdash; which is itself worth noticing, because usability failures are
+        still how deployed cryptography goes wrong.
+      </div>
+
+      <!-- ===== THE GAMES ===== -->
+      <h2 id="t2-games">Security as a game</h2>
+
+      <p>The intuition is unchanged: an adversary without <code>sk</code> should not learn
+      anything meaningful about messages. What changes is that the sentence is replaced by a
+      procedure. A <strong>challenger</strong> samples a key and a uniform bit
+      <code>b</code>; the <strong>adversary</strong> is given some powers and must name
+      <code>b</code>. In all of them the algorithms are public and only the key is not.</p>
+
+      <div class="cr-games">
+        <div class="cr-game">
+          <div class="cr-game-h"><span class="cr-game-n">IND-EAV</span>
+            indistinguishability against eavesdroppers</div>
+          <ol>
+            <li>A sends two messages <code>m<sub>0</sub>, m<sub>1</sub></code>.</li>
+            <li>C aborts if <code>|m<sub>0</sub>| &ne; |m<sub>1</sub>|</code>; otherwise
+              returns <code>c<sub>b</sub> &larr; Enc(sk, m<sub>b</sub>)</code>.</li>
+            <li>A outputs <code>b&prime;</code> and wins if <code>b&prime; = b</code>.</li>
+          </ol>
+        </div>
+        <div class="cr-game">
+          <div class="cr-game-h"><span class="cr-game-n">IND-CPA</span>
+            &hellip; against chosen plaintext attack</div>
+          <ol>
+            <li>A may call <code>O<sub>Enc</sub>(m)</code> as often as it likes.</li>
+            <li>Then the same challenge as above.</li>
+          </ol>
+          <p class="cr-game-note">The oracle is the whole difference, and it is fatal to any
+          scheme with a deterministic <code>Enc</code>.</p>
+        </div>
+        <div class="cr-game">
+          <div class="cr-game-h"><span class="cr-game-n">IND-CCA</span>
+            &hellip; against chosen ciphertext attack</div>
+          <ol>
+            <li>A may call <code>O<sub>Enc</sub>(m)</code> and
+              <code>O<sub>Dec</sub>(c)</code>.</li>
+            <li><code>O<sub>Dec</sub></code> returns <code>&perp;</code> for
+              <code>c = c<sub>b</sub></code> &mdash; and only for that.</li>
+            <li>Then the same challenge.</li>
+          </ol>
+          <p class="cr-game-note">Without that one exception the adversary would hand back the
+          challenge and be told the answer, so every scheme would lose and the definition
+          would mean nothing.</p>
+        </div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Why indistinguishability captures "learns nothing"</div>
+        Suppose an adversary can work out the Hamming weight of <code>m</code> from
+        <code>c</code>. That is not obviously the same as recovering the message &mdash; but
+        it wins the game outright: submit <code>m<sub>0</sub> = 0</code> and
+        <code>m<sub>1</sub> = 1</code>, and read off the answer.<br><br>
+        That is the trick of the definition. Any leak you can name is a way to tell apart
+        <em>some</em> pair of messages, so a scheme where no pair can be told apart has no
+        leaks at all &mdash; including the ones nobody thought to forbid.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">What secure means</div>
+        <code>SKE</code> is <strong>IND-{EAV, CPA, CCA} secure</strong> if no
+        <strong>efficient</strong> adversary wins with probability
+        <strong>noticeably different from one half</strong>.<br><br>
+        One half because the adversary can always flip a coin, so half is what a win rate
+        looks like when nothing has been learned. <em>Efficient</em> means
+        <strong>PPT</strong> &mdash; probabilistic polynomial time. <em>Noticeably
+        different</em> means by a non-negligible amount, where negligible is a function
+        eventually smaller than every inverse polynomial.
+      </div>
+
+      <h3 id="t2-gmtool">&#128736;&#65039; Play the game</h3>
+
+      <div class="tool" data-run="runGame">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Four thousand rounds, and the measured win rate</h3>
+        </div>
+        <div class="tool-desc">Pick a scheme, a game and a strategy. The challenger samples a
+          key and a bit each round; the adversary plays; the wins are counted. Half is
+          guessing.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="gm-scheme">scheme</label>
+            <select id="gm-scheme">
+              <option value="otpFresh">One-time pad, fresh key</option>
+              <option value="otpReused">One-time pad, key reused</option>
+              <option value="shiftFixed">Shift, key fixed</option>
+              <option value="shiftFresh">Shift, fresh key</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="gm-game">game</label>
+            <select id="gm-game">
+              <option value="eav">IND-EAV</option>
+              <option value="cpa">IND-CPA</option>
+              <option value="cca">IND-CCA</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="gm-adv">strategy</label>
+            <select id="gm-adv">
+              <option value="coin">flip a coin</option>
+              <option value="pattern">look at the letter pattern</option>
+              <option value="replay">encrypt m₀ and compare</option>
+              <option value="maul">alter the challenge, have it decrypted</option>
+              <option value="askback">hand the challenge back for decryption</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="gm-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Three things that tool will show you</div>
+        <ul style="margin:6px 0 0;">
+          <li><strong>A deterministic <code>Enc</code> cannot survive IND-CPA.</strong> Ask
+            the oracle to encrypt <code>m<sub>0</sub></code> and compare with the challenge.
+            Nothing about the key matters.</li>
+          <li><strong>A fresh key is not the same as a randomised <code>Enc</code>.</strong>
+            A shift with a new key every time still sends <code>aa</code> to a pair of equal
+            letters, and that is enough.</li>
+          <li><strong>Taking a power away can make a broken scheme look fine.</strong> The
+            same shift cipher that loses IND-CPA every time wins IND-EAV exactly half the
+            time against a strategy that needs the oracle it no longer has.</li>
+        </ul>
+      </div>
+
+      <!-- ===== EUF-CMA ===== -->
+      <h2 id="t2-euf">Forging a tag</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">EUF-CMA &mdash; existential unforgeability under chosen message attack</div>
+        The challenger samples <code>ik &larr; KGen</code> and starts with
+        <code>Q = &empty;</code>.
+        <ol style="margin:6px 0 0;">
+          <li>A may call <code>O<sub>Tag</sub>(m)</code>, which returns
+            <code>&tau; = Tag(ik, m)</code> and adds <code>m</code> to <code>Q</code>.</li>
+          <li>A outputs a pair <code>(m&prime;, &tau;&prime;)</code>.</li>
+          <li>A <strong>wins</strong> when <code>Vf(ik, m&prime;, &tau;&prime;) = 1</code>
+            <strong>and</strong> <code>m&prime; &notin; Q</code>.</li>
+        </ol>
+        <br><code>MAC</code> is <strong>EUF-CMA secure</strong> if no efficient adversary wins
+        with probability <strong>noticeably different from zero</strong>. Zero, not a half,
+        because here the adversary must <em>produce</em> something rather than choose between
+        two equally likely answers.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Why "existential" is the right bar</div>
+        It does not ask for a forgery on a message of anyone's choosing, or a useful message,
+        or the key. <em>Any</em> new message with a valid tag is a win. That looks almost
+        unfairly weak as a requirement on the adversary &mdash; which is exactly why it is the
+        right requirement on the scheme: ruling out the easiest possible forgery rules out all
+        the harder ones too.
+      </div>
+
+      <h3 id="t2-fgtool">&#128736;&#65039; One query, one forgery</h3>
+
+      <div class="tool" data-run="runForge">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>A MAC that loses EUF-CMA to a single question</h3>
+        </div>
+        <div class="tool-desc">The tag is the sum of the letters plus the key. Watch what that
+          costs it &mdash; and note the forger never sees a key.</div>
+        <div class="tool-controls">
+          <div class="tool-field" style="flex:1 1 220px;">
+            <label for="fg-msg">message to ask about</label>
+            <input type="text" id="fg-msg" value="crypto" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="fg-ik">the key (which only the challenger has)</label>
+            <select id="fg-ik">
+              <option value="3">3</option>
+              <option value="9" selected>9</option>
+              <option value="17">17</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="fg-output"></div>
+      </div>
+
+      <h3 id="t2-cvtool">&#128736;&#65039; Why canonical verification needs a deterministic Tag</h3>
+
+      <div class="tool" data-run="runCanonical">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Honest tags, rejected</h3>
+        </div>
+        <div class="tool-desc">Switch <code>Tag</code> between deterministic and randomised,
+          and watch what canonical verification does to tags the honest tagger produced.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="cv-mode">Tag is</label>
+            <select id="cv-mode">
+              <option value="det" selected>deterministic</option>
+              <option value="random">randomised</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="cv-output"></div>
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="t2-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember seven things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>KGen is randomised, Dec and Vf are deterministic, Enc and Tag may be
+            either.</strong> <code>Dec</code> may output <code>&perp;</code>.</li>
+          <li><strong>Randomness is just an extra input:</strong>
+            <code>c = Enc(sk, m; &rho;)</code> with <code>&rho; &larr; R</code>.</li>
+          <li><strong>Canonical verification recomputes the tag and compares</strong>, and is
+            only available when <code>Tag</code> is deterministic.</li>
+          <li><strong><code>Enc<sub>sk</sub></code> is injective, so <code>|C| &ge;
+            |M|</code>.</strong> There are <code>t<sup>s</sup></code> functions
+            <code>M &rarr; C</code> and <code>C(t,s)&middot;s!</code> injective ones.</li>
+          <li><strong>Kerckhoffs:</strong> the system must not require secrecy &mdash; the key
+            is the secret, not the design.</li>
+          <li><strong>IND-EAV / CPA / CCA</strong> differ only in which oracles the adversary
+            gets. Secure means no efficient adversary wins noticeably more than
+            <strong>half</strong> the time.</li>
+          <li><strong>EUF-CMA:</strong> a valid tag on any message not already queried.
+            Secure means winning with probability noticeably different from
+            <strong>zero</strong>.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Forgetting the <code>|m<sub>0</sub>| = |m<sub>1</sub>|</code> rule. Without it
+            every scheme loses, because ciphertext length leaks message length &mdash; and
+            that is a real leak the definition deliberately does not forbid.</li>
+          <li>Forgetting that <code>O<sub>Dec</sub></code> refuses <code>c<sub>b</sub></code>
+            and nothing else. A ciphertext differing in one letter is fair game, which is how
+            a malleable scheme loses IND-CCA.</li>
+          <li>Reading "one half" as the win condition. The adversary must do noticeably
+            <em>better</em> than one half; achieving exactly one half is what guessing
+            does.</li>
+          <li>Expecting EUF-CMA's bar to be one half too. Forging is creation, not a choice
+            between two answers, so the bar is zero.</li>
+          <li>Thinking a fresh random key per message makes <code>Enc</code> randomised in the
+            sense that matters. What matters is whether the same message can produce different
+            ciphertexts <em>and</em> whether the structure survives.</li>
+          <li>Treating injectivity as a design choice. It is forced by correctness.</li>
+        </ul>
+      </div>
+
+    </section>

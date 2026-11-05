@@ -173,3 +173,61 @@
     white-space: nowrap;
     cursor: pointer;
   }
+
+  /* ---------- Topic 02 · the games ---------- */
+
+  .cr-games { display: grid; gap: 14px; margin: 22px 0; }
+  @media (min-width: 860px) { .cr-games { grid-template-columns: repeat(3, 1fr); } }
+  .cr-game {
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--accent);
+    border-radius: 0 0 10px 10px;
+    padding: 14px 16px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  .cr-game-h { font-size: 13px; color: var(--ink-soft); margin-bottom: 8px; }
+  .cr-game-n {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+  .cr-game ol { margin: 6px 0 0; padding-left: 18px; font-size: 13px; }
+  .cr-game li { margin: 3px 0; }
+  .cr-game-note {
+    font-size: 12px;
+    color: var(--ink-muted);
+    font-style: italic;
+    margin: 9px 0 0;
+  }
+
+  /* the win-rate meter */
+  .cr-meter {
+    position: relative;
+    height: 22px;
+    background: var(--surface-3);
+    border: 1px solid var(--rule);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .cr-meter-bar { height: 100%; background: var(--accent); opacity: 0.75; }
+  .cr-meter-half {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--accent-2);
+  }
+  .cr-meter-l {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-muted);
+    margin-top: 3px;
+  }
