@@ -13,23 +13,25 @@ No runtime dependencies. No server. It works offline.
 
 ## What's in it
 
-| Module | Sections | Tools | Question generators | Figures |
-|---|---|---|---|---|
-| Foundations of Computing | 12 | 46 | 91 | 5 |
-| Introduction to AI | 40 | 33 | 230 | 44 |
-| Practical Experiences of Programming | 12 | 30 | 74 | 0 |
-| Programming Language Design | 11 | 24 | 10 | 4 |
-| Operating Systems | 13 | 12 | 10 | 1 |
+| Module | Year | Sections | Tools | Question generators | Figures |
+|---|---|---|---|---|---|
+| Foundations of Computing | 2 | 12 | 46 | 91 | 5 |
+| Introduction to AI | 2 | 40 | 33 | 230 | 44 |
+| Practical Experiences of Programming | 2 | 12 | 30 | 74 | 0 |
+| Programming Language Design | 2 | 11 | 24 | 10 | 4 |
+| Operating Systems | 2 | 13 | 12 | 10 | 1 |
+| Cryptography | 3 | 1 | 0 | 0 | 0 |
+| Software Measurement and Testing | 3 | 1 | 0 | 0 | 0 |
+| Compilers and Formal Languages | 3 | 1 | 0 | 0 | 0 |
 
 Operating Systems also carries a hand-written bank of 123 exam questions behind its mock paper.
 The table is checked against the built modules by `tests/landing.test.js`, so it cannot drift.
 
-Three more are being built and are deliberately not on the landing page yet, because a card would
-send a reader to an empty file: **Cryptography**, **Software Measurement and Testing**, and
-**Compilers and Formal Languages**. Each is a working shell with a start page and its own test
-suite; each gains topics as the material is worked through. The tests enforce the omission in both
-directions — a module with no topics may stay unlisted, and the first real topic makes the missing
-card a failure.
+The year-3 modules are in progress: each is a working shell — it opens, searches, prints and is
+under test — with its orientation page and no topics yet, which is why the counts are what they
+are. The landing page marks them as such, and the tests check that label against the file behind
+it in both directions, so a module cannot gain topics and go on looking unfinished, nor be
+presented as ready while still empty.
 
 ---
 
@@ -98,18 +100,18 @@ any code moved. See [`docs/AUTHORING.md`](docs/AUTHORING.md) to add a module.
 ## Running the tests
 
 ```
-  running build.test.js …                             60 passed (134ms)
-  running compilers-and-formal-languages.test.js …    29 passed (2652ms)
-  running cryptography.test.js …                      29 passed (2587ms)
-  running foundations-of-computing.test.js …         875 passed (9509ms)
-  running intro-to-ai.test.js …                      274 passed (12586ms)
-  running landing.test.js …                           48 passed (13311ms)
-  running operating-systems.test.js …                141 passed (2749ms)
+  running build.test.js …                             60 passed (148ms)
+  running compilers-and-formal-languages.test.js …    29 passed (2660ms)
+  running cryptography.test.js …                      29 passed (2593ms)
+  running foundations-of-computing.test.js …         875 passed (10053ms)
+  running intro-to-ai.test.js …                      274 passed (13531ms)
+  running landing.test.js …                           74 passed (25733ms)
+  running operating-systems.test.js …                141 passed (3080ms)
   running practical-programming.test.js …            544 passed (61388ms)
   running programming-language-design.test.js …      169 passed (6160ms)
   running software-measurement-and-testing.test.js …  29 passed (2555ms)
 
-2198 / 2198 assertions passed across 10 suites in 114.9s
+2224 / 2224 assertions passed across 10 suites in 127.0s
 ```
 
 Run one suite with `node tests/run.js intro` (after a build).

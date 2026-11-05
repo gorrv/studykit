@@ -47,6 +47,13 @@ h2 .s{color:var(--accent-2);font-weight:600;margin-right:6px}
 .sub{color:var(--ink-muted);margin:0 0 22px;font-size:15px}
 .cards{display:grid;grid-template-columns:1fr;gap:16px}
 @media(min-width:720px){.cards{grid-template-columns:1fr 1fr}}
+.year{display:flex;align-items:baseline;gap:10px;margin:34px 0 10px;
+  padding-bottom:7px;border-bottom:1px solid var(--rule)}
+.year h3{font-family:'IBM Plex Serif',serif;font-size:18px;margin:0;letter-spacing:-.01em}
+.year-note{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted)}
+.year-note.wip{color:var(--accent-2)}
+.card.soon{border-style:dashed}
+.card.soon h3,.card.soon .code{color:var(--ink-muted)}
 .card{display:block;text-decoration:none;color:inherit;background:var(--surface);
   border:1px solid var(--rule);border-radius:14px;padding:22px;box-shadow:var(--shadow);
   transition:border-color .15s,transform .15s}
@@ -109,7 +116,11 @@ footer a{color:var(--accent)}
   </section>
 
   <h2><span class="s">§</span>Modules</h2>
-  <p class="sub">Click any module to open it. Each is a single self-contained file.</p>
+  <p class="sub">Click any module to open it. Each is a single self-contained file. Grouped by the
+    year I took them, which is roughly an order of difficulty — but nothing depends on reading them
+    in order.</p>
+
+  <div class="year"><h3>Year 2</h3><span class="year-note">complete</span></div>
   <div class="cards">
 
     <a class="card" href="modules/foundations-of-computing.html">
@@ -193,6 +204,44 @@ footer a{color:var(--accent)}
 
   </div>
 
+  <div class="year"><h3>Year 3</h3><span class="year-note wip">in progress</span></div>
+  <p class="sub">Written as I cover the material, a topic at a time. Each of these opens and works
+    &mdash; search, theme, printing &mdash; but has only its orientation page so far. Nothing is
+    written down until it has been checked, which is why they fill up slowly.</p>
+  <div class="cards">
+
+    <a class="card soon" href="modules/cryptography.html">
+      <div class="code">Starting out</div>
+      <h3>Cryptography</h3>
+      <p>Ciphers and keys, and what it takes to argue that a scheme is hard to break rather than
+        merely unfamiliar.</p>
+      <div class="stats">
+        <span class="stat">no topics yet</span>
+      </div>
+    </a>
+
+    <a class="card soon" href="modules/software-measurement-and-testing.html">
+      <div class="code">Starting out</div>
+      <h3>Software Measurement and Testing</h3>
+      <p>Measuring software, and how you decide a test suite is good enough &mdash; which is a
+        harder question than it sounds, and the reason this repo has a test suite of its own.</p>
+      <div class="stats">
+        <span class="stat">no topics yet</span>
+      </div>
+    </a>
+
+    <a class="card soon" href="modules/compilers-and-formal-languages.html">
+      <div class="code">Starting out</div>
+      <h3>Compilers and Formal Languages</h3>
+      <p>Grammars and automata, and the machinery that turns a language into something a machine
+        will run.</p>
+      <div class="stats">
+        <span class="stat">no topics yet</span>
+      </div>
+    </a>
+
+  </div>
+
   <h2><span class="s">§</span>What makes it different</h2>
   <p class="sub">Most revision notes are static text. These run.</p>
   <div class="feat">
@@ -243,7 +292,7 @@ That's the whole install. It works with no network connection.
       simulates the clock, a value-iteration grid that actually sweeps, a page-replacement tracer that
       shows you Belady's anomaly rather than asserting it.</p>
 
-    <p>The notes grew around the tools, and the test suite grew around both — 2198 assertions that drive
+    <p>The notes grew around the tools, and the test suite grew around both — 2224 assertions that drive
       the real pages and check the results against published worked examples and, where none exists,
       against exhaustive search. That turned out to be the most useful part: it caught several genuine
       errors in the material I was revising from, and a few of my own.</p>

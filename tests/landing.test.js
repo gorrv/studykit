@@ -28,27 +28,42 @@ module.exports = async function run() {
   const linked = cards.map(a => path.basename(a.getAttribute('href')));
   const unlisted = onDisk.filter(f => linked.indexOf(f) < 0);
 
-  // A module being scaffolded is allowed to stay off the landing page: it is
-  // a shell with a start page and no topics, and listing it would send a
-  // reader to an empty file. That allowance has to expire by itself, though,
-  // or a finished module could sit unlinked for months — so it holds only
-  // while the module has no topic of its own, and the first real topic makes
-  // this fail until a card exists.
-  const scaffolds = [];
-  for (const f of unlisted) {
-    const mod = await loadModule(f, 1200);
+  s.ok('every module file is linked from the landing page', unlisted.length === 0,
+    unlisted.join(', '));
+
+  // Modules still being written carry `.soon` on the card, which dashes the
+  // border and says "no topics yet". That label is a promise about the file
+  // behind it, and both directions of it rot: a module can gain topics and go
+  // on looking unfinished, or be marked ready while still empty. So the class
+  // is checked against the module rather than trusted — which also means
+  // nobody has to remember to remove it.
+  for (const a of cards) {
+    const file = path.basename(a.getAttribute('href'));
+    const mod = await loadModule(file, 1200);
     const sections = mod.$$('.topic-section').map(x => x.id);
-    const onlyStart = sections.length === 1 && sections[0] === 'start';
-    if (onlyStart) scaffolds.push(f);
-    else s.ok(`${f} has topics, so it needs a landing-page card`, false,
-      `sections: ${sections.join(', ')}`);
+    const empty = sections.length === 1 && sections[0] === 'start';
+    const marked = a.classList.contains('soon');
+
+    if (marked) {
+      s.ok(`${file}: marked "in progress", and really is`, empty,
+        `card says no topics yet, but the module has: ${sections.join(', ')}`);
+    } else {
+      s.ok(`${file}: not marked "in progress", and has topics`, !empty,
+        'the module is still just a start page — the card needs class="soon"');
+    }
   }
-  const missing = unlisted.filter(f => scaffolds.indexOf(f) < 0);
-  s.ok('every module with content is linked from the landing page',
-    missing.length === 0, missing.join(', '));
-  if (scaffolds.length) {
-    s.ok(`${scaffolds.length} module(s) still being scaffolded, correctly unlisted`, true);
-  }
+
+  // Each year heading should have cards under it, or it is an empty promise.
+  const years = Array.from(doc.querySelectorAll('.year'));
+  s.ok('the modules are grouped by year', years.length > 0);
+  years.forEach(y => {
+    const heading = y.querySelector('h3');
+    const grid = y.nextElementSibling && y.nextElementSibling.classList.contains('cards')
+      ? y.nextElementSibling
+      : (y.nextElementSibling && y.nextElementSibling.nextElementSibling);
+    const n = grid ? grid.querySelectorAll('a.card').length : 0;
+    s.ok(`${heading ? heading.textContent.trim() : '?'} has modules under it`, n > 0);
+  });
 
   // The card stats are hand-written and were wrong within a day of the module
   // changing. Check them against the module they describe.
@@ -60,7 +75,6 @@ module.exports = async function run() {
       const mm = el.textContent.trim().match(/^(\d+)\s+(.+)$/);
       if (mm) stats[mm[2].toLowerCase()] = Number(mm[1]);
     });
-    if (!Object.keys(stats).length) continue;
 
     const mod = await loadModule(file, 1500);
     const actual = {
@@ -84,22 +98,33 @@ module.exports = async function run() {
   // anyone noticed, so check it against the modules too — same numbers, one
   // source of truth, no hand-updating.
   const readme = fs.readFileSync(path.join(DIST, '..', 'README.md'), 'utf8');
-  const cols = ['sections', 'tools', 'question generators', 'figures'];
-  const rows = readme.split('\n')
+  const cells = readme.split('\n')
     .map(l => l.trim())
     .filter(l => l.startsWith('|') && !/^\|[\s|:-]+\|$/.test(l))
-    .map(l => l.slice(1, -1).split('|').map(c => c.trim()))
-    .filter(r => r.length === 5 && byTitle[r[0]]);
+    .map(l => l.slice(1, -1).split('|').map(c => c.trim()));
 
+  // Find the header row and read the columns off it by name, so a column can
+  // be added or moved without silently disabling the check below. Matching by
+  // position is what would make that failure quiet.
+  const header = cells.find(r => r.some(c => /^module$/i.test(c)));
+  s.ok('the README has a module table with a header', !!header);
+  const where = {};
+  (header || []).forEach((c, i) => { where[c.toLowerCase()] = i; });
+  const nameAt = where.module;
+
+  const rows = cells.filter(r => r !== header && nameAt !== undefined && byTitle[r[nameAt]]);
   s.ok('the README table lists every module', rows.length === Object.keys(byTitle).length,
     `README has ${rows.length} recognised rows, the landing page has ${Object.keys(byTitle).length} cards`);
 
-  rows.forEach(r => {
-    cols.forEach((col, i) => {
-      const claimed = Number(r[i + 1]);
+  ['sections', 'tools', 'question generators', 'figures'].forEach(col => {
+    const at = where[col];
+    if (at === undefined) return;
+    rows.forEach(r => {
+      const claimed = Number(r[at]);
+      const name = r[nameAt];
       if (!Number.isFinite(claimed)) return;
-      s.ok(`README: ${r[0]} — ${claimed} ${col}`, byTitle[r[0]][col] === claimed,
-        `README says ${claimed}, module has ${byTitle[r[0]][col]}`);
+      s.ok(`README: ${name} — ${claimed} ${col}`, byTitle[name][col] === claimed,
+        `README says ${claimed}, module has ${byTitle[name][col]}`);
     });
   });
 
