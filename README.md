@@ -24,6 +24,13 @@ No runtime dependencies. No server. It works offline.
 Operating Systems also carries a hand-written bank of 123 exam questions behind its mock paper.
 The table is checked against the built modules by `tests/landing.test.js`, so it cannot drift.
 
+Three more are being built and are deliberately not on the landing page yet, because a card would
+send a reader to an empty file: **Cryptography**, **Software Measurement and Testing**, and
+**Compilers and Formal Languages**. Each is a working shell with a start page and its own test
+suite; each gains topics as the material is worked through. The tests enforce the omission in both
+directions — a module with no topics may stay unlisted, and the first real topic makes the missing
+card a failure.
+
 ---
 
 ## Why it isn't just a notes site
@@ -91,15 +98,18 @@ any code moved. See [`docs/AUTHORING.md`](docs/AUTHORING.md) to add a module.
 ## Running the tests
 
 ```
-  running build.test.js …                             39 passed (119ms)
-  running foundations-of-computing.test.js …         875 passed (9241ms)
-  running intro-to-ai.test.js …                      274 passed (10704ms)
-  running landing.test.js …                           47 passed (9454ms)
-  running operating-systems.test.js …                141 passed (2662ms)
-  running practical-programming.test.js …            544 passed (58942ms)
-  running programming-language-design.test.js …      169 passed (5240ms)
+  running build.test.js …                             60 passed (134ms)
+  running compilers-and-formal-languages.test.js …    29 passed (2652ms)
+  running cryptography.test.js …                      29 passed (2587ms)
+  running foundations-of-computing.test.js …         875 passed (9509ms)
+  running intro-to-ai.test.js …                      274 passed (12586ms)
+  running landing.test.js …                           48 passed (13311ms)
+  running operating-systems.test.js …                141 passed (2749ms)
+  running practical-programming.test.js …            544 passed (61388ms)
+  running programming-language-design.test.js …      169 passed (6160ms)
+  running software-measurement-and-testing.test.js …  29 passed (2555ms)
 
-2089 / 2089 assertions passed across 7 suites in 97.6s
+2198 / 2198 assertions passed across 10 suites in 114.9s
 ```
 
 Run one suite with `node tests/run.js intro` (after a build).

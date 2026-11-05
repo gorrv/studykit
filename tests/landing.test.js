@@ -23,14 +23,35 @@ module.exports = async function run() {
   });
 
   // Every built module should be listed, so none silently goes missing.
+  const { loadModule } = require('./lib/harness');
   const onDisk = fs.readdirSync(path.join(DIST, 'modules')).filter(f => f.endsWith('.html'));
   const linked = cards.map(a => path.basename(a.getAttribute('href')));
   const unlisted = onDisk.filter(f => linked.indexOf(f) < 0);
-  s.ok('every module file is linked from the landing page', unlisted.length === 0, unlisted.join(', '));
+
+  // A module being scaffolded is allowed to stay off the landing page: it is
+  // a shell with a start page and no topics, and listing it would send a
+  // reader to an empty file. That allowance has to expire by itself, though,
+  // or a finished module could sit unlinked for months — so it holds only
+  // while the module has no topic of its own, and the first real topic makes
+  // this fail until a card exists.
+  const scaffolds = [];
+  for (const f of unlisted) {
+    const mod = await loadModule(f, 1200);
+    const sections = mod.$$('.topic-section').map(x => x.id);
+    const onlyStart = sections.length === 1 && sections[0] === 'start';
+    if (onlyStart) scaffolds.push(f);
+    else s.ok(`${f} has topics, so it needs a landing-page card`, false,
+      `sections: ${sections.join(', ')}`);
+  }
+  const missing = unlisted.filter(f => scaffolds.indexOf(f) < 0);
+  s.ok('every module with content is linked from the landing page',
+    missing.length === 0, missing.join(', '));
+  if (scaffolds.length) {
+    s.ok(`${scaffolds.length} module(s) still being scaffolded, correctly unlisted`, true);
+  }
 
   // The card stats are hand-written and were wrong within a day of the module
   // changing. Check them against the module they describe.
-  const { loadModule } = require('./lib/harness');
   const byTitle = {};
   for (const a of cards) {
     const file = path.basename(a.getAttribute('href'));

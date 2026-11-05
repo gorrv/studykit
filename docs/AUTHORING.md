@@ -259,3 +259,17 @@ produced correct fault counts on every worked example and was found only by the 
 
 Finally, add a card to `src/site/index.html`. `tests/landing.test.js` fails if a module builds but
 nothing links to it.
+
+---
+
+## 7. Starting a module before you have the material
+
+A module with one section, `sections/start.html` with `id="start"`, is treated as a scaffold: it may
+have no tools and no landing-page card, because a card would send a reader to an empty file. Both
+allowances are keyed to *having no topics*, not to a list of module names, so neither can be
+forgotten — adding the first real section makes the missing tools and the missing card failures
+again, in `checkStructure` and in `tests/landing.test.js` respectively.
+
+Write the test suite at the same time as the shell. There is nothing to assert yet, but a module
+already under test cannot pick up a duplicate id, a dead link or an unstyled class quietly while it
+fills up — and those are exactly the faults that arrive one topic at a time.

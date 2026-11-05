@@ -226,7 +226,15 @@ async function checkStructure(s, m) {
    */
   {
     const tools = m.$$('.tool[data-run]');
-    s.ok('the module has tools', tools.length > 0);
+
+    /* A module being scaffolded has a start page and nothing else, so it has
+       no tools yet and that is not a fault. The allowance is tied to having
+       no topics rather than to a list of module names, so it expires on its
+       own: the first real topic makes a toolless module a failure again. */
+    const sectionIds = m.$$('.topic-section').map(x => x.id);
+    const scaffold = sectionIds.length === 1 && sectionIds[0] === 'start';
+    s.ok('the module has tools', tools.length > 0 || scaffold,
+      'no .tool[data-run] anywhere on the page');
 
     const noReset = tools.filter(t => !t.querySelector('.tool-reset'))
       .map(t => t.getAttribute('data-run'));

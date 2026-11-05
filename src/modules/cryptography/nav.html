@@ -1,0 +1,29 @@
+    <div class="brand">Crypto<span class="accent">graphy</span></div>
+    <div class="brand-sub">Cryptography</div>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Switch between light and dark theme">
+      <span class="tt-dot" aria-hidden="true"></span><span class="tt-label" id="tt-label">Light</span>
+    </button>
+    <div class="search-box" id="ns-box">
+      <span class="s-ico" aria-hidden="true">&#9906;</span>
+      <input type="search" id="ns-input" placeholder="Search these notes&hellip;" autocomplete="off"
+             spellcheck="false" aria-label="Search these notes"
+             oninput="nsInput()" onkeydown="nsKey(event)" onfocus="nsInput()">
+      <button class="s-clr" onclick="nsClear()" title="Clear search" aria-label="Clear search">&times;</button>
+    </div>
+    <div class="search-results" id="ns-results" hidden></div>
+
+    <nav>
+      <ul>
+        <li class="topic">
+          <div class="topic-label">&#9733; Start</div>
+          <a class="topic-title" href="#" onclick="showSection('start'); return false;">How these notes work</a>
+          <div class="placeholder">Conventions, tools, printing</div>
+          <ul class="subsection">
+            <li><a href="#st-file" onclick="showSection('start')">What this file is</a></li>
+            <li><a href="#st-boxes" onclick="showSection('start')">The four kinds of box</a></li>
+            <li><a href="#st-tools" onclick="showSection('start')">Tools</a></li>
+            <li><a href="#st-extras" onclick="showSection('start')">Search, theme, printing</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
