@@ -20,7 +20,7 @@ No runtime dependencies. No server. It works offline.
 | Practical Experiences of Programming | 2 | 12 | 30 | 74 | 0 |
 | Programming Language Design | 2 | 11 | 24 | 10 | 4 |
 | Operating Systems | 2 | 13 | 12 | 10 | 1 |
-| Cryptography | 3 | 7 | 18 | 38 | 0 |
+| Cryptography | 3 | 8 | 23 | 49 | 1 |
 | Software Measurement and Testing | 3 | 1 | 0 | 0 | 0 |
 | Compilers and Formal Languages | 3 | 1 | 0 | 0 | 0 |
 
@@ -102,7 +102,7 @@ any code moved. See [`docs/AUTHORING.md`](docs/AUTHORING.md) to add a module.
 ```
   running build.test.js …                             60 passed (146ms)
   running compilers-and-formal-languages.test.js …    29 passed (2648ms)
-  running cryptography.test.js …                     237 passed (26793ms)
+  running cryptography.test.js …                     297 passed (77233ms)
   running foundations-of-computing.test.js …         875 passed (9515ms)
   running intro-to-ai.test.js …                      274 passed (11104ms)
   running landing.test.js …                           77 passed (25409ms)
@@ -113,7 +113,7 @@ any code moved. See [`docs/AUTHORING.md`](docs/AUTHORING.md) to add a module.
   running programming-language-design.test.js …      169 passed (5399ms)
   running software-measurement-and-testing.test.js …  29 passed (2556ms)
 
-2436 / 2436 assertions passed across 10 suites in 129.3s
+2497 / 2497 assertions passed across 10 suites in 136.8s
 ```
 
 Run one suite with `node tests/run.js intro` (after a build).

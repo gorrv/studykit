@@ -1,0 +1,414 @@
+<section id="topic5" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 05 &middot; Modes of Operation</div>
+        <h1>Using the Thing You Built</h1>
+        <div class="topic-subtitle">ECB, CBC and counter mode, CBC-MAC, Encrypt-then-MAC, and AES</div>
+      </div>
+
+      <p>A block cipher encrypts <em>one block</em>. Messages are not one block. The ways of
+      bridging that gap are the <strong>modes of operation</strong>, and the gap is where the
+      security goes: a perfect block cipher used in the wrong mode gives a scheme that loses
+      IND-CPA every single time. The last part of the topic puts an SKE and a MAC together in
+      the one order that works, and names the cipher everything actually uses.</p>
+
+      <!-- ===== WHAT A PERFECT F BUYS ===== -->
+      <h2 id="t5-perfect">Suppose F were perfect</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">What perfect would mean</div>
+        <ul style="margin:6px 0 0;">
+          <li>Inverting <code>F</code> costs about <code>2<sup>n</sup></code> &mdash; brute
+            force is the best attack there is.</li>
+          <li>On a uniform <code>sk</code>, <code>F<sub>sk</sub></code> cannot be told from a
+            uniform permutation. That is <strong>PRP security</strong>, and it is the one we
+            take as the definition.</li>
+        </ul>
+        <br>Given that, we can build secure SKE <em>and</em> secure MAC. The whole of this
+        topic is how &mdash; and every security claim in it will reduce to "is
+        <code>F</code> a good block cipher, with a large enough <code>&ell;</code>".
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Follow your nose, and see where it goes wrong</div>
+        The obvious attempt: <code>Enc(sk, m) = F<sub>sk</sub>(m)</code>,
+        <code>Dec(sk, c) = F<sub>sk</sub><sup>&minus;1</sup>(c)</code>. That handles exactly
+        one block. For longer messages: pad unambiguously to a multiple of
+        <code>&ell;</code>, then encrypt block by block.
+        <br><br>That second step is a mode of operation &mdash; the simplest one, and the one
+        that does not work.
+      </div>
+
+      <!-- ===== ECB ===== -->
+      <h2 id="t5-ecb">Electronic Code Book</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">ECB</div>
+        <code>M = C = &bigcup;<sub>j</sub> {0,1}<sup>j&ell;</sup></code>,
+        <code>K = {0,1}<sup>n</sup></code>.
+        Parse <code>m = m<sub>1</sub> &hellip; m<sub>t</sub></code> into blocks, and for each
+        <code>i</code>:
+        <pre class="cr-snippet">cᵢ = F(sk, mᵢ)          mᵢ = F⁻¹(sk, cᵢ)</pre>
+        Correct, parallel, simple, and completely insecure.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Two attacks, and the second needs no oracle</div>
+        <strong>With the encryption oracle.</strong> Pick distinct
+        <code>m<sub>0</sub>, m<sub>1</sub></code> of equal length. Learn
+        <code>c<sub>0</sub> = Enc(sk, m<sub>0</sub>)</code> and
+        <code>c<sub>1</sub> = Enc(sk, m<sub>1</sub>)</code>. They are distinct, and the
+        challenge <code>c<sub>b</sub></code> equals one of them. Done.
+        <br><br><strong>Without one.</strong> Let <code>m<sub>0</sub></code> be a block
+        repeated twice and <code>m<sub>1</sub></code> be two different blocks. Equal plaintext
+        blocks give equal ciphertext blocks, so look.
+        <br><br>The fundamental problem: <strong><code>Enc(sk, &middot;)</code> cannot be
+        allowed to be deterministic.</strong>
+      </div>
+
+      <h3 id="t5-ebtool">&#128736;&#65039; Breaking ECB</h3>
+
+      <div class="tool" data-run="runEcbBreak">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Both attacks, measured</h3>
+        </div>
+        <div class="tool-desc">Three thousand rounds of each. Neither is close to a half.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="eb-which">attack</label>
+            <select id="eb-which">
+              <option value="oracle">IND-CPA, using the encryption oracle</option>
+              <option value="none">IND-EAV, with no oracle at all</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="eb-output"></div>
+      </div>
+
+      <h3 id="t5-pitool">&#128736;&#65039; The famous picture</h3>
+
+      <div class="tool" data-run="runPicture">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>A bitmap, encrypted block by block</h3>
+        </div>
+        <div class="tool-desc">Drawn, packed into blocks, encrypted, drawn again. Count the
+          distinct blocks under each mode.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="pi-key">key (8 bits)</label>
+            <input type="text" id="pi-key" value="01011101" spellcheck="false">
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="pi-output"></div>
+      </div>
+
+      <!-- ===== PROBABILISTIC ENCRYPTION ===== -->
+      <h2 id="t5-prob">Probabilistic encryption</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Randomness as an input, and what it costs</div>
+        A function <code>f : X &rarr; Y</code> has no notion of randomness, so it is supplied:
+        <code>R = {0,1}<sup>p</sup></code>, <code>f : X &times; R &rarr; Y</code>, and the
+        <strong>random coins</strong> <code>&rho;</code> are sampled uniformly for each call.
+        <br><br>Two consequences:
+        <ul style="margin:6px 0 0;">
+          <li>encrypting the same message twice <em>should</em> give different
+            ciphertexts;</li>
+          <li>therefore, to still be decryptable,
+            <strong><code>|C| &gt; |M|</code></strong> &mdash; ciphertexts are necessarily
+            longer than messages.</li>
+        </ul>
+      </div>
+
+      <!-- ===== CBC AND CTR ===== -->
+      <h2 id="t5-cbc">Cipher Block Chaining</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">CBC</div>
+        The first thing <code>Enc</code> does is sample a uniform <code>IV</code>.
+        <pre class="cr-snippet">c₀ = IV                  mᵢ = cᵢ₋₁ ⊕ F⁻¹(sk, cᵢ)
+cᵢ = F(sk, cᵢ₋₁ ⊕ mᵢ)</pre>
+        and the ciphertext is <code>c<sub>0</sub> c<sub>1</sub> &hellip; c<sub>t</sub></code>
+        &mdash; one block longer than the message.
+        <br><br>Encryption is <strong>sequential</strong>: each block needs the previous
+        ciphertext. Decryption is <strong>parallel</strong>, and needs the IV.
+        <br><br>Secure: if <code>F</code> is a good block cipher and <code>&ell;</code> is
+        large enough, CBC is <strong>IND-CPA secure</strong>
+        (Bellare&ndash;Desai&ndash;Jokipii&ndash;Rogaway, FOCS 1997).
+      </div>
+
+      <h2 id="t5-ctr">Counter mode</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Count, do not chain</div>
+        Sample a uniform <code>IV</code> of <code>3&ell;/4</code> bits.
+        <pre class="cr-snippet">c₀ = IV                  mᵢ = cᵢ ⊕ F(sk, IV‖i)
+cᵢ = F(sk, IV‖i) ⊕ mᵢ</pre>
+        <code>IV&#8741;i</code> is the IV with the counter appended. With
+        <code>&ell; = 8</code> and <code>IV = 110111</code>:
+        <code>IV&#8741;1 = <strong>11011101</strong></code> and
+        <code>IV&#8741;2 = <strong>11011110</strong></code>.
+        <br><br>Both directions are <strong>parallel</strong>, and &mdash; the striking part
+        &mdash; <strong><code>F</code> is never inverted</strong>, so it does not have to be a
+        permutation at all.
+        <br><br>Secure on the same condition, plus one more: no
+        <code>F(sk, IV&#8741;i)</code> may ever repeat. For large <code>&ell;</code> and
+        messages of fewer than <code>2<sup>&ell;/4</sup></code> blocks, a repeat has
+        exponentially small probability.
+      </div>
+
+      <h3 id="t5-motool">&#128736;&#65039; The three modes, side by side</h3>
+
+      <div class="tool" data-run="runModes">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Encrypt, decrypt, and the two tests every mode must pass</h3>
+        </div>
+        <div class="tool-desc">Does the same message give the same ciphertext twice? Do two
+          identical blocks stay identical? Counter mode additionally shows what happens past
+          its block limit.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="mo-mode">mode</label>
+            <select id="mo-mode">
+              <option value="ecb">ECB</option>
+              <option value="cbc">CBC</option>
+              <option value="ctr">Counter</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="mo-msg">message (two blocks)</label>
+            <input type="text" id="mo-msg" value="0011110000111100" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="mo-key">key (8 bits)</label>
+            <input type="text" id="mo-key" value="01011101" spellcheck="false">
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="mo-output"></div>
+      </div>
+
+      <!-- ===== CBC-MAC ===== -->
+      <h2 id="t5-cbcmac">CBC-MAC</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">A MAC from the same block cipher</div>
+        <code>M = {0,1}<sup>t&ell;</sup></code>, <code>T = {0,1}<sup>&ell;</sup></code>,
+        <code>K = {0,1}<sup>n</sup></code>.
+        <pre class="cr-snippet">τ₀ = 0^ℓ
+τᵢ = F(ik, τᵢ₋₁ ⊕ mᵢ)
+τ  = τ_t          ← the last one only</pre>
+        Verification is canonical: recompute and compare. Both <code>Tag</code> and
+        <code>Vf</code> are necessarily <strong>sequential</strong>, and like counter mode
+        this never inverts <code>F</code>.
+        <br><br>Secure: EUF-CMA for <strong>fixed-length</strong> messages
+        (Bellare&ndash;Kilian&ndash;Rogaway, 2000).
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Compare with CBC, because the differences are the security</div>
+        <ul style="margin:6px 0 0;">
+          <li><strong>No IV</strong> &mdash; or rather, the IV is fixed at
+            <code>0<sup>&ell;</sup></code>.</li>
+          <li><strong>No intermediate tags.</strong> Only
+            <code>&tau;<sub>t</sub></code> is output.</li>
+          <li><strong>Fixed-length messages only.</strong></li>
+        </ul>
+        <br>Relax any one of those three and <strong>CBC-MAC is not EUF-CMA secure</strong>.
+        The tool below does each in turn.
+      </div>
+
+      <h3 id="t5-cmtool">&#128736;&#65039; Breaking the rules, one at a time</h3>
+
+      <div class="tool" data-run="runCbcMacForge">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Three relaxations, three forgeries</h3>
+        </div>
+        <div class="tool-desc">Each needs a single query, and none needs the key.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="cm-relax">what is allowed</label>
+            <select id="cm-relax">
+              <option value="none">nothing — the rules as specified</option>
+              <option value="length">messages of any length</option>
+              <option value="iv">a random IV</option>
+              <option value="inter">intermediate tags published</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="cm-msg">message block</label>
+            <input type="text" id="cm-msg" value="01101011" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="cm-key">key (8 bits)</label>
+            <input type="text" id="cm-key" value="01011101" spellcheck="false">
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="cm-output"></div>
+      </div>
+
+      <!-- ===== COMPOSITION ===== -->
+      <h2 id="t5-compose">Putting them together</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Encrypt-then-MAC</div>
+        Given an IND-CPA secure <code>SKE</code>, an EUF-CMA secure <code>MAC</code>, and
+        <code>C<sub>SKE</sub> &sube; M<sub>MAC</sub></code>:
+        <table class="cr-defs" style="margin-top:6px;">
+          <tr><th><code>KGen&prime;</code></th><td><code>sk &larr; KGen<sub>SKE</sub></code>,
+            <code>ik &larr; KGen<sub>MAC</sub></code>, return
+            <code>(sk, ik)</code></td></tr>
+          <tr><th><code>Enc&prime;</code></th><td><code>c &larr; Enc(sk, m)</code>,
+            <code>&tau; = Tag(ik, c)</code>, return <code>(c, &tau;)</code></td></tr>
+          <tr><th><code>Dec&prime;</code></th><td>if
+            <code>Vf(ik, c, &tau;) = 0</code> return <code>&perp;</code>, else return
+            <code>Dec(sk, c)</code></td></tr>
+        </table>
+        <br><strong>Theorem (Katz&ndash;Lindell 5.7).</strong> The result is
+        <strong>IND-CCA secure</strong>. The tag is on the ciphertext &mdash; the thing that
+        actually travels &mdash; and it is checked <em>before</em> anything is decrypted.
+        <br><br>The other two orders, <strong>Encrypt-and-MAC</strong> and
+        <strong>MAC-then-Encrypt</strong>, do not generically give IND-CCA.
+      </div>
+
+      <h3 id="t5-cotool">&#128736;&#65039; The three orders</h3>
+
+      <div class="tool" data-run="runCompose">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Why the order is not a matter of taste</h3>
+        </div>
+        <div class="tool-desc">Encrypt-and-MAC is measured losing IND-CPA &mdash; a property
+          both of its components had before they were combined.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="co-order">order</label>
+            <select id="co-order">
+              <option value="etm">Encrypt-then-MAC</option>
+              <option value="eam">Encrypt-and-MAC</option>
+              <option value="mte">MAC-then-Encrypt</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="co-output"></div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Galois Counter Mode, and what is standardised</div>
+        GCM is in the style of Encrypt-then-MAC, with its own proof, and is an example of
+        <strong>AEAD</strong> &mdash; Authenticated Encryption with Associated Data &mdash;
+        which is stronger still than IND-CCA.
+        <table class="cr-defs" style="margin-top:8px;">
+          <tr><th>ECB, CBC, counter</th><td>standardised by NIST (SP 800-38A), with ECB for
+            extremely limited use cases</td></tr>
+          <tr><th>CBC-MAC</th><td><strong>not</strong> standardised, except in an old ISO
+            standard &mdash; it is too brittle</td></tr>
+          <tr><th>GCM</th><td>standardised by NIST (SP 800-38D), and in IPSec, SSH, the CNSA
+            suite, OpenVPN and TLS 1.3</td></tr>
+        </table>
+      </div>
+
+      <!-- ===== AES ===== -->
+      <h2 id="t5-aes">The Advanced Encryption Standard</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Where it came from</div>
+        NIST announced an open competition in <strong>January 1997</strong> to replace DES.
+        <strong>Fifteen</strong> algorithms were submitted by international teams across
+        academia and industry; three workshops were held in 1998, 1999 and 2000, and after
+        the second the field was cut to <strong>five</strong> finalists.
+        <strong>Rijndael</strong>, by Vincent Rijmen and Joan Daemen, was selected &mdash;
+        secure and fast.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The parameters</div>
+        AES is a <strong>substitution-permutation network</strong>.
+        <table class="cr-defs" style="margin-top:6px;">
+          <tr><th>block length</th><td><code>&ell; = 128</code> for all three
+            variants</td></tr>
+          <tr><th>sub-block</th><td><code>&ell;&prime; = 8</code> &mdash; the S-box acts on
+            bytes</td></tr>
+          <tr><th>key length</th><td><code>n &isin; {128, 192, 256}</code>, giving
+            AES-128, AES-192, AES-256</td></tr>
+          <tr><th>rounds</th><td><code>r &isin; {10, 12, 14}</code> respectively &mdash; the
+            rounds are otherwise identical, and only the key schedule differs</td></tr>
+          <tr><th>the state</th><td>128 bits = 16 bytes, held as a 4&times;4 square</td></tr>
+        </table>
+        <br><strong>P is two steps:</strong> <em>ShiftRows</em> acts on the rows of the
+        square, then <em>MixColumns</em> multiplies the columns by a fixed matrix. Together
+        they are the permutation; <em>AddRoundKey</em> lays the round key out as a square and
+        XORs it; <em>SubBytes</em> is <code>S</code>.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">So what</div>
+        AES-128 is usually the answer to "which block cipher should I use?". The best known
+        brute force costs about <strong>2<sup>126</sup></strong> even allowing
+        <code>2<sup>56</sup></code> memory, and TLS 1.3 &mdash; the backbone of the internet
+        &mdash; permits almost exclusively AES modes for authenticated encryption. The full
+        specification is NIST's FIPS-197.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="t5-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember eight things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>ECB:</strong> <code>c<sub>i</sub> = F(sk, m<sub>i</sub>)</code>.
+            Deterministic, so it loses IND-CPA &mdash; and loses IND-EAV too, because equal
+            blocks give equal ciphertext.</li>
+          <li><strong>Enc must be probabilistic,</strong> with randomness as an explicit
+            input, and therefore <code>|C| &gt; |M|</code>.</li>
+          <li><strong>CBC:</strong> <code>c<sub>0</sub> = IV</code>,
+            <code>c<sub>i</sub> = F(sk, c<sub>i&minus;1</sub> &oplus; m<sub>i</sub>)</code>.
+            Sequential to encrypt, parallel to decrypt, needs <code>F<sup>&minus;1</sup></code>.</li>
+          <li><strong>Counter:</strong>
+            <code>c<sub>i</sub> = F(sk, IV&#8741;i) &oplus; m<sub>i</sub></code>. Parallel
+            both ways, and <strong>never inverts F</strong> &mdash; the IV is
+            <code>3&ell;/4</code> bits and messages must be under
+            <code>2<sup>&ell;/4</sup></code> blocks.</li>
+          <li><strong>CBC-MAC:</strong> <code>&tau;<sub>0</sub> = 0<sup>&ell;</sup></code>,
+            chain, output only <code>&tau;<sub>t</sub></code>. Secure for
+            <strong>fixed-length</strong> messages only.</li>
+          <li><strong>Its three rules are load-bearing:</strong> no IV, no intermediate tags,
+            fixed length. Relax any one and there is a one-query forgery.</li>
+          <li><strong>Encrypt-then-MAC gives IND-CCA</strong> from an IND-CPA SKE and an
+            EUF-CMA MAC. The other two orders do not, generically.</li>
+          <li><strong>AES:</strong> an SPN with <code>&ell; = 128</code>,
+            <code>&ell;&prime; = 8</code>, <code>n &isin; {128,192,256}</code>,
+            <code>r &isin; {10,12,14}</code>. GCM is the mode everything uses.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Blaming ECB's failure on the block cipher. <code>F</code> could be a perfect
+            PRP and ECB would still lose every round. The mode is the fault.</li>
+          <li>Forgetting the IV is part of the ciphertext and must be sent. It is not secret,
+            but it is required.</li>
+          <li>Thinking counter mode needs an invertible <code>F</code>. It never inverts
+            anything &mdash; nor does CBC-MAC.</li>
+          <li>Treating counter mode's block limit as a formality. Past
+            <code>2<sup>&ell;/4</sup></code> blocks the keystream repeats, and a repeated pad
+            leaks the difference of the messages.</li>
+          <li>Using CBC-MAC on variable-length messages. One query forges, and the fix is to
+            bind the length in.</li>
+          <li>Assuming the composition order is a matter of style. Encrypt-and-MAC loses
+            IND-CPA &mdash; a property both components had separately.</li>
+          <li>Saying DES and AES are both SPNs. DES is a <em>Feistel</em> network; AES is the
+            SPN.</li>
+        </ul>
+      </div>
+
+    </section>

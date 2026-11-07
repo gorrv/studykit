@@ -656,6 +656,169 @@ module.exports = async function run() {
       w.bkPlayPRP('oneround', 8, 'locality', 500, 99).wins);
   }
 
+  /* ================ Topic 5 ================ */
+
+  /* ---------------- the counter-mode example from the notes ---------------- */
+
+  {
+    const iv = w.bkBits('110111', 6);
+    s.is('IV‖1 = 11011101', w.bkStr(w.mdCounterBlock(iv, 1)), '11011101');
+    s.is('IV‖2 = 11011110', w.bkStr(w.mdCounterBlock(iv, 2)), '11011110');
+    s.is('and the IV really is 3ℓ/4 bits', iv.length, (3 * w.MD_L) / 4);
+
+    /* The condition the notes attach to counter mode, made concrete. */
+    const cw = w.mdCounterWrap(iv);
+    s.is('the counter field is ℓ/4 bits', cw.counterBits, w.MD_L / 4);
+    s.is('so the keystream repeats after 2^(ℓ/4) = 4 blocks', cw.limit, 4);
+    s.is('  ...which is to say, at i = 5', cw.repeatAt, 5);
+  }
+
+  /* ---------------- every mode round-trips ---------------- */
+
+  {
+    ['ecb', 'cbc', 'ctr'].forEach(mode => {
+      let bad = 0, first = null;
+      for (let k = 0; k < 4; k++) {
+        const r = w.mdRoundTrips(mode, w.bkFromInt(k * 61, 8), 2);
+        bad += r.bad;
+        if (r.first && !first) first = r.first;
+      }
+      s.is(`${mode} decrypts to the message, over every two-block message and 4 keys`,
+        bad, 0, first);
+    });
+
+    /* Counter mode never inverts F, so it should work with an F that cannot
+       be inverted at all. That is the claim; here it is run. */
+    const lossy = w.mdRoundTrips('ctr', w.bkFromInt(93, 8), 2, true);
+    s.is('counter mode round-trips even with a non-invertible F', lossy.bad, 0);
+
+    /* And confirm that F really is non-invertible, or the test above proves
+       nothing. */
+    const images = new Set();
+    for (let x = 0; x < 256; x++) {
+      images.add(w.bkStr(w.mdFLossy(w.bkFromInt(93, 8), w.bkFromInt(x, 8))));
+    }
+    s.ok('  ...and that F really was not a permutation', images.size < 256,
+      `${images.size} of 256 images`);
+  }
+
+  /* ---------------- ECB, broken twice ---------------- */
+
+  {
+    ['ecb', 'cbc', 'ctr'].forEach(mode => {
+      const det = w.mdDeterministic(mode, w.bkFromInt(93, 8), w.bkFromInt(0x3c, 8));
+      const want = mode === 'ecb';
+      s.is(`${mode}: same message twice gives the same ciphertext?`, det.same, want);
+
+      const leak = w.mdRepeatLeak(mode, w.bkFromInt(93, 8));
+      s.is(`${mode}: two identical blocks stay identical?`, leak.leaks, want);
+    });
+
+    const cpa = w.mdEcbIndCpa(2000, 7);
+    s.is('ECB loses IND-CPA in every round', cpa.wins, cpa.trials);
+
+    const eav = w.mdEcbNoOracle(2000, 7);
+    s.is('and loses IND-EAV too, with no oracle at all', eav.wins, eav.trials);
+  }
+
+  /* ---------------- the picture ---------------- */
+
+  {
+    const key = w.bkFromInt(93, 8);
+    const plain = w.mdPicture('plain', key, 32, 32);
+    const ecb = w.mdPicture('ecb', key, 32, 32);
+    const cbc = w.mdPicture('cbc', key, 32, 32);
+
+    s.ok('the bitmap has large flat areas — few distinct blocks',
+      plain.distinctPlain < plain.totalBlocks / 4,
+      `${plain.distinctPlain} of ${plain.totalBlocks}`);
+
+    /* The actual reason the picture survives: ECB is a bijection on blocks,
+       so the count cannot change. */
+    s.is('ECB preserves the number of distinct blocks exactly',
+      ecb.distinctOut, plain.distinctPlain);
+    s.ok('while CBC destroys it', cbc.distinctOut > plain.distinctPlain * 4,
+      `${cbc.distinctOut} vs ${plain.distinctPlain}`);
+  }
+
+  /* ---------------- CBC-MAC and its three rules ---------------- */
+
+  {
+    /* Correctness first, separately from any forgery. */
+    let wrong = 0;
+    for (let k = 0; k < 32; k++) {
+      const ik = w.bkFromInt(k * 8, 8);
+      const msg = w.bkFromInt(k * 7, 8).concat(w.bkFromInt(k * 3, 8));
+      if (!w.mdCbcMacVf(ik, msg, w.mdCbcMac(ik, msg).tag)) wrong++;
+    }
+    s.is('CBC-MAC is correct — an honest tag verifies', wrong, 0);
+
+    /* Forgery 1: variable length. Exhausted over every key and message. */
+    const f1 = w.mdForgeAlways();
+    s.is('the variable-length forgery works for every key and message', f1.bad, 0);
+    s.is('  ...all 65,536 of them', f1.total, 65536);
+
+    /* Derived here rather than taken from the engine: the second block is
+       chosen so the chaining cancels, giving F(m₁) again. */
+    let mismatch = 0;
+    for (let k = 0; k < 64; k++) {
+      const ik = w.bkFromInt(k * 4, 8);
+      const m1 = w.bkFromInt(k * 3 + 1, 8);
+      const tau = w.mdCbcMac(ik, m1).tag;
+      const forged = m1.concat(w.bkXor(tau, m1));
+      if (w.bkStr(w.mdCbcMac(ik, forged).tag) !== w.bkStr(tau)) mismatch++;
+    }
+    s.is('and the algebra behind it checks out independently', mismatch, 0);
+
+    /* Forgery 2: a random IV. */
+    const f2 = w.mdForgeIvAlways();
+    s.is('the random-IV forgery works across key, message and Δ', f2.bad, 0);
+    s.ok('  ...over a decent sweep', f2.total > 20000, `${f2.total} cases`);
+
+    /* Forgery 3: publishing intermediates. */
+    let i3bad = 0;
+    for (let k = 0; k < 64; k++) {
+      const r = w.mdForgeIntermediate(w.bkFromInt(k * 4, 8),
+        w.bkFromInt(k * 5 + 1, 8), w.bkFromInt(k * 9 + 2, 8));
+      if (!r.works) i3bad++;
+    }
+    s.is('τ₁ is always a valid tag on the first block alone', i3bad, 0);
+  }
+
+  /* ---------------- composing them ---------------- */
+
+  {
+    const eam = w.mdEamBreaksCpa(2000, 7);
+    s.is('Encrypt-and-MAC loses IND-CPA in every round', eam.wins, eam.trials);
+
+    const etm = w.mdEtmHoldsUp(2000, 7);
+    s.near('Encrypt-then-MAC gives nothing away on the same test', etm.rate, 0.5, 0.04);
+
+    /* Tampering is caught before anything is decrypted. */
+    let accepted = 0;
+    for (let f = 0; f < 16; f++) {
+      const r = w.mdEtmRejects(w.bkFromInt(93, 8), w.bkFromInt(17, 8),
+        w.bkFromInt(0x6b, 8), f);
+      if (r.accepted) accepted++;
+    }
+    s.is('Encrypt-then-MAC rejects every tampered ciphertext tried', accepted, 0);
+
+    s.ok('and only Encrypt-then-MAC is marked as generically IND-CCA',
+      w.MD_COMPOSE.etm.secure && !w.MD_COMPOSE.eam.secure && !w.MD_COMPOSE.mte.secure);
+  }
+
+  /* ---------------- AES, as stated in the notes ---------------- */
+
+  {
+    const A = w.MD_AES;
+    s.is('AES block length is 128 for every variant', A.block, 128);
+    s.is('the S-box acts on bytes', A.subBlock, 8);
+    s.same('key lengths', A.variants.map(v => v.n), [128, 192, 256]);
+    s.same('and the matching round counts', A.variants.map(v => v.rounds), [10, 12, 14]);
+    s.is('the state is 16 bytes', A.stateBytes, 16);
+    s.is('best brute force is about 2^126', A.bruteForce, 126);
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 1500);

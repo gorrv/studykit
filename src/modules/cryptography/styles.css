@@ -268,3 +268,22 @@
   }
   .bk-trace td { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; }
   .bk-trace td:last-child { font-size: 11px; }
+
+  /* ---------- Topic 05 · modes ---------- */
+
+  .cr-pics { display: flex; flex-wrap: wrap; gap: 18px; margin: 10px 0; }
+  .cr-pic { text-align: center; }
+  .cr-pic svg {
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: var(--surface-2);
+    display: block;
+  }
+  .cr-pic .cr-cap { margin: 0 0 5px; }
+  .cr-pic-n {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink-muted);
+    margin-top: 5px;
+  }
+  .cr-table tr.cr-bad-row td { background: var(--tint-b2); }

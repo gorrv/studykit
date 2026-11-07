@@ -478,4 +478,132 @@
 
       </div>
 
+      <h2 id="cr-t5">Topic 05 &middot; modes of operation</h2>
+
+      <div class="cram-grid">
+
+        <div class="cram-card">
+          <h3>ECB, and why not</h3>
+          <ul>
+            <li><code>c<sub>i</sub> = F(sk, m<sub>i</sub>)</code>, block by block.</li>
+            <li><span class="term">Deterministic</span>, so no IND-CPA: ask the oracle for
+              <code>m<sub>0</sub></code> and compare.</li>
+            <li>Loses <strong>IND-EAV</strong> too: one block repeated twice versus two
+              different blocks, same length, visible by eye.</li>
+            <li>The block cipher is not at fault. A perfect PRP in ECB still loses.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Probabilistic encryption</h3>
+          <ul>
+            <li>Randomness is an explicit input:
+              <code>Enc(sk, m; &rho;)</code>, <code>&rho; &larr; R</code>.</li>
+            <li>Same message, different ciphertexts.</li>
+            <li>Therefore <span class="term">|C| &gt; |M|</span> &mdash; ciphertexts are
+              longer than messages, necessarily.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>CBC</h3>
+          <ul>
+            <li><code>c<sub>0</sub> = IV</code> (uniform, &ell; bits),
+              <code>c<sub>i</sub> = F(sk, c<sub>i&minus;1</sub> &oplus;
+              m<sub>i</sub>)</code>.</li>
+            <li>Dec: <code>m<sub>i</sub> = c<sub>i&minus;1</sub> &oplus;
+              F<sup>&minus;1</sup>(sk, c<sub>i</sub>)</code>.</li>
+            <li>Encrypt <strong>sequentially</strong>, decrypt <strong>in
+              parallel</strong>. Needs <code>F<sup>&minus;1</sup></code>.</li>
+            <li>IND-CPA secure (Bellare&ndash;Desai&ndash;Jokipii&ndash;Rogaway 1997).</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Counter mode</h3>
+          <ul>
+            <li>IV is <strong>3&ell;/4</strong> bits.
+              <code>c<sub>i</sub> = F(sk, IV&#8741;i) &oplus; m<sub>i</sub></code>.</li>
+            <li>Both directions <strong>parallel</strong>. <span class="term">F is never
+              inverted</span>, so it need not be a permutation.</li>
+            <li>Condition: fewer than <code>2<sup>&ell;/4</sup></code> blocks, or the
+              keystream repeats and a pad is reused.</li>
+            <li>With &ell; = 8: IV = 110111 gives IV&#8741;1 = 11011101,
+              IV&#8741;2 = 11011110.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>CBC-MAC</h3>
+          <ul>
+            <li><code>&tau;<sub>0</sub> = 0<sup>&ell;</sup></code>,
+              <code>&tau;<sub>i</sub> = F(ik, &tau;<sub>i&minus;1</sub> &oplus;
+              m<sub>i</sub>)</code>, output <code>&tau;<sub>t</sub></code> only.</li>
+            <li>Canonical verification; both Tag and Vf are sequential; F never
+              inverted.</li>
+            <li>EUF-CMA secure for <span class="term">fixed-length</span> messages
+              (Bellare&ndash;Kilian&ndash;Rogaway 2000).</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Its three load-bearing rules</h3>
+          <ul>
+            <li><span class="term">Any length allowed</span> &rarr; query
+              <code>m<sub>1</sub></code>, forge
+              <code>m<sub>1</sub> &#8741; (&tau; &oplus; m<sub>1</sub>)</code> with the same
+              tag.</li>
+            <li><span class="term">Random IV allowed</span> &rarr; XOR &Delta; into the IV
+              and the message; the tag still fits.</li>
+            <li><span class="term">Intermediate tags published</span> &rarr;
+              <code>&tau;<sub>1</sub></code> is already a tag on
+              <code>m<sub>1</sub></code>.</li>
+            <li>Hence not standardised &mdash; too brittle.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Composition</h3>
+          <ul>
+            <li><span class="term">Encrypt-then-MAC:</span> tag the <strong>ciphertext</strong>,
+              verify before decrypting. IND-CPA + EUF-CMA &rArr;
+              <strong>IND-CCA</strong> (KL 5.7).</li>
+            <li><span class="term">Encrypt-and-MAC:</span> tag the message, send alongside.
+              A deterministic tag leaks message equality &mdash; <strong>loses
+              IND-CPA</strong>.</li>
+            <li><span class="term">MAC-then-Encrypt:</span> must decrypt before it can check
+              anything. Not generically IND-CCA.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>GCM and standardisation</h3>
+          <ul>
+            <li>GCM is Encrypt-then-MAC in style, with its own proof, and is
+              <span class="term">AEAD</span> &mdash; stronger than IND-CCA.</li>
+            <li>NIST: ECB, CBC, counter (SP 800-38A); GCM (SP 800-38D).</li>
+            <li>CBC-MAC <strong>not</strong> standardised, outside an old ISO
+              standard.</li>
+            <li>GCM is in IPSec, SSH, OpenVPN, CNSA and TLS 1.3.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>AES</h3>
+          <ul>
+            <li>NIST competition announced <strong>1997</strong>, 15 submissions, 5
+              finalists, <span class="term">Rijndael</span> (Rijmen and Daemen) chosen.</li>
+            <li>A <strong>substitution-permutation network</strong> &mdash; DES is the
+              Feistel one.</li>
+            <li><code>&ell; = 128</code>, <code>&ell;&prime; = 8</code>,
+              <code>n &isin; {128, 192, 256}</code>,
+              <code>r &isin; {10, 12, 14}</code>.</li>
+            <li>State = 16 bytes in a 4&times;4 square. <strong>P = ShiftRows +
+              MixColumns</strong>; S = SubBytes.</li>
+            <li>Best brute force &asymp; <code>2<sup>126</sup></code>.</li>
+          </ul>
+        </div>
+
+      </div>
+
     </section>
