@@ -517,6 +517,145 @@ module.exports = async function run() {
       !w.hiTwoTime('attackatdawn', 'retreatatten', 'abc').ok);
   }
 
+  /* ================ Topic 4 ================ */
+
+  /* ---------------- the worked SPN example from the notes ---------------- */
+
+  {
+    const msg = w.bkBits('01100111', 8);
+    s.is('S(0110 0111) = 0101 1110', w.bkStr(w.bkSub(msg, 4)), '01011110');
+    s.is('P(S(m)) = 1011 0110', w.bkStr(w.bkPerm(w.bkSub(msg, 4))), '10110110');
+
+    /* The four S-box entries the notes print, kept exactly. */
+    s.is('S(0000) = 0100', w.bkStr(w.bkFromInt(w.BK_S[0], 4)), '0100');
+    s.is('S(0001) = 0011', w.bkStr(w.bkFromInt(w.BK_S[1], 4)), '0011');
+    s.is('S(0110) = 0101', w.bkStr(w.bkFromInt(w.BK_S[6], 4)), '0101');
+    s.is('S(0111) = 1110', w.bkStr(w.bkFromInt(w.BK_S[7], 4)), '1110');
+
+    s.is('the S-box is a permutation of the 16 nibbles', new Set(w.BK_S).size, 16);
+    s.same('and P is the one printed', w.BK_P, [2, 6, 5, 1, 3, 4, 7, 8]);
+    s.is('P is a permutation of the 8 indices', new Set(w.BK_P).size, 8);
+
+    /* P and its inverse really undo each other, on every block. */
+    let bad = 0;
+    for (let x = 0; x < 256; x++) {
+      const b = w.bkFromInt(x, 8);
+      if (w.bkStr(w.bkPermInv(w.bkPerm(b))) !== w.bkStr(b)) bad++;
+      if (w.bkStr(w.bkSubInv(w.bkSub(b, 4), 4)) !== w.bkStr(b)) bad++;
+    }
+    s.is('S⁻¹ and P⁻¹ undo S and P on all 256 blocks', bad, 0);
+  }
+
+  /* ---------------- an SPN is a permutation, and inverts ---------------- */
+
+  {
+    let notPerm = 0, failed = 0, first = null;
+    for (let k = 0; k < 8; k++) {
+      const key = w.bkFromInt(k * 31, 8);
+      for (const r of [2, 3, 4]) {
+        const p = w.bkIsPermutation(key, r, 8, 4);
+        const t = w.bkSPNRoundTrips(key, r, 8, 4);
+        if (!p.isPerm) notPerm++;
+        if (t.bad) { failed += t.bad; if (!first) first = `key ${k}, ${r} rounds: ${t.first}`; }
+      }
+    }
+    s.is('F_sk is a permutation for every key and round count tried', notPerm, 0);
+    s.is('and inverting returns the message on every one of the 256 blocks',
+      failed, 0, first);
+
+    /* The construction's own argument: a composition of permutations. Checked
+       at the level of a single round rather than assumed. */
+    const key = w.bkFromInt(178, 8);
+    const seen = new Set();
+    for (let x = 0; x < 256; x++) {
+      seen.add(w.bkStr(w.bkPerm(w.bkSub(w.bkXor(w.bkFromInt(x, 8), key), 4))));
+    }
+    s.is('one round alone is already a permutation', seen.size, 256);
+  }
+
+  /* ---------------- Feistel inverts whatever f is ---------------- */
+
+  {
+    /* The claim the notes call remarkable, and the reason to test it: the
+       round function may be as far from invertible as you like. */
+    ['mix', 'crush', 'constant'].forEach(fn => {
+      const inj = w.bkRoundFnInjective(fn, 4);
+      let bad = 0, notPerm = 0;
+      for (let k = 0; k < 8; k++) {
+        const r = w.bkFeistelRoundTrips(w.bkFromInt(k * 31, 8), 3, 8, fn);
+        bad += r.bad;
+        if (!r.isPerm) notPerm++;
+      }
+      s.is(`Feistel with "${fn}" inverts on every block, for every key`, bad, 0);
+      s.is(`  ...and is still a permutation`, notPerm, 0);
+      if (fn !== 'mix') {
+        s.ok(`  ...even though "${fn}" is not injective (${inj.images} of ${inj.inputs} images)`,
+          !inj.injective);
+      }
+    });
+
+    /* The constant round function is the extreme case: one image out of 16. */
+    s.is('the constant round function really does collapse everything to one value',
+      w.bkRoundFnInjective('constant', 4).images, 1);
+
+    /* And f is genuinely never inverted — inverting a round only ever calls f
+       forwards, which is why the above can hold. */
+    const key = w.bkFromInt(178, 8);
+    const m0 = w.bkFromInt(103, 8);
+    const ct = w.bkFeistel(key, m0, 4, 'constant');
+    s.is('a four-round Feistel round-trips too',
+      w.bkFeistelInv(key, ct.bits, 4, 'constant').out, w.bkStr(m0));
+  }
+
+  /* ---------------- counting permutations ---------------- */
+
+  {
+    /* The notes' three small numbers. */
+    s.is('(2¹)! = 2', w.bkPermCount(1).count, '2');
+    s.is('(2²)! = 24', w.bkPermCount(2).count, '24');
+    s.is('(2³)! = 40320', w.bkPermCount(3).count, '40320');
+    s.is('(2⁴)! = 16!', w.bkPermCount(4).count, '20922789888000');
+
+    /* Derived here rather than read from the engine. */
+    let fact = 1n;
+    for (let i = 2n; i <= 16n; i++) fact *= i;
+    s.is('  ...which an independent factorial agrees with',
+      w.bkPermCount(4).count, fact.toString());
+
+    s.is('writing a permutation of {0,1}³ down takes ℓ·2^ℓ = 24 bits',
+      w.bkPermCount(3).toWrite, 24);
+
+    /* The headline figure: the notes say ≈ 2^(4.31×10⁴⁰) at ℓ = 128. */
+    const big = w.bkHugeCase(128);
+    s.near('at ℓ = 128 the exponent is about 4.31×10⁴⁰',
+      big.log2OfCount / 1e40, 4.31, 0.02);
+  }
+
+  /* ---------------- the PRP game ---------------- */
+
+  {
+    /* Each cell of the table on the page, asserted. A strategy that beat
+       everything, or nothing, would make the tool decorative. */
+    const rate = (c, st) => w.bkPlayPRP(c, 8, st, 2000, 4242).rate;
+
+    s.ok('a plain XOR falls to the difference strategy', rate('xoronly', 'difference') > 0.9);
+    s.ok('and to the locality strategy too', rate('xoronly', 'locality') > 0.9);
+
+    s.near('one round defeats the difference strategy',
+      rate('oneround', 'difference'), 0.5, 0.04);
+    s.ok('but falls to the locality strategy — one P cannot diffuse',
+      rate('oneround', 'locality') > 0.9);
+
+    s.near('three rounds defeat the difference strategy',
+      rate('threeround', 'difference'), 0.5, 0.04);
+    s.near('and the locality strategy as well', rate('threeround', 'locality'), 0.5, 0.04);
+
+    /* Reproducible: the figures quoted on the page are the same every time. */
+    s.is('the same seed gives the same count',
+      w.bkPlayPRP('oneround', 8, 'locality', 500, 99).wins,
+      w.bkPlayPRP('oneround', 8, 'locality', 500, 99).wins);
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 1500);

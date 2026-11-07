@@ -129,7 +129,7 @@
           'trace is information about the message that the ciphertext carries in the open.'
         : 'Something is wrong: the trace changed under a shift.') + '</div>';
 
-    var claim = hiTraceClaim(3);
+    var claim = crOnce('traceclaim3', function () { return hiTraceClaim(3); });
     h += '<div class="tool-note">And it goes the other way: a ciphertext can decrypt to a ' +
       'message exactly when the two share a trace. Checked over every three-letter message ' +
       '&mdash; for each of the ' + claim.messages.toLocaleString() + ' of them, the 26 ' +
@@ -223,7 +223,7 @@
       '<table class="cr-table"><thead><tr><th>letters</th><th>per column</th>' +
       '<th>key recovered</th></tr></thead><tbody>';
     [40, 80, 120, 200].forEach(function (n) {
-      var e = hiVigSuccess(keyText, n);
+      var e = crOnce('vig' + keyText + n, function () { return hiVigSuccess(keyText, n); });
       if (!e.ok) return;
       h += '<tr><td>' + n + '</td><td>' + e.perColumn + '</td><td>' +
         (e.correct ? '<span class="cr-hit">yes</span>'
@@ -332,7 +332,7 @@
       '<tr><th>then m₂ must be</th><td><code class="cr-hit">' + esc(r.recovered) +
         '</code></td></tr></tbody></table>';
 
-    var ex = hiTwoTimeAlways(1);
+    var ex = crOnce('twotime1', function () { return hiTwoTimeAlways(1); });
     h += '<div class="tool-note">Not a property of these messages: over every pair of ' +
       'single-letter messages and every key &mdash; ' + ex.total.toLocaleString() +
       ' cases &mdash; the difference of the ciphertexts equals the difference of the ' +

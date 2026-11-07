@@ -1,0 +1,392 @@
+<section id="topic4" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 04 &middot; Block Ciphers</div>
+        <h1>Building a Permutation You Can Afford</h1>
+        <div class="topic-subtitle">substitution-permutation networks, Feistel networks, and what PRP security asks for</div>
+      </div>
+
+      <p>The historical ciphers failed for want of a definition. But one of them had a good
+      idea buried in it, and this topic digs it out: the monoalphabetic cipher's key
+      <em>is</em> a permutation, and that is the right shape. The problem is the bill &mdash;
+      writing a permutation down costs more than any key can carry &mdash; so the rest of the
+      topic is two ways of <strong>building</strong> a big permutation out of a small key.</p>
+
+      <!-- ===== WHAT WENT RIGHT ===== -->
+      <h2 id="t4-why">What went wrong, and what went right</h2>
+
+      <div class="callout warn">
+        <div class="callout-label">Wrong</div>
+        The historical ciphers were ad hoc, with no definition to satisfy: one
+        message-ciphertext pair is often devastating, meaningful information about messages
+        is easy to infer, and the whole enterprise was an arms race of adding complexity.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Right</div>
+        Recall the monoalphabetic cipher: <code>K = Perm(&alpha;)</code>, and
+        <code>Enc</code> applies the permutation letter by letter. It has a genuinely good
+        property &mdash; <code>sk(a)</code> and <code>sk(b)</code> are
+        <strong>almost independent</strong>.
+        <br><br>Almost: knowing <code>&pi;(x<sub>i</sub>) = x<sub>j</sub></code> tells you
+        nothing about <code>&pi;(x<sub>k</sub>)</code> for <code>k &ne; i</code> &mdash;
+        except that it is not <code>x<sub>j</sub></code>, since a permutation cannot send two
+        things to the same place.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Its two weaknesses, and which one matters more</div>
+        <ul style="margin:6px 0 0;">
+          <li>Message-ciphertext pairs say far too much about <code>sk</code>. Learn that
+            <code>sk(a) = f</code> and the key space drops by a factor of 26.</li>
+          <li><strong><code>Enc</code> is deterministic</strong>, so IND-CPA security is
+            impossible &mdash; no amount of improvement to the permutation changes that.</li>
+        </ul>
+        <br>Which suggests the plan for everything that follows: use a well-designed
+        permutation as a <em>subroutine</em> inside a randomised procedure.
+      </div>
+
+      <!-- ===== PERMUTATIONS AND THE BILL ===== -->
+      <h2 id="t4-perms">Permutations, and why a key cannot be one</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Counting them</div>
+        For a finite set <code>X</code> with <code>t</code> elements, a permutation is a
+        bijection <code>&pi; : X &rarr; X</code>, and
+        <code>|Perm(X)| = t! = t &times; (t&minus;1) &times; &hellip; &times; 1</code>.
+        <br><br>Now take <code>X = {0,1}<sup>&ell;</sup></code>, so <code>t = 2<sup>&ell;</sup></code>:
+        <pre class="cr-snippet">|Perm({0,1}^ℓ)| = (2^ℓ)!
+
+ℓ = 1 → 2      ℓ = 2 → 24      ℓ = 3 → 40320      ℓ = 128 → ≈ 2^(4.31×10⁴⁰)</pre>
+        Writing one down takes about <code>&ell; &middot; 2<sup>&ell;</sup></code> bits.
+      </div>
+
+      <h3 id="t4-pctool">&#128736;&#65039; The bill, counted</h3>
+
+      <div class="tool" data-run="runPermCount">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>(2<sup>&ell;</sup>)! and what it would cost to store</h3>
+        </div>
+        <div class="tool-desc">Exact factorials for small blocks, Stirling for
+          <code>&ell; = 128</code> &mdash; and the number of bits a key would need if it
+          simply named a permutation.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="pc-l">block length &ell;</label>
+            <select id="pc-l">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="pc-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Block cipher</div>
+        A <strong>block cipher</strong> is a function
+        <pre class="cr-snippet">F : {0,1}ⁿ × {0,1}^ℓ → {0,1}^ℓ</pre>
+        with <code>n</code> the <strong>key length</strong> and <code>&ell;</code> the
+        <strong>block length</strong>, such that for every key <code>sk</code> the function
+        <code>F<sub>sk</sub>(&middot;) = F(sk, &middot;)</code> is a
+        <strong>permutation</strong> of <code>{0,1}<sup>&ell;</sup></code>.
+        <br><br>What is wanted, written <strong>(*)</strong>: for a uniform <code>sk</code>,
+        <code>F<sub>sk</sub></code> should <em>behave like</em> a uniform permutation. Not be
+        one &mdash; behave like one, to anyone who cannot afford to look at all of it.
+        <br><br>Why not just let <code>sk</code> name a permutation? Because
+        <code>n &asymp; &ell; &middot; 2<sup>&ell;</sup></code>, which the tool above puts a
+        number on.
+      </div>
+
+      <!-- ===== SPN ===== -->
+      <h2 id="t4-spn">Substitution-permutation networks</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Shannon's idea: many small permutations, repeated</div>
+        <ul style="margin:6px 0 0;">
+          <li>Split the block of length <code>&ell;</code> into sub-blocks of length
+            <code>&ell;&prime;</code> and apply a permutation of binary strings to each
+            &mdash; the <strong>substitution</strong>,
+            <code>S : {0,1}<sup>&ell;&prime;</sup> &rarr; {0,1}<sup>&ell;&prime;</sup></code>.</li>
+          <li>Apply a permutation <em>of the indices</em> across the whole block &mdash; the
+            <strong>permutation</strong>,
+            <code>P : {1, &hellip;, &ell;} &rarr; {1, &hellip;, &ell;}</code>.</li>
+          <li>Repeat for <code>r</code> <strong>rounds</strong>.</li>
+        </ul>
+        <br>Shannon's name for it: <strong>confuse and diffuse</strong>. <code>S</code> mixes
+        up a small block; <code>P</code> spreads that mixing across the whole thing.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">A worked round, with ℓ = 8 and ℓ′ = 4</div>
+        With <code>m = 0110 0111</code> and the tables
+        <pre class="cr-snippet">S:  0000 0001  …  0110 0111  …
+    0100 0011  …  0101 1110  …
+
+P:  1 2 3 4 5 6 7 8
+    2 6 5 1 3 4 7 8</pre>
+        Apply <code>S</code> to each half:
+        <code>S(m) = S(0110) &#8741; S(0111) = <strong>0101 1110</strong></code>.
+        Then move the bit at index <code>i</code> to index <code>P(i)</code>:
+        <code>P(S(m)) = <strong>1011 0110</strong></code>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Where the key goes</div>
+        <code>S</code> and <code>P</code> are <strong>public</strong>. The key enters by being
+        XORed in, one <strong>round key</strong> per round:
+        <pre class="cr-snippet">m⁽⁰⁾ = m
+m⁽¹⁾ = P(S(sk₁ ⊕ m⁽⁰⁾))
+m⁽²⁾ = P(S(sk₂ ⊕ m⁽¹⁾))
+   …
+m⁽ʳ⁾ = sk_r ⊕ m⁽ʳ⁻¹⁾        ← no S and no P in the final round</pre>
+        How the round keys <code>sk<sub>1</sub>, &hellip;, sk<sub>r</sub></code> are derived
+        from <code>sk</code> is the <strong>key schedule</strong>.
+        <br><br>The final round skips <code>S</code> and <code>P</code> because they are
+        public: applying them after the last key adds nothing an adversary could not simply
+        undo.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">It is a permutation for every key, two ways to see it</div>
+        <ul style="margin:6px 0 0;">
+          <li>XOR with a fixed string is a permutation; <code>S</code> is a permutation;
+            <code>P</code> is a permutation. A composition of permutations is a permutation,
+            so each round is one, so any number of rounds is one.</li>
+          <li>Or: <code>F(sk, &middot;)</code> is an invertible function whose domain and
+            codomain are the same finite set, which is the same thing.</li>
+        </ul>
+      </div>
+
+      <h3 id="t4-sptool">&#128736;&#65039; An SPN, round by round and back again</h3>
+
+      <div class="tool" data-run="runSPN">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Every intermediate value, forwards and in reverse</h3>
+        </div>
+        <div class="tool-desc">The default message and the S and P tables are the ones from
+          the worked example. Inverting uses <code>S&#8315;&sup1;</code> and
+          <code>P&#8315;&sup1;</code> &mdash; note that it has to.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="sp-msg">message (8 bits)</label>
+            <input type="text" id="sp-msg" value="01100111" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="sp-key">key (8 bits)</label>
+            <input type="text" id="sp-key" value="10110010" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="sp-rounds">rounds</label>
+            <select id="sp-rounds">
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="sp-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The hard parts, which are genuinely hard</div>
+        How should <code>S</code> and <code>P</code> be designed? How many rounds
+        <code>r</code>? How should the round keys be derived? These need finite fields,
+        discrete probability, linear and differential cryptanalysis, and lower bounds on round
+        counts. The constructions are simple; choosing their parts is not.
+      </div>
+
+      <!-- ===== FEISTEL ===== -->
+      <h2 id="t4-feistel">Feistel networks</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">A different way to the same goal</div>
+        Due to Horst Feistel at IBM. Split the block in half,
+        <code>m = L<sub>0</sub> &#8741; R<sub>0</sub></code>, and take round functions
+        <code>f<sub>i</sub> : {0,1}<sup>n&prime;</sup> &times; {0,1}<sup>&ell;/2</sup> &rarr;
+        {0,1}<sup>&ell;/2</sup></code>. Then each round is
+        <pre class="cr-snippet">Lᵢ = Rᵢ₋₁
+Rᵢ = Lᵢ₋₁ ⊕ fᵢ(skᵢ, Rᵢ₋₁)</pre>
+        and the output is <code>F<sub>sk</sub>(m) = m<sup>(r)</sup></code>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Inverting it &mdash; follow your nose</div>
+        Given <code>sk<sub>i</sub></code> and
+        <code>m<sup>(i)</sup> = L<sub>i</sub> &#8741; R<sub>i</sub></code>:
+        <pre class="cr-snippet">Rᵢ₋₁ = Lᵢ                        ← it was copied across untouched
+Lᵢ₋₁ = Rᵢ ⊕ fᵢ(skᵢ, Rᵢ₋₁)        ← recompute f and XOR it away</pre>
+        <strong>Nowhere is <code>f<sub>i</sub>&#8315;&sup1;</code> needed.</strong> Unlike an
+        SPN, the round functions do not have to be permutations &mdash; they do not even have
+        to be injective. Inverting a round is the same operation as performing one, with the
+        index decremented.
+      </div>
+
+      <h3 id="t4-fetool">&#128736;&#65039; Feistel, with a round function that throws information away</h3>
+
+      <div class="tool" data-run="runFeistel">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Pick a terrible round function and watch it still invert</h3>
+        </div>
+        <div class="tool-desc">One option ignores its input entirely and returns zeros. The
+          network is still a permutation, and still inverts on every block.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="fe-fn">round function f</label>
+            <select id="fe-fn">
+              <option value="mix">a mixing function</option>
+              <option value="crush">one that collapses its input</option>
+              <option value="constant">a constant function</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="fe-msg">message (8 bits)</label>
+            <input type="text" id="fe-msg" value="01100111" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="fe-key">key (8 bits)</label>
+            <input type="text" id="fe-key" value="10110010" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="fe-rounds">rounds</label>
+            <select id="fe-rounds">
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="fe-output"></div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">DES</div>
+        The <strong>Data Encryption Standard</strong> is a Feistel network with
+        <code>n = 56</code>, <code>&ell; = 64</code>, <code>r = 16</code>, refined from IBM's
+        earlier LUCIFER. A 56-bit key is now brute-forceable, which is why <strong>Triple
+        DES</strong> appears in legacy systems.
+        <br><br>All DES variants were <strong>withdrawn from the standard in January
+        2024</strong> and are disallowed. The replacement, AES, is the subject of the next
+        topic.
+      </div>
+
+      <!-- ===== PRP ===== -->
+      <h2 id="t4-prp">What security are we actually asking for?</h2>
+
+      <div class="callout warn">
+        <div class="callout-label">A block cipher is not an SKE and not a MAC</div>
+        It is a building block for both. The IND-CPA security of an SKE built from one, or the
+        EUF-CMA security of a MAC built from one, will depend in part on the security of the
+        block cipher &mdash; but the block cipher has its own definition, and this is it.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">PRP &mdash; pseudorandom permutation</div>
+        The challenger samples a uniform bit <code>b</code> and a uniform <code>sk</code>.
+        <ul style="margin:6px 0 0;">
+          <li><code>b = 0</code>: the adversary gets oracle access to
+            <code>F(sk, &middot;)</code>.</li>
+          <li><code>b = 1</code>: it gets a uniform permutation
+            <code>&pi; : {0,1}<sup>&ell;</sup> &rarr; {0,1}<sup>&ell;</sup></code>.</li>
+        </ul>
+        The adversary queries whatever it likes and outputs <code>b&prime;</code>.
+        <strong><code>F</code> is PRP secure if no efficient adversary guesses
+        <code>b</code> with probability noticeably different from one half.</strong>
+        <br><br>The uniform permutation is realised by <strong>lazy sampling</strong>: an
+        answer is chosen uniformly the first time each input is asked about, and remembered
+        after that. Nobody writes out a table of size <code>2<sup>&ell;</sup></code>.
+      </div>
+
+      <h3 id="t4-prtool">&#128736;&#65039; Playing PRP</h3>
+
+      <div class="tool" data-run="runPRP">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Three ciphers, two strategies, and the measured win rate</h3>
+        </div>
+        <div class="tool-desc">Each round samples a bit and a key and puts either the cipher
+          or a lazily sampled uniform permutation behind the oracle. Half is guessing.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="pr-cipher">cipher</label>
+            <select id="pr-cipher">
+              <option value="xoronly">XOR with the key only</option>
+              <option value="oneround">One round: key, S, P</option>
+              <option value="threeround">Three rounds</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="pr-strat">strategy</label>
+            <select id="pr-strat">
+              <option value="difference">does the output difference match the input?</option>
+              <option value="locality">how far does a flipped bit travel?</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="pr-output"></div>
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="t4-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember seven things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>A block cipher is
+            <code>F : {0,1}<sup>n</sup> &times; {0,1}<sup>&ell;</sup> &rarr;
+            {0,1}<sup>&ell;</sup></code></strong> with <code>F<sub>sk</sub></code> a
+            permutation for every key. <code>n</code> is the key length,
+            <code>&ell;</code> the block length.</li>
+          <li><strong><code>|Perm({0,1}<sup>&ell;</sup>)| = (2<sup>&ell;</sup>)!</code></strong>
+            and writing one down takes <code>&ell; &middot; 2<sup>&ell;</sup></code> bits,
+            which is why the key names a construction and not a permutation.</li>
+          <li><strong>SPN:</strong> per round, XOR the round key, apply <code>S</code> to each
+            sub-block, apply <code>P</code> to the indices. <strong>No S or P in the final
+            round.</strong></li>
+          <li><strong>An SPN needs S and P to be permutations</strong>, because inverting uses
+            <code>S&#8315;&sup1;</code> and <code>P&#8315;&sup1;</code>.</li>
+          <li><strong>Feistel:</strong>
+            <code>L<sub>i</sub> = R<sub>i&minus;1</sub></code>,
+            <code>R<sub>i</sub> = L<sub>i&minus;1</sub> &oplus; f<sub>i</sub>(sk<sub>i</sub>,
+            R<sub>i&minus;1</sub>)</code> &mdash; and
+            <strong><code>f</code> need not be invertible</strong>, because inverting
+            recomputes it rather than undoing it.</li>
+          <li><strong>Confuse and diffuse.</strong> <code>S</code> mixes a small block,
+            <code>P</code> spreads it. Rounds buy diffusion.</li>
+          <li><strong>PRP security:</strong> no efficient adversary tells
+            <code>F(sk, &middot;)</code> from a uniform permutation with probability
+            noticeably different from one half.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Thinking a block cipher is an encryption scheme. It is deterministic and
+            keyless-looking from the outside; building an IND-CPA secure SKE from one takes
+            more work, and is the next topic's problem.</li>
+          <li>Applying <code>S</code> and <code>P</code> in the final SPN round. They are
+            public, so they add nothing after the last key.</li>
+          <li>Assuming Feistel round functions must be invertible. They need not even be
+            injective &mdash; the structure provides the invertibility.</li>
+          <li>Confusing <code>P</code>, a permutation of <em>indices</em> across the block,
+            with <code>S</code>, a permutation of <em>values</em> within a sub-block.</li>
+          <li>Reading PRP as "the output looks random". It is a statement about
+            indistinguishability from a uniform <em>permutation</em> &mdash; which is itself
+            far from a uniform function, since permutations never collide.</li>
+          <li>Forgetting that <code>n</code> and <code>&ell;</code> are independent. DES has
+            <code>n = 56</code> and <code>&ell; = 64</code>.</li>
+        </ul>
+      </div>
+
+    </section>

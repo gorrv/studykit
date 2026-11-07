@@ -5,6 +5,21 @@
      which the test suite drives directly.
      ============================================================ */
 
+  /* ------------------------------------------------------------------
+     Exhaustive sweeps are pure functions of small arguments, and the
+     tools re-run on every keystroke. Computing them once per page is the
+     difference between a tool that responds and one that stalls — the
+     trace sweep alone is seven seconds. Only the rendering layer caches;
+     the engines stay pure so the suite still does the work each time it
+     asks.
+     ------------------------------------------------------------------ */
+
+  var CR_ONCE = {};
+  function crOnce(key, fn) {
+    if (!(key in CR_ONCE)) CR_ONCE[key] = fn();
+    return CR_ONCE[key];
+  }
+
   /* ---------- Tool 1 · correct, and still broken ---------- */
 
   function runSchemeAudit() {
@@ -163,7 +178,7 @@
       '<table class="cr-table"><thead><tr><th>letters</th><th>key recovered</th>' +
       '<th>windows tried</th></tr></thead><tbody>';
     [5, 10, 20, 30, 40].forEach(function (n) {
-      var e = skEnoughText(n);
+      var e = crOnce('enough' + n, function () { return skEnoughText(n); });
       if (!e.ok) return;
       h += '<tr><td>' + n + '</td><td>' + (100 * e.rate).toFixed(1) + '%</td>' +
         '<td>' + e.total.toLocaleString() + '</td></tr>';
@@ -238,7 +253,7 @@
           : 'Which is not what the rider was aiming at.') + '</div>';
     }
 
-    var ex = skMalleableAlways(1);
+    var ex = crOnce('malleable1', function () { return skMalleableAlways(1); });
     h += '<div class="tool-note">This is not a quirk of the message above. Over every ' +
       'single-letter message, every key and every target &mdash; ' +
       ex.total.toLocaleString() + ' cases &mdash; the rewrite lands on the target exactly ' +

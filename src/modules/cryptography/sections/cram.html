@@ -364,4 +364,118 @@
 
       </div>
 
+      <h2 id="cr-t4">Topic 04 &middot; block ciphers</h2>
+
+      <div class="cram-grid">
+
+        <div class="cram-card">
+          <h3>The object</h3>
+          <ul>
+            <li><code>F : {0,1}<sup>n</sup> &times; {0,1}<sup>&ell;</sup> &rarr;
+              {0,1}<sup>&ell;</sup></code>, <span class="term">n</span> the key length,
+              <span class="term">&ell;</span> the block length.</li>
+            <li><code>F<sub>sk</sub>(&middot;)</code> is a <strong>permutation for every
+              key</strong>. That is the definition, not a consequence.</li>
+            <li>Goal <strong>(*)</strong>: for uniform <code>sk</code>, behave <em>like</em> a
+              uniform permutation.</li>
+            <li>Not an SKE and not a MAC &mdash; a building block for both.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Why the key cannot be the permutation</h3>
+          <ul>
+            <li><code>|Perm({0,1}<sup>&ell;</sup>)| = (2<sup>&ell;</sup>)!</code>:
+              <strong>2, 24, 40320</strong> for &ell; = 1, 2, 3; about
+              <code>2<sup>4.31&times;10<sup>40</sup></sup></code> at &ell; = 128.</li>
+            <li>Writing one down takes <code>&ell; &middot; 2<sup>&ell;</sup></code>
+              bits.</li>
+            <li>So <code>n</code> stays small and the permutation is <strong>built</strong>
+              from the key.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>SPN</h3>
+          <ul>
+            <li>Per round: <strong>XOR the round key &rarr; S on each sub-block &rarr; P on
+              the indices</strong>.</li>
+            <li><code>S : {0,1}<sup>&ell;&prime;</sup> &rarr; {0,1}<sup>&ell;&prime;</sup></code>,
+              <code>P : {1..&ell;} &rarr; {1..&ell;}</code>. Both <strong>public</strong>.</li>
+            <li><span class="term">No S and no P in the final round</span> &mdash; they are
+              public, so after the last key they add nothing.</li>
+            <li><strong>S and P must be permutations</strong>: inverting uses
+              <code>S<sup>&minus;1</sup></code> and <code>P<sup>&minus;1</sup></code>.</li>
+            <li>It is a permutation because a composition of permutations is one.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Feistel</h3>
+          <ul>
+            <li><code>L<sub>i</sub> = R<sub>i&minus;1</sub></code>,
+              <code>R<sub>i</sub> = L<sub>i&minus;1</sub> &oplus; f<sub>i</sub>(sk<sub>i</sub>,
+              R<sub>i&minus;1</sub>)</code>.</li>
+            <li>Inverting: <code>R<sub>i&minus;1</sub> = L<sub>i</sub></code>, then
+              <code>L<sub>i&minus;1</sub> = R<sub>i</sub> &oplus; f<sub>i</sub>(sk<sub>i</sub>,
+              R<sub>i&minus;1</sub>)</code>.</li>
+            <li><span class="term">f need not be invertible</span> &mdash; or injective, or
+              anything. It is <em>recomputed</em>, never undone.</li>
+            <li>Decryption is the same circuit with the round keys reversed.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Confuse and diffuse</h3>
+          <ul>
+            <li><strong>S confuses</strong> &mdash; mixes up a small sub-block.</li>
+            <li><strong>P diffuses</strong> &mdash; spreads that mixing across the whole
+              block.</li>
+            <li>Rounds buy diffusion: one round cannot move a flipped bit beyond the
+              positions one P reaches.</li>
+            <li>Designing S and P, choosing r, and deriving round keys are all hard problems
+              in their own right.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>PRP security</h3>
+          <ul>
+            <li>Challenger samples uniform <code>b</code> and <code>sk</code>.
+              <code>b = 0</code> &rarr; oracle is <code>F(sk, &middot;)</code>;
+              <code>b = 1</code> &rarr; a uniform permutation.</li>
+            <li>Secure if no efficient adversary names <code>b</code> noticeably better than
+              <strong>one half</strong>.</li>
+            <li>The uniform permutation is <span class="term">lazily sampled</span> &mdash;
+              answers chosen as they are asked for.</li>
+            <li>Compared against a uniform <em>permutation</em>, not a uniform function.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>DES</h3>
+          <ul>
+            <li>Feistel network, <strong>n = 56, &ell; = 64, r = 16</strong>. Refined from
+              IBM's LUCIFER.</li>
+            <li>56-bit key is brute-forceable, hence Triple DES in legacy systems.</li>
+            <li><span class="term">Withdrawn January 2024</span> &mdash; all variants
+              disallowed. AES replaces it.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>What the monoalphabetic cipher got right</h3>
+          <ul>
+            <li>Its key <em>is</em> a permutation, and <code>sk(a)</code>, <code>sk(b)</code>
+              are <span class="term">almost independent</span>.</li>
+            <li>Almost: knowing <code>&pi;(x<sub>i</sub>) = x<sub>j</sub></code> says nothing
+              about <code>&pi;(x<sub>k</sub>)</code> except that it is not
+              <code>x<sub>j</sub></code>.</li>
+            <li>What it got wrong: pairs leak the key, and <code>Enc</code> is deterministic
+              so IND-CPA is impossible.</li>
+          </ul>
+        </div>
+
+      </div>
+
     </section>

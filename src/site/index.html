@@ -211,7 +211,7 @@ footer a{color:var(--accent)}
   <div class="cards">
 
     <a class="card" href="modules/cryptography.html">
-      <div class="code">Topics 1&ndash;3</div>
+      <div class="code">Topics 1&ndash;4</div>
       <h3>Cryptography</h3>
       <p>What it means for a scheme to be secure, before any scheme is built. Five attempts at
         defining a good cipher, each killed by a scheme that satisfies the previous attempt,
@@ -222,11 +222,13 @@ footer a{color:var(--accent)}
         thousands of rounds against named strategies, with the win rate counted. Then the
         historical ciphers and the attacks that caught them: 26! counted exactly, Vigen&egrave;re
         broken column by column from the ciphertext alone, and the price perfect secrecy
-        charges for being perfect.</p>
+        charges for being perfect. Then block ciphers: substitution-permutation and Feistel
+        networks built and inverted round by round, and the PRP game played against three
+        ciphers and two strategies.</p>
       <div class="stats">
-        <span class="stat"><b>6</b> sections</span>
-        <span class="stat"><b>14</b> tools</span>
-        <span class="stat"><b>29</b> question generators</span>
+        <span class="stat"><b>7</b> sections</span>
+        <span class="stat"><b>18</b> tools</span>
+        <span class="stat"><b>38</b> question generators</span>
         <span class="stat">attacks run, not described</span>
       </div>
     </a>
@@ -303,7 +305,7 @@ That's the whole install. It works with no network connection.
       simulates the clock, a value-iteration grid that actually sweeps, a page-replacement tracer that
       shows you Belady's anomaly rather than asserting it.</p>
 
-    <p>The notes grew around the tools, and the test suite grew around both — 2382 assertions that drive
+    <p>The notes grew around the tools, and the test suite grew around both — 2436 assertions that drive
       the real pages and check the results against published worked examples and, where none exists,
       against exhaustive search. That turned out to be the most useful part: it caught several genuine
       errors in the material I was revising from, and a few of my own.</p>
