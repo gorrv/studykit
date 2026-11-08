@@ -17,8 +17,10 @@
  * much good, so instead each suite's result is written out with a hash of the
  * whole tree it was produced from (every built module, every test file, the
  * harness). On a resumed run, a suite whose hash still matches is reported
- * from that record and the rest are run for real; change anything at all and
- * every hash changes, so there is no way for a stale result to be counted.
+ * from that record and the rest are run for real; change anything that a test
+ * can see and every hash changes, so there is no way for a stale result to be
+ * counted. The single exception is the quoted grand total itself — see
+ * stripClaims for why it has to be one.
  * It is off unless asked for, so CI always does the full work.
  */
 
@@ -36,11 +38,36 @@ const files = fs.readdirSync(DIR)
   .filter(f => !filter || f.includes(filter))
   .sort();
 
+/* The two places that quote the grand total in prose, checked at the end of a
+   full run. Declared here because the resume hash has to know about them too:
+   see stripClaims. */
+const CLAIMS = [
+  ['README.md', /(\d[\d,]*) \/ \1 assertions passed/],
+  [path.join('src', 'site', 'index.html'), /([\d,]+) assertions that drive/],
+];
+
+/* The one thing in the tree that is allowed to change without invalidating a
+   suite's result: the quoted grand total. It cannot affect any assertion —
+   nothing reads it but the drift check — and leaving it in the hash made the
+   total unknowable on a slow machine, because you have to run everything to
+   learn the number and then editing the number throws the run away. So the
+   claim's digits are blanked before hashing. Only the digits: the sentence
+   around them, and every other number in both files, still count. */
+function stripClaims(text) {
+  return CLAIMS.reduce((t, [, re]) =>
+    t.replace(new RegExp(re.source, 'g'), m => m.replace(/\d/g, 'N')), text);
+}
+
 /* Everything a suite's result could possibly depend on. Deliberately coarse:
    a per-suite dependency list would resume more often and would be one
    oversight away from counting a result that no longer holds. */
 function treeHash() {
   const h = crypto.createHash('sha256');
+  const hashFile = (full, name) => {
+    h.update(full);
+    const buf = fs.readFileSync(full);
+    h.update(/\.(md|html)$/.test(name) ? stripClaims(buf.toString('utf8')) : buf);
+  };
   const add = dir => {
     let entries;
     try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (e) { return; }
@@ -48,12 +75,12 @@ function treeHash() {
       if (e.name === '.cache' || e.name === 'node_modules') continue;
       const full = path.join(dir, e.name);
       if (e.isDirectory()) add(full);
-      else { h.update(full); h.update(fs.readFileSync(full)); }
+      else hashFile(full, e.name);
     }
   };
   add(path.join(DIR, '..', 'dist'));
   add(DIR);
-  try { h.update(fs.readFileSync(path.join(DIR, '..', 'README.md'))); } catch (e) {}
+  try { hashFile(path.join(DIR, '..', 'README.md'), 'README.md'); } catch (e) {}
   return h.digest('hex');
 }
 
@@ -147,11 +174,7 @@ const DIM = s => `\x1b[2m${s}\x1b[0m`;
   // smaller total and would flag a drift that is not one.
   let drifted = false;
   if (!filter) {
-    const claims = [
-      ['README.md', /(\d[\d,]*) \/ \1 assertions passed/],
-      [path.join('src', 'site', 'index.html'), /([\d,]+) assertions that drive/],
-    ];
-    for (const [rel, re] of claims) {
+    for (const [rel, re] of CLAIMS) {
       const file = path.join(DIR, '..', rel);
       let text;
       try { text = fs.readFileSync(file, 'utf8'); } catch { continue; }

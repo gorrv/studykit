@@ -107,13 +107,14 @@ any code moved. See [`docs/AUTHORING.md`](docs/AUTHORING.md) to add a module.
   running intro-to-ai.test.js …                      274 passed (11104ms)
   running landing.test.js …                           81 passed (25409ms)
   running operating-systems.test.js …                141 passed (2653ms)
+  running practical-programming-scala.test.js …      157 passed (8842ms)
   running practical-programming.test.js …
     compiler differentials: 89 compiled, 247 from cache (8 recompiled and confirmed)
-                                                     545 passed (17267ms)
+                                                     388 passed (17267ms)
   running programming-language-design.test.js …      169 passed (5399ms)
   running software-measurement-and-testing.test.js … 158 passed (11994ms)
 
-2629 / 2629 assertions passed across 10 suites in 168.0s
+2629 / 2629 assertions passed across 11 suites in 171.9s
 ```
 
 Run one suite with `node tests/run.js intro` (after a build).
@@ -143,7 +144,20 @@ whoever is waiting is able to give it — at which point the temptation is to qu
 checked. Instead each suite's result is stored with a hash of the whole tree it came from, and a
 resumed run reports the stored result for any suite whose hash still matches. Change one byte
 anywhere and every hash changes, so a stale result cannot be counted: a single added newline took
-the number of recalled suites from ten to zero. Also off by default.
+the number of recalled suites from eleven to zero. Also off by default.
+
+That rule has exactly one exception, and it has to. The grand total is quoted in this file and on
+the landing page, so learning it means running everything, and writing it down then threw the run
+away — the number could never be both current and verified. So the digits of those two quoted
+totals are blanked before hashing. Nothing reads them but the drift check, and only the digits are
+excluded: every other number in both files, and the sentences around these, still count.
+
+Checkpointing per suite leaves one gap, and the Practical Programming suite fell into it: a suite
+that on its own takes longer than a single command is allowed to run can never be recorded, so it
+can never be part of a verified total, however many times it is restarted. That is a reason to keep
+suites to a size one sitting can finish. Its C++ and Scala halves are now two suites sharing
+`tests/lib/toolchain.js`, which is where g++, AddressSanitizer, the JVM and the compile cache live.
+The assertion count is unchanged — the same checks, in two records instead of one.
 
 The suites come in three layers.
 
