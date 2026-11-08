@@ -1,0 +1,430 @@
+<section id="topic2" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 02 &middot; Functional Testing</div>
+        <h1>Choosing Which Inputs to Try</h1>
+        <div class="topic-subtitle">boundary values, equivalence classes, decision tables and classification trees</div>
+      </div>
+
+      <p>A program is a map from a domain of inputs to a range of outputs, and there are far
+      too many inputs to try them all. <strong>Functional testing is the business of choosing
+      some</strong> &mdash; from the specification alone, without looking inside the code.
+      Every technique here is a different answer to "which ones", and each comes with a
+      formula for how many test cases it costs.</p>
+
+      <p>The whole topic hangs on one example, and the useful thing about it is that the
+      example is a real program with real faults in it. So rather than take the techniques on
+      trust, the tools below <strong>generate each suite, run it, and count what it
+      catches</strong>.</p>
+
+      <!-- ===== BOUNDARY VALUES ===== -->
+      <h2 id="t2-bv">Boundary value testing</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The idea</div>
+        A test case for each combination of <strong>extreme values</strong> &mdash; normal
+        and out of bound. For a variable ranging over <code>[a, b]</code> the interesting
+        values are <code>a</code>, <code>a+1</code>, something nominal, <code>b&minus;1</code>,
+        <code>b</code>; robust variants add <code>a&minus;1</code> and <code>b+1</code>.
+        <table class="st-defs" style="margin-top:8px;">
+          <tr><th>BV</th><td>vary one variable at a time, others at nominal &mdash;
+            <code>4n + 1</code> test cases</td></tr>
+          <tr><th>Robust BV</th><td>the same, plus just outside &mdash;
+            <code>6n + 1</code></td></tr>
+          <tr><th>Worst case</th><td>every combination of the extreme values &mdash;
+            <code>5&#8319;</code></td></tr>
+          <tr><th>Robust worst case</th><td>every combination, including outside &mdash;
+            <code>7&#8319;</code></td></tr>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">What is wrong with it</div>
+        <div class="st-pro-con">
+          <div><span class="st-plus">+</span> test cases are straightforward to
+            generate</div>
+          <div><span class="st-minus">&minus;</span> no sense of covering the input
+            domain</div>
+          <div><span class="st-minus">&minus;</span> awkward for logical variables &mdash;
+            what is the boundary of a boolean?</div>
+          <div><span class="st-minus">&minus;</span> only handles independent input
+            domains</div>
+          <div><span class="st-minus">&minus;</span> uses no white-box information</div>
+        </div>
+        <br>The first of those is measurable, and the second tool below measures it: on this
+        example the number of faults boundary value testing finds depends entirely on which
+        values you happened to call nominal.
+      </div>
+
+      <!-- ===== EQUIVALENCE CLASSES ===== -->
+      <h2 id="t2-ec">Equivalence class testing</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The idea</div>
+        Partition the domain of each input variable (and the range of each output) into
+        <strong>equivalence classes</strong> &mdash; sets of values the program ought to
+        treat alike &mdash; and then cover the classes. Also called the equivalence partition
+        or category partition method.
+        <br><br>The variants differ in how thoroughly they cover:
+        <table class="st-defs" style="margin-top:8px;">
+          <tr><th>Weak normal</th><td>cover every class of <em>each</em> variable.
+            <strong>Single fault assumption.</strong>
+            <code>max&#8339; |S&#8339;|</code> test cases</td></tr>
+          <tr><th>Strong normal</th><td>cover every <em>combination</em> of classes.
+            <strong>Multiple fault assumption.</strong>
+            <code>&prod;&#8339; |S&#8339;|</code></td></tr>
+          <tr><th>Weak robust</th><td>weak normal, plus out-of-range values for each
+            variable. <code>max&#8339; |S&#8339;| + 2n</code></td></tr>
+          <tr><th>Strong robust</th><td>every combination including out of range.
+            <code>&prod;&#8339; (|S&#8339;| + 2)</code></td></tr>
+        </table>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">A puzzle that explains the first formula</div>
+        What is the fewest tokens you can place on an <code>m &times; n</code> grid so that
+        every row and every column holds at least one?
+        <br><br><strong><code>max(m, n)</code></strong> &mdash; put token <em>i</em> at
+        <code>(min(i, m), min(i, n))</code>. Weak normal EC is exactly this puzzle: each test
+        case is a token covering one class of every variable at once, so covering all the
+        classes of all the variables costs the largest single count, not the sum.
+      </div>
+
+      <h3 id="t2-pztool">&#128736;&#65039; The token puzzle</h3>
+
+      <div class="tool" data-run="runPuzzle">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>max(m, n), and a check that nothing smaller works</h3>
+        </div>
+        <div class="tool-desc">The placement from the notes, drawn &mdash; with an exhaustive
+          search over every arrangement to confirm the count is minimal and not merely
+          sufficient.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="pz-m">rows m</label>
+            <select id="pz-m">
+              <option value="2">2</option><option value="3" selected>3</option>
+              <option value="4">4</option><option value="5">5</option>
+              <option value="6">6</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="pz-n">columns n</label>
+            <select id="pz-n">
+              <option value="2">2</option><option value="3">3</option>
+              <option value="4">4</option><option value="5" selected>5</option>
+              <option value="6">6</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="pz-output"></div>
+      </div>
+
+      <!-- ===== THE EXAMPLE ===== -->
+      <h2 id="t2-mortgage">The mortgage example</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The specification</div>
+        Three inputs: <code>full-time</code> (boolean), <code>age</code> in
+        <code>[18, 55]</code>, <code>salary</code> in <code>[0, 10000]</code>. Output the
+        total mortgage, which is <code>salary &times; factor</code>:
+        <table class="st-levels" style="margin-top:8px;">
+          <tr><th></th><td><strong>full-time = true</strong></td>
+            <td><strong>false</strong></td></tr>
+          <tr><th>Young</th><td>18&ndash;35 &rarr; 75</td><td>18&ndash;30 &rarr; 70</td></tr>
+          <tr><th>Middle</th><td>36&ndash;45 &rarr; 55</td><td>31&ndash;40 &rarr; 50</td></tr>
+          <tr><th>Old</th><td>46&ndash;55 &rarr; 30</td><td>41&ndash;50 &rarr; 35</td></tr>
+        </table>
+        <br>Note the gap, because it matters later: a part-timer aged 51 to 55 is inside the
+        permitted age range and in none of the categories. The notes treat that as an error
+        &mdash; "too late".
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The equivalence classes</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>age</th><td>difficult, because the two columns break differently:
+            <code>[18-30] [31-35] [36-40] [41-45] [46-50] [51-55]</code> &mdash; six
+            classes</td></tr>
+          <tr><th>salary</th><td><code>[0-10000]</code> &mdash; one class</td></tr>
+          <tr><th>full-time</th><td><code>true</code>, <code>false</code> &mdash; two, and
+            "as strange as boundary value"</td></tr>
+        </table>
+        <br>So weak normal EC needs <code>max(2, 6, 1) = <strong>6</strong></code> test
+        cases, and strong normal needs <code>2 &times; 6 &times; 1 = <strong>12</strong></code>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">And the implementation, which does not match it</div>
+        <pre class="st-snippet">if (full-time)
+  return (18 ≤ age &lt; 35) ? 75*salary : (31 ≤ age &lt; 40) ? 55*salary : 30*salary
+else
+  return (18 ≤ age &lt; 30) ? 75*salary : (31 ≤ age &lt; 40) ? 50*salary : 35*salary</pre>
+        Read it against the table above before running anything. There are four separate
+        mistakes in those two lines, and one of them is a line that is not there at all.
+      </div>
+
+      <h3 id="t2-mgtool">&#128736;&#65039; The program, against its specification</h3>
+
+      <div class="tool" data-run="runMortgage">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Every age from 18 to 55, checked</h3>
+        </div>
+        <div class="tool-desc">One input at a time, and a map of the whole valid domain
+          underneath it.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="mg-ft">full-time</label>
+            <select id="mg-ft">
+              <option value="true" selected>true</option>
+              <option value="false">false</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="mg-age">age</label>
+            <input type="text" id="mg-age" value="38" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="mg-sal">salary</label>
+            <input type="text" id="mg-sal" value="1000" spellcheck="false">
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="mg-output"></div>
+      </div>
+
+      <h3 id="t2-tqtool">&#128736;&#65039; Eight techniques, scored</h3>
+
+      <div class="tool" data-run="runTechniques">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>How many test cases, how many faults, and how many tests per fault</h3>
+        </div>
+        <div class="tool-desc">The notes give these three as bar charts with no printed
+          values. Each suite is generated and run here, so these are measurements.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="tq-show">also show</label>
+            <select id="tq-show">
+              <option value="all" selected>everything</option>
+              <option value="formulas">the counting formulas</option>
+              <option value="nominal">how much the nominal values matter</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="tq-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">More test cases does not mean more faults</div>
+        The numbers above contain a result worth pausing on. <strong>Robust worst case runs
+        98 test cases and finds 7 faults. Strong robust EC runs 48 and finds 8.</strong>
+        Twice the effort, one fault fewer.
+        <br><br>The fault it misses is the full-time middle band, ages 40 to 45. Boundary
+        value testing picks ages 17, 18, 19, 36, 54, 55 and 56 &mdash; <em>none of which
+        lands between 40 and 45</em>. Equivalence classes pick the middle of each class, so
+        they walk straight into it.
+        <br><br>That is the complementarity behind the worst-case technique being described
+        as "BV + EC": boundaries catch off-by-one mistakes, class interiors catch wrong
+        constants and misplaced bands, and neither subsumes the other. The
+        <code>A &rarr; B</code> hierarchy orders the techniques that <em>are</em>
+        comparable; these two are not.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">A → B means every test case of A is a test case of B</div>
+        The techniques form a hierarchy, so faults found by A are found by B as well. Weak
+        normal sits at the bottom; robust worst case at the top, with a hundred-odd test
+        cases for three variables. The question is never which is strongest &mdash; it is
+        which is worth its cost.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">The three problems equivalence classes leave open</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>No constraints on the classes.</strong> Nothing stops you partitioning
+            badly.</li>
+          <li><strong>Dependencies between variables are ignored.</strong> Age classes here
+            depend on full-time, and the technique has nowhere to say so.</li>
+          <li><strong>No choice among classes.</strong> You cannot apply worst case to one
+            variable and boundary values to another.</li>
+        </ol>
+        <br>Decision tables and classification trees are the answers to these.
+      </div>
+
+      <!-- ===== DECISION TABLES ===== -->
+      <h2 id="t2-dt">Decision tables</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The idea</div>
+        Summarise the logic of the program, rather in the manner of a Karnaugh map: find a
+        few <strong>conditions</strong> on the input that determine the behaviour, and give
+        the <strong>action</strong> for each combination. The conditions
+        <strong>need not be independent</strong>, which is exactly the assumption every
+        earlier technique had to make. Also called cause-effect graph testing or tableau
+        testing.
+        <table class="st-defs" style="margin-top:8px;">
+          <tr><th>Stub</th><td>the left-hand column: conditions first (most dominating at the
+            top, multi-valued and special cases last), then actions, then
+            exceptions</td></tr>
+          <tr><th>Entry</th><td>the other columns, called <strong>rules</strong>. Condition
+            entries are true, false, other values, or <strong>don't care</strong>; action
+            entries mark which actions fire</td></tr>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The completeness check</div>
+        For independent conditions there must be <code>2<sup>|{c&#8336;}|</sup></code> rules
+        &mdash; or <code>&prod;&#8336; n&#8336;</code> when conditions take
+        <code>n&#8336;</code> values. <strong>Each don't care counts for two rules</strong>,
+        which is how a handful of columns can cover the whole space.
+        <br><br>If the count comes up short, there are input combinations whose behaviour
+        nobody has specified. Those are precisely where faults of omission come from.
+      </div>
+
+      <h3 id="t2-dttool">&#128736;&#65039; Counting the rules</h3>
+
+      <div class="tool" data-run="runDecisionTable">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Is this table complete?</h3>
+        </div>
+        <div class="tool-desc">The table from the notes, with the completeness arithmetic
+          done. Remove a rule or a don't care and watch the count fall short.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="dt-drop">change</label>
+            <select id="dt-drop">
+              <option value="none" selected>the table as given</option>
+              <option value="last">drop the last rule</option>
+              <option value="dontcare">make the first rule specific</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="dt-output"></div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Which technique when</div>
+        The notes close this section with a decision table about decision tables. Reading it
+        off: with <strong>physical</strong> variables that are independent, use boundary
+        values &mdash; robust if exceptions matter, worst case if you cannot assume a single
+        fault. With <strong>logical</strong> variables, use equivalence classes on the same
+        pattern. And whenever the variables are <strong>not independent</strong>, the answer
+        is a decision table, whatever else is true.
+      </div>
+
+      <!-- ===== CLASSIFICATION TREES ===== -->
+      <h2 id="t2-ct">Classification trees</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The steps</div>
+        <ol style="margin:6px 0 0;">
+          <li>Determine the <strong>aspects</strong> of the specification that influence the
+            logic.</li>
+          <li>Establish a <strong>hierarchy</strong> between them &mdash; the more global
+            conditions first.</li>
+          <li><strong>Partition</strong> the input domain for each aspect.</li>
+          <li>Each partition must <strong>cover the whole domain of its parent
+            node</strong>.</li>
+        </ol>
+        <br>Then a <strong>combination table</strong>: one test case per relevant combination
+        of inputs. The word <em>relevant</em> is where the judgement goes, and it is what the
+        technique buys you over strong EC's blind product.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The mortgage example as a tree</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>Salary:</strong> &minus;1, <code>[0..10000]</code>, &gt;10000</li>
+          <li><strong>Full time:</strong> true, false</li>
+          <li><strong>Age:</strong> too young, young, middle, old, too old &mdash;
+            <em>dependent on full-time</em></li>
+        </ol>
+        <br>That last line is the thing equivalence class testing could not express. The
+        hierarchy lets the age partition differ depending on the branch above it, which is
+        the actual structure of the specification.
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Two more examples worth working through</div>
+        <strong>Search.</strong> <code>search(list : List(El), el : El) : int</code> over an
+        arbitrary list &mdash; empty, ordered, unordered, reverse-ordered &mdash; returning
+        the indices of every occurrence, or &minus;1 if there are none. The aspects are the
+        shape of the list, whether the element occurs, and how often.
+        <br><br><strong>Shapes.</strong> A vision system classifying shapes by size (large,
+        small) and colour (red, green, blue); large shapes further by form (circle, square,
+        triangle); triangles further into equilateral, isosceles, scalene. The hierarchy is
+        the point: "which kind of triangle" only exists under "large" and "triangle".
+      </div>
+
+      <!-- ===== CONCLUSIONS ===== -->
+      <h2 id="t2-conc">Conclusions</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">What the notes conclude</div>
+        <ul style="margin:6px 0 0;">
+          <li>Equivalence testing is the basis. <strong>Strong variants are often
+            practically infeasible</strong>, and <strong>robust techniques are very
+            effective for weakly typed languages</strong>, where nothing else stops an
+            out-of-range value.</li>
+          <li>Decision tables and classification trees help by summarising the logic and by
+            documenting which methods and test cases are the effective ones.</li>
+        </ul>
+        <br><strong>No perfect technique exists.</strong> Consider the domain and how much
+        coverage of the requirements is justified; a classification tree or decision table
+        usually gives the most useful structured overview.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="t2-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember seven things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>Weak normal EC costs <code>max&#8339; |S&#8339;|</code></strong>, by the
+            token puzzle: one test case covers one class of every variable at once.</li>
+          <li><strong>Strong normal costs <code>&prod;&#8339; |S&#8339;|</code></strong>; weak
+            robust adds <code>2n</code>; strong robust is
+            <code>&prod;(|S&#8339;| + 2)</code>.</li>
+          <li><strong>Weak = single fault assumption, strong = multiple.</strong> Robust =
+            out-of-range values included.</li>
+          <li><strong>BV is <code>4n+1</code></strong>, robust BV <code>6n+1</code>, worst
+            case <code>5&#8319;</code>, robust worst case <code>7&#8319;</code>.</li>
+          <li><strong>A → B means A's test cases are a subset of B's</strong>, so B finds at
+            least what A finds.</li>
+          <li><strong>Decision tables drop the independence assumption.</strong> Completeness
+            needs <code>2<sup>|conditions|</sup></code> rules, each don't care counting for
+            two.</li>
+          <li><strong>Classification trees add hierarchy</strong>, so one aspect's partition
+            can depend on another's &mdash; which is what the mortgage age classes
+            need.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Adding the class counts for weak normal EC. It is the maximum, not the
+            sum.</li>
+          <li>Applying the robust formulas to a boolean. There is no value just outside
+            <code>{true, false}</code>, so the formula overcounts &mdash; the tool shows 96
+            against 48 for this example.</li>
+          <li>Treating boundary value testing as thorough. On this example it finds anywhere
+            from zero to three faults depending only on the nominal values chosen.</li>
+          <li>Forgetting that don't care counts for two rules when checking
+            completeness.</li>
+          <li>Assuming equivalence classes can express dependency between variables. They
+            cannot; that is what the hierarchy of a classification tree is for.</li>
+          <li>Reading "strong" as "better". It is exponentially more expensive, and the notes
+            call the strong variants often practically infeasible.</li>
+        </ul>
+      </div>
+
+    </section>

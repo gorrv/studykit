@@ -106,3 +106,74 @@
   .st-pro-con div { margin: 4px 0; padding-left: 20px; text-indent: -20px; }
   .st-plus { color: var(--accent-3); font-weight: 700; display: inline-block; width: 14px; }
   .st-minus { color: var(--accent-2); font-weight: 700; display: inline-block; width: 14px; }
+
+  /* ---------- Topic 02 · functional testing ---------- */
+
+  /* the age strip: one cell per age, green where the code agrees */
+  .fn-strip-row { display: flex; align-items: center; gap: 10px; margin: 4px 0; }
+  .fn-strip-l {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+    width: 70px;
+    text-align: right;
+  }
+  .fn-strip { display: flex; gap: 2px; flex-wrap: wrap; }
+  .fn-cell {
+    width: 13px; height: 18px;
+    border-radius: 2px;
+    background: var(--tint-c);
+    border: 1px solid var(--accent-3);
+    display: inline-block;
+  }
+  .fn-cell.bad { background: var(--tint-b2); border-color: var(--accent-2); }
+  .fn-cell.here { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .fn-legend {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 11px; color: var(--ink-muted);
+    margin-top: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* bars in the comparison table */
+  .fn-cmp td { vertical-align: middle; }
+  .fn-bar-n {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    display: inline-block;
+    min-width: 26px;
+  }
+  .fn-bar {
+    display: inline-block;
+    width: 90px;
+    height: 9px;
+    background: var(--surface-3);
+    border-radius: 4px;
+    overflow: hidden;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+  .fn-bar-f { display: block; height: 100%; }
+  .fn-bar-f.a { background: var(--accent); }
+  .fn-bar-f.b { background: var(--accent-3); }
+  .fn-bar-f.c { background: var(--accent-2); }
+
+  /* the token grid */
+  .fn-grid { display: inline-flex; flex-direction: column; gap: 3px; margin: 10px 0; }
+  .fn-grid-row { display: flex; gap: 3px; }
+  .fn-sq {
+    width: 26px; height: 26px;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--surface-2);
+  }
+  .fn-sq.on { background: var(--accent); border-color: var(--accent); }
+
+  /* decision table */
+  .dt-table td.dt-e {
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    width: 44px;
+  }
+  .dt-table td.dt-dash { color: var(--ink-muted); background: var(--surface-2); }
+  .dt-table tr.dt-split th, .dt-table tr.dt-split td { border-top: 2px solid var(--rule); }

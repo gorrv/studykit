@@ -116,4 +116,131 @@
 
       </div>
 
+      <h2 id="cr-t2">Topic 02 &middot; functional testing</h2>
+
+      <div class="cram-grid">
+
+        <div class="cram-card">
+          <h3>Boundary values, four variants</h3>
+          <ul>
+            <li>For <code>[a, b]</code> the interesting values are <code>a</code>,
+              <code>a+1</code>, nominal, <code>b&minus;1</code>, <code>b</code>; robust adds
+              <code>a&minus;1</code> and <code>b+1</code>.</li>
+            <li><span class="term">BV</span> &mdash; one variable at a time, others nominal:
+              <code>4n + 1</code>.</li>
+            <li><span class="term">Robust BV</span> &mdash; <code>6n + 1</code>.</li>
+            <li><span class="term">Worst case</span> &mdash; all combinations:
+              <code>5&#8319;</code>. <span class="term">Robust worst case</span>:
+              <code>7&#8319;</code>.</li>
+            <li>&minus; no sense of covering the domain, awkward for booleans, independent
+              variables only, no white-box information.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Equivalence classes, four variants</h3>
+          <ul>
+            <li><span class="term">Weak normal</span> &mdash; every class of each variable.
+              Single fault assumption. <code>max&#8339; |S&#8339;|</code>.</li>
+            <li><span class="term">Strong normal</span> &mdash; every combination. Multiple
+              fault assumption. <code>&prod;&#8339; |S&#8339;|</code>.</li>
+            <li><span class="term">Weak robust</span> &mdash; plus out of range per
+              variable. <code>max&#8339; |S&#8339;| + 2n</code>.</li>
+            <li><span class="term">Strong robust</span> &mdash;
+              <code>&prod;&#8339; (|S&#8339;| + 2)</code>.</li>
+            <li>Why <strong>max</strong> and not sum: each test case is one token covering a
+              class of <em>every</em> variable at once &mdash; the <code>m &times; n</code>
+              grid puzzle, answer <code>max(m, n)</code>.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The mortgage example</h3>
+          <ul>
+            <li>Classes: age <strong>6</strong>
+              (<code>18-30 31-35 36-40 41-45 46-50 51-55</code>), full-time
+              <strong>2</strong>, salary <strong>1</strong>.</li>
+            <li>So weak normal <code>max(2,6,1) = 6</code>, strong normal
+              <code>2&times;6&times;1 = 12</code>.</li>
+            <li>The implementation holds <strong>four</strong> faults &mdash; two off-by-one
+              bounds, one wrong constant, and a <strong>missing range check</strong>, which
+              is the fault of omission.</li>
+            <li>Part-timers aged 51&ndash;55 are in range and in no category &mdash; the gap
+              the specification itself leaves.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Two results worth remembering</h3>
+          <ul>
+            <li>The robust formulas <strong>overcount</strong> here, because full-time is a
+              boolean with no out-of-range value: <code>max + 2n</code> says 12 where 10
+              exist, <code>&prod;(|S|+2)</code> says 96 where 48 exist.</li>
+            <li><strong>Robust worst case: 98 tests, 7 faults. Strong robust EC: 48 tests, 8
+              faults.</strong> No boundary value lands in 40&ndash;45, so boundaries miss
+              that band entirely.</li>
+            <li>So <code>A &rarr; B</code> orders only the comparable techniques. Boundaries
+              catch off-by-one; class interiors catch wrong constants.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>What EC leaves open</h3>
+          <ul>
+            <li>No constraints on the classes &mdash; nothing stops a bad partition.</li>
+            <li>Dependencies between variables are ignored &mdash; age depends on full-time,
+              and there is nowhere to say so.</li>
+            <li>No choice among classes &mdash; you cannot mix worst case on one variable
+              with boundary values on another.</li>
+            <li>Decision tables and classification trees answer these.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Decision tables</h3>
+          <ul>
+            <li><span class="term">Stub</span> = the first column: conditions above, actions
+              below. <span class="term">Entry</span> = the other columns, the
+              <strong>rules</strong>.</li>
+            <li>Condition entries may be true, false, other values, or <strong>don't
+              care</strong>; action entries are do or do-not.</li>
+            <li>Conditions <strong>need not be independent</strong> &mdash; which is exactly
+              what the other techniques assume.</li>
+            <li><span class="term">Completeness:</span> the rule counts must sum to
+              <code>&prod; n&#8336;</code>, and each <strong>don't care counts for
+              two</strong> (or for however many values its condition has).</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Classification trees</h3>
+          <ul>
+            <li>Find the <strong>aspects</strong> of the specification that influence the
+              behaviour.</li>
+            <li>Put them in a <strong>hierarchy</strong> &mdash; more global aspects
+              higher.</li>
+            <li><strong>Partition</strong> each aspect's domain; every partition must cover
+              the whole domain of its parent class.</li>
+            <li>Then a <strong>combination table</strong>: one test case per relevant
+              combination, so dependencies can be respected and irrelevant combinations
+              dropped.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Which technique when</h3>
+          <ul>
+            <li><strong>Physical</strong> independent variables &rarr; boundary values;
+              robust if there is no error handling, worst case if failure is costly.</li>
+            <li><strong>Logical</strong> variables &rarr; equivalence classes on the same
+              pattern.</li>
+            <li>Variables <strong>not independent</strong> &rarr; decision tables or
+              classification trees.</li>
+            <li>Always: the question is not which technique is strongest, but which is worth
+              its cost.</li>
+          </ul>
+        </div>
+
+      </div>
+
     </section>

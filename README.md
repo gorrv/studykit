@@ -21,7 +21,7 @@ No runtime dependencies. No server. It works offline.
 | Programming Language Design | 2 | 11 | 24 | 10 | 4 |
 | Operating Systems | 2 | 13 | 12 | 10 | 1 |
 | Cryptography | 3 | 8 | 23 | 49 | 1 |
-| Software Measurement and Testing | 3 | 4 | 3 | 9 | 0 |
+| Software Measurement and Testing | 3 | 5 | 7 | 20 | 0 |
 | Compilers and Formal Languages | 3 | 1 | 0 | 0 | 0 |
 
 Operating Systems also carries a hand-written bank of 123 exam questions behind its mock paper.
@@ -105,15 +105,15 @@ any code moved. See [`docs/AUTHORING.md`](docs/AUTHORING.md) to add a module.
   running cryptography.test.js …                     297 passed (77233ms)
   running foundations-of-computing.test.js …         875 passed (9515ms)
   running intro-to-ai.test.js …                      274 passed (11104ms)
-  running landing.test.js …                           77 passed (25409ms)
+  running landing.test.js …                           81 passed (25409ms)
   running operating-systems.test.js …                141 passed (2653ms)
   running practical-programming.test.js …
     compiler differentials: 89 compiled, 247 from cache (8 recompiled and confirmed)
                                                      545 passed (17267ms)
   running programming-language-design.test.js …      169 passed (5399ms)
-  running software-measurement-and-testing.test.js …  76 passed (5242ms)
+  running software-measurement-and-testing.test.js … 158 passed (11994ms)
 
-2547 / 2547 assertions passed across 10 suites in 161.3s
+2629 / 2629 assertions passed across 10 suites in 168.0s
 ```
 
 Run one suite with `node tests/run.js intro` (after a build).
