@@ -235,13 +235,19 @@ footer a{color:var(--accent)}
         </div>
     </a>
 
-    <a class="card soon" href="modules/software-measurement-and-testing.html">
-      <div class="code">Starting out</div>
+    <a class="card" href="modules/software-measurement-and-testing.html">
+      <div class="code">Topic 1</div>
       <h3>Software Measurement and Testing</h3>
-      <p>Measuring software, and how you decide a test suite is good enough &mdash; which is a
-        harder question than it sounds, and the reason this repo has a test suite of its own.</p>
+      <p>Measuring software, and how you decide a test suite is good enough. It starts with
+        three words that are not synonyms &mdash; fault, error, failure &mdash; and a
+        four-line program with one mistake in it, run here against the program it should have
+        been. A fault has to be reached, has to corrupt the state, and the corruption has to
+        reach the output; miss any one and the test passes anyway. There is an input where
+        exactly that happens.</p>
       <div class="stats">
-        <span class="stat">no topics yet</span>
+        <span class="stat"><b>4</b> sections</span>
+        <span class="stat"><b>3</b> tools</span>
+        <span class="stat"><b>9</b> question generators</span>
       </div>
     </a>
 
@@ -307,7 +313,7 @@ That's the whole install. It works with no network connection.
       simulates the clock, a value-iteration grid that actually sweeps, a page-replacement tracer that
       shows you Belady's anomaly rather than asserting it.</p>
 
-    <p>The notes grew around the tools, and the test suite grew around both — 2497 assertions that drive
+    <p>The notes grew around the tools, and the test suite grew around both — 2547 assertions that drive
       the real pages and check the results against published worked examples and, where none exists,
       against exhaustive search. That turned out to be the most useful part: it caught several genuine
       errors in the material I was revising from, and a few of my own.</p>

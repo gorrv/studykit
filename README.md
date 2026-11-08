@@ -21,14 +21,14 @@ No runtime dependencies. No server. It works offline.
 | Programming Language Design | 2 | 11 | 24 | 10 | 4 |
 | Operating Systems | 2 | 13 | 12 | 10 | 1 |
 | Cryptography | 3 | 8 | 23 | 49 | 1 |
-| Software Measurement and Testing | 3 | 1 | 0 | 0 | 0 |
+| Software Measurement and Testing | 3 | 4 | 3 | 9 | 0 |
 | Compilers and Formal Languages | 3 | 1 | 0 | 0 | 0 |
 
 Operating Systems also carries a hand-written bank of 123 exam questions behind its mock paper.
 The table is checked against the built modules by `tests/landing.test.js`, so it cannot drift.
 
 The year-3 modules are being written as the material is covered, so their counts are small and
-will grow. Two of them are still shells — they open, search, print and are under test, but have
+will grow. One of them is still a shell — it opens, searches, prints and is under test, but has
 only an orientation page. The landing page marks those as in progress, and the tests check that
 label against the file behind it in both directions, so a module cannot gain topics and go on
 looking unfinished, nor be presented as ready while still empty.
@@ -111,9 +111,9 @@ any code moved. See [`docs/AUTHORING.md`](docs/AUTHORING.md) to add a module.
     compiler differentials: 89 compiled, 247 from cache (8 recompiled and confirmed)
                                                      545 passed (17267ms)
   running programming-language-design.test.js …      169 passed (5399ms)
-  running software-measurement-and-testing.test.js …  29 passed (2556ms)
+  running software-measurement-and-testing.test.js …  76 passed (5242ms)
 
-2497 / 2497 assertions passed across 10 suites in 136.8s
+2547 / 2547 assertions passed across 10 suites in 161.3s
 ```
 
 Run one suite with `node tests/run.js intro` (after a build).

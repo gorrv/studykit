@@ -1,0 +1,303 @@
+<section id="topic1" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 01 &middot; Terminology</div>
+        <h1>Fault, Error, Failure</h1>
+        <div class="topic-subtitle">three words that are not synonyms, and a four-line program that shows why</div>
+      </div>
+
+      <p>This topic is mostly vocabulary, and the vocabulary earns its keep: <strong>fault</strong>,
+      <strong>error</strong> and <strong>failure</strong> name three different things that
+      people routinely call "a bug". The distinction is not pedantry. A test case can execute
+      faulty code, put the program into a wrong state, and still pass &mdash; and the example
+      below does exactly that, which is the whole argument for why finding bugs by testing is
+      harder than it sounds.</p>
+
+      <!-- ===== WHY ===== -->
+      <h2 id="t1-why">Why this matters at all</h2>
+
+      <div class="callout">
+        <div class="callout-label">Software in places where it being wrong is not an inconvenience</div>
+        The case for all this is usually made with cases rather than arguments, and they are
+        worth keeping in mind: glitches in pacemakers; a study reporting at least 212 deaths
+        from device failure across five brands of implantable cardioverter-defibrillator; a
+        sentencing calculation that released more than 3,200 US prisoners early; airbag sensor
+        faults behind a recall of over a million cars.
+        <br><br>And the scale of the surface: a premium car contains something like
+        <strong>100 million lines</strong> of code across 70 to 100 networked control units
+        (Broy, <em>IEEE Spectrum</em>, 2009).
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Two numbers quoted for the rate and the cost</div>
+        Humphreys puts defect introduction at about <strong>4.2 per hour of
+        programming</strong>, and notes that hurrying makes it worse rather than better.
+        Tricentis's <em>Software Fail Watch</em> put the 2016 cost of software faults at
+        <strong>1,100 billion USD</strong>, affecting 4.4 billion people.
+        <br><br>These are cited figures rather than anything this page can check, and they
+        should be read as the sort of number that makes an argument rather than settles one.
+        What they are arguing is Boehm's curve: the cost of fixing a fault rises sharply with
+        how late it is found, so the economics favour catching things early &mdash; which is
+        what testing is for.
+      </div>
+
+      <!-- ===== THE THREE WORDS ===== -->
+      <h2 id="t1-terms">The three words</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Definitions</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>Fault</th><td><strong>an incorrect implementation.</strong> Two kinds:
+            <em>commission</em>, where something wrong was written, and <em>omission</em>,
+            where something was never written at all &mdash; the harder kind, because there
+            is no line to look at.</td></tr>
+          <tr><th>Error</th><td><strong>an incorrect system state.</strong> What the fault
+            does when it runs.</td></tr>
+          <tr><th>Failure</th><td><strong>a visible error in the behaviour.</strong> Also
+            called an anomaly or an incident.</td></tr>
+        </table>
+        <br>A fault sits in the code. An error is a moment during execution. A failure is
+        something an observer could notice. They are related in that order, and each step can
+        fail to happen.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The example</div>
+        Specification: read an integer <code>i</code>, output <code>2i&sup3;</code>.
+        <pre class="st-snippet">1.  cin &gt;&gt; i;
+2.  i = 2 * i;
+3.  i = pow(i, 3);
+4.  cout &lt;&lt; i;</pre>
+        <table class="st-defs" style="margin-top:8px;">
+          <tr><th>Conceptual mistake</th><td>confusing the binding power of the
+            operators</td></tr>
+          <tr><th>Fault</th><td>statements 2 and 3 are in the wrong order</td></tr>
+          <tr><th>Error</th><td>after line 3, <code>i</code> may hold the wrong
+            value</td></tr>
+          <tr><th>Failure</th><td>test case: input 1, expected output 2, actual output
+            <strong>8</strong></td></tr>
+        </table>
+        <br>The program computes <code>(2i)&sup3; = 8i&sup3;</code> where it should compute
+        <code>2i&sup3;</code>.
+      </div>
+
+      <h3 id="t1-fttool">&#128736;&#65039; The example, run</h3>
+
+      <div class="tool" data-run="runFaultTrace">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Four lines, two programs, and the state after each</h3>
+        </div>
+        <div class="tool-desc">The program that was written beside the one that was meant.
+          Try input 1 first, then 0, then &mdash; with 32-bit integers selected &mdash;
+          2048.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="ft-input">input i</label>
+            <input type="text" id="ft-input" value="1" spellcheck="false">
+          </div>
+          <div class="tool-field">
+            <label for="ft-model">arithmetic</label>
+            <select id="ft-model">
+              <option value="math">exact integers (the specification)</option>
+              <option value="int32">32-bit int (the program)</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="ft-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Three things have to happen, and any of them can fail to</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>The faulty code must run.</strong> A fault on a branch nobody takes
+            produces nothing. Here the four lines are straight through, so this is free
+            &mdash; in a real program it is most of the difficulty.</li>
+          <li><strong>Running it must make the state wrong.</strong> That is the
+            <em>error</em>. With <code>i = 0</code> the two programs agree, so the fault runs
+            and the state stays correct.</li>
+          <li><strong>The wrong state must reach the output.</strong> That is the
+            <em>failure</em>. An error that gets overwritten, or cancelled, or discarded
+            before anything is printed is invisible to the test.</li>
+        </ol>
+        <br>Set the tool to 32-bit integers and try <code>i = 2048</code>: the fault runs,
+        the state genuinely goes wrong, and <em>nothing comes out wrong</em>. All three
+        conditions are separate, and that input demonstrates it.
+      </div>
+
+      <h3 id="t1-cstool">&#128736;&#65039; Which test cases would have caught it</h3>
+
+      <div class="tool" data-run="runCatchSweep">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Sweeping the inputs, and finding the ones that pass</h3>
+        </div>
+        <div class="tool-desc">Every input in a range, checked against the specification.
+          The answer is different depending on whether you believe the arithmetic is exact.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="cs-model">arithmetic</label>
+            <select id="cs-model">
+              <option value="math">exact integers</option>
+              <option value="int32">32-bit int</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="cs-span">range</label>
+            <select id="cs-span">
+              <option value="1000">&plusmn;1,000</option>
+              <option value="5000" selected>&plusmn;5,000</option>
+              <option value="20000">&plusmn;20,000</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="cs-output"></div>
+      </div>
+
+      <!-- ===== WHAT TESTING IS ===== -->
+      <h2 id="t1-testing">What testing is</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Planned experiments, with two different purposes</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>To reveal bugs</strong> &mdash; to turn faults into failures. Called
+            <em>testing to fail</em>. <em>"Testing can show the presence of bugs, but not
+            their absence."</em> (Dijkstra)</li>
+          <li><strong>To gain confidence in quality</strong> &mdash; <em>testing to
+            pass</em>, which is what reliability work is about.</li>
+        </ol>
+        <br>The word <em>planned</em> is doing work. A test is an experiment with a
+        prediction attached; running the program and looking at the output is not testing.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Test case, test suite</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>Test case</th><td>a <strong>pair</strong>: inputs (values, preconditions,
+            the running environment, the timing of events) and <strong>expected
+            outputs</strong> (concrete values, or symbolic properties relating input to
+            output)</td></tr>
+          <tr><th>Test suite</th><td>a set or list of test cases</td></tr>
+        </table>
+        <br>The expected output is half the definition. A "test" with no prediction cannot
+        fail, and therefore cannot pass either.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Validation and verification are different questions</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>Validation</th><td><strong>Have we made the right product?</strong>
+            Compliance with the intended use. Usually user-centred, usually manual, usually
+            on the finished product.</td></tr>
+          <tr><th>Verification</th><td><strong>Have we made the product right?</strong>
+            Compliance between the artefacts of different phases. Usually artefact-driven,
+            and open to being formalised and mechanised at every phase.</td></tr>
+        </table>
+        <br>A product can be perfectly verified and still the wrong product.
+      </div>
+
+      <!-- ===== LEVELS ===== -->
+      <h2 id="t1-levels">Levels of testing</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Three scopes, and what is used at each</div>
+        <table class="st-levels">
+          <tr><th>Unit</th>
+            <td>single units</td>
+            <td>jUnit, QuickCheck, test-driven development</td>
+            <td>equivalence partitioning, decision tables, classification trees</td></tr>
+          <tr><th>Integration</th>
+            <td>subsystems together</td>
+            <td>jUnit, Mockito</td>
+            <td>dependency injection, mocking</td></tr>
+          <tr><th>System</th>
+            <td>the whole product, including acceptance and user testing</td>
+            <td>Selenium</td>
+            <td>GUI model testing, automated GUI testing</td></tr>
+        </table>
+        <br>Test management and policy are a real part of the subject and are not covered
+        here.
+      </div>
+
+      <!-- ===== ALTERNATIVES ===== -->
+      <h2 id="t1-beyond">Going beyond testing</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Model checking</div>
+        Check the <strong>state space</strong> &mdash; every execution &mdash; against
+        formally specified properties.
+        <div class="st-pro-con">
+          <div><span class="st-plus">+</span> rigorous; push-button once the model
+            exists</div>
+          <div><span class="st-minus">&minus;</span> not yet scalable to very large systems,
+            because of state-space explosion</div>
+        </div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Static analysis</div>
+        Check abstract properties <strong>without running the program</strong> &mdash;
+        division by zero, unhandled cases, and so on.
+        <div class="st-pro-con">
+          <div><span class="st-plus">+</span> automatic and scalable for generic
+            properties</div>
+          <div><span class="st-plus">+</span> powerful tools already exist</div>
+          <div><span class="st-minus">&minus;</span> involves approximation, so false
+            positives and true negatives</div>
+          <div><span class="st-minus">&minus;</span> complicated for concrete, specific
+            properties &mdash; it may take theorem proving to show the abstraction itself is
+            correct</div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Where this is going</div>
+        Terminology and functional testing; coverage criteria; test-driven development and
+        jUnit; slicing and debugging; fuzzing; and then beyond testing, to model checking.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="t1-exam">Takeaways</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">If you remember six things</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>Fault</strong> = incorrect implementation (commission or
+            <em>omission</em>); <strong>error</strong> = incorrect state;
+            <strong>failure</strong> = visible incorrect behaviour.</li>
+          <li><strong>Three conditions in order:</strong> the fault must be reached, it must
+            corrupt the state, and the corruption must reach the output. Any of them can
+            fail to happen, and then the test passes.</li>
+          <li><strong>A test case is a pair</strong> &mdash; inputs <em>and</em> expected
+            outputs. A test suite is a set of them.</li>
+          <li><strong>Testing to fail</strong> reveals bugs; <strong>testing to pass</strong>
+            builds confidence. Dijkstra: presence, not absence.</li>
+          <li><strong>Validation</strong> = the right product; <strong>verification</strong>
+            = the product right.</li>
+          <li><strong>Levels:</strong> unit, integration, system. <strong>Beyond
+            testing:</strong> model checking (rigorous, does not scale) and static analysis
+            (scalable, approximate).</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Things that catch people out</div>
+        <ul style="margin:6px 0 0;">
+          <li>Using the three words interchangeably. An exam question asking which of them a
+            scenario describes is asking exactly whether you noticed they differ.</li>
+          <li>Assuming that executing faulty code means detecting it. Both extra conditions
+            are real, and the tool above shows an input where the state goes wrong and the
+            output does not.</li>
+          <li>Forgetting that faults of <em>omission</em> exist. There is no wrong line to
+            find, which is why they are harder.</li>
+          <li>Writing a "test" with no expected output. It cannot fail, so it is not a
+            test.</li>
+          <li>Swapping validation and verification. Right product, versus product right.</li>
+          <li>Reading Dijkstra's line as pessimism. It is a statement about what kind of
+            evidence testing produces &mdash; which is why the other techniques exist.</li>
+        </ul>
+      </div>
+
+    </section>

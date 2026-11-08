@@ -1,0 +1,119 @@
+<section id="cram" class="topic-section">
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">&#9733; Revision</div>
+        <h1>Cram Sheet</h1>
+        <div class="topic-subtitle">every rule so far, one page &mdash; Ctrl/Cmd+P prints it</div>
+      </div>
+
+      <h2 id="cr-t1">Topic 01 &middot; fault, error, failure</h2>
+
+      <div class="cram-grid">
+
+        <div class="cram-card">
+          <h3>The three words</h3>
+          <ul>
+            <li><span class="term">Fault</span> &mdash; incorrect implementation. In the
+              code, whether or not it runs.</li>
+            <li>&hellip;of <span class="term">commission</span> (wrong thing written) or
+              <span class="term">omission</span> (nothing written) &mdash; omission is
+              harder, there is no line to look at.</li>
+            <li><span class="term">Error</span> &mdash; incorrect system state, during
+              execution.</li>
+            <li><span class="term">Failure</span> &mdash; visible incorrect behaviour. Also
+              anomaly, incident.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Three conditions, in order</h3>
+          <ul>
+            <li><strong>Reached</strong> &mdash; the faulty code actually executes.</li>
+            <li><strong>Infected</strong> &mdash; executing it makes the state wrong. That
+              is the error.</li>
+            <li><strong>Propagated</strong> &mdash; the wrong state reaches the output. That
+              is the failure.</li>
+            <li>Any one can fail to happen, and then <span class="term">the test
+              passes</span> despite the fault.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The worked example</h3>
+          <ul>
+            <li>Spec: output <code>2i&sup3;</code>. Code: <code>i = 2*i;</code> then
+              <code>i = pow(i,3);</code> &mdash; so <code>(2i)&sup3; = 8i&sup3;</code>.</li>
+            <li><span class="term">Fault:</span> statements 2 and 3 in the wrong order.
+              <span class="term">Error:</span> <code>i</code> wrong after line 3.
+              <span class="term">Failure:</span> input 1 &rarr; 8, not 2.</li>
+            <li>Hidden at <code>i = 0</code> over the integers &mdash; and at
+              <strong>every multiple of 2048</strong> in real 32-bit arithmetic, because
+              <code>6i&sup3;</code> must vanish mod <code>2&sup3;&sup2;</code>.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Test case, test suite</h3>
+          <ul>
+            <li><span class="term">Test case</span> = a <strong>pair</strong>: inputs
+              (values, preconditions, environment, timing) <em>and</em> expected
+              outputs.</li>
+            <li>Expected outputs may be concrete values or symbolic properties relating
+              input to output.</li>
+            <li><span class="term">Test suite</span> = a set or list of test cases.</li>
+            <li>No prediction, no test.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Two purposes</h3>
+          <ul>
+            <li><span class="term">Test to fail</span> &mdash; reveal bugs, turn faults into
+              failures.</li>
+            <li><span class="term">Test to pass</span> &mdash; gain confidence in quality;
+              the reliability literature.</li>
+            <li>Dijkstra: <em>testing can show the presence of bugs, but not their
+              absence</em>.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Validation vs verification</h3>
+          <ul>
+            <li><span class="term">Validation</span> &mdash; have we made <strong>the right
+              product</strong>? Intended use; user-centred; usually manual; on the end
+              product.</li>
+            <li><span class="term">Verification</span> &mdash; have we made the
+              <strong>product right</strong>? Between artefacts of different phases;
+              artefact-driven; formalisable and mechanisable.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Levels</h3>
+          <ul>
+            <li><span class="term">Unit</span> &mdash; jUnit, QuickCheck, TDD; equivalence
+              partitioning, decision tables, classification trees.</li>
+            <li><span class="term">Integration</span> &mdash; jUnit, Mockito; dependency
+              injection, mocking.</li>
+            <li><span class="term">System</span> &mdash; acceptance and user testing;
+              Selenium; GUI model testing.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Beyond testing</h3>
+          <ul>
+            <li><span class="term">Model checking</span> &mdash; the whole state space
+              against formal properties. <strong>+</strong> rigorous, push-button.
+              <strong>&minus;</strong> state-space explosion.</li>
+            <li><span class="term">Static analysis</span> &mdash; abstract properties
+              without running it. <strong>+</strong> automatic, scalable, good tools.
+              <strong>&minus;</strong> approximates, so false positives; hard for specific
+              properties.</li>
+          </ul>
+        </div>
+
+      </div>
+
+    </section>
