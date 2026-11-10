@@ -58,8 +58,17 @@ module.exports = async function run() {
     // defined only in the light palette is invisible in dark mode, which is
     // the one CSS bug the DOM tests can never see.
     const css = (built.html.match(/<style>([\s\S]*?)<\/style>/) || [, ''])[1];
-    const used = new Set((css.match(/var\(\s*(--[\w-]+)/g) || [])
-      .map(v => v.replace(/var\(\s*/, '')));
+    // Scanned over the whole file, not just the stylesheet: the tools draw
+    // SVG from JavaScript, and `stroke="var(--muted)"` in a string literal
+    // is exactly as invisible as a missing stylesheet token — more so, in
+    // fact, because an undefined stroke renders as black on both palettes
+    // and looks deliberate. One was shipped that way before this line read
+    // the whole document.
+    // Only complete `var(--name)` references count: a few tools build a
+    // token name by concatenation (`'var(--clu' + i + ')'`), and the
+    // fragment before the join is not a token anyone defined.
+    const used = new Set((built.html.match(/var\(\s*(--[\w-]+)\s*[,)]/g) || [])
+      .map(v => v.replace(/var\(\s*/, '').replace(/\s*[,)]$/, '')));
 
     const palette = re => {
       const block = css.match(re);

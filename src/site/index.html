@@ -236,7 +236,7 @@ footer a{color:var(--accent)}
     </a>
 
     <a class="card" href="modules/software-measurement-and-testing.html">
-      <div class="code">Topics 1&ndash;2</div>
+      <div class="code">Topics 1&ndash;3</div>
       <h3>Software Measurement and Testing</h3>
       <p>Measuring software, and how you decide a test suite is good enough. It starts with
         three words that are not synonyms &mdash; fault, error, failure &mdash; and a
@@ -245,11 +245,15 @@ footer a{color:var(--accent)}
         reach the output; miss any one and the test passes anyway. There is an input where
         exactly that happens. Then choosing inputs: boundary values, equivalence classes,
         decision tables and classification trees, with all eight techniques generated, run
-        against a program that really is wrong, and scored on what they catch.</p>
+        against a program that really is wrong, and scored on what they catch. Then reading
+        the program instead of the specification &mdash; flow graphs, DD-paths, prime paths
+        and the cyclomatic number, with a parser and an interpreter here so the graphs are
+        built rather than drawn, and a program whose test set covers every statement and
+        every edge and still misses the one input in 65 536 it gets wrong.</p>
       <div class="stats">
-        <span class="stat"><b>5</b> sections</span>
-        <span class="stat"><b>7</b> tools</span>
-        <span class="stat"><b>20</b> question generators</span>
+        <span class="stat"><b>6</b> sections</span>
+        <span class="stat"><b>12</b> tools</span>
+        <span class="stat"><b>28</b> question generators</span>
       </div>
     </a>
 
@@ -315,7 +319,7 @@ That's the whole install. It works with no network connection.
       simulates the clock, a value-iteration grid that actually sweeps, a page-replacement tracer that
       shows you Belady's anomaly rather than asserting it.</p>
 
-    <p>The notes grew around the tools, and the test suite grew around both — 2629 assertions that drive
+    <p>The notes grew around the tools, and the test suite grew around both — 2793 assertions that drive
       the real pages and check the results against published worked examples and, where none exists,
       against exhaustive search. That turned out to be the most useful part: it caught several genuine
       errors in the material I was revising from, and a few of my own.</p>

@@ -177,3 +177,49 @@
   }
   .dt-table td.dt-dash { color: var(--ink-muted); background: var(--surface-2); }
   .dt-table tr.dt-split th, .dt-table tr.dt-split td { border-top: 2px solid var(--rule); }
+
+  /* ---------- topic 3 · structural testing ---------- */
+
+  .st-ok { color: var(--accent-3); font-weight: 700; }
+  .st-dim { color: var(--ink-muted); font-style: italic; }
+
+  .sg-split { display: flex; gap: 16px; align-items: flex-start; margin: 10px 0; }
+  .sg-split > div { flex: 1 1 0; min-width: 0; }
+  @media (max-width: 760px) { .sg-split { display: block; } }
+
+  .sg-pic {
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 6px;
+    margin: 10px 0;
+  }
+  .sg-code pre { margin: 0; }
+
+  .sg-paths { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; }
+  .sg-paths code {
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-size: 12px;
+  }
+
+  .sg-bar-row { display: flex; align-items: center; gap: 10px; margin: 5px 0; font-size: 12.5px; }
+  .sg-bar-l { width: 96px; color: var(--ink-soft); flex: none; }
+  .sg-bar {
+    flex: 1 1 auto;
+    height: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .sg-bar-fill { display: block; height: 100%; background: var(--accent); }
+  .sg-bar-fill.done { background: var(--accent-3); }
+  .sg-bar-n {
+    width: 46px; flex: none; text-align: right;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+    color: var(--ink-soft);
+  }
+  .sg-bar-note { color: var(--ink-muted); font-size: 11px; }

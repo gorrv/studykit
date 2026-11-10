@@ -21,7 +21,7 @@ No runtime dependencies. No server. It works offline.
 | Programming Language Design | 2 | 11 | 24 | 10 | 4 |
 | Operating Systems | 2 | 13 | 12 | 10 | 1 |
 | Cryptography | 3 | 8 | 23 | 49 | 1 |
-| Software Measurement and Testing | 3 | 5 | 7 | 20 | 0 |
+| Software Measurement and Testing | 3 | 6 | 12 | 28 | 1 |
 | Compilers and Formal Languages | 3 | 1 | 0 | 0 | 0 |
 
 Operating Systems also carries a hand-written bank of 123 exam questions behind its mock paper.
@@ -112,9 +112,9 @@ any code moved. See [`docs/AUTHORING.md`](docs/AUTHORING.md) to add a module.
     compiler differentials: 89 compiled, 247 from cache (8 recompiled and confirmed)
                                                      388 passed (17267ms)
   running programming-language-design.test.js …      169 passed (5399ms)
-  running software-measurement-and-testing.test.js … 158 passed (11994ms)
+  running software-measurement-and-testing.test.js … 322 passed (13183ms)
 
-2629 / 2629 assertions passed across 11 suites in 171.9s
+2793 / 2793 assertions passed across 11 suites
 ```
 
 Run one suite with `node tests/run.js intro` (after a build).
@@ -150,7 +150,10 @@ That rule has exactly one exception, and it has to. The grand total is quoted in
 the landing page, so learning it means running everything, and writing it down then threw the run
 away — the number could never be both current and verified. So the digits of those two quoted
 totals are blanked before hashing. Nothing reads them but the drift check, and only the digits are
-excluded: every other number in both files, and the sentences around these, still count.
+excluded: every other number in both files, and the sentences around these, still count. The
+sample run above quotes no wall time for the same reason, and because it is a property of the
+machine rather than of the suite: it is anywhere from under three minutes to over ten depending on
+what else is running.
 
 Checkpointing per suite leaves one gap, and the Practical Programming suite fell into it: a suite
 that on its own takes longer than a single command is allowed to run can never be recorded, so it

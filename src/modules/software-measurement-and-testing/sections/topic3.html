@@ -1,0 +1,429 @@
+<section id="topic3" class="topic-section" hidden>
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 03</div>
+        <h1>Structural Testing</h1>
+        <div class="topic-subtitle">flow graphs, DD-paths, prime paths, and a number that
+          says how hard a program is to test</div>
+      </div>
+
+      <h2 id="t3-why">Why this matters</h2>
+
+      <p>
+        Functional testing never looks at the program. That is its strength &mdash; test
+        cases can be written before a line of code exists &mdash; and its weakness: it has
+        no way of knowing which parts of the code its test cases actually reach.
+        <strong>Structural testing turns the program into a graph and measures a test set
+        by how much of that graph it touches.</strong>
+      </p>
+
+      <p>
+        The tools below contain a parser, a flow-graph builder and an interpreter for a
+        small imperative language, so the graphs on this page are built from programs
+        rather than drawn, and the paths are recorded by running them. The punchline of the
+        topic is a program whose test set satisfies every criterion here and still misses
+        the only input it gets wrong; that program is run against its specification across
+        all <code>65 536</code> inputs further down.
+      </p>
+
+      <!-- ===== FLOW GRAPHS ===== -->
+      <h2 id="t3-fg">Flow graphs</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The definition</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>Nodes</th><td>program statements</td></tr>
+          <tr><th>Edges</th><td><code>p &rarr; q</code> exactly when <code>q</code> may
+            execute immediately after <code>p</code></td></tr>
+        </table>
+        <br>Four shapes build every program:
+        <table class="st-defs" style="margin-top:6px;">
+          <tr><th>sequence</th><td><code>prog&#8320; ; prog&#8321;</code> &mdash; one edge
+            from the end of the first to the start of the second</td></tr>
+          <tr><th>conditional</th><td><code>if c then prog&#8320; else prog&#8321; fi</code>
+            &mdash; one node with two outgoing edges, and the two branches meeting
+            again</td></tr>
+          <tr><th>while</th><td><code>while c do prog</code> &mdash; the test comes first,
+            and the body comes back to it</td></tr>
+          <tr><th>repeat</th><td><code>repeat prog until c</code> &mdash; the body comes
+            first, and the test goes back to it</td></tr>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The program this topic is built on</div>
+        <strong>Specification.</strong> Input an integer <code>x</code> in
+        <code>[1 .. 2&#185;&#8310;]</code>. Output <code>x</code> incremented by two if
+        <code>x</code> is less than 50, <code>x</code> decremented by one if <code>x</code>
+        is greater than 50, and 50 otherwise.
+        <pre class="st-snippet">if x &lt; 50 then
+  x = x + 2
+end
+if x &gt; 50 then
+  x = x - 1
+end
+return x</pre>
+        Read it before running anything. The specification describes three cases that
+        cannot both apply; the program is two conditions in a row, which can.
+      </div>
+
+      <h3 id="t3-fgtool">&#128736;&#65039; A program, as a graph</h3>
+
+      <div class="tool" data-run="runFlowGraph">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Parsed, built and partitioned into DD-paths</h3>
+        </div>
+        <div class="tool-desc">The graph is built from the parse tree, not drawn by
+          hand &mdash; which is why the node numbers are the order the builder assigned
+          them rather than the order of the lines.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="fg-prog">program</label>
+            <select id="fg-prog">
+              <option value="two conditions" selected>two conditions</option>
+              <option value="the same, as a choice">the same, as a choice</option>
+              <option value="a while loop">a while loop</option>
+              <option value="a repeat-until loop">a repeat-until loop</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="fg-show">show</label>
+            <select id="fg-show">
+              <option value="dd" selected>the DD-path graph</option>
+              <option value="prime">the prime paths</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="fg-output"></div>
+      </div>
+
+      <!-- ===== ADEQUACY ===== -->
+      <h2 id="t3-adq">Test adequacy criteria</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The ladder, weakest first</div>
+        A test set covers, in the flow graph,
+        <table class="st-defs" style="margin-top:6px;">
+          <tr><th>1</th><td>all nodes &mdash; <span class="term">statement
+            coverage</span></td></tr>
+          <tr><th>2</th><td>all edges &mdash; <span class="term">DD-path
+            coverage</span></td></tr>
+          <tr><th>3</th><td>all prime paths &mdash; <span class="term">single-loop
+            coverage</span></td></tr>
+          <tr><th>4</th><td>all edges + all combinations of data-flow dependent edges
+            &mdash; <span class="term">dependent pairs coverage</span></td></tr>
+          <tr><th>5</th><td>all edges + all combinations of condition edges &mdash;
+            <span class="term">multiple-condition coverage</span></td></tr>
+          <tr><th>6</th><td>all paths &mdash; <span class="term">full path
+            coverage</span></td></tr>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Finite feasibility</div>
+        A criterion is only usable if <strong>some finite test set satisfies it</strong>.
+        All paths fails that at once: a single loop has infinitely many. Worse, the others
+        fail it too, for a different reason &mdash; a node the program can never reach can
+        never be covered, so statement coverage is unsatisfiable for any program with dead
+        code in it.
+        <br><br>The repair is to ask only for the <strong>reachable</strong> nodes, edges
+        and paths. <strong>And that does not work either</strong>, because deciding
+        reachability is undecidable in general. So every criterion below the top of the
+        ladder is a practical approximation, and the infeasible parts of a real program
+        have to be argued about by hand.
+      </div>
+
+      <!-- ===== DD-PATHS ===== -->
+      <h2 id="t3-dd">Chains and DD-paths</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Chain</div>
+        A <span class="term">chain</span> <code>n&#8320;, &hellip;, n&#7522;</code> is a
+        list of nodes where each one leads to the next and
+        <code>indeg(n&#11388;) = outdeg(n&#11388;) = 1</code> throughout &mdash; a run of
+        statements with no way in except the front and no way out except the back. It is
+        <span class="term">maximal</span> when it cannot be extended at either end.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">DD-path</div>
+        A <span class="term">DD-path</span> is a set of nodes that is either
+        <ol style="margin:6px 0 0;">
+          <li><code>{n}</code> where <code>indeg(n) &ne; 1</code> or
+            <code>outdeg(n) &ne; 1</code> &mdash; so start and terminal nodes, branches and
+            merges stand alone; or</li>
+          <li><code>{n&#8320;, &hellip;, n&#7522;}</code> a maximal chain.</li>
+        </ol>
+        <br><strong>Property.</strong> Each node belongs to precisely one DD-path. That is
+        what makes the next definition well formed, and the test suite checks it on every
+        graph on this page.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The DD-path graph</div>
+        Nodes are DD-paths; there is an edge from one to another when some node of the
+        first leads to some node of the second. A test set is
+        <span class="term">adequate</span> when every node and every edge of the DD-path
+        graph is covered by some test case.
+        <table class="st-defs" style="margin-top:8px;">
+          <tr><th>equivalent to</th><td>edge coverage of the flow graph &mdash; but with
+            fewer things to check, because a chain collapses to one node</td></tr>
+          <tr><th>subsumes</th><td>node coverage</td></tr>
+        </table>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">"Equivalent, with fewer checks" is worth testing</div>
+        It is also worth being precise about. A self-loop has both ends in the same
+        DD-path, and collapsing it away makes DD-path coverage strictly weaker than edge
+        coverage &mdash; a test set can cover everything in the DD-path graph without ever
+        taking the loop. The engine keeps those edges, and the two criteria then agree on
+        every one of a few thousand randomly generated graphs.
+        <br><br>One more condition hides in the word <em>equivalent</em>: the test cases
+        have to be <strong>complete runs</strong>. A path that stops in the middle of a
+        chain can cover every DD-path and still leave an edge inside that chain untaken.
+        Real test cases run to the end, so the equivalence holds &mdash; but it is a fact
+        about executions, not about arbitrary paths.
+      </div>
+
+      <!-- ===== PRIME PATHS ===== -->
+      <h2 id="t3-pp">Simple paths and prime paths</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The two definitions</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>simple path</th><td>visits each node at most once, <em>except</em> that
+            the first and last node may be the same &mdash; so one complete trip round a
+            loop counts</td></tr>
+          <tr><th>prime path</th><td>a simple path that is not a proper
+            <strong>sub-path</strong> of any other simple path</td></tr>
+        </table>
+        <br>Informally a prime path is either a complete route from start to end, or one
+        complete and simple iteration of a loop. <span class="term">Prime path
+        coverage</span> asks for a test case covering each one as a sub-path, which comes
+        to all complete simple paths and up to two iterations of each loop.
+      </div>
+
+      <h3 id="t3-pptool">&#128736;&#65039; Every prime path, enumerated</h3>
+
+      <div class="tool" data-run="runPrimePaths">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Simple paths, and the ones nothing longer contains</h3>
+        </div>
+        <div class="tool-desc">Enumerated by search, then filtered. The gap between the two
+          counts is the point of the definition.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="pp-graph">graph</label>
+            <select id="pp-graph">
+              <option value="the prime path example" selected>two loops sharing a node</option>
+              <option value="the running graph">the running graph</option>
+              <option value="the DD-path example">the DD-path example</option>
+              <option value="one loop">one loop</option>
+              <option value="a branch and a loop">a branch and a loop</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="pp-output"></div>
+      </div>
+
+      <!-- ===== THE POINT ===== -->
+      <h2 id="t3-complete">Is DD-path coverage enough?</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The test set the notes give</div>
+        Two test cases, <code>3222</code> and <code>30</code>, are enough for statement
+        coverage <em>and</em> edge coverage of the two-condition program &mdash; between
+        them they take every branch in both directions. Both pass.
+        <br><br>Then two more are added, and one of them does not.
+      </div>
+
+      <h3 id="t3-cvtool">&#128736;&#65039; A test set, measured</h3>
+
+      <div class="tool" data-run="runCoverage">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>What these inputs cover, and what they catch</h3>
+        </div>
+        <div class="tool-desc">Each input is run; the path it takes is recorded by the
+          interpreter and measured against the graph. Try <code>3222, 30</code> first, then
+          add <code>49</code>.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="cv-inputs">inputs</label>
+            <input type="text" id="cv-inputs" value="3222, 30" spellcheck="false">
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="cv-output"></div>
+      </div>
+
+      <h3 id="t3-swtool">&#128736;&#65039; The whole input range</h3>
+
+      <div class="tool" data-run="runSweep">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Specification against program, every input</h3>
+        </div>
+        <div class="tool-desc">The specification is written separately from the program and
+          both are run on every value in the range, so the count below is a measurement
+          rather than a claim.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="sw-top">up to</label>
+            <select id="sw-top">
+              <option value="65536" selected>65536</option>
+              <option value="1000">1000</option>
+              <option value="100">100</option>
+              <option value="48">48</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="sw-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">One input in sixty-five thousand</div>
+        The program disagrees with its specification on exactly one input, <code>49</code>,
+        and a test set that covers every statement and every edge can miss it. The reason
+        is worth stating exactly: <strong><code>49</code> is the only input that executes
+        both bodies in the same run.</strong> Statement and edge coverage are satisfied by
+        two tests that each take one of them, and nothing in either criterion asks for the
+        combination.
+        <br><br>Prime path coverage does ask. One of the four prime paths of that program
+        is <code>0&rarr;1&rarr;2&rarr;3&rarr;4</code> &mdash; both conditions true &mdash;
+        and the only input that covers it is 49. Here the stronger criterion is exactly
+        strong enough, which is not a thing to expect in general.
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">What to do about it</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>Use a stronger criterion</strong> &mdash; prime paths, dependent
+            pairs, multiple condition coverage.</li>
+          <li><strong>Expect to pay for it</strong>, in test cases, and sometimes to find
+            no more faults for the money.</li>
+          <li><strong>Write the program differently.</strong> A choice &mdash; a switch, or
+            <code>if &hellip; else if &hellip; else</code> &mdash; instead of two
+            conditions in a row makes the three cases mutually exclusive, which is what the
+            specification said in the first place. Select that program in the first tool:
+            it has the same cyclomatic number and it agrees with the specification on all
+            65 536 inputs.</li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">DD-path testing, weighed</div>
+        <div class="st-pro-con">
+          <div><span class="st-plus">+</span> DD-paths rather than statements: fewer things
+            to measure</div>
+          <div><span class="st-plus">+</span> a practical measure of adequacy</div>
+          <div><span class="st-plus">+</span> implemented in many tools</div>
+          <div><span class="st-minus">&minus;</span> infeasible paths still have to be
+            dealt with</div>
+          <div><span class="st-minus">&minus;</span> important paths are left untested</div>
+          <div><span class="st-minus">&minus;</span> no test case generation technique
+            &mdash; it measures a test set, it does not produce one</div>
+          <div><span class="st-minus">&minus;</span> the root of it: the specification and
+            the data dependencies are ignored</div>
+        </div>
+      </div>
+
+      <!-- ===== CYCLOMATIC ===== -->
+      <h2 id="t3-cyc">The cyclomatic number</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The idea, and the formula</div>
+        Take one path from start to exit, then count the alternatives by flipping one
+        condition at a time. Also called <span class="term">McCabe complexity</span>, the
+        nullity, the first Betti number, or the dimension of the cycle space.
+        <br><br>For a graph with <strong>one connected component, one starting node and one
+        terminal node</strong>:
+        <table class="st-defs" style="margin-top:6px;">
+          <tr><th>V(G)</th><td><code>#edges &minus; #nodes + 2</code></td></tr>
+          <tr><th>planar graphs</th><td><code>#regions the graph cuts the plane
+            into</code></td></tr>
+        </table>
+        <br><strong>It is size independent.</strong> Adding a statement in a straight line
+        adds one node and one edge, and the two cancel: a three-statement program and a
+        four-statement program both score 1.
+      </div>
+
+      <h3 id="t3-cytool">&#128736;&#65039; Counted two ways</h3>
+
+      <div class="tool" data-run="runCyclomatic">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>The formula, and the independent cycles it is counting</h3>
+        </div>
+        <div class="tool-desc">The second figure joins the exit back to the entry and
+          measures the dimension of the cycle space by elimination &mdash; a different
+          calculation that must give the same answer.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="cy-graph">graph</label>
+            <select id="cy-graph">
+              <option value="the running graph" selected>the running graph</option>
+              <option value="a straight line">a straight line</option>
+              <option value="a longer straight line">a longer straight line</option>
+              <option value="one loop">one loop</option>
+              <option value="a branch and a loop">a branch and a loop</option>
+              <option value="the prime path example">two loops sharing a node</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="cy-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Laid end to end</div>
+        For the running graph, <code>V(G) = 5</code>. Two copies in sequence give
+        <code>9 = 5 + 5 &minus; 1</code>, not 10, because the exit of the first is the
+        entry of the second and the two share a node. <code>n</code> copies give
+        <code><strong>4n + 1</strong></code>.
+        <br><br>The general rule that follows: composing graphs in sequence adds their
+        cyclomatic numbers and subtracts one each time, so complexity accumulates almost
+        linearly down a program &mdash; which is why a long procedure scores badly however
+        simple each part of it is.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">What the number is used for</div>
+        <table class="st-levels" style="margin-top:4px;">
+          <tr><th>1&ndash;10</th><td>a simple program, without much risk</td></tr>
+          <tr><th>11&ndash;20</th><td>more complex, moderate risk</td></tr>
+          <tr><th>21&ndash;50</th><td>complex, high risk program</td></tr>
+          <tr><th>&gt;50</th><td>untestable program (very high risk)</td></tr>
+        </table>
+        <br>Watch for <code>V(G) &gt; 10</code>. It is implemented in several tools, and
+        it was invented as a measure of test-set adequacy rather than of complexity
+        &mdash; the number of independent paths you would have to test.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="t3-exam">Takeaways</h2>
+
+      <div class="callout tip">
+        <div class="callout-label">What to be able to do</div>
+        <ol style="margin:6px 0 0;">
+          <li>Draw the flow graph of a program with sequence, conditionals, while and
+            repeat-until.</li>
+          <li>Partition its nodes into DD-paths from the simplified definition, and draw
+            the DD-path graph.</li>
+          <li>Give the six adequacy criteria in order and say which are finitely feasible,
+            and why "all reachable" does not rescue them.</li>
+          <li>List the simple paths of a small graph and pick out the prime ones.</li>
+          <li>Compute <code>V(G)</code> both ways, and know that it is size independent and
+            that sequential composition gives <code>V&#8321; + V&#8322; &minus; 1</code>.</li>
+          <li>Explain how a test set can satisfy every criterion up to DD-path coverage and
+            still miss a fault &mdash; with the 49 example.</li>
+        </ol>
+      </div>
+
+    </section>

@@ -243,4 +243,131 @@
 
       </div>
 
+      <h2 id="cr-t3">Topic 03 &middot; structural testing</h2>
+
+      <div class="cram-grid">
+
+        <div class="cram-card">
+          <h3>Flow graphs</h3>
+          <ul>
+            <li>Nodes are statements; <code>p &rarr; q</code> when <code>q</code>
+              <strong>may</strong> execute immediately after <code>p</code>.</li>
+            <li>Sequence joins end to start; a conditional is one node with two out-edges
+              that meet again.</li>
+            <li><strong>while</strong>: the test comes first and the body returns to it.
+              <strong>repeat-until</strong>: the body comes first and the test returns to
+              it.</li>
+            <li>The idea of the whole topic: derive a structural abstraction from the
+              program and use it to <strong>measure the adequacy of a test set</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The six criteria, weakest first</h3>
+          <ul>
+            <li>all nodes &mdash; <span class="term">statement coverage</span></li>
+            <li>all edges &mdash; <span class="term">DD-path coverage</span></li>
+            <li>all prime paths &mdash; <span class="term">single-loop coverage</span></li>
+            <li>all edges + combinations of data-flow dependent edges &mdash;
+              <span class="term">dependent pairs</span></li>
+            <li>all edges + combinations of condition edges &mdash;
+              <span class="term">multiple-condition</span></li>
+            <li>all paths &mdash; <span class="term">full path coverage</span></li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Finite feasibility</h3>
+          <ul>
+            <li>A criterion must be satisfiable by <strong>some finite test set</strong>.</li>
+            <li>All paths fails immediately: one loop gives infinitely many.</li>
+            <li>The others fail too, because <strong>unreachable</strong> code can never be
+              covered.</li>
+            <li>Ask only for the reachable parts? Then you cannot tell what you are asking
+              for: <strong>reachability is undecidable</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Chains and DD-paths</h3>
+          <ul>
+            <li><span class="term">Chain</span>: consecutive nodes with
+              <code>indeg = outdeg = 1</code> throughout. <strong>Maximal</strong> when it
+              cannot be extended either way.</li>
+            <li><span class="term">DD-path</span>: either <code>{n}</code> with
+              <code>indeg(n) &ne; 1</code> or <code>outdeg(n) &ne; 1</code>, or a maximal
+              chain.</li>
+            <li>So start, terminal, branch and merge nodes always stand alone.</li>
+            <li><strong>Each node belongs to precisely one DD-path</strong> &mdash; that is
+              what makes the DD-path graph well defined.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The DD-path graph</h3>
+          <ul>
+            <li>Nodes: DD-paths. Edge from one to another when some node of the first leads
+              to some node of the second.</li>
+            <li>Adequate when every node <em>and</em> every edge of it is covered.</li>
+            <li><strong>Equivalent to edge coverage</strong>, with fewer checks.
+              <strong>Subsumes node coverage.</strong></li>
+            <li>Weighed: + fewer things to measure, practical, widely implemented;
+              &minus; infeasible paths remain, important paths untested, and it
+              <strong>generates no test cases</strong> &mdash; it only measures them.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Simple and prime paths</h3>
+          <ul>
+            <li><span class="term">Simple path</span>: visits each node at most once,
+              <em>except</em> first and last may coincide &mdash; so one complete loop
+              counts.</li>
+            <li><span class="term">Prime path</span>: a simple path that is not a proper
+              <strong>sub-path</strong> of another.</li>
+            <li>So: every complete route start to end, plus one complete iteration of each
+              loop.</li>
+            <li>Prime path coverage &asymp; all complete simple paths and up to two
+              iterations of each loop.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The cyclomatic number</h3>
+          <ul>
+            <li><code>V(G) = #edges &minus; #nodes + 2</code>, for one component, one
+              entry, one exit.</li>
+            <li>For planar graphs, the number of <strong>regions</strong> it cuts the plane
+              into.</li>
+            <li>Also: McCabe complexity, nullity, first Betti number, dimension of the
+              cycle space.</li>
+            <li><strong>Size independent</strong> &mdash; a statement in a straight line
+              adds one node and one edge, which cancel.</li>
+            <li>Sequential composition: <code>V&#8321; + V&#8322; &minus; 1</code>, because
+              the two share a node. The running graph scores 5, and <code>n</code> copies
+              score <code>4n + 1</code>.</li>
+            <li>Bands: <strong>1&ndash;10</strong> low risk, 11&ndash;20 moderate,
+              21&ndash;50 high, <strong>&gt;50 untestable</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The 49 example</h3>
+          <ul>
+            <li><code>if x&lt;50 then x=x+2 end; if x&gt;50 then x=x-1 end; return x</code>
+              against <em>+2 below, &minus;1 above, 50 exactly</em>.</li>
+            <li><code>{3222, 30}</code> gives <strong>full statement and full edge
+              coverage</strong>, and both pass.</li>
+            <li>The program is wrong on exactly <strong>one</strong> input in 65 536:
+              <code>49</code> &rarr; 51 &rarr; 50, where 51 was wanted.</li>
+            <li>49 is the <strong>only input that runs both bodies</strong>, which is
+              exactly the prime path <code>0&rarr;1&rarr;2&rarr;3&rarr;4</code> that
+              neither weaker criterion asks for.</li>
+            <li>Fixes: a stronger criterion, pay for it, or write the three cases as a
+              <strong>choice</strong> rather than two conditions in a row.</li>
+          </ul>
+        </div>
+
+      </div>
+
     </section>
