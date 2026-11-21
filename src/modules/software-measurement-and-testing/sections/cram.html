@@ -507,4 +507,146 @@
 
       </div>
 
+      <h2 id="cr-t5">Topic 05 &middot; mocking and refactoring</h2>
+
+      <div class="cram-grid">
+
+        <div class="cram-card">
+          <h3>Mocking, the pattern</h3>
+          <ul>
+            <li><strong>Arrange</strong>: create the mocks, set up their state, set up the
+              expectations.</li>
+            <li><strong>Act</strong>: run the unit under test, using the mocks as its
+              resources.</li>
+            <li><strong>Assert</strong>: verify the results <em>and the
+              expectations</em>.</li>
+            <li>That last part is the difference: you can assert on <strong>what the unit
+              asked its collaborators to do</strong>, which is the only thing to assert
+              about a method returning void.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Stubbing</h3>
+          <ul>
+            <li><code>when(mock.m(args))</code> is the trigger.</li>
+            <li><code>thenReturn(x)</code>, <code>thenThrow(x)</code>,
+              <code>thenAnswer(a)</code> (dynamic logic &mdash; a fake),
+              <code>thenCallRealMethod()</code>.</li>
+            <li>An unstubbed method returns the <strong>default of its return type</strong>
+              &mdash; null, false, zero. Never an error.</li>
+            <li>A stub whose arguments do not match simply does not fire, and you get that
+              default instead.</li>
+            <li>Void methods: <code>doThrow(e).when(mock).voidMethod(args)</code>.</li>
+            <li><code>thenReturn(a, b, c)</code> &rarr; a, b, c, then
+              <strong>c for ever</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Verification</h3>
+          <ul>
+            <li><code>times(n)</code>, <code>never()</code> (= <code>times(0)</code>),
+              <code>atLeastOnce()</code>, <code>atLeast(n)</code>, <code>atMost(n)</code>,
+              <code>timeout(ms)</code>.</li>
+            <li><code>only()</code> &mdash; once, <strong>and nothing else on that mock at
+              all</strong>.</li>
+            <li><code>verifyNoInteractions(mocks)</code> &mdash; nothing happened.</li>
+            <li><code>verifyNoMoreInteractions(mocks)</code> &mdash; nothing
+              <em>unverified</em> happened, so it goes last.</li>
+            <li>Stubbing calls do not count as interactions.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Argument matchers</h3>
+          <ul>
+            <li><code>any()</code>, <code>anyInt()</code>, <code>anyString()</code>,
+              <code>anyList()</code>, <code>eq(x)</code>, <code>argThat(m)</code>.</li>
+            <li><strong>If one argument is a matcher, all must be.</strong> They go on a
+              stack, so the mock sees how many arrived, not where they came from.</li>
+            <li>A custom matcher extends <code>ArgumentMatcher</code> and implements
+              <code>matches</code>.</li>
+            <li><code>inOrder(mocks)</code> verifies the <strong>order</strong> of calls
+              across several mocks.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Refactoring, defined</h3>
+          <ul>
+            <li><em>a refactoring</em> (noun): a change to internal structure that makes
+              code easier to understand and modify <strong>without changing external
+              behaviour</strong>.</li>
+            <li><em>to refactor</em> (verb): the disciplined technique of doing that.</li>
+            <li>Each step does little; a sequence does a lot. Small steps are less likely to
+              go wrong and the system keeps working throughout.</li>
+            <li><strong>Not reduction.</strong> Not any change. Not an excuse for skipping
+              design.</li>
+            <li><strong>Re-test after every step</strong> &mdash; which needs fully
+              automated tests.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Hats, timing, performance</h3>
+          <ul>
+            <li><strong>Refactoring hat</strong>: design changes, existing tests check it.
+              <strong>Feature hat</strong>: behaviour changes, new tests come first. Switch
+              often; always know which you wear.</li>
+            <li><span class="term">Rule of three</span>: do it, wince at it, refactor it.</li>
+            <li>When: before adding a feature; when fixing a bug (the bug report says the
+              code was not clear enough); at a code review.</li>
+            <li>Performance: some refactorings are slower, most of a codebase does not
+              matter, intuitions are wrong &mdash; use a profiler. <strong>Make it work,
+              make it clean, make it fast.</strong></li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The video store</h3>
+          <ul>
+            <li>Regular: <strong>2</strong>, plus 1.5 a day beyond 2. New release:
+              <strong>3 a day</strong>. Children's: <strong>1.5</strong>, plus 1.5 a day
+              beyond 3.</li>
+            <li>One point per rental, <strong>plus one</strong> for a new release kept more
+              than a day.</li>
+            <li>The chain: extract method &rarr; rename &rarr; move method (feature envy)
+              &rarr; extract the points &rarr; replace temp with query &rarr; replace type
+              code with state.</li>
+            <li>Then <code>statement()</code> is presentation only, and
+              <code>htmlStatement()</code> is cheap &mdash; which was the point.</li>
+            <li>All seven versions agree on every basket. That <em>is</em> the definition,
+              checked.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Bad smells worth naming</h3>
+          <ul>
+            <li>Duplicated Code, Long Method, Large Class, Long Parameter List.</li>
+            <li>Divergent Change, Shotgun Surgery, Feature Envy, Data Clumps.</li>
+            <li>Primitive Obsession, Switch Statements, Lazy Class, Speculative
+              Generality.</li>
+            <li>Temporary Field, Message Chains, Middle Man, Inappropriate Intimacy,
+              Data Class, Refused Bequest.</li>
+            <li>Each has a refactoring attached &mdash; that is what the list is for.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Simple design, in priority order</h3>
+          <ul>
+            <li>Appropriate for the intended audience.</li>
+            <li>Passes all the tests.</li>
+            <li>Communicates everything it needs to.</li>
+            <li>Smallest number of classes.</li>
+            <li>Each class, the smallest number of methods.</li>
+            <li>So no, not one class with a <code>main</code>: the last two lose to the
+              third, and to single responsibility.</li>
+          </ul>
+        </div>
+
+      </div>
+
     </section>

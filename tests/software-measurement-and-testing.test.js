@@ -1106,6 +1106,314 @@ module.exports = async function run() {
       /fail/i.test(w.TDD_CYCLE[2].step));
   }
 
+  /* ================ Topic 5 · mocking and refactoring ================
+
+     Two halves, both checked against what the notes print rather
+     than against the engine's own opinion. The refactoring half has
+     the strongest ground truth in the module: two complete statements
+     and one HTML statement, printed character for character, padding
+     and all.
+     ================================================================ */
+
+  /* The pricing rules, read off the switch a second time. */
+  const charge = (code, days) => {
+    if (code === 0) return days > 2 ? 2 + (days - 2) * 1.5 : 2;
+    if (code === 1) return days * 3;
+    return days > 3 ? 1.5 + (days - 3) * 1.5 : 1.5;
+  };
+  const points = (code, days) => (code === 1 && days > 1 ? 2 : 1);
+
+  /* ---------------- the printed statements ---------------- */
+
+  {
+    const want1 =
+      '\nRental Record for Dinsdale Pirhana\n' +
+      '\tMonty Python and the Holy Grail\t3.5\n' +
+      '\tStar Trek 27                   \t9.0\n' +
+      '\tStar Wars                      \t5.0\n' +
+      '\tShrek                          \t6.0\n' +
+      'Amount owed is 23.5\n' +
+      'You earned 5 frequent renter points\n';
+
+    const want2 =
+      '\nRental Record for George W. Bush\n' +
+      '\tMonty Python and the Holy Grail\t2.0\n' +
+      '\tStar Trek 27                   \t12.0\n' +
+      '\tStar Wars                      \t2.0\n' +
+      'Amount owed is 16.0\n' +
+      'You earned 4 frequent renter points\n';
+
+    const html1 =
+      '\n<h1>Rental Record for Dinsdale Pirhana</h1>\n' +
+      '<table>\n' +
+      '\t<tr><td>Monty Python and the Holy Grail</td><td>3.5</td></tr>\n' +
+      '\t<tr><td>Star Trek 27                   </td><td>9.0</td></tr>\n' +
+      '\t<tr><td>Star Wars                      </td><td>5.0</td></tr>\n' +
+      '\t<tr><td>Shrek                          </td><td>6.0</td></tr>\n' +
+      '</table>\n' +
+      '<p>Amount owed is <b>23.5</b></p>\n' +
+      '<p>You earned <b>5</b> frequent renter points</p>\n';
+
+    const c1 = w.RF_CUSTOMERS['Dinsdale Pirhana'];
+    const c2 = w.RF_CUSTOMERS['George W. Bush'];
+
+    w.RF_VERSIONS.forEach(v => {
+      s.is(`"${v.id}" prints the first statement exactly`, v.run(c1), want1);
+      s.is(`"${v.id}" prints the second statement exactly`, v.run(c2), want2);
+    });
+    s.is('the HTML statement matches the printed one', w.rfHtmlStatement(c1), html1);
+
+    /* And the arithmetic behind those two, worked separately. */
+    s.is('a regular film for 3 days is 3.50', charge(0, 3), 3.5);
+    s.is('a new release for 3 days is 9', charge(1, 3), 9);
+    s.is('a regular film for 4 days is 5', charge(0, 4), 5);
+    s.is("a children's film for 6 days is 6", charge(2, 6), 6);
+    s.is('so the first customer owes 23.50',
+      charge(0, 3) + charge(1, 3) + charge(0, 4) + charge(2, 6), 23.5);
+    s.is('  ...and earns 5 points',
+      points(0, 3) + points(1, 3) + points(0, 4) + points(2, 6), 5);
+    s.is('a new release for 4 days is 12', charge(1, 4), 12);
+    s.is('a regular film for 2 days is still 2, not 2 plus anything', charge(0, 2), 2);
+    s.is('so the second customer owes 16',
+      charge(0, 1) + charge(1, 4) + charge(0, 2), 16);
+    s.is('  ...and earns 4 points',
+      points(0, 1) + points(1, 4) + points(0, 2), 4);
+  }
+
+  /* ---------------- behaviour preservation ---------------- */
+
+  {
+    const agree = w.rfAgreement(12, 2);
+    s.ok('the agreement search covers every basket of one or two rentals',
+      agree.baskets > 1300, `only ${agree.baskets}`);
+    s.is('  ...which is 36 singles, 36² pairs and the empty one',
+      agree.baskets, 1 + 36 + 36 * 36);
+    s.same('no version of the chain produces a different statement',
+      agree.disagreements.map(d => d.version), []);
+    s.is('  ...over this many comparisons', agree.comparisons,
+      agree.baskets * (w.RF_VERSIONS.length - 1));
+
+    /* The charge itself, version by version, against the second
+       reading of the rules. */
+    let wrong = [];
+    for (const code of [0, 1, 2]) {
+      for (let d = 1; d <= 12; d++) {
+        const r = { movie: { title: 'x', priceCode: code }, daysRented: d };
+        if (w.rfChargeV6(r) !== charge(code, d)) wrong.push(`charge ${code}/${d}`);
+        if (w.rfPointsV6(r) !== points(code, d)) wrong.push(`points ${code}/${d}`);
+      }
+    }
+    s.same('the state classes charge what the switch charged', wrong, []);
+
+    /* The step that matters is the last one: a fourth classification
+       is now a class rather than a hunt for switches. */
+    s.is('there is one Price class per classification',
+      Object.keys(w.RF_PRICES).length, 3);
+    s.same('  ...named as the notes name them',
+      Object.keys(w.RF_PRICES).map(k => w.RF_PRICES[k].name).sort(),
+      ['ChildrensPrice', 'NewReleasePrice', 'RegularPrice']);
+  }
+
+  /* ---------------- the catalogue ---------------- */
+
+  {
+    s.is('twenty bad smells', w.RF_SMELLS.length, 20);
+    ['Duplicated Code', 'Long Method', 'Feature Envy', 'Switch Statements',
+     'Refused Bequest', 'Middle Man'].forEach(name => {
+      s.ok(`"${name}" is in the catalogue`, w.RF_SMELLS.indexOf(name) >= 0);
+    });
+    s.is('the refactoring process has nine steps', w.RF_PROCESS.length, 9);
+    s.is('simple design has five criteria, in priority order', w.RF_DESIGN.length, 5);
+    s.is('  ...with passing the tests second', w.RF_DESIGN[1],
+      'The code passes all the tests');
+  }
+
+  /* ---------------- the mocking library ----------------
+
+     The notes describe a behaviour; the engine implements it; these
+     check the implementation against the description.
+     ------------------------------------------------------------- */
+
+  {
+    w.mkReset();
+    const mock = w.mkMock('m', ['getValue', 'go']);
+
+    /* An unstubbed method returns the default of its return type. */
+    s.is('an unstubbed method returns the default value', mock.getValue(1), null);
+
+    /* A stub fires only when the arguments match. */
+    w.mkWhenOn(mock, 'getValue', [1]).thenReturn('one');
+    s.is('a matching call gets the stubbed value', mock.getValue(1), 'one');
+    s.is('a non-matching call gets the default instead', mock.getValue(100), null);
+
+    /* Stubbing is not interaction. */
+    w.mkReset();
+    const quiet = w.mkMock('quiet', ['f']);
+    w.mkWhenOn(quiet, 'f', [1]).thenReturn(2);
+    s.ok('stubbing a method does not count as an interaction',
+      w.mkVerifyNoInteractions(quiet).ok);
+    quiet.f(1);
+    s.ok('  ...but calling it does', !w.mkVerifyNoInteractions(quiet).ok);
+  }
+
+  /* ---------------- consecutive calls ---------------- */
+
+  {
+    s.same('thenReturn(10, 0, 10) gives 10, 0, 10 and then the last for ever',
+      w.mkConsecutive([10, 0, 10], 6), [10, 0, 10, 10, 10, 10]);
+    s.same('one value repeats for ever straight away',
+      w.mkConsecutive([7], 4), [7, 7, 7, 7]);
+    s.same('two values give the second for ever after the first',
+      w.mkConsecutive([1, 2], 4), [1, 2, 2, 2]);
+
+    /* The disagreement in the notes, pinned so it cannot be quietly
+       lost. The printed test asserts TEN, ZERO, TEN, TEN, ZERO; the
+       stated rule and the comment above the same example both give
+       TEN for the fifth call. */
+    const byRule = w.mkConsecutive([10, 0, 10], 5);
+    s.same('the rule gives this sequence', byRule, [10, 0, 10, 10, 10]);
+    s.same('the printed test asserts this one', w.MK_PRINTED_CONSECUTIVE,
+      [10, 0, 10, 10, 0]);
+    const clash = byRule
+      .map((v, i) => (w.MK_PRINTED_CONSECUTIVE[i] !== v ? i + 1 : null))
+      .filter(Boolean);
+    s.same('they differ at exactly one call, the fifth', clash, [5]);
+  }
+
+  /* ---------------- verification ---------------- */
+
+  {
+    /* The modes, against a known number of calls. */
+    const three = w.mkModeTable(3);
+    const by = name => three.filter(r => r.mode === name)[0];
+    s.ok('times(1) fails when the call was made three times', !by('times(1)').ok);
+    s.ok('times(3) passes', by('times(3)').ok);
+    s.ok('never() fails', !by('never()').ok);
+    s.ok('atLeastOnce() passes', by('atLeastOnce()').ok);
+    s.ok('atLeast(2) passes', by('atLeast(2)').ok);
+    s.ok('atMost(1) fails', !by('atMost(1)').ok);
+    s.ok('only() fails, because three calls is not one', !by('only()').ok);
+
+    const zero = w.mkModeTable(0);
+    const byz = name => zero.filter(r => r.mode === name)[0];
+    s.ok('with no calls, never() passes', byz('never()').ok);
+    s.ok('  ...and atLeastOnce() fails', !byz('atLeastOnce()').ok);
+
+    const one = w.mkModeTable(1);
+    s.ok('with one and only one call, only() passes',
+      one.filter(r => r.mode === 'only()')[0].ok);
+
+    /* only() is the one mode that looks past the call it was given.
+       mkModeTable cannot show that, because the mock it builds has
+       nothing else on it — so here is a mock that does. */
+    w.mkReset();
+    const busy = w.mkMock('portfolio', ['sell', 'buy']);
+    busy.sell('X', 10);
+    busy.buy('Y');
+    s.ok('times(1) still passes when something else was called too',
+      w.mkVerify(busy, w.MK_MODES.times(1)).sell('X', 10).ok);
+    s.ok('  ...but only() does not',
+      !w.mkVerify(busy, w.MK_MODES.only()).sell('X', 10).ok);
+  }
+
+  /* ---------------- argument matchers ---------------- */
+
+  {
+    w.mkReset();
+    const mock = w.mkMock('mock', ['someOtherMethod']);
+    mock.someOtherMethod(1, 'two', 'third arg');
+
+    const allMatchers = w.mkVerify(mock)
+      .someOtherMethod(w.mkAnyInt(), w.mkAnyString(), w.mkEq('third arg'));
+    s.ok('a verification where every argument is a matcher works', allMatchers.ok,
+      allMatchers.error);
+
+    const mixed = w.mkVerify(mock).someOtherMethod(1, w.mkAnyString(), 'third arg');
+    s.ok('mixing a matcher with a literal is rejected', !mixed.ok);
+    s.ok('  ...and says why', /all of them must be/.test(mixed.error || ''), mixed.error);
+
+    /* No matchers at all is fine: that is the ordinary case. */
+    const literal = w.mkVerify(mock).someOtherMethod(1, 'two', 'third arg');
+    s.ok('a verification with no matchers at all is fine', literal.ok, literal.error);
+
+    /* A custom matcher, the way the notes write one. */
+    w.mkReset();
+    const market = w.mkMock('marketWatcher', ['getQuote']);
+    const blueChip = w.mkArgThat(x => x === 'FB' || x === 'AAPL', 'blueChip');
+    w.mkWhenOn(market, 'getQuote', [blueChip]).thenReturn('a blue chip');
+    s.is('a custom matcher fires on what it matches', market.getQuote('AAPL'),
+      'a blue chip');
+    s.is('  ...and not on what it does not', market.getQuote('XY'), null);
+  }
+
+  /* ---------------- verifyNoMoreInteractions ---------------- */
+
+  {
+    w.mkReset();
+    const portfolio = w.mkMock('portfolio', ['getAvgPrice', 'sell']);
+    portfolio.getAvgPrice(null);
+    portfolio.sell(null, 0);
+    w.mkVerify(portfolio).getAvgPrice(w.mkEq(null));
+
+    const more = w.mkVerifyNoMoreInteractions(portfolio);
+    s.ok('an unverified call makes verifyNoMoreInteractions fail', !more.ok);
+    s.is('  ...and it is the sell that was missed', more.unverified.length, 1);
+    s.ok('  ...named', /sell/.test(more.unverified[0]), more.unverified[0]);
+
+    w.mkVerify(portfolio).sell(w.mkEq(null), w.mkEq(0));
+    s.ok('verifying it too makes the check pass',
+      w.mkVerifyNoMoreInteractions(portfolio).ok);
+  }
+
+  /* ---------------- order of calls ---------------- */
+
+  {
+    w.mkReset();
+    const portfolio = w.mkMock('portfolio', ['getAvgPrice', 'getCurrentValue', 'buy']);
+    const market = w.mkMock('marketWatcher', ['getQuote']);
+    portfolio.getAvgPrice('a');
+    portfolio.getCurrentValue();
+    market.getQuote('X');
+    portfolio.buy('a');
+
+    const ok = w.mkInOrder(portfolio, market);
+    s.ok('the calls verify in the order they happened',
+      ok.verify(portfolio).getAvgPrice('a').ok &&
+      ok.verify(portfolio).getCurrentValue().ok &&
+      ok.verify(market).getQuote(w.mkAnyString()).ok &&
+      ok.verify(portfolio).buy('a').ok);
+
+    const bad = w.mkInOrder(portfolio, market);
+    s.ok('and do not verify in the wrong one',
+      bad.verify(portfolio).buy('a').ok &&
+      !bad.verify(portfolio).getAvgPrice('a').ok);
+  }
+
+  /* ---------------- the broker ---------------- */
+
+  {
+    const t = w.brTenPercentTest();
+    s.is('a gain of twelve percent sells', t.result.action, 'sell');
+    s.ok('  ...and the sale is verified', t.sold.ok, t.sold.error);
+    s.ok('  ...and nothing was bought', t.notBought.ok);
+
+    /* The gap. The notes' own test is named after the case the code
+       does not handle. */
+    const sweep = w.brSweep(10.00, 10.00, 12.00, 1);
+    s.is('two hundred and one prices were tried', sweep.rows.length, 201);
+    const none = sweep.rows.filter(r => r.action === 'none');
+    s.is('exactly one of them does neither', none.length, 1);
+    /* Guarded rather than indexed straight in: when this goes wrong
+       it goes wrong by the list being empty, and a crashed suite
+       reports one failure where there are three. */
+    s.is('  ...and it is 11.00', none.length ? none[0].price : null, 11);
+    s.ok('  ...where the gain is exactly the limit',
+      none.length ? Math.abs(none[0].gain - w.BR_LIMIT) < 1e-9 : false);
+    s.ok('a penny either side does something',
+      sweep.rows.filter(r => r.price === 10.99)[0].action === 'buy' &&
+      sweep.rows.filter(r => r.price === 11.01)[0].action === 'sell');
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 1200);

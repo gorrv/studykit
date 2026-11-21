@@ -1,0 +1,428 @@
+<section id="topic5" class="topic-section" hidden>
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 05</div>
+        <h1>Mocking and Refactoring</h1>
+        <div class="topic-subtitle">testing a unit whose collaborators you do not want, and
+          changing code without changing what it does</div>
+      </div>
+
+      <h2 id="t5-why">Why this matters</h2>
+
+      <p>
+        Two practices that sound like advice and are not. A mocking library is a precise
+        description of a behaviour &mdash; what a stub returns on the third call, what counts
+        as an interaction, when an argument matcher is allowed &mdash; and
+        <strong>refactoring has the most checkable definition in the whole module</strong>:
+        a transformation that does not change behaviour.
+      </p>
+
+      <p>
+        So the tools below contain a small mocking library, written to the rules as the
+        notes state them, and the video-store example carried through its entire chain of
+        seven versions, with every version run against every other on more than a thousand
+        baskets. Both turned something up, and both are below.
+      </p>
+
+      <!-- ===== MOCKING ===== -->
+      <h2 id="t5-mock">Mocking</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The usage pattern</div>
+        The three A's again, with two extra steps at the front and one at the back:
+        <table class="st-defs" style="margin-top:6px;">
+          <tr><th>Arrange</th><td>instantiate the mock objects; set up the state that
+            governs their behaviour; set up the expectations on them</td></tr>
+          <tr><th>Act</th><td>execute the method on the unit under test, using the mocks as
+            its resources</td></tr>
+          <tr><th>Assert</th><td>verify the results <em>and the expectations</em></td></tr>
+        </table>
+        <br>That last clause is what makes mocking different. An ordinary unit test asserts
+        on a value the unit returned; a test with mocks can assert on
+        <strong>what the unit asked its collaborators to do</strong>, which is the only
+        thing to assert about a method that returns nothing.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Stubbing</div>
+        <code>when(mock.method(args))</code> is the trigger; what follows says what to do
+        when it fires.
+        <table class="st-defs" style="margin-top:6px;">
+          <tr><th><code>thenReturn(x)</code></th><td>return <code>x</code>; several values
+            can be given for consecutive calls</td></tr>
+          <tr><th><code>thenThrow(x)</code></th><td>throw <code>x</code></td></tr>
+          <tr><th><code>thenAnswer(a)</code></th><td>run user-defined logic rather than
+            returning a hard-coded value &mdash; a fake rather than a stub</td></tr>
+          <tr><th><code>thenCallRealMethod()</code></th><td>call the real method on the mock
+            object</td></tr>
+        </table>
+        <br>A method that was never stubbed returns the <strong>default value of its return
+        type</strong>: <code>false</code> for a boolean, <code>null</code> for an object,
+        zero for a number. Not an error &mdash; which is why a mock whose stub does not
+        match quietly returns nothing instead of telling you.
+        <br><br>For a method that returns <code>void</code>, <code>when(...)</code> cannot
+        be used: it would have to call the real method to get an argument. The form is
+        <code>doThrow(exception).when(mock).voidMethod(args)</code>.
+      </div>
+
+      <h3 id="t5-mbtool">&#128736;&#65039; The broker test, run</h3>
+
+      <div class="tool" data-run="runMockBroker">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Two mocks, a stub each, and a verification</h3>
+        </div>
+        <div class="tool-desc">The worked example from the notes: a stock bought at 10.00,
+          and a broker that sells when the gain passes ten percent. Both collaborators are
+          mocks, so nothing here touches a price feed.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="mb-price">live price</label>
+            <select id="mb-price">
+              <option value="11.20" selected>11.20</option>
+              <option value="11.00">11.00</option>
+              <option value="11.01">11.01</option>
+              <option value="10.99">10.99</option>
+              <option value="9.00">9.00</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="mb-output"></div>
+      </div>
+
+      <h3 id="t5-bgtool">&#128736;&#65039; The price that does nothing</h3>
+
+      <div class="tool" data-run="runBrokerGap">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Every penny from 10.00 to 12.00</h3>
+        </div>
+        <div class="tool-desc">The business logic is transcribed exactly as the notes print
+          it. Run against the whole range, it has a gap.</div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="bg-output"></div>
+      </div>
+
+      <!-- ===== VERIFY ===== -->
+      <h2 id="t5-verify">Verification</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">verify, and how many times</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th><code>times(n)</code></th><td>exactly <em>n</em> times; fewer or more
+            fails</td></tr>
+          <tr><th><code>never()</code></th><td>the same as <code>times(0)</code></td></tr>
+          <tr><th><code>atLeastOnce()</code></th><td>one or more</td></tr>
+          <tr><th><code>atLeast(n)</code> / <code>atMost(n)</code></th><td>bounds rather
+            than an exact count</td></tr>
+          <tr><th><code>only()</code></th><td>this call, once, and <strong>nothing else on
+            that mock at all</strong></td></tr>
+          <tr><th><code>timeout(ms)</code></th><td>interacted with inside a time
+            window</td></tr>
+        </table>
+        <br><code>verifyNoInteractions(mocks...)</code> asks that nothing at all happened.
+        <code>verifyNoMoreInteractions(mocks...)</code> asks that nothing
+        <em>unverified</em> happened, so it goes after the verifications it is checking
+        &mdash; and it catches the call you forgot rather than the call you got wrong.
+      </div>
+
+      <h3 id="t5-vmtool">&#128736;&#65039; The modes, against a known number of calls</h3>
+
+      <div class="tool" data-run="runVerifyModes">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Which verifications pass and which do not</h3>
+        </div>
+        <div class="tool-desc">The method is called the chosen number of times, then every
+          mode is run against it.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="vm-calls">calls made</label>
+            <select id="vm-calls">
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="3" selected>3</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="vm-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Argument matchers, and the rule that catches everyone</div>
+        <code>any()</code>, <code>anyInt()</code>, <code>anyString()</code>,
+        <code>anyList()</code>, <code>eq(x)</code>, and <code>argThat(matcher)</code> for a
+        custom one. Mockito compares arguments in natural Java style with
+        <code>equals()</code>; matchers are for when that is not flexible enough.
+        <br><br><strong>If any argument is given by a matcher, every argument must be.</strong>
+        <pre class="st-snippet">verify(mock).someOtherMethod(anyInt(), anyString(), eq("third arg"));   // fine
+verify(mock).someOtherMethod(1, anyString(), "third argument");         // fails</pre>
+        The reason is in how matchers work rather than in the documentation: they are pushed
+        onto a stack as they are evaluated, and the mock sees only how many arrived, not
+        which positions they came from. Three matchers and three arguments it can line up;
+        one matcher and three arguments it cannot.
+        <br><br>And a stub whose arguments do not match simply does not fire &mdash; the
+        method returns the default for its type. <code>when(mock.getValue(1))</code>
+        followed by <code>mock.getValue(100)</code> returns <code>null</code>, not an error.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Consecutive calls, and the order of calls</div>
+        <code>thenReturn(a, b, c)</code> returns <code>a</code> on the first call,
+        <code>b</code> on the second, <code>c</code> on the third &mdash; and
+        <strong>the last value on every call after that</strong>. Useful when a loop needs
+        different answers, or when the first call should throw and the rest should not.
+        <br><br><code>inOrder(mocks...)</code> builds a verifier whose verifications must
+        occur in the order they are written, across all the mocks passed to it, finishing
+        with <code>inOrder.verifyNoMoreInteractions()</code>.
+      </div>
+
+      <h3 id="t5-cctool">&#128736;&#65039; Consecutive stubbing, against the printed test</h3>
+
+      <div class="tool" data-run="runConsecutive">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>What the rule gives, and what the example asserts</h3>
+        </div>
+        <div class="tool-desc">Three values are stubbed and the method is called more times
+          than that. The rule and the printed assertions part company.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="cc-calls">calls</label>
+            <select id="cc-calls">
+              <option value="3">3</option>
+              <option value="5" selected>5</option>
+              <option value="8">8</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="cc-output"></div>
+      </div>
+
+      <!-- ===== REFACTORING ===== -->
+      <h2 id="t5-ref">Refactoring</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The definitions</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>a refactoring<br><em>noun</em></th><td>a change made to the internal
+            structure of software to make it easier to understand and modify
+            <strong>without changing its external behaviour</strong></td></tr>
+          <tr><th>to refactor<br><em>verb</em></th><td>a disciplined technique for
+            restructuring an existing body of code, altering its internal structure without
+            changing its external behaviour</td></tr>
+        </table>
+        <br>Each transformation does little; a sequence of them produces a significant
+        restructuring. Because each one is small it is less likely to go wrong, and the
+        system is kept fully working after each, which is what stops the restructuring from
+        breaking it.
+        <br><br><strong>Refactoring is not reduction.</strong> The purpose is to improve the
+        structure, and shorter code is a frequent side effect rather than the goal.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">What it is not</div>
+        <div class="st-pro-con">
+          <div><span class="st-minus">&minus;</span> <strong>just any change</strong> &mdash;
+            a refactoring has a clear purpose and proceeds in small, mechanical,
+            deterministic steps</div>
+          <div><span class="st-minus">&minus;</span> <strong>an excuse for not thinking</strong>
+            &mdash; the initial design should still be the best effort you can make. Before
+            choosing the simplest solution, imagine the migration route to the alternatives;
+            if it looks easy, go ahead, and if it looks impossible, think harder now</div>
+        </div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The methodology, and the two hats</div>
+        Make every change small and methodical, following patterns that could in principle be
+        automated. <strong>Re-test after each change</strong> by rerunning all the unit
+        tests: if something breaks you know exactly what caused it. This needs fully
+        automated tests, which is why the topic sits where it does.
+        <table class="st-defs" style="margin-top:8px;">
+          <tr><th>refactoring hat</th><td>updating the design, not what the code does
+            &mdash; so the existing tests are the check</td></tr>
+          <tr><th>feature-adding hat</th><td>changing what the code does &mdash; so new
+            tests come first</td></tr>
+        </table>
+        <br>Switch hats often, and always know which one you are wearing.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">The rule of three</div>
+        The first time you do something, you just do it. The second time you do something
+        similar, you wince at the duplication &mdash; and do it anyway. The third time, you
+        refactor. <strong>Three strikes and you refactor.</strong>
+        <br><br><strong>When:</strong> before adding a feature, to make the feature easier
+        to add; when fixing a bug, because a bug report is a sign the code was not clear
+        enough for you to have seen it; and at a code review, where it spreads knowledge
+        through the team and works best in small groups.
+      </div>
+
+      <!-- ===== THE EXAMPLE ===== -->
+      <h2 id="t5-store">The worked example</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">What it does, and why it needs to change</div>
+        A video store: a customer has rentals, each rental is of a movie, each movie has a
+        classification, and <code>statement()</code> prints a summary. Two changes are
+        wanted: an <strong>HTML version</strong> of the statement, and a
+        <strong>change to the classification system</strong>, in a way nobody has specified
+        yet.
+        <br><br>Neither is possible cheaply, because the one method contains the pricing
+        rules, the frequent-renter rules and the presentation, with a
+        <code>switch</code> on the classification in the middle of it.
+      </div>
+
+      <h3 id="t5-pttool">&#128736;&#65039; The three classifications</h3>
+
+      <div class="tool" data-run="runPriceTable">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>What each classification charges</h3>
+        </div>
+        <div class="tool-desc">Run from the rules rather than copied from them.</div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="pt-output"></div>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The chain</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>1</th><td><strong>Extract method</strong> &mdash; the pricing goes into
+            <code>amountFor(each)</code></td></tr>
+          <tr><th>2</th><td><strong>Rename</strong> &mdash; <code>each</code> to
+            <code>aRental</code>, <code>thisAmount</code> to <code>result</code></td></tr>
+          <tr><th>3</th><td><strong>Move method</strong> &mdash; <code>amountFor</code> uses
+            nothing from Customer and everything from Rental, which is
+            <span class="term">feature envy</span>; it becomes
+            <code>Rental.getCharge()</code></td></tr>
+          <tr><th>4</th><td>the same move for
+            <code>getFrequentRenterPoints()</code></td></tr>
+          <tr><th>5</th><td><strong>Replace temp with query</strong> &mdash;
+            <code>totalAmount</code> and <code>frequentRenterPoints</code> become
+            <code>getTotalCharge()</code> and
+            <code>getTotalFrequentRenterPoints()</code>, leaving
+            <code>statement()</code> holding only presentation</td></tr>
+          <tr><th>6</th><td><strong>Replace type code with state</strong> &mdash; the
+            <code>switch</code> becomes a <code>Price</code> subclass per classification,
+            and the charge calculation moves into it</td></tr>
+        </table>
+        <br>Run the unit tests after every single one.
+      </div>
+
+      <h3 id="t5-rctool">&#128736;&#65039; Every version, and whether it changed anything</h3>
+
+      <div class="tool" data-run="runRefactorChain">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>The statement at each step of the chain</h3>
+        </div>
+        <div class="tool-desc">Each version is a separate implementation. The last step also
+          shows the HTML statement the whole chain was for.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="rc-version">version</label>
+            <select id="rc-version">
+              <option value="0" selected>everything in statement()</option>
+              <option value="1">extract amountFor()</option>
+              <option value="2">rename the variables</option>
+              <option value="3">move it to Rental</option>
+              <option value="4">extract the points</option>
+              <option value="5">replace the temps with queries</option>
+              <option value="6">replace the type code with state</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="rc-who">customer</label>
+            <select id="rc-who">
+              <option value="Dinsdale Pirhana" selected>four rentals</option>
+              <option value="George W. Bush">three rentals</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="rc-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">This is the one definition you can check</div>
+        "Behaviour preserving" is a claim about every input, so it can be measured. Every
+        version above is run against every other on every basket of one or two rentals drawn
+        from three classifications and twelve rental lengths &mdash; just under eight
+        thousand comparisons &mdash; and not one produces a different statement.
+        <br><br>Compare the refactoring steps in Topic 4, where the same word covered a
+        change that altered 998 answers out of 1000. The difference is the tests: with two
+        tests, behaviour-preserving means almost nothing; with a suite that pins the output
+        down, it means what it says. <strong>Refactoring is only as safe as the suite you
+        run after each step</strong>, which is why the methodology insists on running
+        them all, every time.
+      </div>
+
+      <!-- ===== SMELLS ===== -->
+      <h2 id="t5-smells">Bad smells</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The catalogue</div>
+        Twenty names for things worth looking at. The point of the list is not that each is
+        always wrong &mdash; it is that each has a known refactoring attached to it, so
+        spotting one tells you what to do next.
+        <div class="sg-paths" style="margin-top:8px;">
+          <code>Duplicated Code</code><code>Long Method</code><code>Large Class</code><code>Long Parameter List</code><code>Divergent Change</code><code>Shotgun Surgery</code><code>Feature Envy</code><code>Data Clumps</code><code>Primitive Obsession</code><code>Switch Statements</code><code>Parallel Interface Hierarchies</code><code>Lazy Class</code><code>Speculative Generality</code><code>Temporary Field</code><code>Message Chains</code><code>Middle Man</code><code>Inappropriate Intimacy</code><code>Incomplete Library Class</code><code>Data Class</code><code>Refused Bequest</code>
+        </div>
+        <br>Three of them appear in the example above: the original method is a
+        <strong>Long Method</strong> with a <strong>Switch Statement</strong> in it, and
+        <code>amountFor</code> is <strong>Feature Envy</strong> of Rental.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Simple design, in priority order</div>
+        <ol style="margin:6px 0 0;">
+          <li>The code is appropriate for the intended audience.</li>
+          <li>The code passes all the tests.</li>
+          <li>The code communicates everything it needs to.</li>
+          <li>The code has the smallest number of classes.</li>
+          <li>Each class has the smallest number of methods.</li>
+        </ol>
+        <br>Which raises the obvious objection: should everything be one class with one
+        method? No &mdash; the list is in <strong>priority order</strong>, and the fourth
+        and fifth lose to the third, and to the single responsibility principle behind it.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Refactoring and performance</div>
+        Some refactorings make the software slower, and that may or may not matter. Only a
+        small fraction of a code base influences performance at all, so optimising all of it
+        equally wastes most of the effort &mdash; and most people's intuitions about which
+        fraction it is turn out to be wrong, which is what a profiler is for.
+        <br><br>A well-factored program is unusually easy to tune, because the thing to tune
+        is in one place. <strong>Make it work, make it clean, make it fast</strong> &mdash;
+        in that order.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="t5-exam">Takeaways</h2>
+
+      <div class="callout tip">
+        <div class="callout-label">What to be able to do</div>
+        <ol style="margin:6px 0 0;">
+          <li>Write a test with a mock: create it, stub it, act, and verify the
+            interaction.</li>
+          <li>Give the <code>when(...).thenNnnn()</code> family and say what an unstubbed
+            method returns.</li>
+          <li>Give the verification modes, and state the matcher rule and why it
+            exists.</li>
+          <li>Say what <code>thenReturn(a, b, c)</code> returns on the fourth call.</li>
+          <li>Define refactoring both ways round, and give the rule of three and the three
+            occasions for it.</li>
+          <li>Carry the video-store example through at least extract method, move method and
+            replace temp with query, and say which smell each one answers.</li>
+          <li>Say what the two hats are and why you must know which one you have on.</li>
+        </ol>
+      </div>
+
+    </section>

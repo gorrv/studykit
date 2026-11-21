@@ -223,3 +223,15 @@
     color: var(--ink-soft);
   }
   .sg-bar-note { color: var(--ink-muted); font-size: 11px; }
+
+  /* ---------- topic 5 · mocking and refactoring ---------- */
+
+  .callout-quote {
+    border-left: 3px solid var(--accent-2);
+    padding: 6px 0 6px 12px;
+    margin: 8px 0;
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+  }
+  .td-empty { color: var(--ink-muted); font-style: italic; font-size: 13px; padding: 8px 0; }
