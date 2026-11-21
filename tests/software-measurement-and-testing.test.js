@@ -885,6 +885,227 @@ module.exports = async function run() {
         .nodes.hit < withDead.nodes.length);
   }
 
+  /* ================ Topic 4 · unit testing and TDD ================
+
+     The session is a transcription, so it is checked the same way the
+     other transcriptions are: every version of evaluate() is written
+     out a second time here, from the notes rather than from the
+     engine, and the two are run against each other over a thousand
+     inputs. Then the claims the method makes about the sequence —
+     red before green, nothing previously green going red — are
+     checked step by step.
+     ============================================================== */
+
+  /* A second reading of the rule. */
+  const fizz = n => (n % 15 === 0 ? 'FizzBuzz'
+                   : n % 3 === 0 ? 'Fizz'
+                   : n % 5 === 0 ? 'Buzz'
+                   : String(n));
+
+  /* A second transcription of each slide, in order. */
+  const VERSIONS = {
+    empty: null,
+    null: () => null,
+    one: () => '1',
+    ternary: n => (n === 1 ? '1' : '2'),
+    valueOf: n => String(n),
+    fizz: n => (n % 3 === 0 ? 'Fizz' : String(n)),
+    buzz: n => (n % 3 === 0 ? 'Fizz' : n % 5 === 0 ? 'Buzz' : String(n)),
+    extract: n => (n % 3 === 0 ? 'Fizz' : n % 5 === 0 ? 'Buzz' : String(n)),
+    fizzbuzz: n => (n % 3 === 0 && n % 5 === 0 ? 'FizzBuzz'
+                  : n % 3 === 0 ? 'Fizz'
+                  : n % 5 === 0 ? 'Buzz'
+                  : String(n))
+  };
+
+  {
+    const steps = w.FB_STEPS;
+    s.is('the session has nine steps', steps.length, 9);
+    s.same('  ...in the order the notes write them',
+      steps.map(x => x.id),
+      ['empty', 'null', 'one', 'ternary', 'valueOf', 'fizz', 'buzz', 'extract', 'fizzbuzz']);
+
+    steps.forEach(step => {
+      const mine = VERSIONS[step.id];
+      if (!mine) {
+        s.ok(`"${step.id}" has no code to run`, step.run === null);
+        return;
+      }
+      let differ = 0, firstDiff = null;
+      for (let n = 1; n <= 1000; n++) {
+        if (step.run(n) !== mine(n)) { differ++; if (firstDiff === null) firstDiff = n; }
+      }
+      s.is(`"${step.id}" matches a second transcription of it`, differ, 0,
+        firstDiff === null ? null : `first difference at ${firstDiff}`);
+    });
+
+    /* The specification, likewise. */
+    let specDiff = 0;
+    for (let n = 1; n <= 1000; n++) if (w.fbSpec(n) !== fizz(n)) specDiff++;
+    s.is('the specification matches a second reading of the rule', specDiff, 0);
+  }
+
+  /* ---------------- red before green ---------------- */
+
+  {
+    const tests = w.FB_TESTS;
+    s.is('six tests are written over the session', tests.length, 6);
+    s.same('  ...for these inputs', tests.map(t => t.input), [1, 2, 3, 4, 5, 15]);
+    tests.forEach(t => {
+      s.is(`${t.name} expects ${t.expected}`, t.expected, fizz(t.input));
+    });
+
+    /* The schedule itself: how many tests exist at each step. This is
+       the part of the transcription that is easiest to get subtly
+       wrong, and nothing else here depends on it strongly enough to
+       notice. */
+    s.same('the test list grows on this schedule',
+      w.FB_STEPS.map((x, i) => w.fbTestsAt(i).length),
+      [0, 0, 1, 2, 2, 4, 5, 5, 6]);
+    s.ok('testThree and testFour both arrive with the Fizz rule',
+      w.fbTestsAt(w.fbStepIndex('fizz')).map(x => x.name).join(',') ===
+      'testOne,testTwo,testThree,testFour');
+    s.is('the two refactoring steps add no tests',
+      w.fbTestsAt(w.fbStepIndex('valueOf')).length -
+      w.fbTestsAt(w.fbStepIndex('ternary')).length, 0);
+    s.is('  ...either of them',
+      w.fbTestsAt(w.fbStepIndex('extract')).length -
+      w.fbTestsAt(w.fbStepIndex('buzz')).length, 0);
+
+    /* Each test, run against the version before the step that was
+       written to satisfy it, and against that step. */
+    let passedWhenWritten = [];
+    tests.forEach(t => {
+      const i = w.fbStepIndex(t.from);
+      const before = w.fbRun(i - 1, [t])[0];
+      const after = w.fbRun(i, [t])[0];
+      s.ok(`${t.name} passes once its step is written`, after.pass,
+        `got ${after.got}`);
+      if (before.pass) passedWhenWritten.push(t.name);
+    });
+    s.same('exactly one test was green the moment it was written',
+      passedWhenWritten, ['testFour']);
+
+    /* And nothing that was green ever goes red. */
+    let regressions = [];
+    for (let i = 2; i < w.FB_STEPS.length; i++) {
+      const before = w.fbRun(i - 1, w.fbTestsAt(i - 1));
+      const after = w.fbRun(i, w.fbTestsAt(i - 1));
+      before.forEach((b, k) => {
+        if (b.pass && !after[k].pass) regressions.push(`${b.name} at ${w.FB_STEPS[i].id}`);
+      });
+    }
+    s.same('no test that passed ever goes red again', regressions, []);
+
+    /* Which means every step from the third onwards is green. */
+    const session = w.fbSession();
+    s.same('every step with a test on it ends green',
+      session.filter(x => x.tests.length && !x.green).map(x => x.id), []);
+  }
+
+  /* ---------------- green is not right ----------------
+
+     The point of the topic, and the one number worth memorising.
+     ------------------------------------------------------------- */
+
+  {
+    /* Counted here by inclusion and exclusion rather than by running
+       anything: in 1..100 there are 33 multiples of 3, 20 of 5 and 6
+       of 15. */
+    const m3 = 33, m5 = 20, m15 = 6;
+    s.is('String.valueOf is wrong about every multiple of 3 or 5',
+      w.fbWrongCount(w.fbStepIndex('valueOf'), 100), m3 + m5 - m15);
+    s.is('adding Fizz leaves the multiples of 5, and the multiples of 15',
+      w.fbWrongCount(w.fbStepIndex('fizz'), 100), (m5 - m15) + m15);
+    s.is('adding Buzz leaves only the multiples of 15',
+      w.fbWrongCount(w.fbStepIndex('buzz'), 100), m15);
+    s.is('and the last rule leaves none',
+      w.fbWrongCount(w.fbStepIndex('fizzbuzz'), 100), 0);
+
+    const buzz = w.fbStepIndex('buzz');
+    s.is('the Buzz step is wrong first about 15', w.fbFirstWrong(buzz, 1000), 15);
+    s.is('  ...and the largest input any test mentions is 5',
+      Math.max(...w.fbTestsAt(buzz).map(t => t.input)), 5);
+    s.is('  ...while all five of those tests pass',
+      w.fbRun(buzz, w.fbTestsAt(buzz)).filter(r => r.pass).length, 5);
+    s.is('the finished version is wrong about nothing in 1..1000',
+      w.fbFirstWrong(w.fbStepIndex('fizzbuzz'), 1000), null);
+
+    s.same('the smallest wrong input at each step',
+      w.FB_STEPS.map((x, i) => w.fbFirstWrong(i, 1000)),
+      [1, 1, 2, 3, 3, 5, 15, 15, null]);
+  }
+
+  /* ---------------- which steps were refactorings ---------------- */
+
+  {
+    const at = id => w.fbStepIndex(id);
+    s.is('extracting isDivisibleBy changes nothing',
+      w.fbDiff(at('buzz'), at('extract'), 1000).length, 0);
+    s.is('replacing the ternary with String.valueOf changes 998 of 1000',
+      w.fbDiff(at('ternary'), at('valueOf'), 1000).length, 998);
+    s.same('  ...leaving exactly the two inputs under test alone',
+      [1, 2].filter(n =>
+        w.FB_STEPS[at('ternary')].run(n) !== w.FB_STEPS[at('valueOf')].run(n)), []);
+    s.same('  ...and none of the changed inputs appears in a test of the time',
+      w.fbDiff(at('ternary'), at('valueOf'), 1000)
+        .filter(d => w.fbTestsAt(at('ternary')).some(t => t.input === d.input)), []);
+
+    /* Adding a rule is not a refactoring, and the suite should say so. */
+    s.ok('adding Fizz does change behaviour',
+      w.fbDiff(at('valueOf'), at('fizz'), 1000).length > 0);
+  }
+
+  /* ---------------- the fixture ---------------- */
+
+  {
+    const perms = w.acPermutations(4);
+    s.is('there are 24 orders of four tests', perms.length, 24);
+    s.is('  ...all distinct', new Set(perms.map(p => p.join(''))).size, 24);
+    s.ok('  ...and each is a permutation',
+      perms.every(p => p.slice().sort().join('') === '0123'));
+
+    const fresh = w.acEveryOrder(true);
+    s.is('with a fresh account per test, every order is green',
+      `${fresh.green}/${fresh.total}`, '24/24');
+
+    const shared = w.acEveryOrder(false);
+    s.is('sharing one account, not one order is', `${shared.green}/${shared.total}`,
+      '0/24');
+
+    /* Which tests are the casualties, and why. */
+    s.is('testInitialBalance fails in 16 of them', shared.failures.testInitialBalance, 16);
+    s.is('  ...which is every order where something has already moved the balance',
+      24 - 8, 16);
+    s.is('testWithdraw fails in 12', shared.failures.testWithdraw, 12);
+    s.is('testDeposit fails in 12', shared.failures.testDeposit, 12);
+    s.ok('testWithdrawTooMuch never fails: it asks for more than any balance could be',
+      !shared.failures.testWithdrawTooMuch);
+
+    /* The order you would actually write them in is among the failures. */
+    const natural = w.acRunOrder([0, 1, 2, 3], false);
+    s.ok('even the natural order fails when the account is shared',
+      natural.some(r => !r.pass), JSON.stringify(natural));
+    s.ok('  ...and passes when it is not',
+      w.acRunOrder([0, 1, 2, 3], true).every(r => r.pass));
+  }
+
+  /* ---------------- the checklists ---------------- */
+
+  {
+    s.is('CORRECT spells itself', w.CORRECT.map(x => x.letter).join(''), 'CORRECT');
+    s.is('  ...with seven conditions', w.CORRECT.length, 7);
+    s.is('BICEP spells itself after Right',
+      w.BICEP.slice(1).map(x => x.letter).join(''), 'BICEP');
+    s.is('  ...and Right comes first', w.BICEP[0].letter, 'Right');
+    s.is('SMART spells itself', w.SMART.map(x => x.letter).join(''), 'SMART');
+    s.same('the three A\'s are in order', w.THREE_AS.map(x => x.a),
+      ['Arrange', 'Act', 'Assert']);
+    s.is('the cycle has six steps', w.TDD_CYCLE.length, 6);
+    s.ok('  ...and watching it fail is the third',
+      /fail/i.test(w.TDD_CYCLE[2].step));
+  }
+
   /* ---------------- question bank ---------------- */
 
   checkQuestionBank(s, m, 1200);

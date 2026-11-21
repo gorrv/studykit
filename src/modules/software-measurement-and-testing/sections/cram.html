@@ -370,4 +370,141 @@
 
       </div>
 
+      <h2 id="cr-t4">Topic 04 &middot; unit testing and TDD</h2>
+
+      <div class="cram-grid">
+
+        <div class="cram-card">
+          <h3>What a unit test is</h3>
+          <ul>
+            <li>A self-contained module &mdash; usually a class &mdash; holding test
+              scenarios that test one <span class="term">unit under test</span> in
+              <strong>isolation</strong>; each scenario autonomous.</li>
+            <li><strong>Black box</strong>: honours its contract. <strong>White box</strong>:
+              internal workings behave.</li>
+            <li>Written <strong>by developers, for developers</strong>. Proves the code does
+              what we intended; complements acceptance testing, never replaces it.</li>
+            <li><span class="term">Smoke test</span>: a set of them run together &mdash;
+              turn it on, see if smoke comes out.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The three A's</h3>
+          <ul>
+            <li><strong>Arrange</strong> &mdash; instantiate the unit, set up the data.</li>
+            <li><strong>Act</strong> &mdash; call the method(s).</li>
+            <li><strong>Assert</strong> &mdash; verify the results.</li>
+            <li>Naming: <code>MyUnit</code> &rarr; <code>MyUnitTest</code>;
+              <code>withdraw</code> &rarr; <code>testWithdrawTooMuch</code>. Python prepends
+              <code>test_</code> to the module.</li>
+            <li><strong>One scenario per test method</strong> &mdash; so a failure points at
+              one thing.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>S.M.A.R.T.</h3>
+          <ul>
+            <li><strong>S</strong>elf-contained and stateless.</li>
+            <li><strong>M</strong>aintainable &mdash; test-first yields 5&ndash;10&times;
+              more test code than production code.</li>
+            <li><strong>A</strong>ct as documentation.</li>
+            <li><strong>R</strong>epeatable and robust.</li>
+            <li><strong>T</strong>o the point &mdash; good defect triangulation.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The fixture</h3>
+          <ul>
+            <li><code>@Before</code> / <code>@BeforeEach</code> / <code>setUp</code> runs
+              before <strong>every</strong> test, not once.</li>
+            <li><code>@After</code> / <code>@AfterEach</code> / <code>tearDown</code>
+              after every test.</li>
+            <li>Four tests sharing one account: <strong>0 of 24</strong> orders come out
+              green. A fresh account per test: <strong>24 of 24</strong>.</li>
+            <li>Exceptions: <code>@Test(expected=...)</code>, <code>assertRaises</code>, or
+              call then <code>fail(...)</code> with the expected exception caught.</li>
+            <li><code>@Ignore</code> parks a test &mdash; and <code>@Test</code> must
+              stay.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Right-BICEP</h3>
+          <ul>
+            <li><strong>Right</strong> &mdash; are the results right?</li>
+            <li><strong>B</strong> &mdash; boundary conditions CORRECT?</li>
+            <li><strong>I</strong> &mdash; inverse relationships (<code>x&sup2;</code> vs
+              <code>sqrt</code>)?</li>
+            <li><strong>C</strong> &mdash; cross-check by other means?</li>
+            <li><strong>E</strong> &mdash; force error conditions? If it cannot be forced it
+              cannot be tested.</li>
+            <li><strong>P</strong> &mdash; performance within bounds?</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>CORRECT</h3>
+          <ul>
+            <li><strong>C</strong>onformance &mdash; expected format?</li>
+            <li><strong>O</strong>rdering &mdash; ordered or not, as appropriate?</li>
+            <li><strong>R</strong>ange &mdash; within sensible min and max?</li>
+            <li><strong>R</strong>eference &mdash; anything external, outside its control?</li>
+            <li><strong>E</strong>xistence &mdash; non-null, non-zero, present?</li>
+            <li><strong>C</strong>ardinality &mdash; exactly enough values?</li>
+            <li><strong>T</strong>ime &mdash; right order, right time, in time?</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>The TDD cycle</h3>
+          <ul>
+            <li>Think &rarr; write a small test &rarr; <strong>watch it fail</strong> &rarr;
+              just enough code to pass &rarr; refactor &rarr; repeat.</li>
+            <li>Step three is the one people drop, and it is the one that shows the test
+              tests anything.</li>
+            <li>A compiler error counts as a failing test.</li>
+            <li>Work from a <strong>test list</strong>, brainstormed for a task of
+              4&ndash;8 hours. Completeness not required.</li>
+            <li>Of the six FizzBuzz tests, exactly one &mdash;
+              <code>testFour</code> &mdash; passed the moment it was written.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Green is not right</h3>
+          <ul>
+            <li>At the <code>Buzz</code> step all five tests pass and
+              <code>evaluate(15)</code> returns <strong>Fizz</strong>.</li>
+            <li>Largest number in those tests: <strong>5</strong>. Smallest input the code
+              gets wrong: <strong>15</strong>.</li>
+            <li>The bar measures the <strong>test set</strong>, exactly as coverage does.</li>
+            <li>Refactoring preserves the behaviour <strong>that has been specified</strong>:
+              <code>String.valueOf</code> changed 998 of 1000 answers and was still a
+              refactoring, because the two tests that existed still passed.</li>
+          </ul>
+        </div>
+
+        <div class="cram-card">
+          <h3>Effects and weak points</h3>
+          <ul>
+            <li>+ already-automated integration and regression tests; less debugging; no
+              testing phase bolted on at the end.</li>
+            <li>+ <strong>intentional</strong> and <strong>non-speculative</strong>
+              interfaces &mdash; you are the API's first user, and you build only what is
+              needed now.</li>
+            <li>+ high cohesion, low coupling, because dependencies are what make a unit
+              hard to test.</li>
+            <li>&minus; tests leaning on the production API make it harder to change;
+              buggy tests; and it stops paying when the tests cost more to maintain than
+              they return.</li>
+            <li><span class="term">Testability</span> = <strong>visibility</strong> +
+              <strong>control</strong>, and it has to be designed in.</li>
+          </ul>
+        </div>
+
+      </div>
+
     </section>

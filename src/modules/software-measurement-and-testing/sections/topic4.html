@@ -1,0 +1,434 @@
+<section id="topic4" class="topic-section" hidden>
+
+      <div class="topic-header">
+        <div class="topic-eyebrow">Topic 04</div>
+        <h1>Unit Testing and TDD</h1>
+        <div class="topic-subtitle">what a unit test is, what to put in one, and what
+          happens when the test comes first</div>
+      </div>
+
+      <h2 id="t4-why">Why this matters</h2>
+
+      <p>
+        The first three topics are about choosing test cases. This one is about the test
+        itself: what it is made of, where it lives, what makes it worth keeping, and what
+        changes when you write it before the code it tests.
+      </p>
+
+      <p>
+        It looks like the one topic with nothing to run, and it is not.
+        <strong>A test-driven session is a sequence of (test list, code) pairs</strong>, and
+        everything the method claims is a claim about that sequence &mdash; each new test
+        fails when written, passes when the next scrap of code arrives, and nothing that
+        passed before stops passing. The worked example below is transcribed step by step
+        and that claim is checked at each one. It is also where the interesting result comes
+        from: there is a step where every test passes and the code is still wrong.
+      </p>
+
+      <!-- ===== WHAT A UNIT TEST IS ===== -->
+      <h2 id="t4-what">What a unit test is</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The definition</div>
+        A self-contained software module &mdash; typically a class &mdash; containing one or
+        more test scenarios which test a <span class="term">unit under test</span> in
+        <strong>isolation</strong>. Each scenario is autonomous and tests a separate aspect
+        of that unit.
+        <table class="st-defs" style="margin-top:8px;">
+          <tr><th>black box</th><td>verifies that the unit behaves correctly &mdash; that it
+            honours its contract</td></tr>
+          <tr><th>white box</th><td>verifies that its internal structure or workings behave
+            correctly</td></tr>
+        </table>
+        <br>Unit tests are written <strong>by developers, for developers</strong>. They do
+        not address formal validation and verification; they prove that some code does what
+        we intended it to do, and they complement acceptance tests rather than replacing
+        them.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Smoke test</div>
+        A set of unit tests run as a whole: turn it on and make sure no smoke comes out. A
+        cheap way to see that the units seem to work and fit together &mdash; with no
+        guarantee at all about the overall function, which needs functional testing.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">The three A's</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>Arrange</th><td>instantiate the unit under test and set up the test
+            data</td></tr>
+          <tr><th>Act</th><td>execute one or more methods on the unit under test</td></tr>
+          <tr><th>Assert</th><td>verify the results</td></tr>
+        </table>
+        <pre class="st-snippet">@Test
+public void testWithdraw() throws AccountException {
+  AccountImpl account = new AccountImpl("1234-9999", 2000);  // ARRANGE
+  account.withdraw(300);                                     // ACT
+  Assert.assertEquals(1700, account.getBalance());           // ASSERT
+}</pre>
+        The same three steps in Python, where the class inherits from
+        <code>unittest.TestCase</code> and the asserts are methods on it:
+        <pre class="st-snippet">def test_withdraw(self):
+    self.account.deposit(3 * self.amount)        # Arrange
+    self.account.withdraw(self.amount)           # Act
+    expected = 2 * self.amount                   # Assert
+    self.assertEqual(expected, self.account.get_balance())</pre>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Naming and placement</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>the class</th><td>a class is a noun, so the tests for <code>MyUnit</code>
+            go in <code>MyUnitTest</code>; in Python a unit is a module, and its tests go in
+            a separate module with <code>test_</code> prepended</td></tr>
+          <tr><th>the method</th><td>a method is an action, so test the
+            <code>calculate</code> method in <code>testCalculate()</code>, with something
+            appended for each aspect: <code>testWithdrawTooMuch</code>,
+            <code>testWithdrawNegativeAmount</code></td></tr>
+          <tr><th>where</th><td>same package as the unit under test, in a parallel directory
+            tree</td></tr>
+        </table>
+        <br><strong>One scenario per test method.</strong> How much to check in one test is
+        a judgement call, but a test covering one potential error condition tells you what
+        broke; a test covering five tells you only that something did.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Goals for test automation: S.M.A.R.T.</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>Self-contained</th><td>and stateless &mdash; no test may depend on another
+            having run first</td></tr>
+          <tr><th>Maintainable</th><td>test-first produces five to ten times more test code
+            than production code, so its maintenance cost is the larger of the two</td></tr>
+          <tr><th>Act as documentation</th><td>the tests are the definitive reference for
+            what the system is supposed to do</td></tr>
+          <tr><th>Repeatable and robust</th><td>passes alone and in a suite, today and
+            tomorrow</td></tr>
+          <tr><th>To the point</th><td>so that a failure points at one thing &mdash; good
+            "defect triangulation"</td></tr>
+        </table>
+      </div>
+
+      <!-- ===== THE FIXTURE ===== -->
+      <h2 id="t4-fixture">The fixture</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">setUp and tearDown</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th><code>@Before</code></th><td>runs before <em>every</em> test method
+            &mdash; <code>@BeforeEach</code> in JUnit 5, <code>setUp(self)</code> in
+            Python</td></tr>
+          <tr><th><code>@After</code></th><td>runs after every test method &mdash;
+            <code>@AfterEach</code>, <code>tearDown(self)</code></td></tr>
+        </table>
+        <br>Before <em>every</em> test, not once for the class. That is what makes the first
+        letter of S.M.A.R.T. true, and the tool below measures what it is worth.
+      </div>
+
+      <h3 id="t4-fxtool">&#128736;&#65039; Every order, with and without a fresh fixture</h3>
+
+      <div class="tool" data-run="runFixture">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Four tests, twenty-four orders</h3>
+        </div>
+        <div class="tool-desc">The same four tests of the same account, run in every
+          possible order, once with a new account per test and once with one shared between
+          them.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="fx-fresh">fixture</label>
+            <select id="fx-fresh">
+              <option value="fresh" selected>a fresh account per test</option>
+              <option value="shared">one account, shared</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="fx-output"></div>
+      </div>
+
+      <!-- ===== EXCEPTIONS ===== -->
+      <h2 id="t4-exc">Exceptions, and tests that are not run</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">Three ways to test that something throws</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>annotation</th><td><code>@Test(expected = NastyException.class)</code> in
+            JUnit 4; <code>assertThrows</code> in JUnit 5;
+            <code>@unittest.expectedFailure</code> or <code>assertRaises</code> in
+            Python</td></tr>
+          <tr><th>try/catch</th><td>call it, then <code>fail("Expected a NastyException!")</code>
+            on the next line, and catch the expected exception with an empty body &mdash;
+            more typing, but it lets you assert on the state afterwards</td></tr>
+          <tr><th>lambda</th><td><code>self.assertRaises(ValueError, lambda:
+            account.withdraw(2 * amount))</code>, or hand the framework the function and its
+            arguments and let it do the calling</td></tr>
+        </table>
+        <br>Unchecked exceptions thrown during a test &mdash; null, divide by zero &mdash;
+        are caught by the framework and reported as errors, so the test fails. A test method
+        must <em>declare</em> any checked exception the unit may throw; declaring
+        <code>throws Exception</code> is acceptable when there are several.
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">@Ignore</div>
+        <code>@Ignore("trying to fix the bug")</code> parks a test without deleting it
+        &mdash; and the <code>@Test</code> annotation has to stay, or it is not a parked test
+        but a lost one. A parked test is a known unknown; it costs nothing to keep and
+        everything to forget.
+      </div>
+
+      <!-- ===== WHAT TO TEST ===== -->
+      <h2 id="t4-what-to-test">What to test</h2>
+
+      <div class="callout warn">
+        <div class="callout-label">Not everything</div>
+        Exhaustive testing means covering every possible aspect of the function. It takes
+        <em>forever and a day</em> and often is not possible at all. The answer is
+        <span class="term">pragmatic testing</span>: test everything that could possibly
+        break, and do not test things that are too simple to break &mdash; getters, setters,
+        plain data holders.
+        <br><br>The two areas that reliably repay attention are
+        <strong>error conditions</strong> and <strong>boundary conditions</strong>.
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">Right-BICEP &mdash; six things to ask</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>Right</th><td>are the results right?</td></tr>
+          <tr><th>B</th><td>are all the <strong>boundary</strong> conditions CORRECT?</td></tr>
+          <tr><th>I</th><td>can you check <strong>inverse</strong> relationships?
+            <code>x&sup2;</code> against <code>sqrt</code>, insert against read back</td></tr>
+          <tr><th>C</th><td>can you <strong>cross-check</strong> results using other means
+            &mdash; a second, slower way of getting the same answer?</td></tr>
+          <tr><th>E</th><td>can you force <strong>error</strong> conditions to happen? If it
+            cannot be forced, it cannot be tested</td></tr>
+          <tr><th>P</th><td>are <strong>performance</strong> characteristics within
+            bounds?</td></tr>
+        </table>
+      </div>
+
+      <div class="callout exam">
+        <div class="callout-label">CORRECT &mdash; seven kinds of boundary</div>
+        <table class="st-defs" style="margin-top:4px;">
+          <tr><th>Conformance</th><td>does the value conform to an expected format?
+            <code>1 000 SEK</code></td></tr>
+          <tr><th>Ordering</th><td>is the set of values ordered, or unordered, as
+            appropriate?</td></tr>
+          <tr><th>Range</th><td>is the value within reasonable minimum and maximum values?
+            <code>0&ndash;100%</code></td></tr>
+          <tr><th>Reference</th><td>does the code reference anything external that is not
+            under its own control?</td></tr>
+          <tr><th>Existence</th><td>does the value exist &mdash; non-null, non-zero, present
+            in a set, file present?</td></tr>
+          <tr><th>Cardinality</th><td>are there exactly enough values? <em>exactly two
+            parents</em></td></tr>
+          <tr><th>Time</th><td>absolute and relative &mdash; in the right order, at the right
+            time, in time?</td></tr>
+        </table>
+      </div>
+
+      <!-- ===== TDD ===== -->
+      <h2 id="t4-tdd">Test-driven development</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The cycle</div>
+        <ol style="margin:6px 0 0;">
+          <li><strong>Think</strong> about what you want to do, and about how to test it.</li>
+          <li><strong>Write a small test</strong> &mdash; which is where the API gets
+            designed, because you are its first user.</li>
+          <li><strong>Watch it fail.</strong> The red bar. A compiler error counts.</li>
+          <li><strong>Write just enough production code</strong> to pass it and every
+            earlier test. The green bar.</li>
+          <li><strong>Refactor</strong> to remove duplication and increase expressiveness,
+            then run them all again and see the bar stay green.</li>
+          <li><strong>Repeat</strong> until no test you can think of drives new production
+            code.</li>
+        </ol>
+        <br>Design a little &ndash; test a little &ndash; code a little, and round again.
+        Work from a <span class="term">test list</span> brainstormed at the start of a task
+        of four to eight hours; do not get hung up on completeness, since you can always add
+        more later.
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Step 3 is the one people drop</div>
+        Watching the test fail is what shows that the test tests anything. A test that has
+        never been red might be asserting nothing at all &mdash; and you would never find
+        out, because it is green either way. In the session below, exactly one of the six
+        tests passed the moment it was written, and the notes flag it rather than quietly
+        keeping it.
+      </div>
+
+      <h3 id="t4-tdtool">&#128736;&#65039; FizzBuzz, step by step</h3>
+
+      <div class="tool" data-run="runTddStep">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>The code, the test list, and the bar at each step</h3>
+        </div>
+        <div class="tool-desc">Every version of <code>evaluate()</code> from the worked
+          example, with the tests that existed at that moment run against it. Rule: replace
+          numbers divisible by three with Fizz, by five with Buzz, by both with
+          FizzBuzz.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="td-step">step</label>
+            <select id="td-step">
+              <option value="0">1 &middot; nothing written</option>
+              <option value="1">2 &middot; return null</option>
+              <option value="2">3 &middot; return "1"</option>
+              <option value="3">4 &middot; the ternary</option>
+              <option value="4">5 &middot; String.valueOf</option>
+              <option value="5">6 &middot; Fizz</option>
+              <option value="6" selected>7 &middot; Buzz</option>
+              <option value="7">8 &middot; extract isDivisibleBy</option>
+              <option value="8">9 &middot; FizzBuzz</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="td-output"></div>
+      </div>
+
+      <h3 id="t4-tstool">&#128736;&#65039; The whole session at once</h3>
+
+      <div class="tool" data-run="runTddSession">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Every step, with what the bar said and what was true</h3>
+        </div>
+        <div class="tool-desc">Two columns that are easy to confuse: whether the tests
+          passed, and whether the code was right.</div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="ts-output"></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Green is a statement about the tests</div>
+        At the <code>Buzz</code> step the five tests written so far all pass, and the code
+        answers <code>Fizz</code> for 15. Nothing is broken in the method &mdash; it does
+        exactly what has been asked of it. The largest number any of those five tests
+        mentions is 5, and the smallest number the code gets wrong is 15.
+        <br><br>This is the same shape as the fault in the structural topic, arrived at from
+        the other side: there, a test set satisfied every coverage criterion and missed the
+        fault; here, a test list drives code that passes everything on it and is incomplete.
+        <strong>Coverage and the green bar are both measurements of the test set, not of the
+        program.</strong> The repair in both cases is a better test &mdash; and the
+        advantage of the test list is that you were going to write one anyway.
+      </div>
+
+      <h3 id="t4-rftool">&#128736;&#65039; Was that really a refactoring?</h3>
+
+      <div class="tool" data-run="runRefactorCheck">
+        <div class="tool-header">
+          <span class="tool-badge">Practice tool</span>
+          <h3>Two versions, compared on every input</h3>
+        </div>
+        <div class="tool-desc">A refactoring changes the structure without changing the
+          behaviour, which is a checkable claim. Two of the nine steps are labelled
+          refactorings; one of them is one.</div>
+        <div class="tool-controls">
+          <div class="tool-field">
+            <label for="rf-a">from</label>
+            <select id="rf-a">
+              <option value="3" selected>the ternary</option>
+              <option value="6">Buzz</option>
+              <option value="4">String.valueOf</option>
+              <option value="7">extract isDivisibleBy</option>
+            </select>
+          </div>
+          <div class="tool-field">
+            <label for="rf-b">to</label>
+            <select id="rf-b">
+              <option value="4" selected>String.valueOf</option>
+              <option value="7">extract isDivisibleBy</option>
+              <option value="8">FizzBuzz</option>
+              <option value="5">Fizz</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-reset"><button class="tool-btn ghost" onclick="toolReset(this)" title="Restore this tool to how it started">↺ Reset tool</button></div>
+        <div class="tool-output" id="rf-output"></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">"Behaviour preserving" means preserving the tested
+          behaviour</div>
+        Extracting <code>isDivisibleBy</code> changes nothing: the two versions agree on
+        every input. Replacing <code>number == 1 ? "1" : "2"</code> with
+        <code>String.valueOf(number)</code> changes the answer for 998 of the first 1000
+        inputs &mdash; and is still a refactoring in the sense that matters, because the bar
+        stayed green and the behaviour anyone had specified was preserved.
+        <br><br>That is not a quibble; it is the mechanism. Early in a session the tests
+        pin down so little that almost any change is behaviour-preserving, which is exactly
+        why the steps can be so crude. The tests are the specification, and the
+        specification grows as you go.
+      </div>
+
+      <!-- ===== EFFECTS ===== -->
+      <h2 id="t4-effects">What it changes</h2>
+
+      <div class="callout exam">
+        <div class="callout-label">The effects the notes claim</div>
+        <div class="st-pro-con">
+          <div><span class="st-plus">+</span> the tests are already automated, so they are
+            immediately useful as integration and regression tests</div>
+          <div><span class="st-plus">+</span> less time in the debugger, and no long tedious
+            testing phase at the end of the project</div>
+          <div><span class="st-plus">+</span> <strong>intentional design of interfaces</strong>
+            &mdash; the code does not exist yet, so you are free to choose the interface
+            that is most usable</div>
+          <div><span class="st-plus">+</span> <strong>non-speculative interfaces</strong>
+            &mdash; they provide what is needed right now and no more</div>
+          <div><span class="st-plus">+</span> the tests document the intended usage</div>
+          <div><span class="st-plus">+</span> high cohesion and low coupling, because
+            dependencies are what make a unit hard to test</div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">And the weak points</div>
+        <div class="st-pro-con">
+          <div><span class="st-minus">&minus;</span> test code that leans hard on the
+            production API can make that API harder to change &mdash; the tests become a
+            second set of callers</div>
+          <div><span class="st-minus">&minus;</span> buggy tests: failures caused by the
+            test rather than the code</div>
+          <div><span class="st-minus">&minus;</span> and the honest one &mdash; it stops
+            being worth it when maintaining the tests costs more than they return</div>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Testability is designed in</div>
+        Testability has two parts. <span class="term">Visibility</span>: the tester can see
+        and understand what happens inside the system. <span class="term">Control</span>:
+        the tester can force interesting things to happen. Neither arrives by itself, and
+        writing the tests first is a reliable way of getting both &mdash; a unit you cannot
+        instantiate without half the system is a unit you will not write a test for, and you
+        find that out on the first day instead of the last.
+      </div>
+
+      <!-- ===== TAKEAWAYS ===== -->
+      <h2 id="t4-exam">Takeaways</h2>
+
+      <div class="callout tip">
+        <div class="callout-label">What to be able to do</div>
+        <ol style="margin:6px 0 0;">
+          <li>Write a unit test in the three A's, named and placed by the convention, in
+            either Java or Python.</li>
+          <li>Say what <code>setUp</code> runs before, and why "before every test" rather
+            than "once" is the whole of self-containment.</li>
+          <li>Give Right-BICEP and CORRECT, and apply them to a method you are shown.</li>
+          <li>Give the TDD cycle in order, and say what step 3 is for.</li>
+          <li>Explain why a green bar is not a correctness claim, with the Buzz step as the
+            example.</li>
+          <li>Say what makes a change a refactoring, and in what sense that is relative to
+            the tests you have.</li>
+        </ol>
+      </div>
+
+    </section>
